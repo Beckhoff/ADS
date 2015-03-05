@@ -61,7 +61,6 @@ struct TestAds : test_base < TestAds >
 	}
 };
 
-
 int main(int argc, char* argv[])
 {
 #if 0
@@ -73,5 +72,6 @@ int main(int argc, char* argv[])
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
 	adsTest.run(argc, argv);
 
+	std::cout << "Hit ENTER to continue\n";
 	std::cin.ignore();
 }
