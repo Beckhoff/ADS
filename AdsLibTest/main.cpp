@@ -59,6 +59,22 @@ struct TestAds : test_base < TestAds >
 		}
 
 	}
+
+	void testAdsReadReqEx2(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		print(server, out);
+
+		uint32_t group = 0x4020;
+		uint32_t offset = 4;
+		uint32_t bytesRead;
+		char buffer[4];
+		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), buffer, &bytesRead));
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
 };
 
 int main(int argc, char* argv[])
@@ -70,6 +86,7 @@ int main(int argc, char* argv[])
 	TestAds adsTest(std::cout);
 #endif
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
+	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.run(argc, argv);
 
 	std::cout << "Hit ENTER to continue\n";

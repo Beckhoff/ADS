@@ -27,3 +27,14 @@ long AdsGetLocalAddressEx(long port, AmsAddr* pAddr)
 	}
 	return router.GetLocalAddress((uint16_t)port, pAddr);
 }
+
+long AdsSyncReadReqEx2(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
+{
+	if (port <= 0 || port > UINT16_MAX) {
+		return ROUTERERR_NOTREGISTERED;
+	}
+	if (!pAddr || !buffer || !bytesRead || !bufferLength) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.Read((uint16_t)port, pAddr, indexGroup, indexOffset, bufferLength, buffer, bytesRead);
+}

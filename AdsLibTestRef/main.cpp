@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <TcAdsDef.h>
 #include <TcAdsAPI.h>
+#include <cstdint>
 
 #include <iostream>
 
@@ -70,9 +71,9 @@ struct TestAds : test_base < TestAds >
 
 		print(server, out);
 
-		ULONG group = 0x4020;
-		ULONG offset = 4;
-		ULONG bytesRead;
+		uint32_t group = 0x4020;
+		uint32_t offset = 4;
+		unsigned long bytesRead;
 		char buffer[4];
 		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), buffer, &bytesRead));
 		fructose_assert(0 == AdsPortCloseEx(port));

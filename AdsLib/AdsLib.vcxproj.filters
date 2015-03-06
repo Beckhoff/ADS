@@ -24,12 +24,45 @@
     <ClInclude Include="AmsRouter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sockets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wrap_socket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AmsHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wrap_endian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AdsConnection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AdsLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AmsRouter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sockets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AdsConnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

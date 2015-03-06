@@ -41,13 +41,17 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>WS2_32.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -64,13 +68,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AdsConnection.h" />
     <ClInclude Include="AdsDef.h" />
     <ClInclude Include="AdsLib.h" />
+    <ClInclude Include="AmsHeader.h" />
     <ClInclude Include="AmsRouter.h" />
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="NetId.h" />
+    <ClInclude Include="Sockets.h" />
+    <ClInclude Include="wrap_endian.h" />
+    <ClInclude Include="wrap_socket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AdsConnection.cpp" />
     <ClCompile Include="AdsLib.cpp" />
     <ClCompile Include="AmsRouter.cpp" />
+    <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="NetId.cpp" />
+    <ClCompile Include="Sockets.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
