@@ -5,6 +5,7 @@
 #include "AdsConnection.h"
 
 #include <bitset>
+#include <map>
 #include <mutex>
 #include <thread>
 
@@ -18,6 +19,8 @@ struct AmsRouter
 	long GetLocalAddress(uint16_t port, AmsAddr* pAddr);
 	long Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 
+	bool AddRoute(AmsAddr ams, const IpV4& ip);
+
 private:
 	static const size_t NUM_PORTS_MAX = 8;
 	static const uint16_t PORT_BASE = 30000;
@@ -26,11 +29,12 @@ private:
 	std::bitset<NUM_PORTS_MAX> ports;
 	const AmsAddr localAddr;
 	std::mutex mutex;
-	AdsConnection connection;
+	std::map<IpV4, std::unique_ptr<AdsConnection>> connections;
+	std::map<AmsAddr, AdsConnection*> mapping;
 	std::thread worker;
 	bool running;
 
-	AdsConnection& GetConnection(const AmsAddr& pAddr);
+	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator GetConnection(const AmsAddr& pAddr);
 	void Recv();
 
 };

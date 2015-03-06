@@ -20,7 +20,7 @@ void AdsResponse::Wait()
 }
 
 AdsConnection::AdsConnection(AmsAddr destination, IpV4 destIp, uint16_t destPort)
-	: destAddr(destination),
+	: destIp(destIp),
 	socket(destIp, destPort),
 	invokeId(0)
 {

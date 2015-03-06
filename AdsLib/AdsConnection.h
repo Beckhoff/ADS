@@ -28,14 +28,17 @@ private:
 
 struct AdsConnection
 {
-	AdsConnection(AmsAddr destination, IpV4 destIp, uint16_t destPort);
+	AdsConnection(AmsAddr destination = AmsAddr{}, IpV4 destIp = IpV4{""}, uint16_t destPort = 0);
 	~AdsConnection();
 
 	AdsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
 	void Release(AdsResponse* response);
 
+
+
+	
+	const IpV4 destIp;
 private:
-	const AmsAddr destAddr;
 	TcpSocket socket;
 	std::mutex mutex;
 	uint32_t invokeId;

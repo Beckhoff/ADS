@@ -9,6 +9,11 @@ struct IpV4
 {
     IpV4(const std::string& addr);
     uint32_t htonl() const;
+	bool operator < (const IpV4& ref) const
+	{
+		return this->htonl() < ref.htonl();
+	}
+
 
 private:
     uint32_t value;
