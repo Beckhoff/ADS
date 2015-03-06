@@ -72,7 +72,10 @@ struct TestAds : test_base < TestAds >
 		uint32_t offset = 4;
 		uint32_t bytesRead;
 		char buffer[4];
-		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), buffer, &bytesRead));
+
+		for (int i = 0; i < 10; ++i) {
+			fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), buffer, &bytesRead));
+		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };

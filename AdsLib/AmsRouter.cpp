@@ -44,7 +44,6 @@ long AmsRouter::ClosePort(uint16_t port)
 
 	if (ports.none()) {
 		running = false;
-		//worker.join();
 	}
 	return 0;
 }
@@ -70,8 +69,6 @@ AdsConnection& AmsRouter::GetConnection(const AmsAddr& pAddr)
 	return connection;
 }
 
-
-#include <iostream>
 long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {
 	AmsAddr srcAddr;
@@ -83,18 +80,19 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
 	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
 	request.prepend<AoERequestHeader>(readReq);
-	
-	AoEHeader aoeHeader{ *pAddr, srcAddr, AoEHeader::READ, request.size(), 1 };
-	request.prepend<AoEHeader>(aoeHeader);
 
 	AdsConnection& ads = GetConnection(*pAddr);
 
-	AdsResponse* response = ads.Write(request);
+	AdsResponse* response = ads.Write(request, *pAddr, srcAddr, AoEHeader::READ);
 
 	if (response) {
 		response->Wait();
 
-		std::cout << "response locked->frame received" << std::endl;
+		const auto header = response->frame.remove<AoEReadResponseHeader>();
+
+		*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size());
+		memcpy(buffer, response->frame.data(), *bytesRead);
+		ads.Release(response);
 		return 0;
 	}
 

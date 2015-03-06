@@ -39,8 +39,11 @@ AdsConnection::~AdsConnection()
 	receiver.detach();
 }
 
-AdsResponse* AdsConnection::Write(Frame& request)
+AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
 {
+	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, request.size(), ++invokeId };
+	request.prepend<AoEHeader>(aoeHeader);
+
 	AmsTcpHeader header{ request.size() };
 	request.prepend<AmsTcpHeader>(header);
 
@@ -53,7 +56,8 @@ AdsResponse* AdsConnection::Write(Frame& request)
 	auto response = ready.back();
 	ready.pop_back();
 	
-	response->invokeId = ++invokeId;
+	response->invokeId = aoeHeader.invokeId;
+	response->frame.clear();
 	
 	if (request.size() != socket.write(request)) {
 		return nullptr;
@@ -63,7 +67,37 @@ AdsResponse* AdsConnection::Write(Frame& request)
 	return response;
 }
 
+AdsResponse* AdsConnection::GetPending(uint32_t id)
+{
+	for (auto p : pending) {
+		if (p->invokeId == id) {
+			pending.remove(p);
+			return p;
+		}
+	}
+	return nullptr;
+}
 
+void AdsConnection::Release(AdsResponse* response)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	ready.push_back(response);
+}
+
+Frame& ReceiveAmsTcp(Frame &frame)
+{
+	if (frame.size() < sizeof(AmsTcpHeader)) {
+		//LOG_ERROR("packet to short to be AMS/TCP");
+		return frame.clear();
+	}
+
+	const auto header = frame.remove<AmsTcpHeader>();
+	if (header.length != frame.size()) {
+		//LOG_ERROR("received AMS/TCP frame seems corrupt, length: " << header.length << " doesn't match: " << frame.size());
+		return frame.clear();
+	}
+	return frame;
+}
 
 void AdsConnection::Recv()
 {
@@ -71,13 +105,20 @@ void AdsConnection::Recv()
 
 	while (running) {
 		socket.read(frame);
-		if (frame.size() > 0) {
-			auto response = pending.back();
-			pending.pop_back();
+		if (ReceiveAmsTcp(frame).size() > 0) {
+			if (frame.size() >= sizeof(AoEHeader)) {
+				const auto header = frame.remove<AoEHeader>();
 
-			//TODO avoid memcpy
-			response->frame.prepend(frame.data(), frame.size());
-			response->Notify();
+				auto response = GetPending(header.invokeId);
+
+
+				if (response) {
+					//TODO avoid memcpy
+					response->frame.prepend(frame.data(), frame.size());
+					response->Notify();
+					frame.clear();
+				}
+			}
 		}
 	}
 }

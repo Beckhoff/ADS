@@ -86,7 +86,8 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 != port);
 
 		AdsVersion version;
-		char devName[50];
+		char devName[16+1];
+		devName[16] = '\0';
 		fructose_assert(0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
 		fructose_assert(0 == AdsPortCloseEx(port));
 
