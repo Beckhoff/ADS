@@ -19,9 +19,9 @@ void AdsResponse::Wait()
 	cv.wait(lock);
 }
 
-AdsConnection::AdsConnection(AmsAddr destination, IpV4 destIp, uint16_t destPort)
+AdsConnection::AdsConnection(IpV4 destIp)
 	: destIp(destIp),
-	socket(destIp, destPort),
+	socket(destIp, 48898),
 	invokeId(0)
 {
 	for (auto& r : responses) {

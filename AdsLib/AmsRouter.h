@@ -19,7 +19,9 @@ struct AmsRouter
 	long GetLocalAddress(uint16_t port, AmsAddr* pAddr);
 	long Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 
-	bool AddRoute(AmsAddr ams, const IpV4& ip);
+	bool AddRoute(AmsNetId ams, const IpV4& ip);
+	void DelRoute(const AmsNetId& ams);
+	AdsConnection* GetConnection(const AmsNetId& pAddr);
 
 private:
 	static const size_t NUM_PORTS_MAX = 8;
@@ -30,11 +32,12 @@ private:
 	const AmsAddr localAddr;
 	std::mutex mutex;
 	std::map<IpV4, std::unique_ptr<AdsConnection>> connections;
-	std::map<AmsAddr, AdsConnection*> mapping;
+	std::map<AmsNetId, AdsConnection*> mapping;
 	std::thread worker;
 	bool running;
 
-	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator GetConnection(const AmsAddr& pAddr);
+	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator __GetConnection(const AmsNetId& pAddr);
+	void DeleteIfLastConnection(const AdsConnection* conn);
 	void Recv();
 
 };

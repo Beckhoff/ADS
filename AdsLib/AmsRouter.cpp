@@ -8,8 +8,6 @@ AmsRouter::AmsRouter()
 	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
 	running(true)
 {
-	AddRoute(AmsAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }), IpV4("192.168.0.232"));
-	//connection(AmsAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }), IpV4("192.168.0.232"), 48898),
 }
 
 AmsRouter::~AmsRouter()
@@ -19,19 +17,62 @@ AmsRouter::~AmsRouter()
 	}
 }
 
-bool AmsRouter::AddRoute(AmsAddr ams, const IpV4& ip)
+bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	const auto& it = GetConnection(ams);
-	if (it == connections.end()) {
-		
-		auto ads = connections.find(ip);
-		if (ads == connections.end()) {
-			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ ams, ip, 48898 }));
+	auto& route = mapping.find(ams);
+	const auto& conn = connections.find(ip);
+
+	if (route == mapping.end()) {
+		if (conn == connections.end()) {
+			// new route and connection
+			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ ip }));
+			mapping[ams] = connections[ip].get();
 		}
-		mapping[ams] = connections[ip].get();
+		else {
+			//new route to known ip
+			mapping[ams] = conn->second.get();
+		}
+	}
+	else {
+		if (route->second->destIp == ip) {
+			// route already exists
+			return true;
+		}
+		auto oldConnection = route->second;
+		if (conn == connections.end()) {
+			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ ip }));
+			route->second = connections[ip].get();
+		}
+		else {
+			route->second = conn->second.get();
+		}
+		DeleteIfLastConnection(oldConnection);
 	}
 	return true;
+}
+
+void AmsRouter::DelRoute(const AmsNetId& ams)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	auto route = mapping.find(ams);
+
+	if (route != mapping.end()) {
+		const AdsConnection* conn = route->second;
+		mapping.erase(route);
+
+		DeleteIfLastConnection(conn);
+	}
+}
+
+void AmsRouter::DeleteIfLastConnection(const AdsConnection* conn)
+{
+	for (const auto& r : mapping) {
+		if (r.second == conn) {
+			return;
+		}
+	}
+	connections.erase(conn->destIp);
 }
 
 uint16_t AmsRouter::OpenPort()
@@ -66,6 +107,8 @@ long AmsRouter::ClosePort(uint16_t port)
 	return 0;
 }
 
+
+//TODO move into AdsConnection!!!
 long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 {
 	std::lock_guard<std::mutex> lock(mutex);
@@ -82,7 +125,16 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 	return ROUTERERR_NOTREGISTERED;
 }
 
-std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator AmsRouter::GetConnection(const AmsAddr& amsDest)
+AdsConnection* AmsRouter::GetConnection(const AmsNetId& amsDest)
+{
+	auto it = __GetConnection(amsDest);
+	if (it == connections.end()) {
+		return nullptr;
+	}
+	return it->second.get();
+}
+
+std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator AmsRouter::__GetConnection(const AmsNetId& amsDest)
 {
 	const auto it = mapping.find(amsDest);
 	if (it != mapping.end()) {
@@ -103,11 +155,10 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
 	request.prepend<AoERequestHeader>(readReq);
 
-	auto it = GetConnection(*pAddr);
-	if (it == connections.end()) {
+	auto ads = GetConnection(pAddr->netId);
+	if (!ads) {
 		return -1;
 	}
-	auto &ads = it->second;
 
 	AdsResponse* response = ads->Write(request, *pAddr, srcAddr, AoEHeader::READ);
 

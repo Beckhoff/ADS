@@ -74,13 +74,18 @@ struct TestAds : test_base < TestAds >
 		uint32_t group = 0x4020;
 		uint32_t offset = 4;
 		unsigned long bytesRead;
-		char buffer[4];
-		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), buffer, &bytesRead));
+		uint32_t buffer;
+
+		for (int i = 0; i < 10; ++i) {
+			fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), &buffer, &bytesRead));
+			fructose_assert(0 == buffer);
+		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
 	void testAdsReadDeviceInfoReqEx(const std::string&)
 	{
+		static const char NAME[] = "Plc30 App";
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
@@ -90,6 +95,10 @@ struct TestAds : test_base < TestAds >
 		devName[16] = '\0';
 		fructose_assert(0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
 		fructose_assert(0 == AdsPortCloseEx(port));
+		fructose_assert(3 == version.version);
+		fructose_assert(1 == version.revision);
+		fructose_assert(1101 == version.build);
+		fructose_assert(0 == strncmp(devName, NAME, sizeof(NAME)));
 
 		out << "AdsSyncReadDeviceInfoReqEx() name: " << devName
 			<< " Version: " << (int)version.version << '.' << (int)version.revision << '.' << (int)version.build << '\n';
@@ -112,19 +121,20 @@ struct TestAds : test_base < TestAds >
 	}
 };
 
-int main(int argc, char* argv[])
+int main()
 {
-#if 0
 	std::ostream nowhere(0);
-	TestAds adsTest(nowhere);
+#if 0
+	std::ostream& errorstream = nowhere;
 #else
-	TestAds adsTest(std::cout);
+	std::ostream& errorstream = std::cout;
 #endif
+	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
-	adsTest.run(argc, argv);
+	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";
 	std::cin.ignore();

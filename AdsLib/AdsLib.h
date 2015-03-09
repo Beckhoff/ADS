@@ -3,6 +3,9 @@
 
 #include <cstdint>
 #include "AdsDef.h"
+#include "Sockets.h"
+
+long AdsAddRoute(AmsNetId ams, IpV4 ip);
 
 long AdsPortCloseEx(long port);
 long AdsPortOpenEx();

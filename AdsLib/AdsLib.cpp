@@ -4,6 +4,11 @@
 
 static AmsRouter router;
 
+long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
+{
+	return router.AddRoute(ams, ip);
+}
+
 long AdsPortCloseEx(long port)
 {
 	if (port <= 0 || port > UINT16_MAX) {

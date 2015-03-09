@@ -14,6 +14,11 @@ struct IpV4
 		return this->htonl() < ref.htonl();
 	}
 
+	bool operator == (const IpV4& ref) const
+	{
+		return this->htonl() == ref.htonl();
+	}
+
 
 private:
     uint32_t value;

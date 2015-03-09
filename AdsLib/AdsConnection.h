@@ -28,7 +28,7 @@ private:
 
 struct AdsConnection
 {
-	AdsConnection(AmsAddr destination = AmsAddr{}, IpV4 destIp = IpV4{""}, uint16_t destPort = 0);
+	AdsConnection(IpV4 destIp = IpV4{ "" });
 	~AdsConnection();
 
 	AdsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
