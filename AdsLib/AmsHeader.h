@@ -54,8 +54,9 @@ struct AoEHeader
     static const uint16_t AMS_RESPONSE = 0x0005;
     static const uint16_t AMS_UDP = 0x0040;
     static const uint16_t READ_DEVICE_INFO = 0x0001;
-    static const uint16_t READ = 0x0002;
-    static const uint16_t WRITE = 0x0003;
+	static const uint16_t READ = 0x0002;
+	static const uint16_t WRITE = 0x0003;
+	static const uint16_t READ_STATE = 0x0004;
     static const uint16_t READ_WRITE = 0x0009;
 
     const AmsAddr targetAddr;

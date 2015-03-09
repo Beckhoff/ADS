@@ -172,6 +172,22 @@ struct TestAds : test_base < TestAds >
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
+
+	void testAdsReadStateReqEx(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+
+		USHORT adsState;
+		USHORT deviceState;
+		fructose_assert(0 == AdsSyncReadStateReqEx(port, &server, &adsState, &deviceState));
+		fructose_assert(0 == AdsPortCloseEx(port));
+
+		out << "AdsSyncReadStateReqEx() adsState: " << (int)adsState
+			<< " device: " << (int)deviceState << '\n';
+	}
 };
 
 int main()
@@ -191,6 +207,7 @@ int main()
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
+	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";

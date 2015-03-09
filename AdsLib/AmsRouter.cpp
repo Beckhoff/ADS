@@ -154,18 +154,32 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
-
 	char buffer[sizeof(*version) + 16];
 	uint32_t bytesRead;
 
-
-	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer) - 1, buffer, &bytesRead);
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer), buffer, &bytesRead);
 	if (status) {
 		return status;
 	}
 
 	memcpy(version, buffer, sizeof(*version));
 	memcpy(devName, buffer + sizeof(*version), sizeof(buffer) - sizeof(*version));
+	return 0;
+}
+
+long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
+	char buffer[sizeof(*adsState) + sizeof(*deviceState)];
+	uint32_t bytesRead;
+
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_STATE, sizeof(buffer), buffer, &bytesRead);
+	if (status) {
+		return status;
+	}
+
+	memcpy(adsState, buffer, sizeof(*adsState));
+	memcpy(deviceState, buffer + sizeof(*adsState), sizeof(buffer) - sizeof(*adsState));
 	return 0;
 }
 
@@ -185,9 +199,6 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
 	if (response) {
 		response->Wait();
-
-		
-
 		*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size());
 		memcpy(buffer, response->frame.data(), *bytesRead);
 		ads->Release(response);

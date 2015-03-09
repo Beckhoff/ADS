@@ -51,5 +51,14 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
 	if (!pAddr || !devName || !version) {
 		return ADSERR_DEVICE_INVALIDPARM;
 	}
-	return router.ReadDeviceInfo(port, pAddr, devName, version);
+	return router.ReadDeviceInfo((uint16_t)port, pAddr, devName, version);
+}
+
+long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState)
+{
+	ASSERT_PORT(port);
+	if (!pAddr || !adsState || !deviceState) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.ReadState((uint16_t)port, pAddr, adsState, deviceState);
 }
