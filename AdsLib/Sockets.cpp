@@ -49,7 +49,7 @@ Socket::~Socket()
 Frame& Socket::read(Frame &frame) const
 {
     timeval timeout = {5, 0};
-    if (!select(&timeout)) {
+    if (!select(nullptr)) {
         return frame.clear();
     }
 

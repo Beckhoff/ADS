@@ -101,7 +101,7 @@ struct TestAmsRouter : test_base < TestAmsRouter >
 		fructose_assert(testee.GetConnection(netId_2));
 	}
 };
-
+#include <chrono>
 struct TestAds : test_base < TestAds >
 {
 	std::ostream &out;
@@ -150,6 +150,28 @@ struct TestAds : test_base < TestAds >
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
+
+	void testAdsReadDeviceInfoReqEx(const std::string&)
+	{
+		static const char NAME[] = "Plc30 App";
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		for (int i = 0; i < 2; ++i) {
+			AdsVersion version{ 0, 0, 0 };
+			char devName[16 + 1]{};
+			fructose_assert(0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
+			fructose_assert(3 == version.version);
+			fructose_assert(1 == version.revision);
+			fructose_assert(1101 == version.build);
+			fructose_assert(0 == strncmp(devName, NAME, sizeof(NAME)));
+
+			out << "AdsSyncReadDeviceInfoReqEx() name: " << devName
+				<< " Version: " << (int)version.version << '.' << (int)version.revision << '.' << (int)version.build << '\n';
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
 };
 
 int main()
@@ -168,6 +190,7 @@ int main()
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
+	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";

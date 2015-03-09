@@ -205,7 +205,12 @@ typedef struct AmsAddr_
 	uint16_t port;
 } AmsAddr, *PAmsAddr;
 
-
+typedef	struct
+{
+	uint8_t version;
+	uint8_t revision;
+	uint16_t build;
+} AdsVersion;
 
 #pragma	pack( pop )
 

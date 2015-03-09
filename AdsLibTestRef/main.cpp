@@ -90,18 +90,19 @@ struct TestAds : test_base < TestAds >
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
 
-		AdsVersion version;
-		char devName[16+1];
-		devName[16] = '\0';
-		fructose_assert(0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
-		fructose_assert(0 == AdsPortCloseEx(port));
-		fructose_assert(3 == version.version);
-		fructose_assert(1 == version.revision);
-		fructose_assert(1101 == version.build);
-		fructose_assert(0 == strncmp(devName, NAME, sizeof(NAME)));
+		for (int i = 0; i < 2; ++i) {
+			AdsVersion version{ 0, 0, 0 };
+			char devName[16 + 1]{};
+			fructose_assert(0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
+			fructose_assert(3 == version.version);
+			fructose_assert(1 == version.revision);
+			fructose_assert(1101 == version.build);
+			fructose_assert(0 == strncmp(devName, NAME, sizeof(NAME)));
 
-		out << "AdsSyncReadDeviceInfoReqEx() name: " << devName
-			<< " Version: " << (int)version.version << '.' << (int)version.revision << '.' << (int)version.build << '\n';
+			out << "AdsSyncReadDeviceInfoReqEx() name: " << devName
+				<< " Version: " << (int)version.version << '.' << (int)version.revision << '.' << (int)version.build << '\n';
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
 	void testAdsReadStateReqEx(const std::string&)

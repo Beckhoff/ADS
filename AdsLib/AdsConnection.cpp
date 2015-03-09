@@ -101,18 +101,25 @@ Frame& ReceiveAmsTcp(Frame &frame)
 
 void AdsConnection::Recv()
 {
-	Frame frame(2048);
-
 	while (running) {
+		Frame frame(2048);
 		socket.read(frame);
 		if (ReceiveAmsTcp(frame).size() > 0) {
 			if (frame.size() >= sizeof(AoEHeader)) {
 				const auto header = frame.remove<AoEHeader>();
 
 				auto response = GetPending(header.invokeId);
-
-
 				if (response) {
+					switch (header.cmdId) {
+					case AoEHeader::READ_DEVICE_INFO:
+						frame.remove<uint32_t>();
+						break;
+					case AoEHeader::READ:
+						frame.remove<AoEReadResponseHeader>();
+						break;
+					default:
+						frame.clear();
+					}
 					//TODO avoid memcpy
 					response->frame.prepend(frame.data(), frame.size());
 					response->Notify();

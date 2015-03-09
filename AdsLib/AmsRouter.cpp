@@ -145,34 +145,53 @@ std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator AmsRouter::__GetConnect
 
 long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
+	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
+	request.prepend<AoERequestHeader>(readReq);
+	return AdsRequest(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead);
+}
+
+long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
+
+	char buffer[sizeof(*version) + 16];
+	uint32_t bytesRead;
+
+
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer) - 1, buffer, &bytesRead);
+	if (status) {
+		return status;
+	}
+
+	memcpy(version, buffer, sizeof(*version));
+	memcpy(devName, buffer + sizeof(*version), sizeof(buffer) - sizeof(*version));
+	return 0;
+}
+
+long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
+{
 	AmsAddr srcAddr;
 	const auto status = GetLocalAddress(port, &srcAddr);
 	if (status) {
 		return status;
 	}
 
-	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
-	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
-	request.prepend<AoERequestHeader>(readReq);
-
-	auto ads = GetConnection(pAddr->netId);
+	auto ads = GetConnection(destAddr.netId);
 	if (!ads) {
 		return -1;
 	}
 
-	AdsResponse* response = ads->Write(request, *pAddr, srcAddr, AoEHeader::READ);
-
+	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
 	if (response) {
 		response->Wait();
 
-		const auto header = response->frame.remove<AoEReadResponseHeader>();
+		
 
 		*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size());
 		memcpy(buffer, response->frame.data(), *bytesRead);
 		ads->Release(response);
 		return 0;
 	}
-
-	
 	return -1;
 }
