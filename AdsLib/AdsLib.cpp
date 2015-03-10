@@ -54,13 +54,13 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
 	return router.ReadDeviceInfo((uint16_t)port, pAddr, devName, version);
 }
 
-long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState)
+long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
 {
 	ASSERT_PORT(port);
-	if (!pAddr || !adsState || !deviceState) {
+	if (!pAddr || !adsState || !devState) {
 		return ADSERR_DEVICE_INVALIDPARM;
 	}
-	return router.ReadState((uint16_t)port, pAddr, adsState, deviceState);
+	return router.ReadState((uint16_t)port, pAddr, adsState, devState);
 }
 
 long AdsSyncWriteReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
@@ -70,6 +70,15 @@ long AdsSyncWriteReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uin
 		return ADSERR_DEVICE_INVALIDPARM;
 	}
 	return router.Write((uint16_t)port, pAddr, indexGroup, indexOffset, bufferLength, buffer);
+}
+
+long AdsSyncWriteControlReqEx(long port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer)
+{
+	ASSERT_PORT(port);
+	if (!pAddr) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.WriteControl((uint16_t)port, pAddr, adsState, devState, bufferLength, buffer);
 }
 
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)

@@ -27,23 +27,37 @@ struct AmsTcpHeader
 
 struct AoERequestHeader
 {
-    static const uint32_t SDO_UPLOAD = 0xF302;
+	static const uint32_t SDO_UPLOAD = 0xF302;
 
-    uint32_t group;
-    uint32_t offset;
-    uint32_t length;
+	uint32_t group;
+	uint32_t offset;
+	uint32_t length;
 
-    AoERequestHeader(uint16_t sdoIndex, uint8_t sdoSubIndex, uint32_t dataLength)
-        : group(SDO_UPLOAD),
-          offset(((uint32_t)sdoIndex) << 16 | sdoSubIndex),
-          length(dataLength)
-    {
-    }
+	AoERequestHeader(uint16_t sdoIndex, uint8_t sdoSubIndex, uint32_t dataLength)
+		: group(SDO_UPLOAD),
+		offset(((uint32_t)sdoIndex) << 16 | sdoSubIndex),
+		length(dataLength)
+	{
+	}
 
 	AoERequestHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t dataLength)
 		: group(indexGroup),
-		  offset(indexOffset),
-		  length(dataLength)
+		offset(indexOffset),
+		length(dataLength)
+	{
+	}
+};
+
+struct AdsWriteCtrlRequest
+{
+	uint16_t adsState;
+	uint16_t devState;
+	uint32_t length;
+
+	AdsWriteCtrlRequest(uint16_t ads, uint16_t dev, uint32_t dataLength)
+		: adsState(qToLittleEndian(ads)),
+		devState(qToLittleEndian(dev)),
+		length(qToLittleEndian(dataLength))
 	{
 	}
 };
@@ -57,6 +71,7 @@ struct AoEHeader
 	static const uint16_t READ = 0x0002;
 	static const uint16_t WRITE = 0x0003;
 	static const uint16_t READ_STATE = 0x0004;
+	static const uint16_t WRITE_CONTROL = 0x0005;
     static const uint16_t READ_WRITE = 0x0009;
 
     const AmsAddr targetAddr;

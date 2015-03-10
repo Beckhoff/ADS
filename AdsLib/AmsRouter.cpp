@@ -173,7 +173,7 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
-	char buffer[sizeof(*version) + 16];
+	uint8_t buffer[sizeof(*version) + 16];
 	uint32_t bytesRead;
 
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer), buffer, &bytesRead);
@@ -181,15 +181,17 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 		return status;
 	}
 
-	memcpy(version, buffer, sizeof(*version));
+	version->version = buffer[0];
+	version->revision = buffer[1];
+	version->build = qFromLittleEndian<uint16_t>(buffer + 2);
 	memcpy(devName, buffer + sizeof(*version), sizeof(buffer) - sizeof(*version));
 	return 0;
 }
 
-long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState)
+long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
-	char buffer[sizeof(*adsState) + sizeof(*deviceState)];
+	uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
 	uint32_t bytesRead;
 
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_STATE, sizeof(buffer), buffer, &bytesRead);
@@ -197,8 +199,8 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 		return status;
 	}
 
-	memcpy(adsState, buffer, sizeof(*adsState));
-	memcpy(deviceState, buffer + sizeof(*adsState), sizeof(buffer) - sizeof(*adsState));
+	*adsState = qFromLittleEndian<uint16_t>(buffer + 0);
+	*devState = qFromLittleEndian<uint16_t>(buffer + 2);
 	return 0;
 }
 
@@ -238,11 +240,28 @@ long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, 
 	AoERequestHeader header{ indexGroup, indexOffset, bufferLength };
 	request.prepend<AoERequestHeader>(header);
 
-	uint32_t errorCode = 0;
+	uint8_t errorCode[sizeof(uint32_t)];
 	uint32_t bytesRead = 0;
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE, sizeof(errorCode), &errorCode, &bytesRead);
 	if (status) {
 		return status;
 	}
-	return errorCode;
+	return qFromLittleEndian<uint32_t>(errorCode);
+}
+
+long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsWriteCtrlRequest) + bufferLength);
+	request.prepend(buffer, bufferLength);
+
+	AdsWriteCtrlRequest header{ adsState, devState, bufferLength };
+	request.prepend<AdsWriteCtrlRequest>(header);
+
+	uint8_t errorCode[sizeof(uint32_t)];
+	uint32_t bytesRead = 0;
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE_CONTROL, sizeof(errorCode), &errorCode, &bytesRead);
+	if (status) {
+		return status;
+	}
+	return qFromLittleEndian<uint32_t>(errorCode);
 }

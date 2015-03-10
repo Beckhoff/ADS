@@ -122,6 +122,8 @@ void AdsConnection::Recv()
 					case AoEHeader::READ_STATE:
 						frame.remove<uint32_t>();
 						break;
+					case AoEHeader::WRITE_CONTROL:
+						break;
 					default:
 						frame.clear();
 					}
