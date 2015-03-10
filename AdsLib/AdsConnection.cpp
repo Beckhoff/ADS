@@ -36,7 +36,7 @@ AdsConnection::AdsConnection(IpV4 destIp)
 AdsConnection::~AdsConnection()
 {
 	running = false;
-	receiver.detach();
+	receiver.join();
 }
 
 AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
