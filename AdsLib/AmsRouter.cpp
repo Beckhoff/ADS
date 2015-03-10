@@ -13,8 +13,11 @@
 	} while(0)
 
 AmsRouter::AmsRouter()
-	//: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
+#ifdef WIN32
+	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
+#else
 	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 }),
+#endif
 	running(true)
 {
 	for (auto& t : portTimeout) {
