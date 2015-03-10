@@ -20,7 +20,9 @@ struct AdsResponse
 
 	AdsResponse();
 	void Notify();
-	void Wait();
+
+	// return true if notified before timeout
+	bool Wait(uint32_t timeout_ms);
 private:
 	std::mutex mutex;
 	std::condition_variable cv;

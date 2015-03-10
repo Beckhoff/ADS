@@ -14,5 +14,7 @@ long AdsSyncReadReqEx2(long port, const AmsAddr* pAddr, uint32_t indexGroup, uin
 long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, AdsVersion* version);
 long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState);
 long AdsSyncWriteReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer);
+long AdsSyncGetTimeoutEx(long port, uint32_t *timeout);
+long AdsSyncSetTimeoutEx(long port, uint32_t timeout);
 
 #endif /* #ifndef _ADSLIB_H_ */

@@ -4,10 +4,21 @@
 
 #include <algorithm>
 
+#define LOCK_AND_ASSERT_PORT(mutex, port) \
+	do { \
+		std::lock_guard<std::mutex> lock(mutex); \
+		if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) { \
+			return ADSERR_CLIENT_PORTNOTOPEN; \
+				} \
+	} while(0)
+
 AmsRouter::AmsRouter()
 	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
 	running(true)
 {
+	for (auto& t : portTimeout) {
+		t = DEFAULT_TIMEOUT;
+	}
 }
 
 AmsRouter::~AmsRouter()
@@ -94,11 +105,8 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	LOCK_AND_ASSERT_PORT(mutex, port);
 
-	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
-		return ROUTERERR_NOTREGISTERED;
-	}
 	ports.reset(port - PORT_BASE);
 
 	if (ports.none()) {
@@ -107,22 +115,33 @@ long AmsRouter::ClosePort(uint16_t port)
 	return 0;
 }
 
-
 //TODO move into AdsConnection!!!
 long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 {
-	std::lock_guard<std::mutex> lock(mutex);
-
-	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
-		return ROUTERERR_NOTREGISTERED;
-	}
+	LOCK_AND_ASSERT_PORT(mutex, port);
 
 	if (ports.test(port - PORT_BASE)) {
 		memcpy(&pAddr->netId, &localAddr.netId, sizeof(localAddr.netId));
 		pAddr->port = port;
 		return 0;
 	}
-	return ROUTERERR_NOTREGISTERED;
+	return ADSERR_CLIENT_PORTNOTOPEN;
+}
+
+long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
+{
+	LOCK_AND_ASSERT_PORT(mutex, port);
+
+	timeout = portTimeout[port - PORT_BASE];
+	return 0;
+}
+
+long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
+{
+	LOCK_AND_ASSERT_PORT(mutex, port);
+
+	portTimeout[port - PORT_BASE] = timeout;
+	return 0;
 }
 
 AdsConnection* AmsRouter::GetConnection(const AmsNetId& amsDest)
@@ -196,13 +215,17 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 		return -1;
 	}
 
+	uint32_t timeout_ms;
+	GetTimeout(port, timeout_ms);
 	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
 	if (response) {
-		response->Wait();
-		*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size());
-		memcpy(buffer, response->frame.data(), *bytesRead);
-		ads->Release(response);
-		return 0;
+		if (response->Wait(timeout_ms)){
+			*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size());
+			memcpy(buffer, response->frame.data(), *bytesRead);
+			ads->Release(response);
+			return 0;
+		}
+		return ADSERR_CLIENT_SYNCTIMEOUT;
 	}
 	return -1;
 }

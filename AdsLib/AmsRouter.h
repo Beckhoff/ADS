@@ -4,6 +4,7 @@
 #include "AdsDef.h"
 #include "AdsConnection.h"
 
+#include <array>
 #include <bitset>
 #include <map>
 #include <mutex>
@@ -17,6 +18,8 @@ struct AmsRouter
 	uint16_t OpenPort();
 	long ClosePort(uint16_t port);
 	long GetLocalAddress(uint16_t port, AmsAddr* pAddr);
+	long GetTimeout(uint16_t port, uint32_t& timeout);
+	long SetTimeout(uint16_t port, uint32_t timeout);
 	long Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 	long ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version);
 	long ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState);
@@ -27,11 +30,13 @@ struct AmsRouter
 	AdsConnection* GetConnection(const AmsNetId& pAddr);
 
 private:
+	static const uint32_t DEFAULT_TIMEOUT = 5000;
 	static const size_t NUM_PORTS_MAX = 8;
 	static const uint16_t PORT_BASE = 30000;
 	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");
 
 	std::bitset<NUM_PORTS_MAX> ports;
+	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
 	const AmsAddr localAddr;
 	std::mutex mutex;
 	std::map<IpV4, std::unique_ptr<AdsConnection>> connections;

@@ -7,7 +7,7 @@ static AmsRouter router;
 #define ASSERT_PORT(port) \
 	do { \
 		if ((port) <= 0 || (port) > UINT16_MAX) { \
-			return ROUTERERR_NOTREGISTERED; \
+			return ADSERR_CLIENT_PORTNOTOPEN; \
 				} \
 	} while (0)
 
@@ -70,4 +70,19 @@ long AdsSyncWriteReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uin
 		return ADSERR_DEVICE_INVALIDPARM;
 	}
 	return router.Write((uint16_t)port, pAddr, indexGroup, indexOffset, bufferLength, buffer);
+}
+
+long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)
+{
+	ASSERT_PORT(port);
+	if (!timeout) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.GetTimeout((uint16_t)port, *timeout);
+}
+
+long AdsSyncSetTimeoutEx(long port, uint32_t timeout)
+{
+	ASSERT_PORT(port);
+	return router.SetTimeout((uint16_t)port, timeout);
 }

@@ -13,10 +13,10 @@ void AdsResponse::Notify()
 	cv.notify_one();
 }
 
-void AdsResponse::Wait()
+bool AdsResponse::Wait(uint32_t timeout_ms)
 {
 	std::unique_lock<std::mutex> lock(mutex);
-	cv.wait(lock);
+	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
 AdsConnection::AdsConnection(IpV4 destIp)

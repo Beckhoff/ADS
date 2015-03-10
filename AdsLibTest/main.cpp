@@ -203,7 +203,7 @@ struct TestAds : test_base < TestAds >
 		uint32_t buffer;
 		uint32_t outBuffer = 0xDEADBEEF;
 
-		for (int i = 0; i < 1000; ++i) {
+		for (int i = 0; i < 10; ++i) {
 			fructose_assert(0 == AdsSyncWriteReqEx(port, &server, group, offset, sizeof(outBuffer), &outBuffer));
 			fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), &buffer, &bytesRead));
 			fructose_assert(outBuffer == buffer);
@@ -211,6 +211,23 @@ struct TestAds : test_base < TestAds >
 		}
 		const uint32_t defaultValue = 0;
 		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, group, offset, sizeof(defaultValue), &defaultValue));
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
+	void testAdsTimeout(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		uint32_t timeout;
+
+		fructose_assert(0 != port);
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncGetTimeoutEx(55555, &timeout));
+		fructose_assert(0 == AdsSyncGetTimeoutEx(port, &timeout));
+		fructose_assert(5000 == timeout);
+		fructose_assert(0 == AdsSyncSetTimeoutEx(port, 1000));
+		fructose_assert(0 == AdsSyncGetTimeoutEx(port, &timeout));
+		fructose_assert(1000 == timeout);
+		fructose_assert(0 == AdsSyncSetTimeoutEx(port, 5000));
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };
@@ -237,8 +254,7 @@ int main()
 	// WriteControl
 	// AddNotification
 	// DelNotification
-	// GetTimeout
-	// SetTimeout
+	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 	// ReadWrite
 	adsTest.run();
 
