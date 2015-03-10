@@ -206,3 +206,20 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	}
 	return -1;
 }
+
+long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader) + bufferLength);
+	request.prepend(buffer, bufferLength);
+
+	AoERequestHeader header{ indexGroup, indexOffset, bufferLength };
+	request.prepend<AoERequestHeader>(header);
+
+	uint32_t errorCode = 0;
+	uint32_t bytesRead = 0;
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE, sizeof(errorCode), &errorCode, &bytesRead);
+	if (status) {
+		return status;
+	}
+	return errorCode;
+}

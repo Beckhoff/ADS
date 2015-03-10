@@ -117,6 +117,8 @@ void AdsConnection::Recv()
 					case AoEHeader::READ:
 						frame.remove<AoEReadResponseHeader>();
 						break;
+					case AoEHeader::WRITE:
+						break;
 					case AoEHeader::READ_STATE:
 						frame.remove<uint32_t>();
 						break;

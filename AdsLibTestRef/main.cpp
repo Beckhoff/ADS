@@ -120,6 +120,31 @@ struct TestAds : test_base < TestAds >
 		out << "AdsSyncReadStateReqEx() adsState: " << (int)adsState
 			<< " device: " << (int)deviceState << '\n';
 	}
+
+	void testAdsWriteReqEx(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		print(server, out);
+
+		uint32_t group = 0x4020;
+		uint32_t offset = 4;
+		unsigned long bytesRead;
+		uint32_t buffer;
+		uint32_t outBuffer = 0xDEADBEEF;
+
+		for (int i = 0; i < 1000; ++i) {
+			fructose_assert(0 == AdsSyncWriteReqEx(port, &server, group, offset, sizeof(outBuffer), &outBuffer));
+			fructose_assert(0 == AdsSyncReadReqEx2(port, &server, group, offset, sizeof(buffer), &buffer, &bytesRead));
+			fructose_assert(outBuffer == buffer);
+			outBuffer = ~outBuffer;
+		}
+		uint32_t defaultValue = 0;
+		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, group, offset, sizeof(defaultValue), &defaultValue));
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
 };
 
 int main()
@@ -135,6 +160,13 @@ int main()
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
+	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
+	// WriteControl
+	// AddNotification
+	// DelNotification
+	// GetTimeout
+	// SetTimeout
+	// ReadWrite
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";
