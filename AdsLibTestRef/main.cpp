@@ -123,6 +123,30 @@ struct TestAds : test_base < TestAds >
 			<< " device: " << (int)devState << '\n';
 	}
 
+	void testAdsReadWriteReqEx2(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		print(server, out);
+
+		uint32_t group = ADSIGRP_SYM_HNDBYNAME;
+		uint32_t offset = 0;
+		unsigned long bytesRead;
+		uint32_t readBuffer;
+		//uint32_t writeBuffer = 0xDEADBEEF;
+		char writeBuffer[] = { "MAIN.PLCVar" };
+
+		for (int i = 0; i < 1; ++i) {
+			//fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, group, offset, sizeof(readBuffer), &readBuffer, sizeof(writeBuffer), &writeBuffer, &bytesRead));
+			long status = AdsSyncReadWriteReqEx2(port, &server, group, offset, sizeof(readBuffer), &readBuffer, sizeof(writeBuffer), &writeBuffer, &bytesRead);
+			out << "Status: " << status << " readBuffer: " << readBuffer << '\n';
+//			fructose_assert(writeBuffer == readBuffer);
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
 	void testAdsWriteReqEx(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -155,8 +179,6 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 != port);
 
 		uint32_t outBuffer = 0xDEADBEEF;
-		unsigned long bytesRead;
-		uint32_t buffer;
 		uint16_t adsState;
 		uint16_t devState;
 
@@ -170,6 +192,15 @@ struct TestAds : test_base < TestAds >
 			fructose_assert(ADSSTATE_RUN == adsState);
 			fructose_assert(0 == devState);
 		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
+	void testAdsNotification(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+
+		fructose_assert(0 != port);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -206,10 +237,9 @@ int main()
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-	// AddNotification
-	// DelNotification
+	//adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-	// ReadWrite
+	//adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";

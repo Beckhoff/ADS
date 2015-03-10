@@ -31,7 +31,7 @@ AmsRouter::~AmsRouter()
 bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto& route = mapping.find(ams);
+	auto route = mapping.find(ams);
 	const auto& conn = connections.find(ip);
 
 	if (route == mapping.end()) {
