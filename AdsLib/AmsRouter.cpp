@@ -13,7 +13,8 @@
 	} while(0)
 
 AmsRouter::AmsRouter()
-	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
+	//: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
+	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 }),
 	running(true)
 {
 	for (auto& t : portTimeout) {

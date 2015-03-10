@@ -74,8 +74,8 @@ struct AoEHeader
 	static const uint16_t WRITE_CONTROL = 0x0005;
     static const uint16_t READ_WRITE = 0x0009;
 
-    const AmsAddr targetAddr;
-	const AmsAddr sourceAddr;
+    AmsAddr targetAddr;
+    AmsAddr sourceAddr;
     const uint16_t cmdId;
     const uint16_t stateFlags;
     const uint32_t length;

@@ -112,7 +112,7 @@ void AdsConnection::Recv()
 				if (response) {
 					switch (header.cmdId) {
 					case AoEHeader::READ_DEVICE_INFO:
-						frame.remove<uint32_t>();
+						frame.remove(sizeof(uint32_t));
 						break;
 					case AoEHeader::READ:
 						frame.remove<AoEReadResponseHeader>();
@@ -120,7 +120,7 @@ void AdsConnection::Recv()
 					case AoEHeader::WRITE:
 						break;
 					case AoEHeader::READ_STATE:
-						frame.remove<uint32_t>();
+						frame.remove(sizeof(uint32_t));
 						break;
 					case AoEHeader::WRITE_CONTROL:
 						break;
