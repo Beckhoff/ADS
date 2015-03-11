@@ -14,21 +14,13 @@
 
 AmsRouter::AmsRouter()
 #ifdef WIN32
-	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 }),
+	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 })
 #else
-	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 }),
+	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 })
 #endif
-	running(true)
 {
 	for (auto& t : portTimeout) {
 		t = DEFAULT_TIMEOUT;
-	}
-}
-
-AmsRouter::~AmsRouter()
-{
-	for (uint16_t port = PORT_BASE; port < PORT_BASE + NUM_PORTS_MAX; ++port) {
-		ClosePort(port);
 	}
 }
 
@@ -112,10 +104,6 @@ long AmsRouter::ClosePort(uint16_t port)
 	LOCK_AND_ASSERT_PORT(mutex, port);
 
 	ports.reset(port - PORT_BASE);
-
-	if (ports.none()) {
-		running = false;
-	}
 	return 0;
 }
 

@@ -101,8 +101,10 @@ Frame& ReceiveAmsTcp(Frame &frame)
 
 void AdsConnection::Recv()
 {
+	static const size_t FRAME_SIZE = 1024;
+	Frame frame(FRAME_SIZE);
 	while (running) {
-		Frame frame(2048);
+		frame.reset(FRAME_SIZE);
 		socket.read(frame);
 		if (ReceiveAmsTcp(frame).size() > 0) {
 			if (frame.size() >= sizeof(AoEHeader)) {
@@ -127,10 +129,9 @@ void AdsConnection::Recv()
 					default:
 						frame.clear();
 					}
-					//TODO avoid memcpy
+					// prepend() was benchmarked against frame.swap() and was three times faster for small frames -> very workload dependend!
 					response->frame.prepend(frame.data(), frame.size());
 					response->Notify();
-					frame.clear();
 				}
 			}
 		}

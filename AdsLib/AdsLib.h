@@ -6,6 +6,7 @@
 #include "Sockets.h"
 
 long AdsAddRoute(AmsNetId ams, IpV4 ip);
+void AdsDelRoute(AmsNetId ams);
 
 long AdsPortCloseEx(long port);
 long AdsPortOpenEx();

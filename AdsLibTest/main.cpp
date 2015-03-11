@@ -112,6 +112,12 @@ struct TestAds : test_base < TestAds >
 		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
 	}
 
+	~TestAds()
+	{
+		// WORKAROUND: we saw issues on win7-64bit when program shutsdown and static AdsRouter object is destroyed the ~AdsConnection() hangs
+		AdsDelRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 });
+	}
+
 	void testAdsPortOpenEx(const std::string&)
 	{
 		static const size_t NUM_TEST_PORTS = 2;

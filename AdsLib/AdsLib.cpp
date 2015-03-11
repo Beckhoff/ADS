@@ -16,6 +16,11 @@ long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
 	return router.AddRoute(ams, ip);
 }
 
+void AdsDelRoute(const AmsNetId ams)
+{
+	router.DelRoute(ams);
+}
+
 long AdsPortCloseEx(long port)
 {
 	ASSERT_PORT(port);

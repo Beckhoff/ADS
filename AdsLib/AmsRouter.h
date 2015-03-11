@@ -13,7 +13,6 @@
 struct AmsRouter
 {
 	AmsRouter();
-	~AmsRouter();
 
 	uint16_t OpenPort();
 	long ClosePort(uint16_t port);
@@ -42,8 +41,6 @@ private:
 	std::mutex mutex;
 	std::map<IpV4, std::unique_ptr<AdsConnection>> connections;
 	std::map<AmsNetId, AdsConnection*> mapping;
-	std::thread worker;
-	bool running;
 
 	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator __GetConnection(const AmsNetId& pAddr);
 	void DeleteIfLastConnection(const AdsConnection* conn);

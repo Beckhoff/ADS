@@ -44,6 +44,8 @@ struct Frame
      */
     Frame& limit(size_t newSize);
 
+    Frame& reset(size_t newSize);
+
     /**
      * @brief data
      * @return a pointer to the beginning of the frame

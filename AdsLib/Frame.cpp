@@ -37,9 +37,16 @@ const uint8_t* Frame::data() const
 
 Frame& Frame::limit(size_t newSize)
 {
-    m_Size = std::min(m_Size, newSize);
-    m_Pos = m_Data.get();
-    return *this;
+	m_Size = std::min(m_Size, newSize);
+	m_Pos = m_Data.get();
+	return *this;
+}
+
+Frame& Frame::reset(size_t newSize)
+{
+	m_Size = newSize;
+	m_Pos = m_Data.get() + m_Size;
+	return *this;
 }
 
 Frame& Frame::prepend(const void *const data, const size_t size)
@@ -78,5 +85,3 @@ size_t Frame::size() const
 {
     return m_Size - (m_Pos - m_Data.get());
 }
-
-
