@@ -3,8 +3,11 @@
 #include <TcAdsDef.h>
 #include <TcAdsAPI.h>
 #include <cstdint>
+#include <chrono>
+#include <thread>
 
 #include <iostream>
+#include <iomanip>
 
 #pragma warning(push, 0)
 #include <fructose/fructose.h>
@@ -123,30 +126,6 @@ struct TestAds : test_base < TestAds >
 			<< " device: " << (int)devState << '\n';
 	}
 
-	void testAdsReadWriteReqEx2(const std::string&)
-	{
-		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
-		const long port = AdsPortOpenEx();
-		fructose_assert(0 != port);
-
-		print(server, out);
-
-		uint32_t group = ADSIGRP_SYM_HNDBYNAME;
-		uint32_t offset = 0;
-		unsigned long bytesRead;
-		uint32_t readBuffer;
-		//uint32_t writeBuffer = 0xDEADBEEF;
-		char writeBuffer[] = { "MAIN.PLCVar" };
-
-		for (int i = 0; i < 1; ++i) {
-			//fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, group, offset, sizeof(readBuffer), &readBuffer, sizeof(writeBuffer), &writeBuffer, &bytesRead));
-			long status = AdsSyncReadWriteReqEx2(port, &server, group, offset, sizeof(readBuffer), &readBuffer, sizeof(writeBuffer), &writeBuffer, &bytesRead);
-			out << "Status: " << status << " readBuffer: " << readBuffer << '\n';
-//			fructose_assert(writeBuffer == readBuffer);
-		}
-		fructose_assert(0 == AdsPortCloseEx(port));
-	}
-
 	void testAdsWriteReqEx(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -195,12 +174,34 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
+	static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
+	{
+#if 1
+		std::cout << std::setfill('0')
+			<< "Callback: hUser 0x" << std::hex << std::setw(4) << hUser
+			<< " sample size: " << std::dec << pNotification->cbSampleSize
+			<< " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
+#endif
+	}
+
 	void testAdsNotification(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
 		const long port = AdsPortOpenEx();
 
 		fructose_assert(0 != port);
+
+		static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
+		unsigned long notification[MAX_NOTIFICATIONS_PER_PORT];
+		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+
+		for (unsigned long hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
+			fructose_assert(0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		for (unsigned long hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
+			fructose_assert(0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -237,9 +238,9 @@ int main()
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-	//adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
+	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-	//adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
+	// ReadWrite
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";

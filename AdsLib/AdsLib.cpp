@@ -86,6 +86,24 @@ long AdsSyncWriteControlReqEx(long port, const AmsAddr* pAddr, uint16_t adsState
 	return router.WriteControl((uint16_t)port, pAddr, adsState, devState, bufferLength, buffer);
 }
 
+long AdsSyncAddDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
+{
+	ASSERT_PORT(port);
+	if (!pAddr || !pAttrib || !pFunc || !pNotification) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.AddNotification(port, pAddr, indexGroup, indexOffset, pAttrib, pFunc, hUser, pNotification);
+}
+
+long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
+{
+	ASSERT_PORT(port);
+	if (!pAddr) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.DelNotification(port, pAddr, hNotification);
+}
+
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)
 {
 	ASSERT_PORT(port);

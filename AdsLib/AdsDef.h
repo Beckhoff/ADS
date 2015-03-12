@@ -212,7 +212,14 @@ typedef	struct
 	uint16_t build;
 } AdsVersion;
 
-#pragma	pack( pop )
+typedef enum nAdsTransMode
+{
+	ADSTRANS_NOTRANS = 0,
+	ADSTRANS_CLIENTCYCLE = 1,
+	ADSTRANS_CLIENTONCHA = 2,
+	ADSTRANS_SERVERCYCLE = 3,
+	ADSTRANS_SERVERONCHA = 4,
+}ADSTRANSMODE;
 
 typedef enum nAdsState
 {
@@ -237,4 +244,27 @@ typedef enum nAdsState
 	ADSSTATE_MAXSTATES
 } ADSSTATE;
 
+typedef struct
+{
+	uint32_t cbLength;
+	uint32_t nTransMode;
+	uint32_t nMaxDelay;
+	union
+	{
+		uint32_t nCycleTime;
+		uint32_t dwChangeFilter;
+	};
+} AdsNotificationAttrib, *PAdsNotificationAttrib;
+
+typedef struct
+{
+	uint32_t hNotification;
+	uint64_t nTimeStamp;
+	uint32_t cbSampleSize;
+	uint8_t data[];
+} AdsNotificationHeader, *PAdsNotificationHeader;
+
+typedef void(*PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser);
+
+#pragma	pack( pop )
 #endif	// __ADSDEF_H__

@@ -24,6 +24,8 @@ struct AmsRouter
 	long ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState);
 	long Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer);
 	long WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer);
+	long AddNotification(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification);
+	long DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotification);
 
 	bool AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);

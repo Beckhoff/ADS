@@ -257,3 +257,13 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 	}
 	return qFromLittleEndian<uint32_t>(errorCode);
 }
+
+long AmsRouter::AddNotification(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
+{
+	return -1;
+}
+
+long AmsRouter::DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotification)
+{
+	return -1;
+}

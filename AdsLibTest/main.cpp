@@ -4,6 +4,7 @@
 #include "AmsRouter.h"
 
 #include <iostream>
+#include <iomanip>
 
 #pragma warning(push, 0)
 #include <fructose/fructose.h>
@@ -101,7 +102,7 @@ struct TestAmsRouter : test_base < TestAmsRouter >
 		fructose_assert(testee.GetConnection(netId_2));
 	}
 };
-#include <chrono>
+
 struct TestAds : test_base < TestAds >
 {
 	std::ostream &out;
@@ -111,12 +112,14 @@ struct TestAds : test_base < TestAds >
 	{
 		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
 	}
-
+#ifdef WIN32
 	~TestAds()
 	{
-		// WORKAROUND: we saw issues on win7-64bit when program shutsdown and static AdsRouter object is destroyed the ~AdsConnection() hangs
+		// WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
+		//             of the static AdsRouter object and hangs in receive.join()
 		AdsDelRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 });
 	}
+#endif
 
 	void testAdsPortOpenEx(const std::string&)
 	{
@@ -247,6 +250,37 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
+	static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
+	{
+#if 1
+		std::cout << std::setfill('0')
+			<< "Callback: hUser 0x" << std::hex << std::setw(4) << hUser
+			<< " sample size: " << std::dec << pNotification->cbSampleSize
+			<< " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
+#endif
+	}
+
+	void testAdsNotification(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+
+		fructose_assert(0 != port);
+
+		static const size_t MAX_NOTIFICATIONS_PER_PORT = 1;// 024;
+		uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
+		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+
+		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
+			fructose_assert(0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
+			fructose_assert(0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
 	void testAdsTimeout(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -285,8 +319,7 @@ int main()
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-	// AddNotification
-	// DelNotification
+	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 	// ReadWrite
 	adsTest.run();
