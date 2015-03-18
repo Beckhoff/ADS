@@ -62,6 +62,29 @@ struct AdsWriteCtrlRequest
 	}
 };
 
+struct AdsAddDeviceNotificationRequest
+{
+	uint32_t group;
+	uint32_t offset;
+	uint32_t length;
+	uint32_t mode;
+	uint32_t maxDelay;
+	uint32_t cycleTime;
+	const uint8_t reserved[16];
+
+	AdsAddDeviceNotificationRequest(uint32_t __group, uint32_t __offset, uint32_t __length, uint32_t __mode, uint32_t __maxDelay, uint32_t __cycleTime)
+		: group(__group),
+		offset(__offset),
+		length(__length),
+		mode(__mode),
+		maxDelay(__maxDelay),
+		cycleTime(__cycleTime),
+		reserved()
+	{}
+};
+
+using AdsDelDeviceNotificationRequest = uint32_t;
+
 struct AoEHeader
 {
     static const uint16_t AMS_REQUEST = 0x0004;
@@ -72,7 +95,10 @@ struct AoEHeader
 	static const uint16_t WRITE = 0x0003;
 	static const uint16_t READ_STATE = 0x0004;
 	static const uint16_t WRITE_CONTROL = 0x0005;
-    static const uint16_t READ_WRITE = 0x0009;
+	static const uint16_t ADD_DEVICE_NOTIFICATION = 0x0006;
+	static const uint16_t DEL_DEVICE_NOTIFICATION = 0x0007;
+	static const uint16_t DEVICE_NOTIFICATION = 0x0008;
+	static const uint16_t READ_WRITE = 0x0009;
 
     AmsAddr targetAddr;
     AmsAddr sourceAddr;

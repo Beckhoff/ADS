@@ -110,28 +110,35 @@ void AdsConnection::Recv()
 			if (frame.size() >= sizeof(AoEHeader)) {
 				const auto header = frame.remove<AoEHeader>();
 
-				auto response = GetPending(header.invokeId);
-				if (response) {
-					switch (header.cmdId) {
-					case AoEHeader::READ_DEVICE_INFO:
-						frame.remove(sizeof(uint32_t));
-						break;
-					case AoEHeader::READ:
-						frame.remove<AoEReadResponseHeader>();
-						break;
-					case AoEHeader::WRITE:
-						break;
-					case AoEHeader::READ_STATE:
-						frame.remove(sizeof(uint32_t));
-						break;
-					case AoEHeader::WRITE_CONTROL:
-						break;
-					default:
-						frame.clear();
+				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
+					//TODO implement this
+
+				} else {
+					auto response = GetPending(header.invokeId);
+					if (response) {
+						switch (header.cmdId) {
+						case AoEHeader::READ_DEVICE_INFO:
+							frame.remove(sizeof(uint32_t));
+							break;
+						case AoEHeader::READ:
+							frame.remove<AoEReadResponseHeader>();
+							break;
+						case AoEHeader::WRITE:
+							break;
+						case AoEHeader::READ_STATE:
+							frame.remove(sizeof(uint32_t));
+							break;
+						case AoEHeader::WRITE_CONTROL:
+						case AoEHeader::ADD_DEVICE_NOTIFICATION:
+						case AoEHeader::DEL_DEVICE_NOTIFICATION:
+							break;
+						default:
+							frame.clear();
+						}
+						// prepend() was benchmarked against frame.swap() and was three times faster for small frames -> very workload dependend!
+						response->frame.prepend(frame.data(), frame.size());
+						response->Notify();
 					}
-					// prepend() was benchmarked against frame.swap() and was three times faster for small frames -> very workload dependend!
-					response->frame.prepend(frame.data(), frame.size());
-					response->Notify();
 				}
 			}
 		}

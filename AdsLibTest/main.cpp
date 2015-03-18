@@ -267,14 +267,14 @@ struct TestAds : test_base < TestAds >
 
 		fructose_assert(0 != port);
 
-		static const size_t MAX_NOTIFICATIONS_PER_PORT = 1;// 024;
+		static const size_t MAX_NOTIFICATIONS_PER_PORT = 10;// 1024;
 		uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
 
 		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
 			fructose_assert(0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
 			fructose_assert(0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}

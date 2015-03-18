@@ -260,10 +260,38 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 
 long AmsRouter::AddNotification(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
 {
-	return -1;
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsAddDeviceNotificationRequest));
+	AdsAddDeviceNotificationRequest header{
+		indexGroup,
+		indexOffset,
+		pAttrib->cbLength,
+		pAttrib->nTransMode,
+		pAttrib->nMaxDelay,
+		pAttrib->nCycleTime
+	};
+	request.prepend<AdsAddDeviceNotificationRequest>(header);
+
+	uint8_t response[8];
+	uint32_t bytesRead;
+
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(response), &response, &bytesRead);
+	if (status) {
+		return status;
+	}
+	*pNotification = qFromLittleEndian<uint32_t>(response + 4);
+	return qFromLittleEndian<uint32_t>(response);
 }
 
 long AmsRouter::DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	return -1;
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsDelDeviceNotificationRequest));
+	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<uint32_t>(hNotification));
+
+	uint8_t errorCode[sizeof(uint32_t)];
+	uint32_t bytesRead = 0;
+	const long status = AdsRequest(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION, sizeof(errorCode), &errorCode, &bytesRead);
+	if (status) {
+		return status;
+	}
+	return qFromLittleEndian<uint32_t>(errorCode);
 }
