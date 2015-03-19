@@ -5,14 +5,6 @@
 
 #include <algorithm>
 
-#define LOCK_AND_ASSERT_PORT(mutex, port) \
-	do { \
-		std::lock_guard<std::mutex> lock(mutex); \
-		if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) { \
-			return ADSERR_CLIENT_PORTNOTOPEN; \
-				} \
-	} while(0, 0)
-
 AmsRouter::AmsRouter()
 #ifdef WIN32
 	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 })
@@ -102,17 +94,25 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	LOCK_AND_ASSERT_PORT(mutex, port);
+	for (const auto &n : CollectOrphanedNotifies(port)) {
+		DelNotification(port, &n.first, n.second);
+	}
 
+	std::lock_guard<std::mutex> lock(mutex);
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
+		return ADSERR_CLIENT_PORTNOTOPEN;
+	}
 	ports.reset(port - PORT_BASE);
-	DeleteNotifyMapping(port);
 	return 0;
 }
 
 //TODO move into AdsConnection!!!
 long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 {
-	LOCK_AND_ASSERT_PORT(mutex, port);
+	std::lock_guard<std::mutex> lock(mutex);
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
+		return ADSERR_CLIENT_PORTNOTOPEN;
+	}
 
 	if (ports.test(port - PORT_BASE)) {
 		memcpy(&pAddr->netId, &localAddr.netId, sizeof(localAddr.netId));
@@ -124,7 +124,10 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 
 long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
 {
-	LOCK_AND_ASSERT_PORT(mutex, port);
+	std::lock_guard<std::mutex> lock(mutex);
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
+		return ADSERR_CLIENT_PORTNOTOPEN;
+	}
 
 	timeout = portTimeout[port - PORT_BASE];
 	return 0;
@@ -132,7 +135,10 @@ long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
 
 long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 {
-	LOCK_AND_ASSERT_PORT(mutex, port);
+	std::lock_guard<std::mutex> lock(mutex);
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
+		return ADSERR_CLIENT_PORTNOTOPEN;
+	}
 
 	portTimeout[port - PORT_BASE] = timeout;
 	return 0;
@@ -321,22 +327,20 @@ void AmsRouter::DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t
 	}
 }
 
-void AmsRouter::DeleteNotifyMapping(const uint16_t port)
+std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifies(const uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(notificationLock);
+	std::vector<NotifyPair> orphanedNotifies{};
+	std::unique_lock<std::mutex> lock(notificationLock);
 
 	for (const auto &mapping : tableMapping) {
 		auto &table = mapping.second.operator*();
-		for (auto it = table.begin(), ite = table.end(); it != ite;) {
-			if (it->second.port == port) {
-				//TODO send DelDeviceNotification to remote!
-				it = table.erase(it);
-			}
-			else {
-				++it;
+		for (auto it: table) {
+			if (it.second.port == port) {
+				orphanedNotifies.emplace_back(NotifyPair{ mapping.first, it.first });
 			}
 		}
 	}
+	return orphanedNotifies;
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
@@ -346,12 +350,22 @@ template<class T> T extractLittleEndian(Frame& frame)
 	return value;
 }
 
+#define netIdToStream(netId) \
+	std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5]	
+
 void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr) const
 {
 	static const int FREQUENCY = 10;
 	static int i = 0;
 	if (!(++i % FREQUENCY)) {
-		LOG_INFO("Dispatching: " << std::dec << (int)amsAddr.netId.b[0] << '.' << (int)amsAddr.netId.b[1] << '.' << (int)amsAddr.netId.b[2] << '.' << (int)amsAddr.netId.b[3] << '.' << (int)amsAddr.netId.b[4] << '.' << (int)amsAddr.netId.b[5]);
+
+		const auto table = tableMapping.find(amsAddr);
+		if (table == tableMapping.end()) {
+			LOG_WARN("Notifcation from unknown source: " << netIdToStream(amsAddr.netId));
+			return;
+		}
+
+		LOG_INFO("Dispatching: " << netIdToStream(amsAddr.netId));
 
 		const auto length = extractLittleEndian<uint32_t>(frame);
 		auto numStamps = extractLittleEndian<uint32_t>(frame);

@@ -9,6 +9,7 @@
 #include <map>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 struct Notification
 {
@@ -58,14 +59,14 @@ private:
 	void Recv();
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 
-
 	using NotifyTable = std::map < uint32_t, Notification >;
+	using NotifyPair = std::pair < AmsAddr, uint32_t >;
 	using TableRef = std::unique_ptr<NotifyTable>;
 	std::map<AmsAddr, TableRef> tableMapping;
 	std::mutex notificationLock;
 	long CreateNotifyMapping(uint16_t port, const AmsAddr& destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify);
 	void DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify);
-	void DeleteNotifyMapping(uint16_t port);
+	std::vector<NotifyPair> CollectOrphanedNotifies(uint16_t port);
 
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

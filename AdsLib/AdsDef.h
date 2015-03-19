@@ -204,6 +204,7 @@ typedef struct AmsNetId_
 } AmsNetId, *PAmsNetId;
 
 #include <cstring> // for memcmp()
+#include "wrap_endian.h" // for qFromLittleEndian()
 typedef struct AmsAddr_
 {
 	AmsNetId netId;
@@ -215,8 +216,8 @@ typedef struct AmsAddr_
 	{}
 
 	AmsAddr_(const uint8_t *frame)
+		: port(qFromLittleEndian<uint16_t>(frame + sizeof(netId)))
 	{
-		//TODO add port
 		memcpy(&netId, frame, sizeof(netId));
 	}
 

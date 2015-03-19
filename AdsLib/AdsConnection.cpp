@@ -114,7 +114,6 @@ void AdsConnection::Recv()
 				const auto header = frame.remove<AoEHeader>();
 
 				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
-					//TODO implement this
 					dispatcher.Dispatch(frame, header.sourceAddr);
 				} else {
 					auto response = GetPending(header.invokeId);
