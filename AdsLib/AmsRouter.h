@@ -62,8 +62,8 @@ private:
 	std::map<AmsAddr, TableRef> tableMapping;
 	std::mutex notificationLock;
 	long CreateNotifyMapping(uint16_t port, const AmsAddr& destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify);
-	void AmsRouter::DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify);
-	void AmsRouter::DeleteNotifyMapping(uint16_t port);
+	void DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify);
+	void DeleteNotifyMapping(uint16_t port);
 
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */
