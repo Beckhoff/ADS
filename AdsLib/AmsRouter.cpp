@@ -329,6 +329,7 @@ void AmsRouter::DeleteNotifyMapping(const uint16_t port)
 		auto &table = mapping.second.operator*();
 		for (auto it = table.begin(), ite = table.end(); it != ite;) {
 			if (it->second.port == port) {
+				//TODO send DelDeviceNotification to remote!
 				it = table.erase(it);
 			}
 			else {
@@ -338,10 +339,33 @@ void AmsRouter::DeleteNotifyMapping(const uint16_t port)
 	}
 }
 
-void AmsRouter::Dispatch(const AmsAddr amsAddr) const
+template<class T> T extractLittleEndian(Frame& frame)
 {
+	const auto value = qFromLittleEndian<T>(frame.data());
+	frame.remove(sizeof(T));
+	return value;
+}
+
+void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr) const
+{
+	static const int FREQUENCY = 10;
 	static int i = 0;
-	if (!(++i % 10)) {
+	if (!(++i % FREQUENCY)) {
 		LOG_INFO("Dispatching: " << std::dec << (int)amsAddr.netId.b[0] << '.' << (int)amsAddr.netId.b[1] << '.' << (int)amsAddr.netId.b[2] << '.' << (int)amsAddr.netId.b[3] << '.' << (int)amsAddr.netId.b[4] << '.' << (int)amsAddr.netId.b[5]);
+
+		const auto length = extractLittleEndian<uint32_t>(frame);
+		auto numStamps = extractLittleEndian<uint32_t>(frame);
+		LOG_INFO("frameLength: " << frame.size() << " length: " << length << " numStamps: " << numStamps);
+
+		while (numStamps-- > 0) {
+			const auto timestamp = extractLittleEndian<uint64_t>(frame);
+			auto numSamples = extractLittleEndian<uint32_t>(frame);
+			LOG_INFO("Timespam: " << timestamp << " numSamples: " << numSamples);
+			while (numSamples-- > 0) {
+				const auto hNotify = extractLittleEndian<uint32_t>(frame);
+				const auto size = extractLittleEndian<uint32_t>(frame);
+				LOG_INFO("hNotify: " << hNotify << " size: " << size);
+			}
+		}
 	}
 }

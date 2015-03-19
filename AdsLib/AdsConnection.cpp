@@ -115,7 +115,7 @@ void AdsConnection::Recv()
 
 				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
 					//TODO implement this
-					dispatcher.Dispatch(header.sourceAddr);
+					dispatcher.Dispatch(frame, header.sourceAddr);
 				} else {
 					auto response = GetPending(header.invokeId);
 					if (response) {

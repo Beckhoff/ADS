@@ -38,7 +38,7 @@ struct AmsRouter : NotificationDispatcher
 	void DelRoute(const AmsNetId& ams);
 	AdsConnection* GetConnection(const AmsNetId& pAddr);
 
-	void Dispatch(AmsAddr amsAddr) const;
+	void Dispatch(Frame &frame, AmsAddr amsAddr) const;
 
 private:
 	static const uint32_t DEFAULT_TIMEOUT = 5000;

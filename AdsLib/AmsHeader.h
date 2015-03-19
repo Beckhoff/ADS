@@ -120,14 +120,16 @@ struct AoEHeader
     }
 
     AoEHeader(const uint8_t *frame)
-        : //TODO targetAddr(frame),
-          //TODO sourceAddr(frame + offsetof(AoEHeader, sourceAddr)),
+        : targetAddr(frame),
+          sourceAddr(frame + offsetof(AoEHeader, sourceAddr)),
           cmdId     (qFromLittleEndian<uint16_t>(frame + offsetof(AoEHeader, cmdId))),
           stateFlags(qFromLittleEndian<uint16_t>(frame + offsetof(AoEHeader, stateFlags))),
           length    (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, length))),
           errorCode (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, errorCode))),
           invokeId  (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, invokeId)))
     {
+		memcpy(&targetAddr, frame, sizeof(targetAddr));
+		memcpy(&targetAddr, frame, sizeof(targetAddr));
     }
 };
 

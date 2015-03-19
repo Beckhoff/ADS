@@ -1,8 +1,6 @@
 #ifndef _ADSCONNECTION_H_
 #define _ADSCONNECTION_H_
 
-#include "AdsDef.h"
-#include "Frame.h"
 #include "Sockets.h"
 #include "NotificationDispatcher.h"
 

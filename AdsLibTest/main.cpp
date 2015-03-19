@@ -301,7 +301,7 @@ struct TestAds : test_base < TestAds >
 			fructose_assert(0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		for (uint32_t hUser = 0; hUser < LEAKED_NOTIFICATIONS; ++hUser) {
+		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++hUser) {
 			fructose_assert(0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));

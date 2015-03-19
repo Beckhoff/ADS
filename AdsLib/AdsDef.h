@@ -209,6 +209,17 @@ typedef struct AmsAddr_
 	AmsNetId netId;
 	uint16_t port;
 #ifdef __cplusplus
+	AmsAddr_(AmsNetId id = AmsNetId{ 0, 0, 0, 0, 0, 0 }, uint16_t __port = 0)
+		: netId(id),
+		port(__port)
+	{}
+
+	AmsAddr_(const uint8_t *frame)
+	{
+		//TODO add port
+		memcpy(&netId, frame, sizeof(netId));
+	}
+
 	bool operator <(const AmsAddr_& ref) const
 	{
 		if (memcmp(&netId, &ref.netId, sizeof(netId))) {
