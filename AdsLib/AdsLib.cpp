@@ -9,7 +9,7 @@ static AmsRouter router;
 		if ((port) <= 0 || (port) > UINT16_MAX) { \
 			return ADSERR_CLIENT_PORTNOTOPEN; \
 				} \
-	} while (0)
+	} while (0, 0)
 
 long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
 {

@@ -38,6 +38,31 @@ long testPortOpen(std::ostream &out)
 	return port;
 }
 
+struct TestAmsAddr : test_base < TestAmsAddr >
+{
+	std::ostream &out;
+
+	TestAmsAddr(std::ostream& outstream)
+		: out(outstream)
+	{}
+
+	void testAmsAddrCompare(const std::string&)
+	{
+		static const AmsAddr testee      { AmsNetId{ 192, 168, 0, 231, 1, 1 }, 1000 };
+		static const AmsAddr lower_last  { AmsNetId{ 192, 168, 0, 231, 1, 0 }, 1000 };
+		static const AmsAddr lower_middle{ AmsNetId{ 192, 168, 0,   1, 1, 1 }, 1000 };
+		static const AmsAddr lower_port  { AmsNetId{ 192, 168, 0, 231, 1, 1 },  999 };
+
+		fructose_assert(lower_last < testee);
+		fructose_assert(lower_middle < testee);
+		fructose_assert(lower_port < testee);
+		fructose_assert(!(testee < lower_last));
+		fructose_assert(!(testee < lower_middle));
+		fructose_assert(!(testee < lower_port));
+		fructose_assert(!(testee < testee));
+	}
+};
+
 struct TestAmsRouter : test_base < TestAmsRouter >
 {
 	std::ostream &out;
@@ -268,6 +293,7 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 != port);
 
 		static const size_t MAX_NOTIFICATIONS_PER_PORT = 10;// 1024;
+		static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
 		uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
 
@@ -275,7 +301,7 @@ struct TestAds : test_base < TestAds >
 			fructose_assert(0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		for (uint32_t hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
+		for (uint32_t hUser = 0; hUser < LEAKED_NOTIFICATIONS; ++hUser) {
 			fructose_assert(0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
@@ -307,6 +333,10 @@ int main()
 #else
 	std::ostream& errorstream = std::cout;
 #endif
+	TestAmsAddr amsAddrTest(errorstream);
+	amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
+	amsAddrTest.run();
+
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);

@@ -193,7 +193,12 @@ typedef struct AmsNetId_
 #ifdef __cplusplus
 	bool operator <(const AmsNetId_& ref) const
 	{
-		return b[0] < ref.b[0];
+		for (size_t i = 0; i < sizeof(ref.b); ++i) {
+			if (b[i] != ref.b[i]) {
+				return b[i] < ref.b[i];
+			}
+		}
+		return false;
 	}
 #endif
 } AmsNetId, *PAmsNetId;
@@ -203,6 +208,15 @@ typedef struct AmsAddr_
 {
 	AmsNetId netId;
 	uint16_t port;
+#ifdef __cplusplus
+	bool operator <(const AmsAddr_& ref) const
+	{
+		if (memcmp(&netId, &ref.netId, sizeof(netId))) {
+			return netId < ref.netId;
+		}
+		return port < ref.port;
+	}
+#endif
 } AmsAddr, *PAmsAddr;
 
 typedef	struct

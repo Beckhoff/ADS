@@ -1,6 +1,7 @@
 #include "AmsRouter.h"
 #include "AmsHeader.h"
 #include "Frame.h"
+#include "Log.h"
 
 #include <algorithm>
 
@@ -10,7 +11,7 @@
 		if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) { \
 			return ADSERR_CLIENT_PORTNOTOPEN; \
 				} \
-	} while(0)
+	} while(0, 0)
 
 AmsRouter::AmsRouter()
 #ifdef WIN32
@@ -104,6 +105,7 @@ long AmsRouter::ClosePort(uint16_t port)
 	LOCK_AND_ASSERT_PORT(mutex, port);
 
 	ports.reset(port - PORT_BASE);
+	DeleteNotifyMapping(port);
 	return 0;
 }
 
@@ -258,34 +260,38 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 	return qFromLittleEndian<uint32_t>(errorCode);
 }
 
-long AmsRouter::AddNotification(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
+long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsAddDeviceNotificationRequest));
-	AdsAddDeviceNotificationRequest header{
+	request.prepend<AdsAddDeviceNotificationRequest>(AdsAddDeviceNotificationRequest{
 		indexGroup,
 		indexOffset,
 		pAttrib->cbLength,
 		pAttrib->nTransMode,
 		pAttrib->nMaxDelay,
 		pAttrib->nCycleTime
-	};
-	request.prepend<AdsAddDeviceNotificationRequest>(header);
+	});
 
 	uint8_t response[8];
 	uint32_t bytesRead;
-
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(response), &response, &bytesRead);
 	if (status) {
 		return status;
 	}
+
 	*pNotification = qFromLittleEndian<uint32_t>(response + 4);
-	return qFromLittleEndian<uint32_t>(response);
+	const auto result = qFromLittleEndian<uint32_t>(response);
+	if (result) {
+		return result;
+	}
+	return CreateNotifyMapping(port, *pAddr, pFunc, hUser, *pNotification);
 }
 
-long AmsRouter::DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotification)
+long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
+	DeleteNotifyMapping(port, *pAddr, hNotification);
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsDelDeviceNotificationRequest));
-	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<uint32_t>(hNotification));
+	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<AdsDelDeviceNotificationRequest>(hNotification));
 
 	uint8_t errorCode[sizeof(uint32_t)];
 	uint32_t bytesRead = 0;
@@ -294,4 +300,40 @@ long AmsRouter::DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotif
 		return status;
 	}
 	return qFromLittleEndian<uint32_t>(errorCode);
+}
+
+long AmsRouter::CreateNotifyMapping(uint16_t port, const AmsAddr &addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify)
+{
+	std::lock_guard<std::mutex> lock(notificationLock);
+
+	auto table = tableMapping.emplace(addr, TableRef(new NotifyTable())).first->second.get();
+	table->emplace(hNotify, Notification{ pFunc, hUser, port });
+	return 0;
+}
+
+void AmsRouter::DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify)
+{
+	std::lock_guard<std::mutex> lock(notificationLock);
+
+	auto table = tableMapping.find(addr);
+	if (table != tableMapping.end()) {
+		table->second->erase(hNotify);
+	}
+}
+
+void AmsRouter::DeleteNotifyMapping(const uint16_t port)
+{
+	std::lock_guard<std::mutex> lock(notificationLock);
+
+	for (const auto &mapping : tableMapping) {
+		auto &table = mapping.second.operator*();
+		for (auto it = table.begin(), ite = table.end(); it != ite;) {
+			if (it->second.port == port) {
+				it = table.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+	}
 }

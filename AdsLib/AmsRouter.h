@@ -10,6 +10,13 @@
 #include <mutex>
 #include <thread>
 
+struct Notification
+{
+	PAdsNotificationFuncEx func;
+	uint32_t hUser;
+	uint16_t port;
+};
+
 struct AmsRouter
 {
 	AmsRouter();
@@ -24,8 +31,8 @@ struct AmsRouter
 	long ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* deviceState);
 	long Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer);
 	long WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer);
-	long AddNotification(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification);
-	long DelNotification(long port, const AmsAddr* pAddr, uint32_t hNotification);
+	long AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification);
+	long DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification);
 
 	bool AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);
@@ -48,6 +55,15 @@ private:
 	void DeleteIfLastConnection(const AdsConnection* conn);
 	void Recv();
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
+
+
+	using NotifyTable = std::map < uint32_t, Notification >;
+	using TableRef = std::unique_ptr<NotifyTable>;
+	std::map<AmsAddr, TableRef> tableMapping;
+	std::mutex notificationLock;
+	long CreateNotifyMapping(uint16_t port, const AmsAddr& destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify);
+	void AmsRouter::DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify);
+	void AmsRouter::DeleteNotifyMapping(uint16_t port);
 
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

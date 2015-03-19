@@ -74,6 +74,7 @@
     <ClInclude Include="AmsHeader.h" />
     <ClInclude Include="AmsRouter.h" />
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="NetId.h" />
     <ClInclude Include="Sockets.h" />
     <ClInclude Include="wrap_endian.h" />
@@ -84,6 +85,7 @@
     <ClCompile Include="AdsLib.cpp" />
     <ClCompile Include="AmsRouter.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="NetId.cpp" />
     <ClCompile Include="Sockets.cpp" />
   </ItemGroup>
