@@ -34,7 +34,7 @@ bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 	if (route == mapping.end()) {
 		if (conn == connections.end()) {
 			// new route and connection
-			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ ip }));
+			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
 			mapping[ams] = connections[ip].get();
 		}
 		else {
@@ -49,7 +49,7 @@ bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 		}
 		auto oldConnection = route->second;
 		if (conn == connections.end()) {
-			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ ip }));
+			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
 			route->second = connections[ip].get();
 		}
 		else {
@@ -335,5 +335,13 @@ void AmsRouter::DeleteNotifyMapping(const uint16_t port)
 				++it;
 			}
 		}
+	}
+}
+
+void AmsRouter::Dispatch(const AmsAddr amsAddr) const
+{
+	static int i = 0;
+	if (!(++i % 10)) {
+		LOG_INFO("Dispatching: " << std::dec << (int)amsAddr.netId.b[0] << '.' << (int)amsAddr.netId.b[1] << '.' << (int)amsAddr.netId.b[2] << '.' << (int)amsAddr.netId.b[3] << '.' << (int)amsAddr.netId.b[4] << '.' << (int)amsAddr.netId.b[5]);
 	}
 }

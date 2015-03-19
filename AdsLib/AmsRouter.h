@@ -17,7 +17,7 @@ struct Notification
 	uint16_t port;
 };
 
-struct AmsRouter
+struct AmsRouter : NotificationDispatcher
 {
 	AmsRouter();
 
@@ -37,6 +37,8 @@ struct AmsRouter
 	bool AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);
 	AdsConnection* GetConnection(const AmsNetId& pAddr);
+
+	void Dispatch(AmsAddr amsAddr) const;
 
 private:
 	static const uint32_t DEFAULT_TIMEOUT = 5000;

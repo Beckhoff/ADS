@@ -1,5 +1,7 @@
 #include "AdsConnection.h"
 #include "AmsHeader.h"
+#include "AmsRouter.h"
+
 #include <iostream>
 AdsResponse::AdsResponse()
 	: frame(2048),
@@ -19,8 +21,9 @@ bool AdsResponse::Wait(uint32_t timeout_ms)
 	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
-AdsConnection::AdsConnection(IpV4 destIp)
-	: destIp(destIp),
+AdsConnection::AdsConnection(const NotificationDispatcher &__dispatcher, IpV4 destIp)
+	: dispatcher(__dispatcher),
+	destIp(destIp),
 	socket(destIp, 48898),
 	invokeId(0)
 {
@@ -112,7 +115,7 @@ void AdsConnection::Recv()
 
 				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
 					//TODO implement this
-
+					dispatcher.Dispatch(header.sourceAddr);
 				} else {
 					auto response = GetPending(header.invokeId);
 					if (response) {

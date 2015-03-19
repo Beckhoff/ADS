@@ -292,7 +292,7 @@ struct TestAds : test_base < TestAds >
 
 		fructose_assert(0 != port);
 
-		static const size_t MAX_NOTIFICATIONS_PER_PORT = 10;// 1024;
+		static const size_t MAX_NOTIFICATIONS_PER_PORT = 2;// 1024;
 		static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
 		uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };

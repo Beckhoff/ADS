@@ -4,6 +4,7 @@
 #include "AdsDef.h"
 #include "Frame.h"
 #include "Sockets.h"
+#include "NotificationDispatcher.h"
 
 #include <array>
 #include <condition_variable>
@@ -30,7 +31,7 @@ private:
 
 struct AdsConnection
 {
-	AdsConnection(IpV4 destIp = IpV4{ "" });
+	AdsConnection(const NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
 	~AdsConnection();
 
 	AdsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
@@ -41,6 +42,7 @@ struct AdsConnection
 	
 	const IpV4 destIp;
 private:
+	const NotificationDispatcher &dispatcher;
 	TcpSocket socket;
 	std::mutex mutex;
 	uint32_t invokeId;
