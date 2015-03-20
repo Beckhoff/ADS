@@ -8,15 +8,15 @@
 struct IpV4
 {
     IpV4(const std::string& addr);
-    uint32_t htonl() const;
+	uint32_t toNetworkOrder() const;
 	bool operator < (const IpV4& ref) const
 	{
-		return this->htonl() < ref.htonl();
+		return this->toNetworkOrder() < ref.toNetworkOrder();
 	}
 
 	bool operator == (const IpV4& ref) const
 	{
-		return this->htonl() == ref.htonl();
+		return this->toNetworkOrder() == ref.toNetworkOrder();
 	}
 
 

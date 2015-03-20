@@ -8,7 +8,7 @@
     struct tm temp; \
     localtime_s(&temp, TIME_T); \
     std::strftime(DATE_TIME, sizeof(DATE_TIME), "%Y-%m-%dT%H:%M:%S ", &temp); \
-    } while (0);
+    } while (0, 0);
 #else
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) std::strftime(DATE_TIME, sizeof(DATE_TIME), "%FT%T%z ", localtime(TIME_T));
 #endif

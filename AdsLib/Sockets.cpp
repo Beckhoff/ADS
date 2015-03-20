@@ -18,7 +18,7 @@ IpV4::IpV4(const std::string& addr)
     value = shift ? 0 : result;
 }
 
-uint32_t IpV4::htonl() const
+uint32_t IpV4::toNetworkOrder() const
 {
     return ::htonl(value);
 }
@@ -32,7 +32,7 @@ Socket::Socket(IpV4 ip, uint16_t port, int type)
     }
     m_SockAddress.sin_family = AF_INET;
     m_SockAddress.sin_port = htons(port);
-    m_SockAddress.sin_addr.s_addr = ip.htonl();
+    m_SockAddress.sin_addr.s_addr = ip.toNetworkOrder();
 }
 
 Socket::~Socket()
