@@ -8,6 +8,8 @@
 AmsRouter::AmsRouter()
 #ifdef WIN32
 	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 })
+#elif __APPLE__
+	: localAddr({ { 192, 168, 0, 200, 1, 1 }, 0 })
 #else
 	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 })
 #endif

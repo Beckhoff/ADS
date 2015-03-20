@@ -20,7 +20,7 @@ IpV4::IpV4(const std::string& addr)
 
 uint32_t IpV4::toNetworkOrder() const
 {
-    return ::htonl(value);
+    return htonl(value);
 }
 
 Socket::Socket(IpV4 ip, uint16_t port, int type)

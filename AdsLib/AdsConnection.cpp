@@ -44,10 +44,10 @@ AdsConnection::~AdsConnection()
 
 AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
 {
-	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, request.size(), ++invokeId };
+	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), ++invokeId };
 	request.prepend<AoEHeader>(aoeHeader);
 
-	AmsTcpHeader header{ request.size() };
+	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
 	request.prepend<AmsTcpHeader>(header);
 
 	std::lock_guard<std::mutex> lock(mutex);
