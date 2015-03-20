@@ -16,8 +16,7 @@ inline int InitSocketLibrary(void) {
 typedef int socklen_t;
 #endif
 
-//#ifdef __gnu_linux__
-#ifndef _WIN32
+#if defined(__gnu_linux__) || defined(__APPLE__)
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
