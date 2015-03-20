@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.0.26">
+  <POU Name="MAIN" Id="{ac002873-776d-4096-82aa-e6da7e9c1d13}">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	byByte		AT %MB0 : ARRAY [0..1027] OF BYTE;	
+	i			: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[FOR i := 4 TO 1027 BY 1 DO
+	byByte[i] := byByte[i] + 1;
+END_FOR]]></ST>
+    </Implementation>
+    <ObjectProperties />
+  </POU>
+</TcPlcObject>
