@@ -284,8 +284,8 @@ typedef struct
 
 typedef struct
 {
-	uint32_t hNotification;
 	uint64_t nTimeStamp;
+	uint32_t hNotification;
 	uint32_t cbSampleSize;
 	uint8_t data[];
 } AdsNotificationHeader, *PAdsNotificationHeader;

@@ -21,6 +21,7 @@ AmsRouter::AmsRouter()
 
 bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
+	//TODO refactor using the mapping::operator[]
 	std::lock_guard<std::mutex> lock(mutex);
 	auto route = mapping.find(ams);
 	const auto& conn = connections.find(ip);
@@ -292,12 +293,12 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 	if (result) {
 		return result;
 	}
-	return CreateNotifyMapping(port, *pAddr, pFunc, hUser, *pNotification);
+	return CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
 }
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	DeleteNotifyMapping(port, *pAddr, hNotification);
+	DeleteNotifyMapping(*pAddr, hNotification);
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsDelDeviceNotificationRequest));
 	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<AdsDelDeviceNotificationRequest>(hNotification));
 
@@ -310,16 +311,16 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 	return qFromLittleEndian<uint32_t>(errorCode);
 }
 
-long AmsRouter::CreateNotifyMapping(uint16_t port, const AmsAddr &addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify)
+long AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
 	std::lock_guard<std::mutex> lock(notificationLock);
 
 	auto table = tableMapping.emplace(addr, TableRef(new NotifyTable())).first->second.get();
-	table->emplace(hNotify, Notification{ pFunc, hUser, port });
+	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
 	return 0;
 }
 
-void AmsRouter::DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify)
+void AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
 {
 	std::lock_guard<std::mutex> lock(notificationLock);
 
@@ -352,35 +353,41 @@ template<class T> T extractLittleEndian(Frame& frame)
 	return value;
 }
 
-#define netIdToStream(netId) \
-	std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5]	
+
+std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
+{
+	return out << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
+}
 
 void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr) const
 {
-	static const int FREQUENCY = 10;
-	static int i = 0;
-	if (!(++i % FREQUENCY)) {
+	const auto table = tableMapping.find(amsAddr);
+	if (table == tableMapping.end()) {
+		LOG_WARN("Notifcation from unknown source: " << amsAddr.netId);
+		return;
+	}
 
-		const auto table = tableMapping.find(amsAddr);
-		if (table == tableMapping.end()) {
-			LOG_WARN("Notifcation from unknown source: " << netIdToStream(amsAddr.netId));
-			return;
-		}
+	const auto length = extractLittleEndian<uint32_t>(frame);
+	if (length != frame.size()) {
+		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << frame.size());
+		return;
+	}
 
-		LOG_INFO("Dispatching: " << netIdToStream(amsAddr.netId));
-
-		const auto length = extractLittleEndian<uint32_t>(frame);
-		auto numStamps = extractLittleEndian<uint32_t>(frame);
-		LOG_INFO("frameLength: " << frame.size() << " length: " << length << " numStamps: " << numStamps);
-
-		while (numStamps-- > 0) {
-			const auto timestamp = extractLittleEndian<uint64_t>(frame);
-			auto numSamples = extractLittleEndian<uint32_t>(frame);
-			LOG_INFO("Timespam: " << timestamp << " numSamples: " << numSamples);
-			while (numSamples-- > 0) {
-				const auto hNotify = extractLittleEndian<uint32_t>(frame);
-				const auto size = extractLittleEndian<uint32_t>(frame);
-				LOG_INFO("hNotify: " << hNotify << " size: " << size);
+	auto numStamps = extractLittleEndian<uint32_t>(frame);
+	while (numStamps-- > 0) {
+		const auto timestamp = extractLittleEndian<uint64_t>(frame);
+		auto numSamples = extractLittleEndian<uint32_t>(frame);
+		while (numSamples-- > 0) {
+			const auto hNotify = extractLittleEndian<uint32_t>(frame);
+			const auto size = extractLittleEndian<uint32_t>(frame);
+			auto it = table->second->find(hNotify);
+			if (it != table->second->end()) {
+				auto notification = it->second;
+				if (size != notification.Size()) {
+					LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
+					return;
+				}
+				notification.Notify(timestamp, frame.data());
 			}
 		}
 	}

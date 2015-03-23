@@ -3,6 +3,7 @@
 
 #include "AdsDef.h"
 #include "AdsConnection.h"
+#include "AdsNotification.h"
 
 #include <array>
 #include <bitset>
@@ -10,13 +11,6 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-
-struct Notification
-{
-	PAdsNotificationFuncEx func;
-	uint32_t hUser;
-	uint16_t port;
-};
 
 struct AmsRouter : NotificationDispatcher
 {
@@ -64,8 +58,8 @@ private:
 	using TableRef = std::unique_ptr<NotifyTable>;
 	std::map<AmsAddr, TableRef> tableMapping;
 	std::mutex notificationLock;
-	long CreateNotifyMapping(uint16_t port, const AmsAddr& destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t hNotify);
-	void DeleteNotifyMapping(uint16_t port, const AmsAddr &addr, uint32_t hNotify);
+	long CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
+	void DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify);
 	std::vector<NotifyPair> CollectOrphanedNotifies(uint16_t port);
 
 };
