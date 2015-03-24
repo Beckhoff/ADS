@@ -30,7 +30,7 @@ private:
 
 struct AdsConnection
 {
-	AdsConnection(const NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
+	AdsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
 	~AdsConnection();
 
 	AdsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
@@ -41,7 +41,7 @@ struct AdsConnection
 	
 	const IpV4 destIp;
 private:
-	const NotificationDispatcher &dispatcher;
+	NotificationDispatcher &dispatcher;
 	TcpSocket socket;
 	std::mutex mutex;
 	uint32_t invokeId;
@@ -52,7 +52,8 @@ private:
 	std::list<AdsResponse*> ready;
 	std::list<AdsResponse*> pending;
 
-	bool Read(void* buffer, size_t bytesToRead) const;
+	void ReadJunk(size_t bytesToRead) const;
+	bool Read(uint8_t* buffer, size_t bytesToRead) const;
 	void Recv();
 	void TryRecv();
 

@@ -44,7 +44,7 @@ struct Frame
      */
     Frame& limit(size_t newSize);
 
-    Frame& reset(size_t newSize);
+    Frame& reset();
 
     /**
      * @brief data
@@ -104,6 +104,7 @@ private:
     std::unique_ptr<uint8_t[]> m_Data;
     uint8_t *m_Pos;
     size_t m_Size;
+    size_t m_OriginalSize;
 };
 
 #endif // FRAME_H

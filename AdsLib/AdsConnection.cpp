@@ -4,7 +4,7 @@
 #include "Log.h"
 
 AdsResponse::AdsResponse()
-	: frame(2048),
+	: frame(4096),
 	invokeId(0)
 {
 }
@@ -21,7 +21,7 @@ bool AdsResponse::Wait(uint32_t timeout_ms)
 	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
-AdsConnection::AdsConnection(const NotificationDispatcher &__dispatcher, IpV4 destIp)
+AdsConnection::AdsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
 	: dispatcher(__dispatcher),
 	destIp(destIp),
 	socket(destIp, 48898),
@@ -83,19 +83,29 @@ AdsResponse* AdsConnection::GetPending(uint32_t id)
 
 void AdsConnection::Release(AdsResponse* response)
 {
+	response->frame.reset();
 	std::lock_guard<std::mutex> lock(mutex);
 	ready.push_back(response);
 }
 
-bool AdsConnection::Read(void* __buffer, size_t bytesToRead) const
+bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
 {
-	uint8_t * buffer = reinterpret_cast<uint8_t*>(__buffer);
 	while (running && bytesToRead) {
 		const size_t bytesRead = socket.read(buffer, bytesToRead);
 		bytesToRead -= bytesRead;
 		buffer += bytesRead;
 	}
 	return running;
+}
+
+void AdsConnection::ReadJunk(size_t bytesToRead) const
+{
+	uint8_t buffer[1024];
+	while (bytesToRead > sizeof(buffer)) {
+		Read(buffer, sizeof(buffer));
+		bytesToRead -= sizeof(buffer);
+	}
+	Read(buffer, bytesToRead);
 }
 
 template<class T> T AdsConnection::Receive() const
@@ -111,11 +121,7 @@ Frame& AdsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 {
 	if (bytesLeft > frame.capacity()) {
 		LOG_WARN("Frame to long");
-		size_t bytesToRead = std::min<size_t>(bytesLeft, frame.capacity());
-		while (bytesToRead && Read(frame.rawData(), bytesToRead)) {
-			bytesLeft -= bytesToRead;
-			bytesToRead = std::min<size_t>(bytesLeft, frame.capacity());
-		}
+		ReadJunk(bytesLeft);
 		return frame.clear();
 	}
 
@@ -136,54 +142,50 @@ void AdsConnection::TryRecv()
 
 void AdsConnection::Recv()
 {
-	static const size_t FRAME_SIZE = 10240;
-	Frame frame(FRAME_SIZE);
 	while (running) {
-		frame.reset(FRAME_SIZE);
 		const auto amsTcp = Receive<AmsTcpHeader>();
-		if (amsTcp.length) {
-			if (amsTcp.length < sizeof(AoEHeader)) {
-				LOG_WARN("Frame to short to be AoE");
-				uint8_t trash[sizeof(AoEHeader)];
-				Read(trash, sizeof(trash));
-			}
-			else {
-				const auto header = Receive<AoEHeader>();
-
-
-				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
-					ReceiveFrame(frame, header.length);
-					dispatcher.Dispatch(frame, header.sourceAddr);
-				}
-				else {
-					ReceiveFrame(frame, header.length);
-					auto response = GetPending(header.invokeId);
-					if (response) {
-						switch (header.cmdId) {
-						case AoEHeader::READ_DEVICE_INFO:
-							frame.remove(sizeof(uint32_t));
-							break;
-						case AoEHeader::READ:
-							frame.remove<AoEReadResponseHeader>();
-							break;
-						case AoEHeader::WRITE:
-							break;
-						case AoEHeader::READ_STATE:
-							frame.remove(sizeof(uint32_t));
-							break;
-						case AoEHeader::WRITE_CONTROL:
-						case AoEHeader::ADD_DEVICE_NOTIFICATION:
-						case AoEHeader::DEL_DEVICE_NOTIFICATION:
-							break;
-						default:
-							frame.clear();
-						}
-						// prepend() was benchmarked against frame.swap() and was three times faster for small frames -> very workload dependend!
-						response->frame.prepend(frame.data(), frame.size());
-						response->Notify();
-					}
-				}
-			}
+		if (amsTcp.length < sizeof(AoEHeader)) {
+			LOG_WARN("Frame to short to be AoE");
+			ReadJunk(amsTcp.length);
+			continue;
 		}
+
+		const auto header = Receive<AoEHeader>();
+		if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
+			Frame& frame = dispatcher.GetFrame();
+			ReceiveFrame(frame, header.length);
+			dispatcher.Dispatch(frame, header.sourceAddr);
+			frame.reset();
+			continue;
+		}
+
+		auto response = GetPending(header.invokeId);
+		if (!response) {
+			LOG_WARN("No response pending");
+			ReadJunk(header.length);
+			continue;
+		}
+
+		ReceiveFrame(response->frame, header.length);
+		switch (header.cmdId) {
+		case AoEHeader::READ_DEVICE_INFO:
+			response->frame.remove(sizeof(uint32_t));
+			break;
+		case AoEHeader::READ:
+			response->frame.remove<AoEReadResponseHeader>();
+			break;
+		case AoEHeader::WRITE:
+			break;
+		case AoEHeader::READ_STATE:
+			response->frame.remove(sizeof(uint32_t));
+			break;
+		case AoEHeader::WRITE_CONTROL:
+		case AoEHeader::ADD_DEVICE_NOTIFICATION:
+		case AoEHeader::DEL_DEVICE_NOTIFICATION:
+			break;
+		default:
+			response->frame.clear();
+		}
+		response->Notify();
 	}
 }

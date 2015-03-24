@@ -8,6 +8,7 @@ Frame::Frame(size_t length, const void* data)
 {
     m_Size = m_Data ? length : 0;
     m_Pos = m_Data.get() + m_Size;
+    m_OriginalSize = m_Size;
 
     if (m_Pos && data) {
         m_Pos -= length;
@@ -42,9 +43,9 @@ Frame& Frame::limit(size_t newSize)
 	return *this;
 }
 
-Frame& Frame::reset(size_t newSize)
+Frame& Frame::reset()
 {
-	m_Size = newSize;
+	m_Size = m_OriginalSize;
 	m_Pos = m_Data.get() + m_Size;
 	return *this;
 }
@@ -62,7 +63,8 @@ Frame& Frame::prepend(const void *const data, const size_t size)
         memcpy(m_Pos, m_Data.get() + bytesFree, m_Size - bytesFree);
         m_Data.reset(newData);
         m_Size += size;
-        m_Pos = m_Data.get() + bytesFree ;
+        m_OriginalSize = m_Size;
+        m_Pos = m_Data.get() + bytesFree;
     } else {
         m_Pos -= size;
     }
