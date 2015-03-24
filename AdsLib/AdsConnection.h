@@ -51,6 +51,7 @@ private:
 	std::list<AdsResponse*> ready;
 	std::list<AdsResponse*> pending;
 
+	bool Read(uint8_t* buffer, size_t bytesToRead);
 	void Recv();
 	void TryRecv();
 	Frame& ReceiveAmsTcp(Frame &frame);

@@ -48,15 +48,16 @@ Socket::~Socket()
     }
 }
 
-size_t Socket::read(char *buffer, size_t maxBytes) const
+size_t Socket::read(uint8_t *buffer, size_t maxBytes) const
 {
 	timeval timeout = { 1, 0 };
 	if (!select(&timeout)) {
 		return 0;
 	}
 
-	maxBytes = static_cast<int>(std::min<size_t>(INT_MAX, maxBytes));
-	const int bytesRead = recv(m_Socket, buffer, maxBytes, 0);
+	maxBytes = static_cast<int>(std::min<size_t>(1, maxBytes));
+	//maxBytes = static_cast<int>(std::min<size_t>(INT_MAX, maxBytes));
+	const int bytesRead = recv(m_Socket, reinterpret_cast<char*>(buffer), maxBytes, 0);
 	if (bytesRead > 0) {
 		return bytesRead;
 	}

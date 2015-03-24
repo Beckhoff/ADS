@@ -268,7 +268,7 @@ struct TestAds : test_base < TestAds >
 
 	static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 	{
-#if 1
+#if 0
 		std::cout << std::setfill('0')
 			<< "hUser 0x" << std::hex << std::setw(4) << hUser
 			<< " sample time: " << std::dec << pNotification->nTimeStamp
@@ -284,8 +284,8 @@ struct TestAds : test_base < TestAds >
 
 		fructose_assert(0 != port);
 
-		static const size_t MAX_NOTIFICATIONS_PER_PORT = 12;// 1024;
-		static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
+		static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
+		static const size_t LEAKED_NOTIFICATIONS = 0;// MAX_NOTIFICATIONS_PER_PORT / 2;
 		uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
 		uint32_t hUser;
@@ -293,7 +293,7 @@ struct TestAds : test_base < TestAds >
 		for (hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
 			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		for (hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++hUser) {
 			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}

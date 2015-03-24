@@ -169,9 +169,10 @@ struct TestAds : test_base < TestAds >
 
 	static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
 	{
-#if 1
+#if 0
 		std::cout << std::setfill('0')
-			<< "Callback: hUser 0x" << std::hex << std::setw(4) << hUser
+			<< "hUser 0x" << std::hex << std::setw(4) << hUser
+			<< " sample time: " << std::dec << pNotification->nTimeStamp
 			<< " sample size: " << std::dec << pNotification->cbSampleSize
 			<< " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
 #endif

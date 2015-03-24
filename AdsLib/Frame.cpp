@@ -70,9 +70,9 @@ Frame& Frame::prepend(const void *const data, const size_t size)
     return *this;
 }
 
-char* Frame::rawData() const
+uint8_t* Frame::rawData() const
 {
-    return reinterpret_cast<char*>(m_Data.get());
+    return m_Data.get();
 }
 
 Frame& Frame::remove(size_t numBytes)

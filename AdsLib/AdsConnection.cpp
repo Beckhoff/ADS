@@ -87,19 +87,36 @@ void AdsConnection::Release(AdsResponse* response)
 	ready.push_back(response);
 }
 
+bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead)
+{
+	while (running && bytesToRead) {
+		const size_t bytesRead = socket.read(buffer, bytesToRead);
+		bytesToRead -= bytesRead;
+		buffer += bytesRead;
+	}
+	return running;
+}
+
 Frame& AdsConnection::ReceiveAmsTcp(Frame &frame)
 {
-	if (frame.size() < sizeof(AmsTcpHeader)) {
-		LOG_ERROR("packet to short to be AMS/TCP");
+	uint8_t header[sizeof(AmsTcpHeader)];
+	if (!Read(header, sizeof(header)))
+		return frame.clear();
+
+	size_t bytesToRead = qFromLittleEndian<uint32_t>(header + offsetof(AmsTcpHeader, length));
+	if (bytesToRead > frame.capacity()) {
+		LOG_WARN("Frame to long");
+		size_t bytesLeft = bytesToRead;
+		while (Read(frame.rawData(), bytesToRead)) {
+			bytesLeft -= bytesToRead;
+			bytesToRead = std::min<size_t>(bytesLeft, frame.capacity());
+		}
 		return frame.clear();
 	}
 
-	const auto header = frame.remove<AmsTcpHeader>();
-	if (header.length != frame.size()) {
-		LOG_ERROR("received AMS/TCP frame seems corrupt, length: " << header.length << " doesn't match: " << frame.size());
+	if (!Read(frame.rawData(), bytesToRead))
 		return frame.clear();
-	}
-	return frame;
+	return frame.limit(bytesToRead);
 }
 
 void AdsConnection::TryRecv()
@@ -114,12 +131,11 @@ void AdsConnection::TryRecv()
 
 void AdsConnection::Recv()
 {
-	static const size_t FRAME_SIZE = 1024;
+	static const size_t FRAME_SIZE = 10240;
 	Frame frame(FRAME_SIZE);
 	while (running) {
 		frame.reset(FRAME_SIZE);
-		socket.read(frame);
-		if (frame.size() > 0 && ReceiveAmsTcp(frame).size() > 0) {
+		if (ReceiveAmsTcp(frame).size() > 0) {
 			if (frame.size() >= sizeof(AoEHeader)) {
 				const auto header = frame.remove<AoEHeader>();
 

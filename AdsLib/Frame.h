@@ -74,7 +74,7 @@ struct Frame
      * Reuse the frame as response buffer, use with care!
      * @return a raw pointer to the beginning of the internal allocated buffer
      */
-    char* rawData() const;
+    uint8_t* rawData() const;
 
     /**
      * @brief remove
