@@ -52,6 +52,8 @@ private:
 	std::list<AdsResponse*> pending;
 
 	void Recv();
+	void TryRecv();
+	Frame& ReceiveAmsTcp(Frame &frame);
 	AdsResponse* GetPending(uint32_t id);
 };
 

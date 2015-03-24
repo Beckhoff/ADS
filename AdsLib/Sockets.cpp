@@ -1,6 +1,8 @@
 #include "Sockets.h"
+#include "Log.h"
 #include <algorithm>
 #include <climits>
+#include <exception>
 #include <sstream>
 #include <system_error>
 
@@ -46,24 +48,34 @@ Socket::~Socket()
     }
 }
 
-Frame& Socket::read(Frame &frame) const
+size_t Socket::read(char *buffer, size_t maxBytes) const
 {
 	timeval timeout = { 1, 0 };
 	if (!select(&timeout)) {
-        return frame.clear();
-    }
+		return 0;
+	}
 
-    const int maxBytes = static_cast<int>(std::min<size_t>(INT_MAX, frame.capacity()));
-    const int bytesRead = recv(m_Socket, frame.rawData(), maxBytes, 0);
-    if (bytesRead > 0) {
-        return frame.limit(bytesRead);
-    }
-    if (0 == bytesRead) {
-//        LOG_ERROR("connection closed by remote");
-    } else {
-//        LOG_ERROR("read frame failed with error: " << WSAGetLastError());
-    }
-    return frame.clear();
+	maxBytes = static_cast<int>(std::min<size_t>(INT_MAX, maxBytes));
+	const int bytesRead = recv(m_Socket, buffer, maxBytes, 0);
+	if (bytesRead > 0) {
+		return bytesRead;
+	}
+	if (0 == bytesRead) {
+		throw std::runtime_error("connection closed by remote");
+	}
+	else {
+		LOG_ERROR("read frame failed with error: " << WSAGetLastError());
+	}
+	return 0;
+}
+
+Frame& Socket::read(Frame &frame) const
+{
+	const size_t bytesRead = read(frame.rawData(), frame.capacity());
+	if (bytesRead) {
+		return frame.limit(bytesRead);
+	}
+	return frame.clear();
 }
 
 bool Socket::select(timeval *timeout) const
@@ -76,13 +88,13 @@ bool Socket::select(timeval *timeout) const
     /* wait for receive data */
     const int state = NATIVE_SELECT(m_Socket + 1, &readSockets, NULL, NULL, timeout);
     if(0 == state) {
-//        LOG_ERROR("select() timeout");
+        LOG_ERROR("select() timeout");
         return false;
     }
 
     /* and check if socket was correct */
     if((1 != state) || (!FD_ISSET(m_Socket, &readSockets))) {
-//        LOG_ERROR("something strange happen while waiting for socket...");
+        LOG_ERROR("something strange happen while waiting for socket...");
         return false;
     }
     return true;
@@ -91,7 +103,7 @@ bool Socket::select(timeval *timeout) const
 size_t Socket::write(const Frame &frame) const
 {
     if (frame.size() > INT_MAX) {
-//        LOG_ERROR("frame length: " << frame.size() << " exceeds maximum length for sockets");
+        LOG_ERROR("frame length: " << frame.size() << " exceeds maximum length for sockets");
         return 0;
     }
 
@@ -101,7 +113,7 @@ size_t Socket::write(const Frame &frame) const
 
     const int  status = sendto(m_Socket, buffer, bufferLength, 0, addr, sizeof(m_SockAddress));
     if (SOCKET_ERROR == status) {
-//        LOG_ERROR("read frame failed with error: " << WSAGetLastError());
+        LOG_ERROR("read frame failed with error: " << WSAGetLastError());
         return 0;
     }
     return status;
@@ -114,11 +126,11 @@ TcpSocket::TcpSocket(const IpV4 ip, const uint16_t port)
 
 uint32_t TcpSocket::Connect() const
 {
-//	const uint32_t addr = ntohl(m_SockAddress.sin_addr.s_addr);
-//	LOG_INFO("Connecting to " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.' << ((addr & 0xff00) >> 8) << '.' << (addr & 0xff));
+	const uint32_t addr = ntohl(m_SockAddress.sin_addr.s_addr);
+	LOG_INFO("Connecting to " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.' << ((addr & 0xff00) >> 8) << '.' << (addr & 0xff));
 
     if (::connect(m_Socket, reinterpret_cast<const sockaddr *>(&m_SockAddress), sizeof(m_SockAddress))) {
-//        LOG_ERROR("Connect TCP socket failed with: " << WSAGetLastError());
+        LOG_ERROR("Connect TCP socket failed with: " << WSAGetLastError());
         return 0;
     }
 
@@ -126,7 +138,7 @@ uint32_t TcpSocket::Connect() const
     socklen_t len = sizeof(source);
 
     if (getsockname(m_Socket, reinterpret_cast<sockaddr*>(&source), &len)) {
-//        LOG_ERROR("Read local tcp/ip address failed");
+        LOG_ERROR("Read local tcp/ip address failed");
         return 0;
     }
     return ntohl(source.sin_addr.s_addr);

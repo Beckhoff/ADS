@@ -1,8 +1,8 @@
 #include "AdsConnection.h"
 #include "AmsHeader.h"
 #include "AmsRouter.h"
+#include "Log.h"
 
-#include <iostream>
 AdsResponse::AdsResponse()
 	: frame(2048),
 	invokeId(0)
@@ -32,7 +32,7 @@ AdsConnection::AdsConnection(const NotificationDispatcher &__dispatcher, IpV4 de
 	}
 	socket.Connect();
 
-	receiver = std::thread(&AdsConnection::Recv, this);
+	receiver = std::thread(&AdsConnection::TryRecv, this);
 }
 
 
@@ -87,19 +87,29 @@ void AdsConnection::Release(AdsResponse* response)
 	ready.push_back(response);
 }
 
-Frame& ReceiveAmsTcp(Frame &frame)
+Frame& AdsConnection::ReceiveAmsTcp(Frame &frame)
 {
 	if (frame.size() < sizeof(AmsTcpHeader)) {
-		//LOG_ERROR("packet to short to be AMS/TCP");
+		LOG_ERROR("packet to short to be AMS/TCP");
 		return frame.clear();
 	}
 
 	const auto header = frame.remove<AmsTcpHeader>();
 	if (header.length != frame.size()) {
-		//LOG_ERROR("received AMS/TCP frame seems corrupt, length: " << header.length << " doesn't match: " << frame.size());
+		LOG_ERROR("received AMS/TCP frame seems corrupt, length: " << header.length << " doesn't match: " << frame.size());
 		return frame.clear();
 	}
 	return frame;
+}
+
+void AdsConnection::TryRecv()
+{
+	try {
+		Recv();
+	}
+	catch (std::runtime_error &e) {
+		LOG_INFO(e.what());
+	}
 }
 
 void AdsConnection::Recv()
@@ -109,7 +119,7 @@ void AdsConnection::Recv()
 	while (running) {
 		frame.reset(FRAME_SIZE);
 		socket.read(frame);
-		if (ReceiveAmsTcp(frame).size() > 0) {
+		if (frame.size() > 0 && ReceiveAmsTcp(frame).size() > 0) {
 			if (frame.size() >= sizeof(AoEHeader)) {
 				const auto header = frame.remove<AoEHeader>();
 
