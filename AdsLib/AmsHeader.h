@@ -12,7 +12,7 @@ struct AmsTcpHeader
     const uint16_t reserved;
     const uint32_t length;
 
-    AmsTcpHeader(uint32_t __length)
+    AmsTcpHeader(uint32_t __length = 0)
         : reserved(0),
           length(__length)
     {
@@ -90,6 +90,7 @@ struct AoEHeader
     static const uint16_t AMS_REQUEST = 0x0004;
     static const uint16_t AMS_RESPONSE = 0x0005;
     static const uint16_t AMS_UDP = 0x0040;
+	static const uint16_t INVALID = 0x0000;
     static const uint16_t READ_DEVICE_INFO = 0x0001;
 	static const uint16_t READ = 0x0002;
 	static const uint16_t WRITE = 0x0003;
@@ -106,18 +107,29 @@ struct AoEHeader
     const uint16_t stateFlags;
     const uint32_t length;
     const uint32_t errorCode;
-    const uint32_t invokeId;
+	const uint32_t invokeId;
+
+	AoEHeader()
+		: targetAddr({ { 0, 0, 0, 0, 0, 0 }, 0 }),
+		sourceAddr({ { 0, 0, 0, 0, 0, 0 }, 0 }),
+		cmdId(0),
+		stateFlags(0),
+		length(0),
+		errorCode(0),
+		invokeId(0)
+	{
+	}
 
 	AoEHeader(const AmsAddr &__targetAddr, const AmsAddr &__sourceAddr, uint16_t __cmdId, uint32_t __length, uint32_t __invokeId)
-        : targetAddr(__targetAddr),
-          sourceAddr(__sourceAddr),
-          cmdId(__cmdId),
-          stateFlags(AMS_REQUEST),
-          length(__length),
-          errorCode(0),
-          invokeId(__invokeId)
-    {
-    }
+		: targetAddr(__targetAddr),
+		sourceAddr(__sourceAddr),
+		cmdId(__cmdId),
+		stateFlags(AMS_REQUEST),
+		length(__length),
+		errorCode(0),
+		invokeId(__invokeId)
+	{
+	}
 
     AoEHeader(const uint8_t *frame)
         : targetAddr(frame),

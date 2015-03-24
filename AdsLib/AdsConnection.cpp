@@ -87,8 +87,9 @@ void AdsConnection::Release(AdsResponse* response)
 	ready.push_back(response);
 }
 
-bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead)
+bool AdsConnection::Read(void* __buffer, size_t bytesToRead) const
 {
+	uint8_t * buffer = reinterpret_cast<uint8_t*>(__buffer);
 	while (running && bytesToRead) {
 		const size_t bytesRead = socket.read(buffer, bytesToRead);
 		bytesToRead -= bytesRead;
@@ -97,26 +98,30 @@ bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead)
 	return running;
 }
 
-Frame& AdsConnection::ReceiveAmsTcp(Frame &frame)
+template<class T> T AdsConnection::Receive() const
 {
-	uint8_t header[sizeof(AmsTcpHeader)];
-	if (!Read(header, sizeof(header)))
-		return frame.clear();
+	uint8_t buffer[sizeof(T)];
+	if (Read(buffer, sizeof(buffer))) {
+		return T{ buffer };
+	}
+	return T{};
+}
 
-	size_t bytesToRead = qFromLittleEndian<uint32_t>(header + offsetof(AmsTcpHeader, length));
-	if (bytesToRead > frame.capacity()) {
+Frame& AdsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
+{
+	if (bytesLeft > frame.capacity()) {
 		LOG_WARN("Frame to long");
-		size_t bytesLeft = bytesToRead;
-		while (Read(frame.rawData(), bytesToRead)) {
+		size_t bytesToRead = std::min<size_t>(bytesLeft, frame.capacity());
+		while (bytesToRead && Read(frame.rawData(), bytesToRead)) {
 			bytesLeft -= bytesToRead;
 			bytesToRead = std::min<size_t>(bytesLeft, frame.capacity());
 		}
 		return frame.clear();
 	}
 
-	if (!Read(frame.rawData(), bytesToRead))
+	if (!Read(frame.rawData(), bytesLeft))
 		return frame.clear();
-	return frame.limit(bytesToRead);
+	return frame.limit(bytesLeft);
 }
 
 void AdsConnection::TryRecv()
@@ -135,13 +140,23 @@ void AdsConnection::Recv()
 	Frame frame(FRAME_SIZE);
 	while (running) {
 		frame.reset(FRAME_SIZE);
-		if (ReceiveAmsTcp(frame).size() > 0) {
-			if (frame.size() >= sizeof(AoEHeader)) {
-				const auto header = frame.remove<AoEHeader>();
+		const auto amsTcp = Receive<AmsTcpHeader>();
+		if (amsTcp.length) {
+			if (amsTcp.length < sizeof(AoEHeader)) {
+				LOG_WARN("Frame to short to be AoE");
+				uint8_t trash[sizeof(AoEHeader)];
+				Read(trash, sizeof(trash));
+			}
+			else {
+				const auto header = Receive<AoEHeader>();
+
 
 				if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
+					ReceiveFrame(frame, header.length);
 					dispatcher.Dispatch(frame, header.sourceAddr);
-				} else {
+				}
+				else {
+					ReceiveFrame(frame, header.length);
 					auto response = GetPending(header.invokeId);
 					if (response) {
 						switch (header.cmdId) {

@@ -1,6 +1,7 @@
 #ifndef _ADSCONNECTION_H_
 #define _ADSCONNECTION_H_
 
+#include "AmsHeader.h"
 #include "Sockets.h"
 #include "NotificationDispatcher.h"
 
@@ -51,10 +52,12 @@ private:
 	std::list<AdsResponse*> ready;
 	std::list<AdsResponse*> pending;
 
-	bool Read(uint8_t* buffer, size_t bytesToRead);
+	bool Read(void* buffer, size_t bytesToRead) const;
 	void Recv();
 	void TryRecv();
-	Frame& ReceiveAmsTcp(Frame &frame);
+
+	template<class T> T Receive() const;
+	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AdsResponse* GetPending(uint32_t id);
 };
 
