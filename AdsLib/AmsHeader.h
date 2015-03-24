@@ -5,6 +5,7 @@
 #include "wrap_endian.h"
 
 #include "AdsDef.h"
+#include <cstddef>
 
 #pragma pack (push, 1)
 struct AmsTcpHeader
