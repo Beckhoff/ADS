@@ -36,7 +36,7 @@ struct AmsRouter : NotificationDispatcher
 	void Dispatch(Frame &frame, AmsAddr amsAddr) const;
 
 private:
-	static const uint32_t DEFAULT_TIMEOUT = 5000;
+	static const uint32_t DEFAULT_TIMEOUT;
 	static const size_t NUM_PORTS_MAX = 8;
 	static const uint16_t PORT_BASE = 30000;
 	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");

@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-const uint32_t AmsRouter::DEFAULT_TIMEOUT;
+const uint32_t AmsRouter::DEFAULT_TIMEOUT = 5000;
 
 AmsRouter::AmsRouter()
 #ifdef WIN32
