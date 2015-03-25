@@ -172,10 +172,7 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 	request.prepend<AoERequestHeader>(readReq);
 	AoEReadResponseHeader response;
 	const long status = AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead, &response);
-	if (status) {
-		return status;
-	}
-	return response.result;
+	return status ? status : response.result;
 }
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -256,10 +253,7 @@ long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, 
 	AoEResponseHeader response;
 	uint32_t bytesRead = 0;
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE, 0, nullptr, &bytesRead, &response);
-	if (status) {
-		return status;
-	}
-	return response.result;
+	return status ? status : response.result;
 }
 
 long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer)
@@ -273,10 +267,7 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 	AoEResponseHeader response;
 	uint32_t bytesRead = 0;
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE_CONTROL, 0, nullptr, &bytesRead, &response);
-	if (status) {
-		return status;
-	}
-	return response.result;
+	return status ? status : response.result;
 }
 
 long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
@@ -315,10 +306,7 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 	AoEResponseHeader response;
 	uint32_t bytesRead = 0;
 	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION, 0, nullptr, &bytesRead, &response);
-	if (status) {
-		return status;
-	}
-	return response.result;
+	return status ? status : response.result;
 }
 
 long AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
@@ -342,18 +330,18 @@ void AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
 
 std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifications(const uint16_t port)
 {
-	std::vector<NotifyPair> orphanedNotifies{};
+	std::vector<NotifyPair> orphaned{};
 	std::unique_lock<std::mutex> lock(notificationLock);
 
 	for (const auto &mapping : tableMapping) {
 		auto &table = mapping.second.operator*();
 		for (auto it: table) {
 			if (it.second.port == port) {
-				orphanedNotifies.emplace_back(NotifyPair{ mapping.first, it.first });
+				orphaned.emplace_back(NotifyPair{ mapping.first, it.first });
 			}
 		}
 	}
-	return orphanedNotifies;
+	return orphaned;
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
