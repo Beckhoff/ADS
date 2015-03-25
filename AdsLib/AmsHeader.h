@@ -153,11 +153,15 @@ struct AoEReadResponseHeader
     const uint32_t result;
     const uint32_t readLength;
 
+	AoEReadResponseHeader()
+		: result(0),
+		readLength(0)
+	{}
+
     AoEReadResponseHeader(const uint8_t *frame)
         : result(qFromLittleEndian<uint32_t>(frame)),
           readLength(qFromLittleEndian<uint32_t>(frame + sizeof(result)))
-    {
-    }
+	{}
 };
 #pragma pack (pop)
 #endif // AMSHEADER_H

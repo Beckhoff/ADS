@@ -169,10 +169,7 @@ void AdsConnection::Recv()
 		ReceiveFrame(response->frame, header.length);
 		switch (header.cmdId) {
 		case AoEHeader::READ_DEVICE_INFO:
-			break;
 		case AoEHeader::READ:
-			response->frame.remove<AoEReadResponseHeader>();
-			break;
 		case AoEHeader::WRITE:
 		case AoEHeader::READ_STATE:
 		case AoEHeader::WRITE_CONTROL:
@@ -180,6 +177,7 @@ void AdsConnection::Recv()
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:
 			break;
 		default:
+			LOG_WARN("Unkown AMS command id");
 			response->frame.clear();
 		}
 		response->Notify();

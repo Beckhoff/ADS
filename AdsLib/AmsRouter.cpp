@@ -170,7 +170,8 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
 	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
 	request.prepend<AoERequestHeader>(readReq);
-	return AdsRequest(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead);
+	AoEReadResponseHeader header;
+	return AdsReadRequest(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead, &header);
 }
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -208,6 +209,35 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 	*adsState = qFromLittleEndian<uint16_t>(buffer + sizeof(result));
 	*devState = qFromLittleEndian<uint16_t>(buffer + sizeof(result) + sizeof(*adsState));
 	return result;
+}
+
+long AmsRouter::AdsReadRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, AoEReadResponseHeader* header)
+{
+	AmsAddr srcAddr;
+	const auto status = GetLocalAddress(port, &srcAddr);
+	if (status) {
+		return status;
+	}
+
+	auto ads = GetConnection(destAddr.netId);
+	if (!ads) {
+		return -1;
+	}
+
+	uint32_t timeout_ms;
+	GetTimeout(port, timeout_ms);
+	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
+	if (response) {
+		if (response->Wait(timeout_ms)){
+			*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(*header));
+			memcpy(header, response->frame.data(), sizeof(*header));
+			memcpy(buffer, response->frame.data() + sizeof(*header), *bytesRead);
+			ads->Release(response);
+			return 0;
+		}
+		return ADSERR_CLIENT_SYNCTIMEOUT;
+	}
+	return -1;
 }
 
 long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
