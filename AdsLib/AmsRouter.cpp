@@ -14,9 +14,7 @@ AmsRouter::AmsRouter()
 	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 })
 #endif
 {
-	for (auto& t : portTimeout) {
-		t = DEFAULT_TIMEOUT;
-	}
+	std::fill(portTimeout.begin(), portTimeout.end(), DEFAULT_TIMEOUT);
 }
 
 bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
@@ -149,7 +147,7 @@ long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 
 AdsConnection* AmsRouter::GetConnection(const AmsNetId& amsDest)
 {
-	auto it = __GetConnection(amsDest);
+	const auto it = __GetConnection(amsDest);
 	if (it == connections.end()) {
 		return nullptr;
 	}
@@ -219,10 +217,10 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 		return -1;
 	}
 
-	uint32_t timeout_ms;
-	GetTimeout(port, timeout_ms);
 	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
 	if (response) {
+		uint32_t timeout_ms;
+		GetTimeout(port, timeout_ms);
 		if (response->Wait(timeout_ms)){
 			const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
 			T header(response->frame.data());
@@ -273,8 +271,8 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 		pAttrib->nMaxDelay,
 		pAttrib->nCycleTime
 	});
-	uint8_t buffer[sizeof*pNotification];
 
+	uint8_t buffer[sizeof(*pNotification)];
 	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(buffer), buffer);
 	if (!status) {
 		*pNotification = qFromLittleEndian<uint32_t>(buffer);
@@ -286,9 +284,8 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
 	DeleteNotifyMapping(*pAddr, hNotification);
-	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsDelDeviceNotificationRequest));
-	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<AdsDelDeviceNotificationRequest>(hNotification));
-
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotification));
+	request.prepend(qToLittleEndian(hNotification));
 	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
@@ -332,7 +329,6 @@ template<class T> T extractLittleEndian(Frame& frame)
 	frame.remove(sizeof(T));
 	return value;
 }
-
 
 std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 {

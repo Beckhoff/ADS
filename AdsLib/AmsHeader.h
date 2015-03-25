@@ -86,8 +86,6 @@ private:
 	const std::array<uint8_t, 16> reserved;
 };
 
-using AdsDelDeviceNotificationRequest = uint32_t;
-
 struct AoEHeader
 {
     static const uint16_t AMS_REQUEST = 0x0004;
