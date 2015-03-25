@@ -249,7 +249,6 @@ struct TestAds : test_base < TestAds >
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
 
-		uint32_t outBuffer = 0xDEADBEEF;
 		uint16_t adsState;
 		uint16_t devState;
 

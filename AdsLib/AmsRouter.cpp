@@ -97,7 +97,7 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	for (const auto &n : CollectOrphanedNotifies(port)) {
+	for (const auto &n : CollectOrphanedNotifications(port)) {
 		DelNotification(port, &n.first, n.second);
 	}
 
@@ -340,7 +340,7 @@ void AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
 	}
 }
 
-std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifies(const uint16_t port)
+std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifications(const uint16_t port)
 {
 	std::vector<NotifyPair> orphanedNotifies{};
 	std::unique_lock<std::mutex> lock(notificationLock);
