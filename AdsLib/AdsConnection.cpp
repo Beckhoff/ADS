@@ -144,9 +144,9 @@ void AdsConnection::Recv()
 {
 	while (running) {
 		const auto amsTcp = Receive<AmsTcpHeader>();
-		if (amsTcp.length < sizeof(AoEHeader)) {
+		if (amsTcp.length() < sizeof(AoEHeader)) {
 			LOG_WARN("Frame to short to be AoE");
-			ReadJunk(amsTcp.length);
+			ReadJunk(amsTcp.length());
 			continue;
 		}
 

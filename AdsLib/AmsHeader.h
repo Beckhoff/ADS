@@ -10,20 +10,24 @@
 #pragma pack (push, 1)
 struct AmsTcpHeader
 {
-    const uint16_t reserved;
-    const uint32_t length;
+	AmsTcpHeader(const uint32_t length = 0)
+	{
+		*((uint16_t*)(&buffer[0])) = 0;
+		*((uint32_t*)(&buffer[2])) = qToLittleEndian<uint32_t>(length);
+	}
 
-    AmsTcpHeader(uint32_t __length = 0)
-        : reserved(0),
-          length(__length)
-    {
-    }
+	AmsTcpHeader(const uint8_t *frame)
+	{
+		memcpy(buffer, frame, sizeof(buffer));
+	}
 
-    AmsTcpHeader(const uint8_t *frame)
-        : reserved(qFromLittleEndian<uint16_t>(frame)),
-          length(qFromLittleEndian<uint32_t>(frame + offsetof(AmsTcpHeader, length)))
-    {
-    }
+	uint32_t length() const
+	{
+		return qFromLittleEndian<uint32_t>(buffer + sizeof(uint16_t));
+	}
+
+private:
+	uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)];
 };
 
 struct AoERequestHeader
@@ -157,6 +161,19 @@ struct AoEResponseHeader
 
 	AoEResponseHeader(const uint8_t *frame)
 		: result(qFromLittleEndian<uint32_t>(frame))
+	{}
+};
+
+struct AoEAddNotificationResponseHeader : AoEResponseHeader
+{
+	uint32_t hNotify;
+	AoEAddNotificationResponseHeader()
+		: hNotify(0)
+	{}
+
+	AoEAddNotificationResponseHeader(const uint8_t *frame)
+		: AoEResponseHeader(frame),
+		hNotify(qFromLittleEndian<uint32_t>(frame + sizeof(AoEResponseHeader)))
 	{}
 };
 

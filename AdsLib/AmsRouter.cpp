@@ -289,17 +289,16 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 		pAttrib->nCycleTime
 	});
 
-	uint8_t buffer[sizeof(*pNotification)];
-	AoEResponseHeader response;
-	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, &response, sizeof(buffer), buffer);
+	AoEAddNotificationResponseHeader response;
+	const long status = AdsRequest<AoEAddNotificationResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, &response);
 	if (status) {
 		return status;
 	}
 
-	*pNotification = qFromLittleEndian<uint32_t>(buffer);
 	if (response.result) {
 		return response.result;
 	}
+	*pNotification = response.hNotify;
 	return CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
 }
 
