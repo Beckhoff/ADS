@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+const uint32_t AmsRouter::DEFAULT_TIMEOUT;
+
 AmsRouter::AmsRouter()
 #ifdef WIN32
 	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 })
