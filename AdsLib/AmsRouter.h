@@ -51,7 +51,9 @@ private:
 	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator __GetConnection(const AmsNetId& pAddr);
 	void DeleteIfLastConnection(const AdsConnection* conn);
 	void Recv();
-	long AdsReadRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, AoEReadResponseHeader* header);
+
+	template<class T>
+	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, T* header);
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 
 	using NotifyTable = std::map < uint32_t, Notification >;

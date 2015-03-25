@@ -171,7 +171,11 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
 	request.prepend<AoERequestHeader>(readReq);
 	AoEReadResponseHeader header;
-	return AdsReadRequest(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead, &header);
+	const long status = AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead, &header);
+	if (status) {
+		return status;
+	}
+	return header.result;
 }
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -211,7 +215,8 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 	return result;
 }
 
-long AmsRouter::AdsReadRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, AoEReadResponseHeader* header)
+template <class T>
+long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, T* header)
 {
 	AmsAddr srcAddr;
 	const auto status = GetLocalAddress(port, &srcAddr);
@@ -230,7 +235,7 @@ long AmsRouter::AdsReadRequest(Frame& request, const AmsAddr& destAddr, uint16_t
 	if (response) {
 		if (response->Wait(timeout_ms)){
 			*bytesRead = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(*header));
-			memcpy(header, response->frame.data(), sizeof(*header));
+			new(header)T(response->frame.data());
 			memcpy(buffer, response->frame.data() + sizeof(*header), *bytesRead);
 			ads->Release(response);
 			return 0;
