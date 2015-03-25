@@ -168,8 +168,12 @@ std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator AmsRouter::__GetConnect
 long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
-	AoERequestHeader readReq{ indexGroup, indexOffset, bufferLength };
-	request.prepend<AoERequestHeader>(readReq);
+	request.prepend<AoERequestHeader>({
+		indexGroup,
+		indexOffset,
+		bufferLength
+	});
+
 	AoEReadResponseHeader response;
 	const long status = AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, &response, bufferLength, buffer, bytesRead);
 	return status ? status : response.result;
@@ -247,9 +251,11 @@ long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, 
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader) + bufferLength);
 	request.prepend(buffer, bufferLength);
-
-	AoERequestHeader header{ indexGroup, indexOffset, bufferLength };
-	request.prepend<AoERequestHeader>(header);
+	request.prepend<AoERequestHeader>({
+		indexGroup,
+		indexOffset,
+		bufferLength
+	});
 
 	AoEResponseHeader response;
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE, &response);
@@ -260,9 +266,11 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsWriteCtrlRequest) + bufferLength);
 	request.prepend(buffer, bufferLength);
-
-	AdsWriteCtrlRequest header{ adsState, devState, bufferLength };
-	request.prepend<AdsWriteCtrlRequest>(header);
+	request.prepend<AdsWriteCtrlRequest>({
+		adsState,
+		devState,
+		bufferLength
+	});
 
 	AoEResponseHeader response;
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::WRITE_CONTROL, &response);
@@ -272,7 +280,7 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsAddDeviceNotificationRequest));
-	request.prepend<AdsAddDeviceNotificationRequest>(AdsAddDeviceNotificationRequest{
+	request.prepend<AdsAddDeviceNotificationRequest>({
 		indexGroup,
 		indexOffset,
 		pAttrib->cbLength,
