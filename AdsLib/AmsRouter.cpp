@@ -19,37 +19,18 @@ AmsRouter::AmsRouter()
 
 bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
-	//TODO refactor using the mapping::operator[]
 	std::lock_guard<std::mutex> lock(mutex);
-	auto route = mapping.find(ams);
+	const auto oldConnection = GetConnection(ams);
 	const auto& conn = connections.find(ip);
 
-	if (route == mapping.end()) {
-		if (conn == connections.end()) {
-			// new route and connection
-			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
-			mapping[ams] = connections[ip].get();
-		}
-		else {
-			//new route to known ip
-			mapping[ams] = conn->second.get();
-		}
+	if (conn == connections.end()) {
+		connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
+		mapping[ams] = connections[ip].get();
 	}
 	else {
-		if (route->second->destIp == ip) {
-			// route already exists
-			return true;
-		}
-		auto oldConnection = route->second;
-		if (conn == connections.end()) {
-			connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
-			route->second = connections[ip].get();
-		}
-		else {
-			route->second = conn->second.get();
-		}
-		DeleteIfLastConnection(oldConnection);
+		mapping[ams] = conn->second.get();
 	}
+	DeleteIfLastConnection(oldConnection);	
 	return true;
 }
 
@@ -68,12 +49,14 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
 
 void AmsRouter::DeleteIfLastConnection(const AdsConnection* conn)
 {
-	for (const auto& r : mapping) {
-		if (r.second == conn) {
-			return;
+	if (conn) {
+		for (const auto& r : mapping) {
+			if (r.second == conn) {
+				return;
+			}
 		}
+		connections.erase(conn->destIp);
 	}
-	connections.erase(conn->destIp);
 }
 
 uint16_t AmsRouter::OpenPort()
