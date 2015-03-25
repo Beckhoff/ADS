@@ -166,19 +166,6 @@ struct AoEResponseHeader
 
 };
 
-struct AoEAddNotificationResponseHeader : AoEResponseHeader
-{
-	const uint32_t hNotify;
-	AoEAddNotificationResponseHeader()
-		: hNotify(0)
-	{}
-
-	AoEAddNotificationResponseHeader(const uint8_t *frame)
-		: AoEResponseHeader(frame),
-		hNotify(qFromLittleEndian<uint32_t>(frame + sizeof(AoEResponseHeader)))
-	{}
-};
-
 struct AoEReadResponseHeader : AoEResponseHeader
 {
     const uint32_t readLength;
