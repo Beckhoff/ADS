@@ -177,8 +177,6 @@ void AdsConnection::Recv()
 		case AoEHeader::WRITE:
 			break;
 		case AoEHeader::READ_STATE:
-			response->frame.remove(sizeof(uint32_t));
-			break;
 		case AoEHeader::WRITE_CONTROL:
 		case AoEHeader::ADD_DEVICE_NOTIFICATION:
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:

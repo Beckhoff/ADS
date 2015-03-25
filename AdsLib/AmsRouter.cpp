@@ -194,7 +194,7 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
-	uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
+	uint8_t buffer[sizeof(uint32_t) + sizeof(*adsState) + sizeof(*devState)];
 	uint32_t bytesRead;
 
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_STATE, sizeof(buffer), buffer, &bytesRead);
@@ -202,9 +202,10 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 		return status;
 	}
 
-	*adsState = qFromLittleEndian<uint16_t>(buffer + 0);
-	*devState = qFromLittleEndian<uint16_t>(buffer + 2);
-	return 0;
+	const auto result = qFromLittleEndian<uint32_t>(buffer);
+	*adsState = qFromLittleEndian<uint16_t>(buffer + sizeof(result));
+	*devState = qFromLittleEndian<uint16_t>(buffer + sizeof(result) + sizeof(*adsState));
+	return result;
 }
 
 long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
