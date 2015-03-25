@@ -178,6 +178,7 @@ struct TestAds : test_base < TestAds >
 
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 			fructose_loop_assert(i, 0 == buffer);
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
@@ -235,6 +236,7 @@ struct TestAds : test_base < TestAds >
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 			fructose_loop_assert(i, outBuffer == buffer);
 			outBuffer = ~outBuffer;
 		}
