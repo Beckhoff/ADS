@@ -173,7 +173,7 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 		indexOffset,
 		bufferLength
 	});
-	return AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead).result();
+	return AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead);
 }
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -182,7 +182,7 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
 	uint8_t buffer[sizeof(*version) + NAME_LENGTH];
 
-	const auto status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer), buffer).result();
+	const auto status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer), buffer);
 	if (!status) {
 		version->version = buffer[0];
 		version->revision = buffer[1];
@@ -197,7 +197,7 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
 	uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
 
-	const auto status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::READ_STATE, sizeof(buffer), buffer).result();
+	const auto status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::READ_STATE, sizeof(buffer), buffer);
 	if (!status) {
 		*adsState = qFromLittleEndian<uint16_t>(buffer);
 		*devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
@@ -206,17 +206,17 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 }
 
 template <class T>
-AmsResponse<T> AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
+long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {
 	AmsAddr srcAddr;
 	const auto status = GetLocalAddress(port, &srcAddr);
 	if (status) {
-		return AmsResponse<T>(status);
+		return status;
 	}
 
 	auto ads = GetConnection(destAddr.netId);
 	if (!ads) {
-		return AmsResponse<T>(-1);
+		return -1;
 	}
 
 	uint32_t timeout_ms;
@@ -231,11 +231,11 @@ AmsResponse<T> AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, ui
 				*bytesRead = bytesAvailable;
 			}
 			ads->Release(response);
-			return AmsResponse<T>(header);
+			return header.result;
 		}
-		return AmsResponse<T>(ADSERR_CLIENT_SYNCTIMEOUT);
+		return ADSERR_CLIENT_SYNCTIMEOUT;
 	}
-	return AmsResponse<T>(-1);
+	return -1;
 }
 
 long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
@@ -247,7 +247,7 @@ long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, 
 		indexOffset,
 		bufferLength
 	});
-	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::WRITE).result();
+	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::WRITE);
 }
 
 long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsState, uint16_t devState, uint32_t bufferLength, const void* buffer)
@@ -259,7 +259,7 @@ long AmsRouter::WriteControl(uint16_t port, const AmsAddr* pAddr, uint16_t adsSt
 		devState,
 		bufferLength
 	});
-	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::WRITE_CONTROL).result();
+	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::WRITE_CONTROL);
 }
 
 long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification)
@@ -275,7 +275,7 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 	});
 	uint8_t buffer[sizeof*pNotification];
 
-	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(buffer), buffer).result();
+	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(buffer), buffer);
 	if (!status) {
 		*pNotification = qFromLittleEndian<uint32_t>(buffer);
 		CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
@@ -289,7 +289,7 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsDelDeviceNotificationRequest));
 	request.prepend<AdsDelDeviceNotificationRequest>(qToLittleEndian<AdsDelDeviceNotificationRequest>(hNotification));
 
-	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION).result();
+	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
 void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)

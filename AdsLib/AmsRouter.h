@@ -12,27 +12,6 @@
 #include <thread>
 #include <vector>
 
-template <class T> struct AmsResponse
-{
-	AmsResponse(long __status)
-		: status(__status)
-	{}
-
-	AmsResponse(T header)
-		: status(0),
-		response(header)
-	{}
-
-	long result() const
-	{
-		return status ? status : response.result;
-	}
-
-private:
-	const long status;
-	T response;
-};
-
 struct AmsRouter : NotificationDispatcher
 {
 	AmsRouter();
@@ -74,7 +53,7 @@ private:
 	void Recv();
 
 	template<class T>
-	AmsResponse<T> AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr);
+	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr);
 
 	using NotifyTable = std::map < uint32_t, Notification >;
 	using NotifyPair = std::pair < AmsAddr, uint32_t >;
