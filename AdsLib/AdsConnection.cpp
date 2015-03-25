@@ -169,13 +169,11 @@ void AdsConnection::Recv()
 		ReceiveFrame(response->frame, header.length);
 		switch (header.cmdId) {
 		case AoEHeader::READ_DEVICE_INFO:
-			response->frame.remove(sizeof(uint32_t));
 			break;
 		case AoEHeader::READ:
 			response->frame.remove<AoEReadResponseHeader>();
 			break;
 		case AoEHeader::WRITE:
-			break;
 		case AoEHeader::READ_STATE:
 		case AoEHeader::WRITE_CONTROL:
 		case AoEHeader::ADD_DEVICE_NOTIFICATION:

@@ -175,8 +175,9 @@ long AmsRouter::Read(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, u
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
 {
+	static const size_t NAME_LENGTH = 16;
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader));
-	uint8_t buffer[sizeof(*version) + 16];
+	uint8_t buffer[sizeof(uint32_t) + sizeof(*version) + NAME_LENGTH];
 	uint32_t bytesRead;
 
 	const long status = AdsRequest(request, *pAddr, port, AoEHeader::READ_DEVICE_INFO, sizeof(buffer), buffer, &bytesRead);
@@ -184,11 +185,12 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 		return status;
 	}
 
-	version->version = buffer[0];
-	version->revision = buffer[1];
-	version->build = qFromLittleEndian<uint16_t>(buffer + 2);
-	memcpy(devName, buffer + sizeof(*version), sizeof(buffer) - sizeof(*version));
-	return 0;
+	const auto result = qFromLittleEndian<uint32_t>(buffer);
+	version->version = buffer[sizeof(uint32_t) + 0];
+	version->revision = buffer[sizeof(uint32_t) + 1];
+	version->build = qFromLittleEndian<uint16_t>(buffer + sizeof(uint32_t) + 2);
+	memcpy(devName, buffer + sizeof(uint32_t) + sizeof(*version), NAME_LENGTH);
+	return result;
 }
 
 long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
