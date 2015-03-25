@@ -20,16 +20,14 @@ AmsRouter::AmsRouter()
 bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	const auto oldConnection = GetConnection(ams);
-	const auto& conn = connections.find(ip);
 
+	const auto oldConnection = GetConnection(ams);
+	auto conn = connections.find(ip);
 	if (conn == connections.end()) {
-		connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip }));
-		mapping[ams] = connections[ip].get();
+		conn = connections.emplace(ip, std::unique_ptr<AdsConnection>(new AdsConnection{ *this, ip })).first;
 	}
-	else {
-		mapping[ams] = conn->second.get();
-	}
+
+	mapping[ams] = conn->second.get();
 	DeleteIfLastConnection(oldConnection);	
 	return true;
 }
@@ -37,12 +35,11 @@ bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 void AmsRouter::DelRoute(const AmsNetId& ams)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto route = mapping.find(ams);
 
+	auto route = mapping.find(ams);
 	if (route != mapping.end()) {
 		const AdsConnection* conn = route->second;
 		mapping.erase(route);
-
 		DeleteIfLastConnection(conn);
 	}
 }
