@@ -148,6 +148,18 @@ struct AoEHeader
 
 using AoEWriteResponseHeader = uint32_t;
 
+struct AoEResponseHeader
+{
+	uint32_t result;
+	AoEResponseHeader()
+		: result(0)
+	{}
+
+	AoEResponseHeader(const uint8_t *frame)
+		: result(qFromLittleEndian<uint32_t>(frame))
+	{}
+};
+
 struct AoEReadResponseHeader
 {
     const uint32_t result;

@@ -54,7 +54,6 @@ private:
 
 	template<class T>
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead, T* header);
-	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead);
 
 	using NotifyTable = std::map < uint32_t, Notification >;
 	using NotifyPair = std::pair < AmsAddr, uint32_t >;
