@@ -85,6 +85,22 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, 0 == buffer);
 		}
 
+		// provide out of range port
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadReqEx2(0, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide nullptr to AmsAddr
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadReqEx2(port, nullptr, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide unknown AmsAddr
+		bytesRead = 0xDEADBEEF;
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
 		// provide nullptr to bytesRead
 		buffer = 0xDEADBEEF;
 		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, nullptr));
@@ -98,6 +114,7 @@ struct TestAds : test_base < TestAds >
 		bytesRead = 0xDEADBEEF;
 		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, 0, &buffer, &bytesRead));
 		fructose_assert(0 == bytesRead);
+		//TODO is this a bug? Shouldn't the request fail with ADSERR_DEVICE_INVALIDSIZE?
 
 		// provide invalid indexGroup
 		bytesRead = 0xDEADBEEF;
@@ -107,22 +124,6 @@ struct TestAds : test_base < TestAds >
 		// provide invalid indexOffset
 		bytesRead = 0xDEADBEEF;
 		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncReadReqEx2(port, &server, 0x4025, 0x10000, sizeof(buffer), &buffer, &bytesRead));
-		fructose_assert(0 == bytesRead);
-
-		// provide out of range port
-		bytesRead = 0xDEADBEEF;
-		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadReqEx2(0, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
-
-		// provide nullptr to AmsAddr
-		bytesRead = 0xDEADBEEF;
-		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadReqEx2(0, nullptr, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
-
-		// provide unknown AmsAddr
-		bytesRead = 0xDEADBEEF;
-		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-		fructose_assert(0x7 == AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
 		fructose_assert(0 == bytesRead);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
@@ -143,13 +144,22 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, 1101 == version.build);
 			fructose_loop_assert(i, 0 == strncmp(devName, NAME, sizeof(NAME)));
 		}
-#if 0
-		long status = AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead);
-		out << "Status: 0x" << std::hex << status << '\n';
-		out << "Status: 0x" << std::hex << 0x00000007 << '\n';
-		out << "buffer: 0x" << std::hex << buffer << '\n';
-		out << "bytesRead: " << std::dec << bytesRead << '\n';
-#endif
+
+		// provide out of range port
+		AdsVersion version{ 0, 0, 0 };
+		char devName[16 + 1]{};
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadDeviceInfoReqEx(0, &server, devName, &version));
+
+		// provide nullptr to AmsAddr
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadDeviceInfoReqEx(port, nullptr, devName, &version));
+
+		// provide unknown AmsAddr
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
+
+		// provide nullptr to devName/version
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, nullptr, &version));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, devName, nullptr));
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -159,27 +169,38 @@ struct TestAds : test_base < TestAds >
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
 
-
 		uint16_t adsState;
 		uint16_t devState;
 		fructose_assert(0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
 		fructose_assert(ADSSTATE_RUN == adsState);
 		fructose_assert(0 == devState);
-		fructose_assert(0 == AdsPortCloseEx(port));
 
-		out << "AdsSyncReadStateReqEx() adsState: " << (int)adsState
-			<< " device: " << (int)devState << '\n';
+		// provide out of range port
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadStateReqEx(0, &server, &adsState, &devState));
+
+		// provide nullptr to AmsAddr
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadStateReqEx(port, nullptr, &adsState, &devState));
+
+		// provide unknown AmsAddr
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
+
+		// provide nullptr to adsState/devState
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, nullptr, &devState));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, &adsState, nullptr));
+		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
 	void testAdsReadWriteReqEx2(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		char handleName[] = "MAIN.byByte";
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
 
 		uint32_t hHandle;
 		unsigned long bytesRead;
-		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, 11, "MAIN.byByte", &bytesRead));
+		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, sizeof(handleName), handleName, &bytesRead));
 		fructose_assert(sizeof(hHandle) == bytesRead);
 
 		uint32_t buffer;
@@ -192,6 +213,60 @@ struct TestAds : test_base < TestAds >
 			outBuffer = ~outBuffer;
 		}
 		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
+
+		// provide out of range port
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadWriteReqEx2(0, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide nullptr to AmsAddr
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadWriteReqEx2(port, nullptr, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide unknown AmsAddr
+		bytesRead = 0xDEADBEEF;
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncReadWriteReqEx2(port, &unknown, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide nullptr to bytesRead
+		buffer = 0xDEADBEEF;
+		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), handleName, nullptr));
+		fructose_assert(0xDEADBEEF != buffer);
+
+		// provide nullptr to readBuffer
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), nullptr, sizeof(handleName), handleName, nullptr));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), nullptr, sizeof(handleName), handleName, &bytesRead));
+
+		// provide 0 length readBuffer
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_INVALIDSIZE == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, 0, &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide nullptr to writeBuffer
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), nullptr, nullptr));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName), nullptr, &bytesRead));
+
+		// provide 0 length writeBuffer
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 0, handleName, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide invalid writeBuffer
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 3, "xxx", &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide invalid indexGroup
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncReadWriteReqEx2(port, &server, 0, 0, sizeof(buffer), &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide invalid indexOffset
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncReadWriteReqEx2(port, &server, 0x4025, 0x10000, sizeof(buffer), &buffer, sizeof(handleName), handleName, &bytesRead));
+		fructose_assert(0 == bytesRead);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -216,6 +291,8 @@ struct TestAds : test_base < TestAds >
 		uint32_t defaultValue = 0;
 		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(defaultValue), &defaultValue));
 		fructose_assert(0 == AdsPortCloseEx(port));
+
+		//out << "status: 0x" << std::hex << status << '\n';
 	}
 
 	void testAdsWriteControlReqEx(const std::string&)
