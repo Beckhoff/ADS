@@ -185,6 +185,11 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 	return status;
 }
 
+long AmsRouter::ReadWrite(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, void* readData, uint32_t writeLength, const void* writeData, uint32_t *bytesRead)
+{
+	return -1;
+}
+
 template <class T>
 long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {

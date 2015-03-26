@@ -68,6 +68,15 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
 	return router.ReadState((uint16_t)port, pAddr, adsState, devState);
 }
 
+long AdsSyncReadWriteReqEx2(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, void* readData, uint32_t writeLength, const void* writeData, uint32_t *bytesRead)
+{
+	ASSERT_PORT(port);
+	if (!pAddr || !readLength || !readData || !writeLength || !writeData || !bytesRead) {
+		return ADSERR_DEVICE_INVALIDPARM;
+	}
+	return router.ReadWrite((uint16_t)port, pAddr, indexGroup, indexOffset, readLength, readData, writeLength, writeData, bytesRead);
+}
+
 long AdsSyncWriteReqEx(long port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
 {
 	ASSERT_PORT(port);

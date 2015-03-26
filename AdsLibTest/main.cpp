@@ -221,6 +221,30 @@ struct TestAds : test_base < TestAds >
 			<< " device: " << (int)devState << '\n';
 	}
 
+	void testAdsReadWriteReqEx2(const std::string&)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+
+		uint32_t hHandle;
+		uint32_t bytesRead;
+		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, 11, "MAIN.byByte", &bytesRead));
+		fructose_assert(sizeof(hHandle) == bytesRead);
+
+		uint32_t outBuffer = 0xDEADBEEF;
+		uint32_t buffer;
+		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+			fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port, &server, 0xF005, hHandle, sizeof(outBuffer), &outBuffer));
+			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0xF005, hHandle, sizeof(buffer), &buffer, &bytesRead));
+			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
+			fructose_loop_assert(i, outBuffer == buffer);
+			outBuffer = ~outBuffer;
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
 	void testAdsWriteReqEx(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -341,11 +365,11 @@ int main()
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
+	adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-	// ReadWrite
 	adsTest.run();
 
 	std::cout << "Hit ENTER to continue\n";
