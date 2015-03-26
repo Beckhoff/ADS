@@ -175,6 +175,7 @@ void AdsConnection::Recv()
 		case AoEHeader::WRITE_CONTROL:
 		case AoEHeader::ADD_DEVICE_NOTIFICATION:
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:
+		case AoEHeader::READ_WRITE:
 			break;
 		default:
 			LOG_WARN("Unkown AMS command id");

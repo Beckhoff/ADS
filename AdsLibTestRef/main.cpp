@@ -76,7 +76,6 @@ struct TestAds : test_base < TestAds >
 
 		unsigned long bytesRead;
 		uint32_t buffer;
-
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
 			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
@@ -128,14 +127,13 @@ struct TestAds : test_base < TestAds >
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
 
-
 		uint32_t hHandle;
 		unsigned long bytesRead;
 		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, 11, "MAIN.byByte", &bytesRead));
 		fructose_assert(sizeof(hHandle) == bytesRead);
 
-		uint32_t outBuffer = 0xDEADBEEF;
 		uint32_t buffer;
+		uint32_t outBuffer = 0xDEADBEEF;
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port, &server, 0xF005, hHandle, sizeof(outBuffer), &outBuffer));
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0xF005, hHandle, sizeof(buffer), &buffer, &bytesRead));
@@ -143,6 +141,7 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, outBuffer == buffer);
 			outBuffer = ~outBuffer;
 		}
+		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -157,7 +156,6 @@ struct TestAds : test_base < TestAds >
 		unsigned long bytesRead;
 		uint32_t buffer;
 		uint32_t outBuffer = 0xDEADBEEF;
-
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
@@ -178,7 +176,6 @@ struct TestAds : test_base < TestAds >
 
 		uint16_t adsState;
 		uint16_t devState;
-
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_STOP, 0, 0, nullptr));
 			fructose_loop_assert(i, 0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
