@@ -543,7 +543,7 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 == timeout);
 
 		// provide nullptr to timeout
-		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncGetTimeoutEx(0, nullptr));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncGetTimeoutEx(port, nullptr));
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };

@@ -82,7 +82,7 @@ long AmsRouter::ClosePort(uint16_t port)
 	}
 
 	std::lock_guard<std::mutex> lock(mutex);
-	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports.test(port - PORT_BASE)) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
 	ports.reset(port - PORT_BASE);
@@ -200,6 +200,9 @@ long AmsRouter::ReadWrite(uint16_t port, const AmsAddr* pAddr, uint32_t indexGro
 template <class T>
 long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength, void* buffer, uint32_t *bytesRead)
 {
+	if (bytesRead) {
+		*bytesRead = 0;
+	}
 	AmsAddr srcAddr;
 	const auto status = GetLocalAddress(port, &srcAddr);
 	if (status) {
@@ -208,7 +211,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 
 	auto ads = GetConnection(destAddr.netId);
 	if (!ads) {
-		return -1;
+		return GLOBALERR_MISSING_ROUTE;
 	}
 
 	AdsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
@@ -277,7 +280,9 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	DeleteNotifyMapping(*pAddr, hNotification);
+	if (!DeleteNotifyMapping(*pAddr, hNotification)) {
+		return ADSERR_CLIENT_REMOVEHASH;
+	}
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotification));
 	request.prepend(qToLittleEndian(hNotification));
 	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
@@ -291,14 +296,15 @@ void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificatio
 	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
 }
 
-void AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
+bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
 {
 	std::lock_guard<std::mutex> lock(notificationLock);
 
 	auto table = tableMapping.find(addr);
 	if (table != tableMapping.end()) {
-		table->second->erase(hNotify);
+		return table->second->erase(hNotify);
 	}
+	return false;
 }
 
 std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifications(const uint16_t port)
