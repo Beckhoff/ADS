@@ -186,13 +186,13 @@ long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsStat
 
 long AmsRouter::ReadWrite(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, void* readData, uint32_t writeLength, const void* writeData, uint32_t *bytesRead)
 {
-	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader) + sizeof(uint32_t) + writeLength);
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoEReadWriteReqHeader) + writeLength);
 	request.prepend(writeData, writeLength);
-	request.prepend<uint32_t>(writeLength);
-	request.prepend<AoERequestHeader>({
+	request.prepend<AoEReadWriteReqHeader>({
 		indexGroup,
 		indexOffset,
-		readLength
+		readLength,
+		writeLength
 	});
 	return AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ_WRITE, readLength, readData, bytesRead);
 }

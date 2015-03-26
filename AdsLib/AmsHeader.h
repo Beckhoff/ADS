@@ -50,6 +50,16 @@ private:
 	uint32_t leLength;
 };
 
+struct AoEReadWriteReqHeader : AoERequestHeader
+{
+	AoEReadWriteReqHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, uint32_t writeLength)
+		: AoERequestHeader(indexGroup, indexOffset, readLength),
+		leWriteLength(qToLittleEndian(writeLength))
+	{}
+private:
+	const uint32_t leWriteLength;
+};
+
 struct AdsWriteCtrlRequest
 {
 	AdsWriteCtrlRequest(uint16_t ads, uint16_t dev, uint32_t dataLength)
