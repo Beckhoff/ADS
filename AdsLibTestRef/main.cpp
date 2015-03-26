@@ -288,11 +288,37 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, outBuffer == buffer);
 			outBuffer = ~outBuffer;
 		}
+
+		// provide out of range port
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncWriteReqEx(0, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+
+		// provide nullptr to AmsAddr
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncWriteReqEx(port, nullptr, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+
+		// provide unknown AmsAddr
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+
+		// provide nullptr to writeBuffer
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), nullptr));
+
+		// provide 0 length writeBuffer
+		outBuffer = 0xDEADBEEF;
+		buffer = 0;
+		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, 0, &buffer));
+		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(outBuffer == buffer);
+
+		// provide invalid indexGroup
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncWriteReqEx(port, &server, 0, 0, sizeof(outBuffer), &outBuffer));
+
+		// provide invalid indexOffset
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncWriteReqEx(port, &server, 0x4025, 0x10000, sizeof(outBuffer), &outBuffer));
+
 		uint32_t defaultValue = 0;
 		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(defaultValue), &defaultValue));
 		fructose_assert(0 == AdsPortCloseEx(port));
-
-		//out << "status: 0x" << std::hex << status << '\n';
 	}
 
 	void testAdsWriteControlReqEx(const std::string&)
@@ -314,6 +340,8 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, 0 == devState);
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
+
+		//out << "status: 0x" << std::hex << status << '\n';
 	}
 
 	static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
