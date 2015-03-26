@@ -16,7 +16,7 @@ using namespace fructose;
 
 void print(const AmsAddr &addr, std::ostream &out)
 {
-	out << "AmsAddr: "
+	out << "AmsAddr: " << std::dec
 		<< (int)addr.netId.b[0] << '.' << (int)addr.netId.b[1] << '.' << (int)addr.netId.b[2] << '.'
 		<< (int)addr.netId.b[3] << '.' << (int)addr.netId.b[4] << '.' << (int)addr.netId.b[5] << ':'
 		<< addr.port << '\n';
@@ -64,6 +64,9 @@ struct TestAds : test_base < TestAds >
 				fructose_loop_assert(i, !AdsPortCloseEx(port[i]));
 			}
 		}
+
+		// close an already closed port()
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsPortCloseEx(port[0]));
 	}
 
 	void testAdsReadReqEx2(const std::string&)
@@ -81,6 +84,46 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 			fructose_loop_assert(i, 0 == buffer);
 		}
+
+		// provide nullptr to bytesRead
+		buffer = 0xDEADBEEF;
+		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, nullptr));
+		fructose_assert(0 == buffer);
+
+		// provide nullptr to buffer
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), nullptr, nullptr));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), nullptr, &bytesRead));
+
+		// provide 0 length buffer
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, 0, &buffer, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide invalid indexGroup
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncReadReqEx2(port, &server, 0, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide invalid indexOffset
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncReadReqEx2(port, &server, 0x4025, 0x10000, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0 == bytesRead);
+
+		// provide out of range port
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadReqEx2(0, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide nullptr to AmsAddr
+		bytesRead = 0xDEADBEEF;
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadReqEx2(0, nullptr, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+
+		// provide unknown AmsAddr
+		bytesRead = 0xDEADBEEF;
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+		fructose_assert(0 == bytesRead);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
@@ -100,6 +143,13 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, 1101 == version.build);
 			fructose_loop_assert(i, 0 == strncmp(devName, NAME, sizeof(NAME)));
 		}
+#if 0
+		long status = AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead);
+		out << "Status: 0x" << std::hex << status << '\n';
+		out << "Status: 0x" << std::hex << 0x00000007 << '\n';
+		out << "buffer: 0x" << std::hex << buffer << '\n';
+		out << "bytesRead: " << std::dec << bytesRead << '\n';
+#endif
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
