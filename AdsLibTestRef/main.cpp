@@ -339,9 +339,29 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, ADSSTATE_RUN == adsState);
 			fructose_loop_assert(i, 0 == devState);
 		}
-		fructose_assert(0 == AdsPortCloseEx(port));
 
-		//out << "status: 0x" << std::hex << status << '\n';
+		// provide out of range port
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncWriteControlReqEx(0, &server, ADSSTATE_STOP, 0, 0, nullptr));
+
+		// provide nullptr to AmsAddr
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncWriteControlReqEx(port, nullptr, ADSSTATE_STOP, 0, 0, nullptr));
+
+		// provide unknown AmsAddr
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncWriteControlReqEx(port, &unknown, ADSSTATE_STOP, 0, 0, nullptr));
+
+		// provide invalid adsState
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_INVALID, 0, 0, nullptr));
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_MAXSTATES, 0, 0, nullptr));
+
+		// provide invalid devState
+		// TODO find correct parameters for this test
+
+		// provide trash buffer
+		uint8_t buffer[10240]{};
+		fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_STOP, 0, sizeof(buffer), buffer));
+		fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_RUN, 0, sizeof(buffer), buffer));
+		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
 	static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
@@ -366,8 +386,33 @@ struct TestAds : test_base < TestAds >
 		static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
 		unsigned long notification[MAX_NOTIFICATIONS_PER_PORT];
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
-		unsigned long hUser;
+		unsigned long hUser = 0xDEADBEEF;
 
+		// provide out of range port
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+
+		// provide nullptr to AmsAddr
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+
+		// provide unknown AmsAddr
+		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
+		fructose_assert(0x7 == AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+
+		// provide invalid indexGroup
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+
+		// provide invalid indexOffset
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+
+		// provide nullptr to attrib/callback/hNotification
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, nullptr, &NotifyCallback, hUser, &notification[0]));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, nullptr, hUser, &notification[0]));
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, nullptr));
+
+		// delete nonexisting notification
+		fructose_assert(ADSERR_CLIENT_REMOVEHASH == AdsSyncDelDeviceNotificationReqEx(port, &server, 0xDEADBEEF));
+
+		// normal test
 		for (hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
 			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
@@ -380,7 +425,6 @@ struct TestAds : test_base < TestAds >
 
 	void testAdsTimeout(const std::string&)
 	{
-		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
 		const long port = AdsPortOpenEx();
 		long timeout;
 
@@ -392,6 +436,15 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 == AdsSyncGetTimeoutEx(port, &timeout));
 		fructose_assert(1000 == timeout);
 		fructose_assert(0 == AdsSyncSetTimeoutEx(port, 5000));
+
+		timeout = 0;
+		// provide out of range port
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncGetTimeoutEx(0, &timeout));
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncSetTimeoutEx(0, 2000));
+		fructose_assert(0 == timeout);
+
+		// provide nullptr to timeout
+		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncGetTimeoutEx(0, nullptr));
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };
