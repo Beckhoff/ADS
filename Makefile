@@ -1,7 +1,12 @@
-CC = gcc
 
 VPATH = AdsLib
-LIBS = -lpthread -lc++
+LIBS = -lpthread
+CC = gcc
+
+ifeq ($(shell uname),Darwin)
+CC = clang
+LIBS += -lc++
+endif
 
 all: AdsLibTest.bin
 
