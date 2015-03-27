@@ -1,5 +1,5 @@
-#ifndef _ADSCONNECTION_H_
-#define _ADSCONNECTION_H_
+#ifndef _AMSCONNECTION_H_
+#define _AMSCONNECTION_H_
 
 #include "AmsHeader.h"
 #include "Sockets.h"
@@ -13,12 +13,12 @@
 
 
 
-struct AdsResponse
+struct AmsResponse
 {
 	Frame frame;
 	uint32_t invokeId;
 
-	AdsResponse();
+	AmsResponse();
 	void Notify();
 
 	// return true if notified before timeout
@@ -28,17 +28,14 @@ private:
 	std::condition_variable cv;
 };
 
-struct AdsConnection
+struct AmsConnection
 {
-	AdsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
-	~AdsConnection();
+	AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
+	~AmsConnection();
 
-	AdsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
-	void Release(AdsResponse* response);
+	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
+	void Release(AmsResponse* response);
 
-
-
-	
 	const IpV4 destIp;
 private:
 	NotificationDispatcher &dispatcher;
@@ -48,9 +45,9 @@ private:
 	std::thread receiver;
 	bool running = true;
 
-	std::array<AdsResponse, 16> responses;
-	std::list<AdsResponse*> ready;
-	std::list<AdsResponse*> pending;
+	std::array<AmsResponse, 16> responses;
+	std::list<AmsResponse*> ready;
+	std::list<AmsResponse*> pending;
 
 	void ReadJunk(size_t bytesToRead) const;
 	bool Read(uint8_t* buffer, size_t bytesToRead) const;
@@ -59,7 +56,7 @@ private:
 
 	template<class T> T Receive() const;
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
-	AdsResponse* GetPending(uint32_t id);
+	AmsResponse* GetPending(uint32_t id);
 };
 
-#endif /* #ifndef _ADSCONNECTION_H_ */
+#endif /* #ifndef _AMSCONNECTION_H_ */

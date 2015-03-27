@@ -68,7 +68,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AdsConnection.h" />
+    <ClInclude Include="AmsConnection.h" />
     <ClInclude Include="AdsDef.h" />
     <ClInclude Include="AdsLib.h" />
     <ClInclude Include="AdsNotification.h" />
@@ -83,7 +83,7 @@
     <ClInclude Include="wrap_socket.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AdsConnection.cpp" />
+    <ClCompile Include="AmsConnection.cpp" />
     <ClCompile Include="AdsLib.cpp" />
     <ClCompile Include="AmsRouter.cpp" />
     <ClCompile Include="Frame.cpp" />

@@ -1,27 +1,27 @@
-#include "AdsConnection.h"
+#include "AmsConnection.h"
 #include "AmsHeader.h"
 #include "AmsRouter.h"
 #include "Log.h"
 
-AdsResponse::AdsResponse()
+AmsResponse::AmsResponse()
 	: frame(4096),
 	invokeId(0)
 {
 }
 
-void AdsResponse::Notify()
+void AmsResponse::Notify()
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	cv.notify_one();
 }
 
-bool AdsResponse::Wait(uint32_t timeout_ms)
+bool AmsResponse::Wait(uint32_t timeout_ms)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
-AdsConnection::AdsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
+AmsConnection::AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
 	: dispatcher(__dispatcher),
 	destIp(destIp),
 	socket(destIp, 48898),
@@ -32,17 +32,17 @@ AdsConnection::AdsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
 	}
 	socket.Connect();
 
-	receiver = std::thread(&AdsConnection::TryRecv, this);
+	receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 
 
-AdsConnection::~AdsConnection()
+AmsConnection::~AmsConnection()
 {
 	running = false;
 	receiver.join();
 }
 
-AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
+AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
 {
 	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), ++invokeId };
 	request.prepend<AoEHeader>(aoeHeader);
@@ -58,10 +58,10 @@ AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 
 	auto response = ready.back();
 	ready.pop_back();
-	
+
 	response->invokeId = aoeHeader.invokeId;
 	response->frame.clear();
-	
+
 	if (request.size() != socket.write(request)) {
 		return nullptr;
 	}
@@ -70,7 +70,7 @@ AdsResponse* AdsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	return response;
 }
 
-AdsResponse* AdsConnection::GetPending(uint32_t id)
+AmsResponse* AmsConnection::GetPending(uint32_t id)
 {
 	for (auto p : pending) {
 		if (p->invokeId == id) {
@@ -81,14 +81,14 @@ AdsResponse* AdsConnection::GetPending(uint32_t id)
 	return nullptr;
 }
 
-void AdsConnection::Release(AdsResponse* response)
+void AmsConnection::Release(AmsResponse* response)
 {
 	response->frame.reset();
 	std::lock_guard<std::mutex> lock(mutex);
 	ready.push_back(response);
 }
 
-bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
+bool AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
 {
 	while (running && bytesToRead) {
 		const size_t bytesRead = socket.read(buffer, bytesToRead);
@@ -98,7 +98,7 @@ bool AdsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
 	return running;
 }
 
-void AdsConnection::ReadJunk(size_t bytesToRead) const
+void AmsConnection::ReadJunk(size_t bytesToRead) const
 {
 	uint8_t buffer[1024];
 	while (bytesToRead > sizeof(buffer)) {
@@ -108,7 +108,7 @@ void AdsConnection::ReadJunk(size_t bytesToRead) const
 	Read(buffer, bytesToRead);
 }
 
-template<class T> T AdsConnection::Receive() const
+template<class T> T AmsConnection::Receive() const
 {
 	uint8_t buffer[sizeof(T)];
 	if (Read(buffer, sizeof(buffer))) {
@@ -117,7 +117,7 @@ template<class T> T AdsConnection::Receive() const
 	return T{};
 }
 
-Frame& AdsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
+Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 {
 	if (bytesLeft > frame.capacity()) {
 		LOG_WARN("Frame to long");
@@ -130,7 +130,7 @@ Frame& AdsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 	return frame.limit(bytesLeft);
 }
 
-void AdsConnection::TryRecv()
+void AmsConnection::TryRecv()
 {
 	try {
 		Recv();
@@ -140,7 +140,7 @@ void AdsConnection::TryRecv()
 	}
 }
 
-void AdsConnection::Recv()
+void AmsConnection::Recv()
 {
 	while (running) {
 		const auto amsTcp = Receive<AmsTcpHeader>();

@@ -2,7 +2,7 @@
 #define _AMS_ROUTER_H_
 
 #include "AdsDef.h"
-#include "AdsConnection.h"
+#include "AmsConnection.h"
 #include "AdsNotification.h"
 
 #include <array>
@@ -32,7 +32,7 @@ struct AmsRouter : NotificationDispatcher
 
 	bool AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);
-	AdsConnection* GetConnection(const AmsNetId& pAddr);
+	AmsConnection* GetConnection(const AmsNetId& pAddr);
 
 	void Dispatch(Frame &frame, AmsAddr amsAddr) const;
 
@@ -46,11 +46,11 @@ private:
 	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
 	const AmsAddr localAddr;
 	std::mutex mutex;
-	std::map<IpV4, std::unique_ptr<AdsConnection>> connections;
-	std::map<AmsNetId, AdsConnection*> mapping;
+	std::map<IpV4, std::unique_ptr<AmsConnection>> connections;
+	std::map<AmsNetId, AmsConnection*> mapping;
 
-	std::map<IpV4, std::unique_ptr<AdsConnection>>::iterator __GetConnection(const AmsNetId& pAddr);
-	void DeleteIfLastConnection(const AdsConnection* conn);
+	std::map<IpV4, std::unique_ptr<AmsConnection>>::iterator __GetConnection(const AmsNetId& pAddr);
+	void DeleteIfLastConnection(const AmsConnection* conn);
 	void Recv();
 
 	template<class T>

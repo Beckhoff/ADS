@@ -42,9 +42,6 @@
     <ClInclude Include="wrap_endian.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdsConnection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdsNotification.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AmsConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,10 +71,10 @@
     <ClCompile Include="NetId.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdsConnection.cpp">
+    <ClCompile Include="Log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Log.cpp">
+    <ClCompile Include="AmsConnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
