@@ -35,7 +35,6 @@ AmsConnection::AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
 	receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 
-
 AmsConnection::~AmsConnection()
 {
 	running = false;
@@ -50,23 +49,11 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
 	request.prepend<AmsTcpHeader>(header);
 
-	std::lock_guard<std::mutex> lock(mutex);
-
-	if (ready.empty()) {
+	auto response = Reserve(aoeHeader.invokeId);
+	if (response && request.size() != socket.write(request)) {
+		Release(response);
 		return nullptr;
 	}
-
-	auto response = ready.back();
-	ready.pop_back();
-
-	response->invokeId = aoeHeader.invokeId;
-	response->frame.clear();
-
-	if (request.size() != socket.write(request)) {
-		return nullptr;
-	}
-
-	pending.push_back(response);
 	return response;
 }
 
@@ -79,6 +66,22 @@ AmsResponse* AmsConnection::GetPending(uint32_t id)
 		}
 	}
 	return nullptr;
+}
+
+AmsResponse* AmsConnection::Reserve(uint32_t id)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	if (ready.empty()) {
+		return nullptr;
+	}
+
+	auto response = ready.back();
+	ready.pop_back();
+
+	response->invokeId = id;
+	pending.push_back(response);
+	return response;
 }
 
 void AmsConnection::Release(AmsResponse* response)

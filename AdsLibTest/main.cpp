@@ -610,12 +610,12 @@ int main()
 
 	TestAmsAddr amsAddrTest(errorstream);
 	amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
-//	amsAddrTest.run();
+	amsAddrTest.run();
 
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
-//	routerTest.run();
+	routerTest.run();
 
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
@@ -627,7 +627,7 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-//	adsTest.run();
+	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
 	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);

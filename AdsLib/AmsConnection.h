@@ -57,6 +57,7 @@ private:
 
 	template<class T> T Receive() const;
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
+	AmsResponse* Reserve(uint32_t id);
 	AmsResponse* GetPending(uint32_t id);
 };
 
