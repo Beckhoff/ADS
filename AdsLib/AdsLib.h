@@ -7,6 +7,7 @@
 
 long AdsAddRoute(AmsNetId ams, IpV4 ip);
 void AdsDelRoute(AmsNetId ams);
+void AdsSetNetId(AmsNetId ams);
 
 long AdsPortCloseEx(long port);
 long AdsPortOpenEx();

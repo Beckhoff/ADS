@@ -32,6 +32,7 @@ struct AmsRouter : NotificationDispatcher
 
 	bool AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);
+	void SetNetId(AmsNetId ams);
 	AmsConnection* GetConnection(const AmsNetId& pAddr);
 
 	void Dispatch(Frame &frame, AmsAddr amsAddr) const;
@@ -44,7 +45,7 @@ private:
 
 	std::bitset<NUM_PORTS_MAX> ports;
 	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
-	const AmsNetId localAddr;
+	AmsNetId localAddr;
 	std::mutex mutex;
 	std::map<IpV4, std::unique_ptr<AmsConnection>> connections;
 	std::map<AmsNetId, AmsConnection*> mapping;

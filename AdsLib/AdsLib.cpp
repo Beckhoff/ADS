@@ -2,14 +2,7 @@
 #include "AdsLib.h"
 #include "AmsRouter.h"
 
-
-#ifdef WIN32
-static AmsRouter router(AmsNetId{ 192, 168, 0, 114, 1, 1 });
-#elif __APPLE__
-static AmsRouter router(AmsNetId{ 192, 168, 0, 200, 1, 1 });
-#else
-static AmsRouter router(AmsNetId{ 192, 168, 0, 164, 1, 1 });
-#endif
+static AmsRouter router;
 
 #define ASSERT_PORT(port) do { \
 	if ((port) <= 0 || (port) > UINT16_MAX) { \
@@ -32,6 +25,11 @@ long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
 void AdsDelRoute(const AmsNetId ams)
 {
 	router.DelRoute(ams);
+}
+
+void AdsSetNetId(AmsNetId ams)
+{
+	router.SetNetId(ams);
 }
 
 long AdsPortCloseEx(long port)

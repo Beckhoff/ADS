@@ -550,8 +550,16 @@ struct TestAds : test_base < TestAds >
 
 int main()
 {
-	std::ostream nowhere(0);
+#ifdef WIN32
+	AdsSetNetId(AmsNetId{ 192, 168, 0, 114, 1, 1 });
+#elif __APPLE__
+	AdsSetNetId(AmsNetId{ 192, 168, 0, 200, 1, 1 });
+#else
+	AdsSetNetId(AmsNetId{ 192, 168, 0, 164, 1, 1 });
+#endif
+
 #if 0
+	std::ostream nowhere(0);
 	std::ostream& errorstream = nowhere;
 #else
 	std::ostream& errorstream = std::cout;

@@ -40,6 +40,12 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
 	}
 }
 
+void AmsRouter::SetNetId(AmsNetId ams)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	localAddr = ams;
+}
+
 void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)
 {
 	if (conn) {
