@@ -9,9 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibTest", "AdsLibTest\Ad
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibTestRef", "AdsLibTestRef\AdsLibTestRef.vcxproj", "{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB} = {F94F5A05-3A40-4F66-AEBD-68A4A55579DB}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLib", "AdsLib\AdsLib.vcxproj", "{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}"
 EndProject

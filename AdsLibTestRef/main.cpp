@@ -451,8 +451,8 @@ struct TestAds : test_base < TestAds >
 
 int main()
 {
-	std::ostream nowhere(0);
 #if 0
+	std::ostream nowhere(0);
 	std::ostream& errorstream = nowhere;
 #else
 	std::ostream& errorstream = std::cout;
