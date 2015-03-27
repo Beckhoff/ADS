@@ -22,8 +22,8 @@ bool AmsResponse::Wait(uint32_t timeout_ms)
 }
 
 AmsConnection::AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
-	: dispatcher(__dispatcher),
-	destIp(destIp),
+	: destIp(destIp),
+	dispatcher(__dispatcher),
 	socket(destIp, 48898),
 	invokeId(0)
 {

@@ -194,7 +194,7 @@ typedef struct AmsNetId_
 #ifdef __cplusplus
 	bool operator <(const AmsNetId_& ref) const
 	{
-		for (int i = 0; i < sizeof(ref.b); ++i) {
+		for (unsigned int i = 0; i < sizeof(ref.b); ++i) {
 			if (b[i] != ref.b[i]) {
 				return b[i] < ref.b[i];
 			}

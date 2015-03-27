@@ -8,14 +8,14 @@ static AmsRouter router;
 	if ((port) <= 0 || (port) > UINT16_MAX) { \
 		return ADSERR_CLIENT_PORTNOTOPEN; \
 		} \
-} while (0, 0)
+} while (false)
 
 #define ASSERT_PORT_AND_AMSADDR(port, pAddr) do { \
 	ASSERT_PORT(port); \
 	if (!pAddr) { \
 		return ADSERR_CLIENT_NOAMSADDR; \
 	} \
-} while (0, 0)
+} while (false)
 
 long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
 {

@@ -1,17 +1,17 @@
 
 VPATH = AdsLib
 LIBS = -lpthread
-CC = gcc
+CC = g++
 
 ifeq ($(shell uname),Darwin)
-CC = clang
-LIBS += -lc++
+	CC = clang
+	LIBS += -lc++
 endif
 
 all: AdsLibTest.bin
 
 .cpp.o:
-	$(CC) -c -g -std=c++11 $< -o $@ -I AdsLib/
+	$(CC) -Wall -c -g -std=c++11 $< -o $@ -I AdsLib/
 
 AdsLib.a: AdsLib.o AmsConnection.o AmsRouter.o Log.o Sockets.o Frame.o
 	ar rvs $@ $?

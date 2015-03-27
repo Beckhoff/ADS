@@ -9,10 +9,10 @@ struct Notification
 	uint16_t port;
 
 	Notification(PAdsNotificationFuncEx __func, uint32_t hNotify, uint32_t __hUser, uint32_t length, AmsAddr __amsAddr, uint16_t __port)
-		: callback(__func),
-		hUser(__hUser),
-		port(__port),
+		: port(__port),
+		callback(__func),
 		buffer(new uint8_t[sizeof(AdsNotificationHeader) + length]),
+		hUser(__hUser),
 		amsAddr(__amsAddr)
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
