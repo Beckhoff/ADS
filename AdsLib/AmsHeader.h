@@ -12,9 +12,9 @@
 struct AmsTcpHeader
 {
 	AmsTcpHeader(const uint8_t *frame)
-	{
-		memcpy(this, frame, sizeof(*this));
-	}
+		: reserved(*((const uint16_t*)frame)),
+		leLength(*((const uint32_t*)(frame + offsetof(AmsTcpHeader, leLength))))
+	{}
 
 	AmsTcpHeader(const uint32_t numBytes = 0)
 		: reserved(0),
@@ -26,8 +26,8 @@ struct AmsTcpHeader
 		return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
 	}
 private:
-	uint16_t reserved;
-	uint32_t leLength;
+	const uint16_t reserved;
+	const uint32_t leLength;
 };
 
 struct AoERequestHeader
@@ -45,9 +45,9 @@ struct AoERequestHeader
 	{}
 
 private:
-	uint32_t leGroup;
-	uint32_t leOffset;
-	uint32_t leLength;
+	const uint32_t leGroup;
+	const uint32_t leOffset;
+	const uint32_t leLength;
 };
 
 struct AoEReadWriteReqHeader : AoERequestHeader
@@ -69,9 +69,9 @@ struct AdsWriteCtrlRequest
 	{}
 
 private:
-	uint16_t leAdsState;
-	uint16_t leDevState;
-	uint32_t leLength;
+	const uint16_t leAdsState;
+	const uint16_t leDevState;
+	const uint32_t leLength;
 };
 
 struct AdsAddDeviceNotificationRequest
@@ -87,12 +87,12 @@ struct AdsAddDeviceNotificationRequest
 	{}
 
 private:
-	uint32_t leGroup;
-	uint32_t leOffset;
-	uint32_t leLength;
-	uint32_t leMode;
-	uint32_t leMaxDelay;
-	uint32_t leCycleTime;
+	const uint32_t leGroup;
+	const uint32_t leOffset;
+	const uint32_t leLength;
+	const uint32_t leMode;
+	const uint32_t leMaxDelay;
+	const uint32_t leCycleTime;
 	const std::array<uint8_t, 16> reserved;
 };
 
@@ -162,22 +162,24 @@ using AoEWriteResponseHeader = uint32_t;
 
 struct AoEResponseHeader
 {
-	const uint32_t result;
-
 	AoEResponseHeader()
-		: result(0)
+		: leResult(0)
 	{}
 
 	AoEResponseHeader(const uint8_t *frame)
-		: result(qFromLittleEndian<uint32_t>(frame))
+		: leResult(*((const uint32_t*)frame))
 	{}
 
+	uint32_t result() const
+	{
+		return qFromLittleEndian<uint32_t>((const uint8_t*)&leResult);
+	}
+private:
+	const uint32_t leResult;
 };
 
 struct AoEReadResponseHeader : AoEResponseHeader
 {
-    const uint32_t readLength;
-
 	AoEReadResponseHeader()
 		: readLength(0)
 	{}
@@ -186,6 +188,8 @@ struct AoEReadResponseHeader : AoEResponseHeader
         : AoEResponseHeader(frame),
 		readLength(qFromLittleEndian<uint32_t>(frame + sizeof(AoEResponseHeader)))
 	{}
+private:
+	const uint32_t readLength;
 };
 #pragma pack (pop)
 #endif // AMSHEADER_H

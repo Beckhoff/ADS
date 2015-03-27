@@ -226,7 +226,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 				*bytesRead = bytesAvailable;
 			}
 			ads->Release(response);
-			return header.result;
+			return header.result();
 		}
 		return ADSERR_CLIENT_SYNCTIMEOUT;
 	}

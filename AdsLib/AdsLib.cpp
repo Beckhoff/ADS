@@ -101,13 +101,13 @@ long AdsSyncAddDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t
 	if (!pAttrib || !pFunc || !pNotification) {
 		return ADSERR_CLIENT_INVALIDPARM;
 	}
-	return router.AddNotification(port, pAddr, indexGroup, indexOffset, pAttrib, pFunc, hUser, pNotification);
+	return router.AddNotification((uint16_t)port, pAddr, indexGroup, indexOffset, pAttrib, pFunc, hUser, pNotification);
 }
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {
 	ASSERT_PORT_AND_AMSADDR(port, pAddr);
-	return router.DelNotification(port, pAddr, hNotification);
+	return router.DelNotification((uint16_t)port, pAddr, hNotification);
 }
 
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)
