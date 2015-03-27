@@ -14,7 +14,7 @@
 
 struct AmsRouter : NotificationDispatcher
 {
-	AmsRouter(AmsNetId netId = {0, 0, 0, 0, 0, 0});
+	AmsRouter(AmsNetId netId = AmsNetId{0, 0, 0, 0, 0, 0});
 
 	uint16_t OpenPort();
 	long ClosePort(uint16_t port);
