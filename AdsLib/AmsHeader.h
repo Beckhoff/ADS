@@ -123,8 +123,8 @@ struct AoEHeader
 	const uint32_t invokeId;
 
 	AoEHeader()
-		: targetAddr({ { 0, 0, 0, 0, 0, 0 }, 0 }),
-		sourceAddr({ { 0, 0, 0, 0, 0, 0 }, 0 }),
+		: targetAddr(),
+		sourceAddr(),
 		cmdId(0),
 		stateFlags(0),
 		length(0),
