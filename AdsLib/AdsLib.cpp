@@ -2,7 +2,14 @@
 #include "AdsLib.h"
 #include "AmsRouter.h"
 
-static AmsRouter router;
+
+#ifdef WIN32
+static AmsRouter router(AmsNetId{ 192, 168, 0, 114, 1, 1 });
+#elif __APPLE__
+static AmsRouter router(AmsNetId{ 192, 168, 0, 200, 1, 1 });
+#else
+static AmsRouter router(AmsNetId{ 192, 168, 0, 164, 1, 1 });
+#endif
 
 #define ASSERT_PORT(port) do { \
 	if ((port) <= 0 || (port) > UINT16_MAX) { \
@@ -12,7 +19,7 @@ static AmsRouter router;
 
 #define ASSERT_PORT_AND_AMSADDR(port, pAddr) do { \
 	ASSERT_PORT(port); \
-	if (!pAddr) { \
+	if (!(pAddr)) { \
 		return ADSERR_CLIENT_NOAMSADDR; \
 	} \
 } while (false)

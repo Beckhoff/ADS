@@ -7,14 +7,8 @@
 
 const uint32_t AmsRouter::DEFAULT_TIMEOUT = 5000;
 
-AmsRouter::AmsRouter()
-#ifdef WIN32
-	: localAddr({ { 192, 168, 0, 114, 1, 1 }, 0 })
-#elif __APPLE__
-	: localAddr({ { 192, 168, 0, 200, 1, 1 }, 0 })
-#else
-	: localAddr({ { 192, 168, 0, 164, 1, 1 }, 0 })
-#endif
+AmsRouter::AmsRouter(AmsNetId netId)
+	: localAddr(netId)
 {
 	std::fill(portTimeout.begin(), portTimeout.end(), DEFAULT_TIMEOUT);
 }
@@ -97,7 +91,7 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 	}
 
 	if (ports.test(port - PORT_BASE)) {
-		memcpy(&pAddr->netId, &localAddr.netId, sizeof(localAddr.netId));
+		memcpy(&pAddr->netId, &localAddr, sizeof(localAddr));
 		pAddr->port = port;
 		return 0;
 	}
