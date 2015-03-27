@@ -38,6 +38,7 @@ struct AmsConnection
 
 	const IpV4 destIp;
 private:
+	static const size_t RESPONSE_Q_LENGTH = 128;
 	NotificationDispatcher &dispatcher;
 	TcpSocket socket;
 	std::mutex mutex;
@@ -45,7 +46,7 @@ private:
 	std::thread receiver;
 	bool running = true;
 
-	std::array<AmsResponse, 16> responses;
+	std::array<AmsResponse, RESPONSE_Q_LENGTH> responses;
 	std::list<AmsResponse*> ready;
 	std::list<AmsResponse*> pending;
 

@@ -449,6 +449,49 @@ struct TestAds : test_base < TestAds >
 	}
 };
 
+struct TestAdsPerformance : test_base < TestAdsPerformance >
+{
+	std::ostream &out;
+
+	TestAdsPerformance(std::ostream& outstream)
+		: out(outstream)
+	{}
+
+	void testParallelReadAndWrite(const std::string& testname)
+	{
+		std::thread threads[96];
+		const auto start = std::chrono::high_resolution_clock::now();
+		for (auto &t : threads) {
+			t = std::thread(&TestAdsPerformance::Read, this, 1024);
+		}
+		for (auto &t : threads) {
+			t.join();
+		}
+		const auto end = std::chrono::high_resolution_clock::now();
+		const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		out << testname << " took " << tmms << "ms\n";
+	}
+
+	// testLargeFrames
+	// testManyNotifications
+private:
+	void Read(const size_t numLoops)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		unsigned long bytesRead;
+		uint32_t buffer;
+		for (int i = 0; i < numLoops; ++i) {
+			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
+			fructose_loop_assert(i, 0 == buffer);
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+};
+
 int main()
 {
 #if 0
@@ -467,7 +510,11 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-	adsTest.run();
+//	adsTest.run();
+
+	TestAdsPerformance performance(errorstream);
+	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+	performance.run();
 
 	std::cout << "Hit ENTER to continue\n";
 	std::cin.ignore();
