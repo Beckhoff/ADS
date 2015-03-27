@@ -4,7 +4,8 @@
 #include <cstdint>
 #ifdef _WIN32
 #include <WinSock2.h>
-inline int InitSocketLibrary(void) {
+inline int InitSocketLibrary(void)
+{
     WSADATA wsaData;
     return WSAStartup(0x0202, &wsaData);
 }
@@ -26,9 +27,10 @@ typedef int SOCKET;
 #define closesocket(X) close(X)
 #define WSACleanup()
 #define WSAGetLastError() errno
-inline int InitSocketLibrary(void) {
+inline int InitSocketLibrary(void)
+{
     return 0;
-};
+}
 #define NATIVE_SELECT(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT) \
     ::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 #endif
