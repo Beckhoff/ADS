@@ -11,14 +11,14 @@ AmsResponse::AmsResponse()
 
 void AmsResponse::Notify()
 {
-	std::unique_lock<std::mutex> lock(mutex);
-	cv.notify_one();
+	invokeId = 0;
+	cv.notify_all();
 }
 
 bool AmsResponse::Wait(uint32_t timeout_ms)
 {
 	std::unique_lock<std::mutex> lock(mutex);
-	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
+	return cv.wait_for(lock, std::chrono::milliseconds(timeout_ms), [&]() { return !invokeId; });
 }
 
 AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
@@ -55,15 +55,18 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 
 AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 {
-	if (queue[port - Router::PORT_BASE].invokeId == id) {
+	const auto currentId = queue[port - Router::PORT_BASE].invokeId;
+	if (currentId == id) {
 		return &queue[port - Router::PORT_BASE];
 	}
+	LOG_WARN("InvokeId missmatch: waiting for 0x" << std::hex << currentId << " received 0x" << id);
 	return nullptr;
 }
 
 AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 {
 	if (queue[port - Router::PORT_BASE].invokeId) {
+		LOG_WARN("Port: " << port << " already in use");
 		return nullptr;
 	}
 	queue[port - Router::PORT_BASE].invokeId = id;

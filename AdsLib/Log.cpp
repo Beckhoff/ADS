@@ -21,7 +21,7 @@ static const char* CATEGORY[] = {
     "Error: "
 };
 
-#if 1
+#if 0
 std::ofstream outFile("test.txt", std::ofstream::out | std::ofstream::trunc);
 std::ostream& Logger::output = outFile;
 #else
