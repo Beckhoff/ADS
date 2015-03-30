@@ -63,7 +63,7 @@ uint16_t AmsRouter::OpenPort()
 	std::lock_guard<std::mutex> lock(mutex);
 
 	if (ports.all()) {
-		return 0; // we can't pass ROUTERERR_NOMOREQUEUES due to API limitation...
+		return 0;
 	}
 
 	for (uint16_t i = 0; i < ports.size(); ++i) {
@@ -228,7 +228,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 			ads->Release(response);
 			return header.result();
 		}
-		ads->GetPending(response->invokeId);
+		ads->GetPending(response->invokeId, srcAddr.port);
 		ads->Release(response);
 		return ADSERR_CLIENT_SYNCTIMEOUT;
 	}

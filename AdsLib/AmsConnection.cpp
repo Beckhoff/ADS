@@ -21,17 +21,13 @@ bool AmsResponse::Wait(uint32_t timeout_ms)
 	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
-AmsConnection::AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
+AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
-	dispatcher(__dispatcher),
+	router(__router),
 	socket(destIp, 48898),
 	invokeId(0)
 {
-	for (auto& r : responses) {
-		ready.push_back(&r);
-	}
 	socket.Connect();
-
 	receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 
@@ -49,7 +45,7 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
 	request.prepend<AmsTcpHeader>(header);
 
-	auto response = Reserve(aoeHeader.invokeId);
+	auto response = Reserve(aoeHeader.invokeId, srcAddr.port);
 	if (response && request.size() != socket.write(request)) {
 		Release(response);
 		return nullptr;
@@ -57,40 +53,26 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	return response;
 }
 
-AmsResponse* AmsConnection::GetPending(uint32_t id)
+AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(pendingMutex);
-	for (auto p : pending) {
-		if (p->invokeId == id) {
-			pending.remove(p);
-			return p;
-		}
+	if (queue[port - Router::PORT_BASE].invokeId == id) {
+		return &queue[port - Router::PORT_BASE];
 	}
 	return nullptr;
 }
 
-AmsResponse* AmsConnection::Reserve(uint32_t id)
+AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(mutex);
-
-	if (ready.empty()) {
+	if (queue[port - Router::PORT_BASE].invokeId) {
 		return nullptr;
 	}
-
-	auto response = ready.back();
-	ready.pop_back();
-
-	response->invokeId = id;
-	std::lock_guard<std::mutex> pendingLock(pendingMutex);
-	pending.push_back(response);
-	return response;
+	queue[port - Router::PORT_BASE].invokeId = id;
+	return &queue[port - Router::PORT_BASE];
 }
 
 void AmsConnection::Release(AmsResponse* response)
 {
-	response->frame.reset();
-	std::lock_guard<std::mutex> lock(mutex);
-	ready.push_back(response);
+	response->invokeId = 0;
 }
 
 bool AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
@@ -157,14 +139,14 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
-			Frame& frame = dispatcher.GetFrame();
+			Frame& frame = router.GetFrame();
 			ReceiveFrame(frame, header.length);
-			dispatcher.Dispatch(frame, header.sourceAddr);
+			router.Dispatch(frame, header.sourceAddr);
 			frame.reset();
 			continue;
 		}
 
-		auto response = GetPending(header.invokeId);
+		auto response = GetPending(header.invokeId, header.targetAddr.port);
 		if (!response) {
 			LOG_WARN("No response pending");
 			ReadJunk(header.length);

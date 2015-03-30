@@ -3,7 +3,7 @@
 
 #include "AmsHeader.h"
 #include "Sockets.h"
-#include "NotificationDispatcher.h"
+#include "Router.h"
 
 #include <array>
 #include <condition_variable>
@@ -29,27 +29,21 @@ private:
 
 struct AmsConnection
 {
-	AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
+	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
 	~AmsConnection();
 
 	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
 	void Release(AmsResponse* response);
-	AmsResponse* GetPending(uint32_t id);
+	AmsResponse* GetPending(uint32_t id, uint16_t port);
 
 	const IpV4 destIp;
 private:
-	static const size_t RESPONSE_Q_LENGTH = 128;
-	NotificationDispatcher &dispatcher;
+	Router &router;
 	TcpSocket socket;
-	std::mutex mutex;
-	std::mutex pendingMutex;
 	uint32_t invokeId;
 	std::thread receiver;
 	bool running = true;
-
-	std::array<AmsResponse, RESPONSE_Q_LENGTH> responses;
-	std::vector<AmsResponse*> ready;
-	std::list<AmsResponse*> pending;
+	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
 	void ReadJunk(size_t bytesToRead) const;
 	bool Read(uint8_t* buffer, size_t bytesToRead) const;
@@ -58,7 +52,7 @@ private:
 
 	template<class T> T Receive() const;
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
-	AmsResponse* Reserve(uint32_t id);
+	AmsResponse* Reserve(uint32_t id, uint16_t port);
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */
