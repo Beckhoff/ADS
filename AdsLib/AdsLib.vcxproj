@@ -78,7 +78,7 @@
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="NetId.h" />
-    <ClInclude Include="NotificationDispatcher.h" />
+    <ClInclude Include="Router.h" />
     <ClInclude Include="Sockets.h" />
     <ClInclude Include="wrap_endian.h" />
     <ClInclude Include="wrap_socket.h" />

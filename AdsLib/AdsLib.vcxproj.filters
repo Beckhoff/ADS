@@ -45,13 +45,13 @@
     <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NotificationDispatcher.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AdsNotification.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AmsConnection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Router.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
