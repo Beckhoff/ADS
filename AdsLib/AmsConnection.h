@@ -3,7 +3,7 @@
 
 #include "AmsHeader.h"
 #include "Sockets.h"
-#include "NotificationDispatcher.h"
+#include "Router.h"
 
 #include <array>
 #include <condition_variable>
@@ -29,7 +29,7 @@ private:
 
 struct AmsConnection
 {
-	AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp = IpV4{ "" });
+	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
 	~AmsConnection();
 
 	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
@@ -37,23 +37,13 @@ struct AmsConnection
 	AmsResponse* GetPending(uint32_t id, uint16_t port);
 
 	const IpV4 destIp;
-	static const size_t NUM_PORTS_MAX = 128;
-	static const uint16_t PORT_BASE = 30000;
-	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");
 private:
-	static const size_t RESPONSE_Q_LENGTH = 128;
-	NotificationDispatcher &dispatcher;
+	Router &router;
 	TcpSocket socket;
-	std::mutex mutex;
-	std::mutex pendingMutex;
 	uint32_t invokeId;
 	std::thread receiver;
 	bool running = true;
-
-	std::array<AmsResponse, RESPONSE_Q_LENGTH> responses;
-	std::vector<AmsResponse*> ready;
-	std::list<AmsResponse*> pending;
-	std::array<AmsResponse, NUM_PORTS_MAX> queue;
+	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
 	void ReadJunk(size_t bytesToRead) const;
 	bool Read(uint8_t* buffer, size_t bytesToRead) const;

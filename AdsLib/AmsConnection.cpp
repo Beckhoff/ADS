@@ -21,17 +21,13 @@ bool AmsResponse::Wait(uint32_t timeout_ms)
 	return std::cv_status::no_timeout == cv.wait_for(lock, std::chrono::milliseconds(timeout_ms));
 }
 
-AmsConnection::AmsConnection(NotificationDispatcher &__dispatcher, IpV4 destIp)
+AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
-	dispatcher(__dispatcher),
+	router(__router),
 	socket(destIp, 48898),
 	invokeId(0)
 {
-	for (auto& r : responses) {
-		ready.push_back(&r);
-	}
 	socket.Connect();
-
 	receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 
@@ -59,19 +55,19 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 
 AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 {
-	if (queue[port - PORT_BASE].invokeId == id) {
-		return &queue[port - PORT_BASE];
+	if (queue[port - Router::PORT_BASE].invokeId == id) {
+		return &queue[port - Router::PORT_BASE];
 	}
 	return nullptr;
 }
 
 AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 {
-	if (queue[port - PORT_BASE].invokeId) {
+	if (queue[port - Router::PORT_BASE].invokeId) {
 		return nullptr;
 	}
-	queue[port - PORT_BASE].invokeId = id;
-	return &queue[port - PORT_BASE];
+	queue[port - Router::PORT_BASE].invokeId = id;
+	return &queue[port - Router::PORT_BASE];
 }
 
 void AmsConnection::Release(AmsResponse* response)
@@ -143,9 +139,9 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
-			Frame& frame = dispatcher.GetFrame();
+			Frame& frame = router.GetFrame();
 			ReceiveFrame(frame, header.length);
-			dispatcher.Dispatch(frame, header.sourceAddr);
+			router.Dispatch(frame, header.sourceAddr);
 			frame.reset();
 			continue;
 		}

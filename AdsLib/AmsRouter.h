@@ -12,7 +12,7 @@
 #include <thread>
 #include <vector>
 
-struct AmsRouter : NotificationDispatcher
+struct AmsRouter : Router
 {
 	AmsRouter(AmsNetId netId = AmsNetId{0, 0, 0, 0, 0, 0});
 
@@ -39,9 +39,6 @@ struct AmsRouter : NotificationDispatcher
 
 private:
 	static const uint32_t DEFAULT_TIMEOUT;
-	static const size_t NUM_PORTS_MAX = 128;
-	static const uint16_t PORT_BASE = 30000;
-	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");
 
 	std::bitset<NUM_PORTS_MAX> ports;
 	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
