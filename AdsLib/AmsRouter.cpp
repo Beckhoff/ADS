@@ -228,7 +228,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 			ads->Release(response);
 			return header.result();
 		}
-		auto pending = ads->GetPending(response->invokeId);
+		auto pending = ads->GetPending(response->invokeId, srcAddr.port);
 		ads->Release(response);
 		return ADSERR_CLIENT_SYNCTIMEOUT;
 	}
