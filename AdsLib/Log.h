@@ -2,7 +2,7 @@
 #define LOG_H
 
 #include <cstdint>
-#include <iostream>
+#include <iosfwd>
 #include <sstream>
 #include <vector>
 
@@ -25,6 +25,8 @@
 
 struct Logger {
     static void Log(size_t level, const std::string& msg);
+private:
+	static std::ostream& output;
 };
 
 #endif // LOG_H

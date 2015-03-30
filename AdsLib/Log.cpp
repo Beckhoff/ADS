@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <fstream>
+#include <iostream>
 
 #ifdef _WIN32
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) do { \
@@ -19,6 +21,13 @@ static const char* CATEGORY[] = {
     "Error: "
 };
 
+#if 0
+std::ofstream outFile("test.txt", std::ofstream::out | std::ofstream::app);
+std::ostream& Logger::output = outFile;
+#else
+std::ostream& Logger::output = std::cerr;
+#endif
+
 void Logger::Log(const size_t level, const std::string &msg)
 {
     std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -26,5 +35,5 @@ void Logger::Log(const size_t level, const std::string &msg)
 
     //TODO use std::put_time() when available
     TIME_T_TO_STRING(dateTime, &tt);
-    std::cerr << dateTime << CATEGORY[std::min(level, sizeof(CATEGORY) / sizeof(CATEGORY[0]))] << msg << std::endl;
+    output << dateTime << CATEGORY[std::min(level, sizeof(CATEGORY) / sizeof(CATEGORY[0]))] << msg << std::endl;
 }

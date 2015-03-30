@@ -59,6 +59,7 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 
 AmsResponse* AmsConnection::GetPending(uint32_t id)
 {
+	std::lock_guard<std::mutex> lock(pendingMutex);
 	for (auto p : pending) {
 		if (p->invokeId == id) {
 			pending.remove(p);
@@ -80,6 +81,7 @@ AmsResponse* AmsConnection::Reserve(uint32_t id)
 	ready.pop_back();
 
 	response->invokeId = id;
+	std::lock_guard<std::mutex> pendingLock(pendingMutex);
 	pending.push_back(response);
 	return response;
 }
