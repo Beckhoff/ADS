@@ -49,7 +49,6 @@ void Socket::close()
 {
 	if (INVALID_SOCKET != m_Socket) {
 		closesocket(m_Socket);
-		m_Socket = INVALID_SOCKET;
 	}
 }
 
