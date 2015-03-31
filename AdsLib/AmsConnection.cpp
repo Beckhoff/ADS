@@ -45,7 +45,7 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
 	request.prepend<AmsTcpHeader>(header);
 
-	auto response = Reserve(aoeHeader.invokeId, srcAddr.port);
+	auto response = Reserve(aoeHeader.invokeId(), srcAddr.port);
 	if (response && request.size() != socket.write(request)) {
 		Release(response);
 		return nullptr;
@@ -142,23 +142,23 @@ void AmsConnection::Recv()
 		}
 
 		const auto header = Receive<AoEHeader>();
-		if (header.cmdId == AoEHeader::DEVICE_NOTIFICATION) {
+		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			Frame& frame = router.GetFrame();
-			ReceiveFrame(frame, header.length);
+			ReceiveFrame(frame, header.length());
 			router.Dispatch(frame, header.sourceAddr);
 			frame.reset();
 			continue;
 		}
 
-		auto response = GetPending(header.invokeId, header.targetAddr.port);
+		auto response = GetPending(header.invokeId(), header.targetAddr.port);
 		if (!response) {
 			LOG_WARN("No response pending");
-			ReadJunk(header.length);
+			ReadJunk(header.length());
 			continue;
 		}
 
-		ReceiveFrame(response->frame, header.length);
-		switch (header.cmdId) {
+		ReceiveFrame(response->frame, header.length());
+		switch (header.cmdId()) {
 		case AoEHeader::READ_DEVICE_INFO:
 		case AoEHeader::READ:
 		case AoEHeader::WRITE:

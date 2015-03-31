@@ -582,7 +582,7 @@ private:
 
 		uint32_t bytesRead;
 		uint32_t buffer;
-		for (int i = 0; i < numLoops; ++i) {
+		for (size_t i = 0; i < numLoops; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
 			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 			fructose_loop_assert(i, 0 == buffer);
@@ -610,12 +610,12 @@ int main()
 
 	TestAmsAddr amsAddrTest(errorstream);
 	amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
-//	amsAddrTest.run();
+	amsAddrTest.run();
 
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
-//	routerTest.run();
+	routerTest.run();
 
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
@@ -627,7 +627,7 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-//	adsTest.run();
+	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
 	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);

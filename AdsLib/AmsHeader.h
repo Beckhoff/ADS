@@ -12,9 +12,9 @@
 struct AmsTcpHeader
 {
 	AmsTcpHeader(const uint8_t *frame)
-		: reserved(*((const uint16_t*)frame)),
-		leLength(*((const uint32_t*)(frame + offsetof(AmsTcpHeader, leLength))))
-	{}
+	{
+		memcpy(this, frame, sizeof(*this));
+	}
 
 	AmsTcpHeader(const uint32_t numBytes = 0)
 		: reserved(0),
@@ -26,8 +26,8 @@ struct AmsTcpHeader
 		return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
 	}
 private:
-	const uint16_t reserved;
-	const uint32_t leLength;
+	uint16_t reserved;
+	uint32_t leLength;
 };
 
 struct AoERequestHeader
@@ -112,50 +112,56 @@ struct AoEHeader
 	static const uint16_t DEVICE_NOTIFICATION = 0x0008;
 	static const uint16_t READ_WRITE = 0x0009;
 
-
-	//TODO fix endianess!!!
-    AmsAddr targetAddr;
-    AmsAddr sourceAddr;
-    const uint16_t cmdId;
-    const uint16_t stateFlags;
-    const uint32_t length;
-    const uint32_t errorCode;
-	const uint32_t invokeId;
-
 	AoEHeader()
 		: targetAddr(),
 		sourceAddr(),
-		cmdId(0),
-		stateFlags(0),
-		length(0),
-		errorCode(0),
-		invokeId(0)
+		leCmdId(0),
+		leStateFlags(0),
+		leLength(0),
+		leErrorCode(0),
+		leInvokeId(0)
 	{
 	}
 
 	AoEHeader(const AmsAddr &__targetAddr, const AmsAddr &__sourceAddr, uint16_t __cmdId, uint32_t __length, uint32_t __invokeId)
 		: targetAddr(__targetAddr),
 		sourceAddr(__sourceAddr),
-		cmdId(__cmdId),
-		stateFlags(AMS_REQUEST),
-		length(__length),
-		errorCode(0),
-		invokeId(__invokeId)
+		leCmdId(qToLittleEndian(__cmdId)),
+		leStateFlags(qToLittleEndian(AMS_REQUEST)),
+		leLength(qToLittleEndian(__length)),
+		leErrorCode(qToLittleEndian(0)),
+		leInvokeId(qToLittleEndian(__invokeId))
 	{
 	}
 
     AoEHeader(const uint8_t *frame)
-        : targetAddr(frame),
-          sourceAddr(frame + offsetof(AoEHeader, sourceAddr)),
-          cmdId     (qFromLittleEndian<uint16_t>(frame + offsetof(AoEHeader, cmdId))),
-          stateFlags(qFromLittleEndian<uint16_t>(frame + offsetof(AoEHeader, stateFlags))),
-          length    (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, length))),
-          errorCode (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, errorCode))),
-          invokeId  (qFromLittleEndian<uint32_t>(frame + offsetof(AoEHeader, invokeId)))
-    {
-		memcpy(&targetAddr, frame, sizeof(targetAddr));
-		memcpy(&targetAddr, frame, sizeof(targetAddr));
+	{
+		memcpy(this, frame, sizeof(*this));
     }
+
+	uint16_t cmdId() const
+	{
+		return qFromLittleEndian<uint16_t>((const uint8_t*)&leCmdId);
+	}
+
+	uint32_t invokeId() const
+	{
+		return qFromLittleEndian<uint32_t>((const uint8_t*)&leInvokeId);
+	}
+
+	uint32_t length() const
+	{
+		return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
+	}
+
+	AmsAddr targetAddr;
+	AmsAddr sourceAddr;
+private:
+	uint16_t leCmdId;
+	uint16_t leStateFlags;
+	uint32_t leLength;
+	uint32_t leErrorCode;
+	uint32_t leInvokeId;
 };
 
 using AoEWriteResponseHeader = uint32_t;
@@ -167,15 +173,16 @@ struct AoEResponseHeader
 	{}
 
 	AoEResponseHeader(const uint8_t *frame)
-		: leResult(*((const uint32_t*)frame))
-	{}
+	{
+		memcpy(this, frame, sizeof(*this));
+	}
 
 	uint32_t result() const
 	{
 		return qFromLittleEndian<uint32_t>((const uint8_t*)&leResult);
 	}
 private:
-	const uint32_t leResult;
+	uint32_t leResult;
 };
 
 struct AoEReadResponseHeader : AoEResponseHeader
@@ -185,11 +192,11 @@ struct AoEReadResponseHeader : AoEResponseHeader
 	{}
 
     AoEReadResponseHeader(const uint8_t *frame)
-        : AoEResponseHeader(frame),
-		readLength(qFromLittleEndian<uint32_t>(frame + sizeof(AoEResponseHeader)))
-	{}
+	{
+		memcpy(this, frame, sizeof(*this));
+	}
 private:
-	const uint32_t readLength;
+	uint32_t readLength;
 };
 #pragma pack (pop)
 #endif // AMSHEADER_H
