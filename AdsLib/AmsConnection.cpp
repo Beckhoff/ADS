@@ -75,6 +75,7 @@ AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 
 void AmsConnection::Release(AmsResponse* response)
 {
+	response->frame.reset();
 	response->invokeId = 0;
 }
 
@@ -110,7 +111,7 @@ template<class T> T AmsConnection::Receive() const
 Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 {
 	if (bytesLeft > frame.capacity()) {
-		LOG_WARN("Frame to long");
+		LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << frame.capacity());
 		ReadJunk(bytesLeft);
 		return frame.clear();
 	}
