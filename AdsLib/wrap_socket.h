@@ -24,9 +24,10 @@ typedef int socklen_t;
 typedef int SOCKET;
 #define INVALID_SOCKET ((int)-1)
 #define SOCKET_ERROR ((int)-1)
-#define closesocket(X) close(X)
+#define closesocket(X) ::close(X)
 #define WSACleanup()
 #define WSAGetLastError() errno
+#define WSAENOTSOCK EBADF
 inline int InitSocketLibrary(void)
 {
     return 0;
