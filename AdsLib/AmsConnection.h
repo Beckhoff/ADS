@@ -42,11 +42,10 @@ private:
 	TcpSocket socket;
 	uint32_t invokeId;
 	std::thread receiver;
-	bool running = true;
 	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
 	void ReadJunk(size_t bytesToRead) const;
-	bool Read(uint8_t* buffer, size_t bytesToRead) const;
+	void Read(uint8_t* buffer, size_t bytesToRead) const;
 	void Recv();
 	void TryRecv();
 

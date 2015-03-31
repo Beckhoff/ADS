@@ -33,7 +33,7 @@ AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 
 AmsConnection::~AmsConnection()
 {
-	running = false;
+	socket.close();
 	receiver.join();
 }
 
@@ -79,14 +79,13 @@ void AmsConnection::Release(AmsResponse* response)
 	response->invokeId = 0;
 }
 
-bool AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
+void AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
 {
-	while (running && bytesToRead) {
+	while (bytesToRead) {
 		const size_t bytesRead = socket.read(buffer, bytesToRead);
 		bytesToRead -= bytesRead;
 		buffer += bytesRead;
 	}
-	return running;
 }
 
 void AmsConnection::ReadJunk(size_t bytesToRead) const
@@ -102,10 +101,8 @@ void AmsConnection::ReadJunk(size_t bytesToRead) const
 template<class T> T AmsConnection::Receive() const
 {
 	uint8_t buffer[sizeof(T)];
-	if (Read(buffer, sizeof(buffer))) {
-		return T{ buffer };
-	}
-	return T{};
+	Read(buffer, sizeof(buffer));
+	return T{ buffer };
 }
 
 Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
@@ -115,9 +112,7 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 		ReadJunk(bytesLeft);
 		return frame.clear();
 	}
-
-	if (!Read(frame.rawData(), bytesLeft))
-		return frame.clear();
+	Read(frame.rawData(), bytesLeft);
 	return frame.limit(bytesLeft);
 }
 
@@ -133,7 +128,7 @@ void AmsConnection::TryRecv()
 
 void AmsConnection::Recv()
 {
-	while (running) {
+	for (;;) {
 		const auto amsTcp = Receive<AmsTcpHeader>();
 		if (amsTcp.length() < sizeof(AoEHeader)) {
 			LOG_WARN("Frame to short to be AoE");

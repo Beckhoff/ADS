@@ -29,6 +29,7 @@ struct Socket
     Frame& read(Frame &frame) const;
 	size_t read(uint8_t *buffer, size_t maxBytes) const;
     size_t write(const Frame &frame) const;
+	void close();
 
 protected:
     int m_WSAInitialized;

@@ -39,13 +39,18 @@ Socket::Socket(IpV4 ip, uint16_t port, int type)
 
 Socket::~Socket()
 {
-    if (INVALID_SOCKET != m_Socket) {
-        closesocket(m_Socket);
-    }
-
+	close();
     if (m_WSAInitialized) {
         WSACleanup();
     }
+}
+
+void Socket::close()
+{
+	if (INVALID_SOCKET != m_Socket) {
+		closesocket(m_Socket);
+		m_Socket = INVALID_SOCKET;
+	}
 }
 
 size_t Socket::read(uint8_t *buffer, size_t maxBytes) const
@@ -92,9 +97,14 @@ bool Socket::select(timeval *timeout) const
         return false;
     }
 
+	const auto lastError = WSAGetLastError();
+	if (lastError == WSAENOTSOCK) {
+		throw std::runtime_error("connection closed");
+	}
+
     /* and check if socket was correct */
     if((1 != state) || (!FD_ISSET(m_Socket, &readSockets))) {
-        LOG_ERROR("something strange happen while waiting for socket...");
+        LOG_ERROR("something strange happen while waiting for socket... with error: " << lastError << " state: " << state);
         return false;
     }
     return true;
