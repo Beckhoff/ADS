@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // WARNING code was never tested on a big endian machine!
-#if defined(_WIN32) || (BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#if defined(_WIN32) || (BYTE_ORDER__ == __LITTLE_ENDIAN)
 template<class T>
 inline T qToLittleEndian(const T value)
 {
@@ -37,7 +37,7 @@ inline T qFromLittleEndian(const uint8_t *value)
 {
 	T result = 0;
 	for (int i = 0; i < sizeof(T); ++i) {
-		result += (value[i] << (8 * (sizeof(T) - 1 - i));
+		result += (value[i] << (8 * (sizeof(T) - 1 - i)));
 	}
 	return result;
 }
