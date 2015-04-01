@@ -198,29 +198,13 @@ typedef struct AmsNetId_
 typedef struct AmsAddr_
 {
 	AmsNetId netId;
+	uint16_t port;
 #ifdef __cplusplus
 	AmsAddr_(AmsNetId id = AmsNetId{}, uint16_t __port = 0)
 		: netId(id),
-		lePort(qToLittleEndian(__port))
+		port(__port)
 	{}
-
-	AmsAddr_(const uint8_t *frame)
-	{
-		memcpy(this, frame, sizeof(*this));
-	}
-
-	uint16_t port() const
-	{
-		return qFromLittleEndian<uint16_t>((const uint8_t*)&lePort);
-	}
-
-	void port(uint16_t value)
-	{
-		lePort = qToLittleEndian(value);
-	}
 #endif
-private:
-	uint16_t lePort;
 } AmsAddr, *PAmsAddr;
 
 #ifdef __cplusplus

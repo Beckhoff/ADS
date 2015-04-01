@@ -29,7 +29,7 @@ void print(const AmsAddr &addr, std::ostream &out)
 	out << "AmsAddr: " << std::dec
 		<< (int)addr.netId.b[0] << '.' << (int)addr.netId.b[1] << '.' << (int)addr.netId.b[2] << '.'
 		<< (int)addr.netId.b[3] << '.' << (int)addr.netId.b[4] << '.' << (int)addr.netId.b[5] << ':'
-		<< addr.port() << '\n';
+		<< addr.port << '\n';
 }
 
 long testPortOpen(std::ostream &out)

@@ -19,7 +19,7 @@ bool operator <(const AmsAddr_& lhs, const AmsAddr_& rhs)
 	if (memcmp(&lhs.netId, &rhs.netId, sizeof(lhs.netId))) {
 		return lhs.netId < rhs.netId;
 	}
-	return lhs.port() < rhs.port();
+	return lhs.port < rhs.port;
 }
 
 #define ASSERT_PORT(port) do { \

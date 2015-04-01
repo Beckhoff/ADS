@@ -45,7 +45,7 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
 	request.prepend<AmsTcpHeader>(header);
 
-	auto response = Reserve(aoeHeader.invokeId(), srcAddr.port());
+	auto response = Reserve(aoeHeader.invokeId(), srcAddr.port);
 	if (response && request.size() != socket.write(request)) {
 		Release(response);
 		return nullptr;
@@ -140,12 +140,12 @@ void AmsConnection::Recv()
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			Frame& frame = router.GetFrame();
 			ReceiveFrame(frame, header.length());
-			router.Dispatch(frame, header.sourceAddr);
+			router.Dispatch(frame, header.sourceAddr());
 			frame.reset();
 			continue;
 		}
 
-		auto response = GetPending(header.invokeId(), header.targetAddr.port());
+		auto response = GetPending(header.invokeId(), header.targetPort());
 		if (!response) {
 			LOG_WARN("No response pending");
 			ReadJunk(header.length());
