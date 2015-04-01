@@ -4,6 +4,7 @@
 #include <TcAdsAPI.h>
 #include <cstdint>
 #include <chrono>
+#include <memory>
 #include <thread>
 
 #include <iostream>
@@ -13,6 +14,17 @@
 #include <fructose/fructose.h>
 #pragma warning(pop)
 using namespace fructose;
+
+static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
+{
+#if 0
+	std::cout << std::setfill('0')
+		<< "hUser 0x" << std::hex << std::setw(4) << hUser
+		<< " sample time: " << std::dec << pNotification->nTimeStamp
+		<< " sample size: " << std::dec << pNotification->cbSampleSize
+		<< " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
+#endif
+}
 
 void print(const AmsAddr &addr, std::ostream &out)
 {
@@ -364,17 +376,6 @@ struct TestAds : test_base < TestAds >
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 
-	static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
-	{
-#if 0
-		std::cout << std::setfill('0')
-			<< "hUser 0x" << std::hex << std::setw(4) << hUser
-			<< " sample time: " << std::dec << pNotification->nTimeStamp
-			<< " sample size: " << std::dec << pNotification->cbSampleSize
-			<< " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
-#endif
-	}
-
 	void testAdsNotification(const std::string&)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -457,6 +458,27 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		: out(outstream)
 	{}
 
+	void testLargeFrames(const std::string& testname)
+	{
+		// TODO testLargeFrames
+		fructose_assert(false);
+	}
+
+	void testManyNotifications(const std::string& testname)
+	{
+		std::thread threads[8];
+		const auto start = std::chrono::high_resolution_clock::now();
+		for (auto &t : threads) {
+			t = std::thread(&TestAdsPerformance::Notifications, this, 1024);
+		}
+		for (auto &t : threads) {
+			t.join();
+		}
+		const auto end = std::chrono::high_resolution_clock::now();
+		const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		out << testname << " took " << tmms << "ms\n";
+	}
+
 	void testParallelReadAndWrite(const std::string& testname)
 	{
 		std::thread threads[96];
@@ -472,9 +494,27 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		out << testname << " took " << tmms << "ms\n";
 	}
 
-	// testLargeFrames
-	// testManyNotifications
 private:
+	void Notifications(size_t numNotifications)
+	{
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		const auto notification = std::unique_ptr<unsigned long[]>(new unsigned long[numNotifications]);
+		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+		unsigned long hUser = 0xDEADBEEF;
+
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		}
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+		}
+		fructose_assert(0 == AdsPortCloseEx(port));
+	}
+
 	void Read(const size_t numLoops)
 	{
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
@@ -513,6 +553,7 @@ int main()
 	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
+	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
 	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 	performance.run();
 
