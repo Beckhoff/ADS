@@ -4,6 +4,16 @@
 
 static AmsRouter router;
 
+bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs)
+{
+	for (unsigned int i = 0; i < sizeof(rhs.b); ++i) {
+		if (lhs.b[i] != rhs.b[i]) {
+			return lhs.b[i] < rhs.b[i];
+		}
+	}
+	return false;
+}
+
 #define ASSERT_PORT(port) do { \
 	if ((port) <= 0 || (port) > UINT16_MAX) { \
 		return ADSERR_CLIENT_PORTNOTOPEN; \

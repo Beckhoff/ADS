@@ -191,18 +191,11 @@
 typedef struct AmsNetId_
 {
 	uint8_t b[6];
-#ifdef __cplusplus
-	bool operator <(const AmsNetId_& ref) const
-	{
-		for (unsigned int i = 0; i < sizeof(ref.b); ++i) {
-			if (b[i] != ref.b[i]) {
-				return b[i] < ref.b[i];
-			}
-		}
-		return false;
-	}
-#endif
 } AmsNetId, *PAmsNetId;
+
+#ifdef __cplusplus
+bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs);
+#endif /* #ifdef __cplusplus */
 
 #include <cstring> // for memcmp()
 #include "wrap_endian.h" // for qFromLittleEndian()
