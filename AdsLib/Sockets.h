@@ -29,7 +29,7 @@ struct Socket
     Frame& read(Frame &frame) const;
 	size_t read(uint8_t *buffer, size_t maxBytes) const;
     size_t write(const Frame &frame) const;
-	void close();
+	void Shutdown();
 
 protected:
     int m_WSAInitialized;
@@ -38,7 +38,7 @@ protected:
 
     Socket(IpV4 ip, uint16_t port, int type);
     ~Socket();
-    bool select(timeval *timeout) const;
+    bool Select(timeval *timeout) const;
 };
 
 struct TcpSocket : Socket

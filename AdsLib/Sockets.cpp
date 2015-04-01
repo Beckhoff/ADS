@@ -39,23 +39,22 @@ Socket::Socket(IpV4 ip, uint16_t port, int type)
 
 Socket::~Socket()
 {
-	close();
+    Shutdown();
+    closesocket(m_Socket);
+
     if (m_WSAInitialized) {
         WSACleanup();
     }
 }
 
-void Socket::close()
+void Socket::Shutdown()
 {
-	if (INVALID_SOCKET != m_Socket) {
-		closesocket(m_Socket);
-	}
+	shutdown(m_Socket, SHUT_RDWR);
 }
 
 size_t Socket::read(uint8_t *buffer, size_t maxBytes) const
 {
-	timeval timeout = { 1, 0 };
-	if (!select(&timeout)) {
+	if (!Select(nullptr)) {
 		return 0;
 	}
 
@@ -68,7 +67,7 @@ size_t Socket::read(uint8_t *buffer, size_t maxBytes) const
 	if ((0 == bytesRead) || ( lastError == ENOTCONN)) {
 		throw std::runtime_error("connection closed by remote");
 	} else {
-		LOG_ERROR("read frame failed with error: " << lastError);
+		LOG_ERROR("read frame failed with error: " << std::dec << lastError);
 	}
 	return 0;
 }
@@ -82,7 +81,7 @@ Frame& Socket::read(Frame &frame) const
 	return frame.clear();
 }
 
-bool Socket::select(timeval *timeout) const
+bool Socket::Select(timeval *timeout) const
 {
     /* prepare socket set for select() */
     fd_set readSockets;
@@ -90,7 +89,7 @@ bool Socket::select(timeval *timeout) const
     FD_SET(m_Socket, &readSockets);
 
     /* wait for receive data */
-    const int state = NATIVE_SELECT(m_Socket + 1, &readSockets, NULL, NULL, timeout);
+    const int state = NATIVE_SELECT(m_Socket + 1, &readSockets, nullptr, nullptr, timeout);
     if(0 == state) {
         LOG_ERROR("select() timeout");
         return false;
@@ -122,7 +121,7 @@ size_t Socket::write(const Frame &frame) const
 
     const int  status = sendto(m_Socket, buffer, bufferLength, 0, addr, sizeof(m_SockAddress));
     if (SOCKET_ERROR == status) {
-        LOG_ERROR("read frame failed with error: " << WSAGetLastError());
+        LOG_ERROR("write frame failed with error: " << WSAGetLastError());
         return 0;
     }
     return status;

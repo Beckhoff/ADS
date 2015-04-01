@@ -33,7 +33,7 @@ AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 
 AmsConnection::~AmsConnection()
 {
-	socket.close();
+	socket.Shutdown();
 	receiver.join();
 }
 
