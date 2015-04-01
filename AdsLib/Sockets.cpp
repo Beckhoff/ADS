@@ -64,7 +64,7 @@ size_t Socket::read(uint8_t *buffer, size_t maxBytes) const
 		return bytesRead;
 	}
 	const auto lastError = WSAGetLastError();
-	if ((0 == bytesRead) || ( lastError == ENOTCONN)) {
+	if ((0 == bytesRead) || (lastError == CONNECTION_CLOSED)) {
 		throw std::runtime_error("connection closed by remote");
 	} else {
 		LOG_ERROR("read frame failed with error: " << std::dec << lastError);

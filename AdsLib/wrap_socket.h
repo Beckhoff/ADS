@@ -15,6 +15,8 @@ inline int InitSocketLibrary(void)
 
 #define s_addr S_un.S_addr
 typedef int socklen_t;
+#define SHUT_RDWR SD_BOTH
+#define CONNECTION_CLOSED WSAESHUTDOWN
 #endif
 
 #if defined(__gnu_linux__) || defined(__APPLE__)
@@ -28,6 +30,7 @@ typedef int SOCKET;
 #define WSACleanup()
 #define WSAGetLastError() errno
 #define WSAENOTSOCK EBADF
+#define CONNECTION_CLOSED ENOTCONN
 inline int InitSocketLibrary(void)
 {
     return 0;
