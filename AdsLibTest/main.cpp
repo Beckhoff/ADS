@@ -325,6 +325,7 @@ struct TestAds : test_base < TestAds >
 			fructose_loop_assert(i, outBuffer == buffer);
 			outBuffer = ~outBuffer;
 		}
+		hHandle = qToLittleEndian<uint32_t>(hHandle);
 		fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
 
 		// provide out of range port
