@@ -314,6 +314,7 @@ struct TestAds : test_base < TestAds >
 		uint32_t bytesRead;
 		fructose_assert(0 == AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, sizeof(handleName), handleName, &bytesRead));
 		fructose_assert(sizeof(hHandle) == bytesRead);
+		hHandle = qFromLittleEndian<uint32_t>((uint8_t*)&hHandle);
 
 		uint32_t buffer;
 		uint32_t outBuffer = 0xDEADBEEF;
