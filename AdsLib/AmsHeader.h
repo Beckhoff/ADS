@@ -129,7 +129,7 @@ struct AoEHeader
 		leCmdId(qToLittleEndian(__cmdId)),
 		leStateFlags(qToLittleEndian(AMS_REQUEST)),
 		leLength(qToLittleEndian(__length)),
-		leErrorCode(qToLittleEndian(0)),
+		leErrorCode(qToLittleEndian<uint32_t>(0)),
 		leInvokeId(qToLittleEndian(__invokeId))
 	{
 	}
