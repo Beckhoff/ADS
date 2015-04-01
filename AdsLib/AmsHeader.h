@@ -166,11 +166,11 @@ struct AoEHeader
 		return qFromLittleEndian<uint16_t>((const uint8_t*)&leTargetPort);
 	}
 
+private:
 	AmsNetId_ targetNetId;
 	uint16_t leTargetPort;
 	AmsNetId sourceNetId;
 	uint16_t leSourcePort;
-private:
 	uint16_t leCmdId;
 	uint16_t leStateFlags;
 	uint32_t leLength;

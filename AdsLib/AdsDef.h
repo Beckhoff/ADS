@@ -193,18 +193,10 @@ typedef struct AmsNetId_
 	uint8_t b[6];
 } AmsNetId, *PAmsNetId;
 
-#include <cstring> // for memcmp()
-#include "wrap_endian.h" // for qFromLittleEndian()
 typedef struct AmsAddr_
 {
 	AmsNetId netId;
 	uint16_t port;
-#ifdef __cplusplus
-	AmsAddr_(AmsNetId id = AmsNetId{}, uint16_t __port = 0)
-		: netId(id),
-		port(__port)
-	{}
-#endif
 } AmsAddr, *PAmsAddr;
 
 #ifdef __cplusplus
