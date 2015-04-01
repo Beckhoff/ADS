@@ -25,7 +25,7 @@ inline T qFromLittleEndian(const uint8_t *value)
 {
 	T result = 0;
 	for (size_t i = 0; i < sizeof(T); ++i) {
-		result += (value[i] << (8 * (sizeof(T) - 1 - i)));
+		result += (value[i] << (8 * i));
 	}
 	return result;
 }

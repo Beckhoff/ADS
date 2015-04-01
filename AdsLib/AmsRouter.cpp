@@ -98,7 +98,7 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 
 	if (ports.test(port - PORT_BASE)) {
 		memcpy(&pAddr->netId, &localAddr, sizeof(localAddr));
-		pAddr->port = port;
+		pAddr->port(port);
 		return 0;
 	}
 	return ADSERR_CLIENT_PORTNOTOPEN;

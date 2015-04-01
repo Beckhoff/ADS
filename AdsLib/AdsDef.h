@@ -209,17 +209,15 @@ typedef struct AmsNetId_
 typedef struct AmsAddr_
 {
 	AmsNetId netId;
-	uint16_t port;
 #ifdef __cplusplus
 	AmsAddr_(AmsNetId id = AmsNetId{}, uint16_t __port = 0)
 		: netId(id),
-		port(__port)
+		lePort(qToLittleEndian(__port))
 	{}
 
 	AmsAddr_(const uint8_t *frame)
-		: port(qFromLittleEndian<uint16_t>(frame + sizeof(netId)))
 	{
-		memcpy(&netId, frame, sizeof(netId));
+		memcpy(this, frame, sizeof(*this));
 	}
 
 	bool operator <(const AmsAddr_& ref) const
@@ -227,9 +225,21 @@ typedef struct AmsAddr_
 		if (memcmp(&netId, &ref.netId, sizeof(netId))) {
 			return netId < ref.netId;
 		}
-		return port < ref.port;
+		return port() < ref.port();
+	}
+
+	uint16_t port() const
+	{
+		return qFromLittleEndian<uint16_t>((const uint8_t*)&lePort);
+	}
+
+	void port(uint16_t value)
+	{
+		lePort = qToLittleEndian(value);
 	}
 #endif
+private:
+	uint16_t lePort;
 } AmsAddr, *PAmsAddr;
 
 typedef	struct
