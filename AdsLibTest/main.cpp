@@ -554,7 +554,17 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 
 	TestAdsPerformance(std::ostream& outstream)
 		: out(outstream)
-	{}
+	{
+		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
+	}
+#ifdef WIN32
+	~TestAdsPerformance()
+	{
+		// WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
+		//             of the static AdsRouter object and hangs in receive.join()
+		AdsDelRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 });
+	}
+#endif
 
 	void testParallelReadAndWrite(const std::string& testname)
 	{
