@@ -193,10 +193,6 @@ typedef struct AmsNetId_
 	uint8_t b[6];
 } AmsNetId, *PAmsNetId;
 
-#ifdef __cplusplus
-bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs);
-#endif /* #ifdef __cplusplus */
-
 #include <cstring> // for memcmp()
 #include "wrap_endian.h" // for qFromLittleEndian()
 typedef struct AmsAddr_
@@ -213,14 +209,6 @@ typedef struct AmsAddr_
 		memcpy(this, frame, sizeof(*this));
 	}
 
-	bool operator <(const AmsAddr_& ref) const
-	{
-		if (memcmp(&netId, &ref.netId, sizeof(netId))) {
-			return netId < ref.netId;
-		}
-		return port() < ref.port();
-	}
-
 	uint16_t port() const
 	{
 		return qFromLittleEndian<uint16_t>((const uint8_t*)&lePort);
@@ -234,6 +222,11 @@ typedef struct AmsAddr_
 private:
 	uint16_t lePort;
 } AmsAddr, *PAmsAddr;
+
+#ifdef __cplusplus
+bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs);
+bool operator <(const AmsAddr_& lhs, const AmsAddr_& rhs);
+#endif /* #ifdef __cplusplus */
 
 typedef	struct
 {
