@@ -7,6 +7,7 @@
 #include "AdsDef.h"
 #include <array>
 #include <cstddef>
+#include <cstring>
 
 #pragma pack (push, 1)
 struct AmsTcpHeader
