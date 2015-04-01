@@ -483,7 +483,7 @@ private:
 
 		unsigned long bytesRead;
 		uint32_t buffer;
-		for (int i = 0; i < numLoops; ++i) {
+		for (size_t i = 0; i < numLoops; ++i) {
 			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
 			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 			fructose_loop_assert(i, 0 == buffer);
@@ -510,7 +510,7 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-//	adsTest.run();
+	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
 	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
