@@ -2,6 +2,7 @@
 #include <AdsLib.h>
 
 #include "AmsRouter.h"
+#include "RingBuffer.h"
 
 #include <iostream>
 #include <iomanip>
@@ -138,6 +139,50 @@ struct TestAmsRouter : test_base < TestAmsRouter >
 		testee.DelRoute(netId_1);
 		fructose_assert(!testee.GetConnection(netId_1));
 		fructose_assert(testee.GetConnection(netId_2));
+	}
+};
+
+struct TestRingBuffer : test_base < TestRingBuffer >
+{
+	static const int NUM_TEST_LOOPS = 1024;
+	std::ostream &out;
+
+	TestRingBuffer(std::ostream& outstream)
+		: out(outstream)
+	{}
+
+	void testBytesFree(const std::string&)
+	{
+		RingBuffer<1> testee;
+
+		fructose_assert(1 == testee.BytesFree());
+		fructose_assert(testee.write == testee.read);
+
+		*testee.write = 0xA5;
+		testee.Write(1);
+		fructose_assert(0 == testee.BytesFree());
+		fructose_assert(0xA5 == *testee.read);
+
+		testee.Read(1);
+		fructose_assert(1 == testee.BytesFree());
+		fructose_assert(testee.write == testee.read);
+
+		*testee.write = 0x5A;
+		testee.Write(1);
+		fructose_assert(0 == testee.BytesFree());
+		fructose_assert(0x5A == *testee.read);
+	}
+
+	void testWriteChunk(const std::string&)
+	{
+		RingBuffer<1> testee;
+
+		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+			fructose_assert(1 == testee.WriteChunk());
+			testee.Write(1);
+			fructose_assert(0 == testee.WriteChunk());
+			testee.Read(1);
+		}
 	}
 };
 
@@ -670,6 +715,11 @@ int main()
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
 	routerTest.run();
+
+	TestRingBuffer ringBufferTest(errorstream);
+	ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
+	ringBufferTest.add_test("testWriteChunk", &TestRingBuffer::testWriteChunk);
+	ringBufferTest.run();
 
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
