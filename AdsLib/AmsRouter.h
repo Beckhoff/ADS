@@ -61,7 +61,7 @@ private:
 	std::mutex notificationLock;
 	void CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
 	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
-	std::vector<NotifyPair> CollectOrphanedNotifications(uint16_t port);
+	void DeleteOrphanedNotifications(uint16_t port);
 
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

@@ -77,9 +77,7 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	for (const auto &n : CollectOrphanedNotifications(port)) {
-		DelNotification(port, &n.first, n.second);
-	}
+	DeleteOrphanedNotifications(port);
 
 	std::lock_guard<std::mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports.test(port - PORT_BASE)) {
@@ -308,20 +306,10 @@ bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint1
 	return false;
 }
 
-std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifications(const uint16_t port)
+void AmsRouter::DeleteOrphanedNotifications(const uint16_t port)
 {
-	std::vector<NotifyPair> orphaned{};
 	std::unique_lock<std::mutex> lock(notificationLock);
-
-	for (const auto &mapping : tableMapping[port - Router::PORT_BASE]) {
-		auto &table = mapping.second.operator*();
-		for (auto it: table) {
-			if (it.second.port == port) {
-				orphaned.emplace_back(NotifyPair{ mapping.first, it.first });
-			}
-		}
-	}
-	return orphaned;
+	tableMapping[port - Router::PORT_BASE].clear();
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
