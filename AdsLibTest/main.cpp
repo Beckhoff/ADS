@@ -653,6 +653,42 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		out << testname << " took " << tmms << "ms\n";
 	}
 
+	void testEndurance(const std::string& testname)
+	{
+		static const size_t numNotifications = 128;
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		const auto notification = std::unique_ptr<uint32_t[]>(new uint32_t[numNotifications]);
+		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+		uint32_t hUser = 0xDEADBEEF;
+
+		std::thread threads[8];
+		for (auto &t : threads) {
+			t = std::thread(&TestAdsPerformance::Read, this, 1024);
+		}
+
+		const auto start = std::chrono::high_resolution_clock::now();
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		}
+
+		std::cout << "Hit ENTER to stop endurance test\n";
+		std::cin.ignore();
+
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+		}
+		const auto end = std::chrono::high_resolution_clock::now();
+		const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+		for (auto &t : threads) {
+			t.join();
+		}
+		out << testname << ' ' << 1000 * g_NumNotifications / tmms << " notifications/s (" << g_NumNotifications << '/' << tmms << ")\n";
+	}
+
 private:
 	void Notifications(size_t numNotifications)
 	{
@@ -715,12 +751,12 @@ int main()
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
-	routerTest.run();
+//	routerTest.run();
 
 	TestRingBuffer ringBufferTest(errorstream);
 	ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
 	ringBufferTest.add_test("testWriteChunk", &TestRingBuffer::testWriteChunk);
-	ringBufferTest.run();
+//	ringBufferTest.run();
 
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
@@ -732,11 +768,12 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-	adsTest.run();
+//	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
-	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+//	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
+//	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
 	performance.run();
 
 	std::cout << "Hit ENTER to continue\n";
