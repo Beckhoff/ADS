@@ -35,7 +35,7 @@ struct AmsRouter : Router
 	void SetNetId(AmsNetId ams);
 	AmsConnection* GetConnection(const AmsNetId& pAddr);
 
-	void Dispatch(Frame &frame, AmsAddr amsAddr) const;
+	void Dispatch(Frame &frame, AmsAddr amsAddr, uint16_t port) const;
 
 private:
 	static const uint32_t DEFAULT_TIMEOUT;
@@ -57,10 +57,10 @@ private:
 	using NotifyTable = std::map < uint32_t, Notification >;
 	using NotifyPair = std::pair < AmsAddr, uint32_t >;
 	using TableRef = std::unique_ptr<NotifyTable>;
-	std::map<AmsAddr, TableRef> tableMapping;
+	std::map<AmsAddr, TableRef> tableMapping[Router::NUM_PORTS_MAX];
 	std::mutex notificationLock;
 	void CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
-	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify);
+	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
 	std::vector<NotifyPair> CollectOrphanedNotifications(uint16_t port);
 
 };

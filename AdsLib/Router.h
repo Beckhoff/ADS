@@ -9,7 +9,7 @@ struct Router {
 	static const uint16_t PORT_BASE = 30000;
 	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");
 
-	virtual void Dispatch(Frame &frame, AmsAddr amsAddr) const = 0;
+	virtual void Dispatch(Frame &frame, AmsAddr amsAddr, uint16_t port) const = 0;
 	Frame& GetFrame() { return frame; };
 private:
 	Frame frame{ 10240 };

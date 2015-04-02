@@ -15,8 +15,10 @@
 #pragma warning(pop)
 using namespace fructose;
 
+static size_t g_NumNotifications = 0;
 static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
 {
+	++g_NumNotifications;
 #if 0
 	std::cout << std::setfill('0')
 		<< "hUser 0x" << std::hex << std::setw(4) << hUser
@@ -467,6 +469,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 	void testManyNotifications(const std::string& testname)
 	{
 		std::thread threads[8];
+		g_NumNotifications = 0;
 		const auto start = std::chrono::high_resolution_clock::now();
 		for (auto &t : threads) {
 			t = std::thread(&TestAdsPerformance::Notifications, this, 1024);
@@ -476,7 +479,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		}
 		const auto end = std::chrono::high_resolution_clock::now();
 		const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		out << testname << " took " << tmms << "ms\n";
+		out << testname << ' ' << g_NumNotifications / tmms << " notifications/ms (" << g_NumNotifications << '/' << tmms << ")\n";
 	}
 
 	void testParallelReadAndWrite(const std::string& testname)

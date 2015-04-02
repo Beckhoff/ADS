@@ -281,7 +281,7 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	if (!DeleteNotifyMapping(*pAddr, hNotification)) {
+	if (!DeleteNotifyMapping(*pAddr, hNotification, port)) {
 		return ADSERR_CLIENT_REMOVEHASH;
 	}
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotification));
@@ -293,16 +293,16 @@ void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificatio
 {
 	std::lock_guard<std::mutex> lock(notificationLock);
 
-	auto table = tableMapping.emplace(addr, TableRef(new NotifyTable())).first->second.get();
+	auto table = tableMapping[port - Router::PORT_BASE].emplace(addr, TableRef(new NotifyTable())).first->second.get();
 	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
 }
 
-bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify)
+bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
 {
 	std::lock_guard<std::mutex> lock(notificationLock);
 
-	auto table = tableMapping.find(addr);
-	if (table != tableMapping.end()) {
+	auto table = tableMapping[port - Router::PORT_BASE].find(addr);
+	if (table != tableMapping[port - Router::PORT_BASE].end()) {
 		return table->second->erase(hNotify);
 	}
 	return false;
@@ -313,7 +313,7 @@ std::vector<AmsRouter::NotifyPair> AmsRouter::CollectOrphanedNotifications(const
 	std::vector<NotifyPair> orphaned{};
 	std::unique_lock<std::mutex> lock(notificationLock);
 
-	for (const auto &mapping : tableMapping) {
+	for (const auto &mapping : tableMapping[port - Router::PORT_BASE]) {
 		auto &table = mapping.second.operator*();
 		for (auto it: table) {
 			if (it.second.port == port) {
@@ -336,10 +336,10 @@ std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 	return out << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
 }
 
-void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr) const
+void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr, uint16_t port) const
 {
-	const auto table = tableMapping.find(amsAddr);
-	if (table == tableMapping.end()) {
+	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
+	if (table == tableMapping[port - Router::PORT_BASE].end()) {
 		LOG_WARN("Notifcation from unknown source: " << amsAddr.netId);
 		return;
 	}

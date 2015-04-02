@@ -140,7 +140,7 @@ void AmsConnection::Recv()
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			Frame& frame = router.GetFrame();
 			ReceiveFrame(frame, header.length());
-			router.Dispatch(frame, header.sourceAddr());
+			router.Dispatch(frame, header.sourceAddr(), header.targetPort());
 			frame.reset();
 			continue;
 		}
