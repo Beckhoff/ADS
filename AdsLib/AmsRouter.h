@@ -58,7 +58,7 @@ private:
 	using NotifyPair = std::pair < AmsAddr, uint32_t >;
 	using TableRef = std::unique_ptr<NotifyTable>;
 	std::map<AmsAddr, TableRef> tableMapping[Router::NUM_PORTS_MAX];
-	std::mutex notificationLock;
+	std::array<std::mutex, Router::NUM_PORTS_MAX> notificationLock;
 	void CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
 	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
 	void DeleteOrphanedNotifications(uint16_t port);

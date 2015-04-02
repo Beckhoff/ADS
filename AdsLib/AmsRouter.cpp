@@ -289,7 +289,7 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 
 void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	std::lock_guard<std::mutex> lock(notificationLock);
+	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
 
 	auto table = tableMapping[port - Router::PORT_BASE].emplace(addr, TableRef(new NotifyTable())).first->second.get();
 	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
@@ -297,7 +297,7 @@ void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificatio
 
 bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(notificationLock);
+	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
 
 	auto table = tableMapping[port - Router::PORT_BASE].find(addr);
 	if (table != tableMapping[port - Router::PORT_BASE].end()) {
@@ -308,7 +308,7 @@ bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint1
 
 void AmsRouter::DeleteOrphanedNotifications(const uint16_t port)
 {
-	std::unique_lock<std::mutex> lock(notificationLock);
+	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
 	tableMapping[port - Router::PORT_BASE].clear();
 }
 
