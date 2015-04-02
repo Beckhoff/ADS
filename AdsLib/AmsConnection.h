@@ -50,6 +50,7 @@ private:
 	void TryRecv();
 
 	template<class T> T Receive() const;
+	void Read(const AoEHeader& header) const;
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 };

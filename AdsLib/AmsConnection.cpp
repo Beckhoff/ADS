@@ -116,6 +116,23 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 	return frame.limit(bytesLeft);
 }
 
+void AmsConnection::Read(const AoEHeader& header) const
+{
+	auto &ring = router.GetRing(header.targetPort());
+
+	auto bytesLeft = header.length();
+	auto chunk = ring.WriteChunk();
+	while (bytesLeft > chunk) {
+		Read(ring.write, chunk);
+		ring.Write(chunk);
+		chunk = ring.WriteChunk();
+		bytesLeft -= chunk;
+		Sleep(0);
+	}
+	Read(ring.write, bytesLeft);
+	ring.Write(bytesLeft);
+}
+
 void AmsConnection::TryRecv()
 {
 	try {
@@ -138,10 +155,8 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-			Frame& frame = router.GetFrame();
-			ReceiveFrame(frame, header.length());
-			router.Dispatch(frame, header.sourceAddr(), header.targetPort());
-			frame.reset();
+			Read(header);
+			router.Dispatch(header.sourceAddr(), header.targetPort(), header.length() - sizeof(uint32_t));
 			continue;
 		}
 

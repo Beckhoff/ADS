@@ -2,6 +2,7 @@
 #define _ADS_NOTIFICATION_H_
 
 #include "AdsDef.h"
+#include "RingBuffer.h"
 #include <memory>
 
 struct Notification
@@ -20,10 +21,12 @@ struct Notification
 		header->cbSampleSize = length;
 	}
 
-	void Notify(uint64_t timestamp, const uint8_t* data)
+	void Notify(uint64_t timestamp, RingBuffer& ring)
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
-		memcpy(header->data, data, header->cbSampleSize);
+		for (size_t i = 0; i < header->cbSampleSize; ++i) {
+			header->data[i] = ring.ReadFromLittleEndian<uint8_t>();
+		}
 		header->nTimeStamp = timestamp;
 		callback(&amsAddr, header, hUser);
 	}

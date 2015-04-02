@@ -35,7 +35,7 @@ struct AmsRouter : Router
 	void SetNetId(AmsNetId ams);
 	AmsConnection* GetConnection(const AmsNetId& pAddr);
 
-	void Dispatch(Frame &frame, AmsAddr amsAddr, uint16_t port) const;
+	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
 
 private:
 	static const uint32_t DEFAULT_TIMEOUT;

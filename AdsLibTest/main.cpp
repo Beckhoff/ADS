@@ -153,8 +153,8 @@ struct TestRingBuffer : test_base < TestRingBuffer >
 
 	void testBytesFree(const std::string&)
 	{
-		RingBuffer<1> testee;
-
+		RingBuffer testee{ 1 };
+		const auto data = testee.write;
 		fructose_assert(1 == testee.BytesFree());
 		fructose_assert(testee.write == testee.read);
 
@@ -162,8 +162,9 @@ struct TestRingBuffer : test_base < TestRingBuffer >
 		testee.Write(1);
 		fructose_assert(0 == testee.BytesFree());
 		fructose_assert(0xA5 == *testee.read);
+		fructose_assert(data + 1 == testee.write);
 
-		testee.Read(1);
+		testee.ReadFromLittleEndian<uint8_t>();
 		fructose_assert(1 == testee.BytesFree());
 		fructose_assert(testee.write == testee.read);
 
@@ -175,13 +176,13 @@ struct TestRingBuffer : test_base < TestRingBuffer >
 
 	void testWriteChunk(const std::string&)
 	{
-		RingBuffer<1> testee;
+		RingBuffer testee{ 1 };
 
 		for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
 			fructose_assert(1 == testee.WriteChunk());
 			testee.Write(1);
 			fructose_assert(0 == testee.WriteChunk());
-			testee.Read(1);
+			testee.ReadFromLittleEndian<uint8_t>();
 		}
 	}
 };

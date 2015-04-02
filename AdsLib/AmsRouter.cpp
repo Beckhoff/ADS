@@ -335,7 +335,7 @@ std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 	return out << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
 }
 
-void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr, uint16_t port) const
+void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
 	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
 	if (table == tableMapping[port - Router::PORT_BASE].end()) {
@@ -343,27 +343,33 @@ void AmsRouter::Dispatch(Frame &frame, const AmsAddr amsAddr, uint16_t port) con
 		return;
 	}
 
-	const auto length = extractLittleEndian<uint32_t>(frame);
-	if (length != frame.size()) {
-		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << frame.size());
+	auto &ring = GetRing(port);
+	const auto length = ring.ReadFromLittleEndian<uint32_t>();
+	if (length != expectedSize) {
+		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << expectedSize);
+		ring.Read(expectedSize);
 		return;
 	}
 
-	auto numStamps = extractLittleEndian<uint32_t>(frame);
-	while (numStamps-- > 0) {
-		const auto timestamp = extractLittleEndian<uint64_t>(frame);
-		auto numSamples = extractLittleEndian<uint32_t>(frame);
-		while (numSamples-- > 0) {
-			const auto hNotify = extractLittleEndian<uint32_t>(frame);
-			const auto size = extractLittleEndian<uint32_t>(frame);
+	const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
+	for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
+		const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
+		const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
+		for (uint32_t sample = 0; sample < numSamples; ++sample) {
+			const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
+			const auto size = ring.ReadFromLittleEndian<uint32_t>();
 			auto it = table->second->find(hNotify);
 			if (it != table->second->end()) {
-				auto notification = it->second;
+				auto &notification = it->second;
 				if (size != notification.Size()) {
 					LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
+					ring.Read(size);
 					return;
 				}
-				notification.Notify(timestamp, frame.data());
+				notification.Notify(timestamp, ring);
+			}
+			else {
+				ring.Read(size);
 			}
 		}
 	}
