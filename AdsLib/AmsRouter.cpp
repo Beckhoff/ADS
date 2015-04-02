@@ -282,9 +282,7 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 	if (!DeleteNotifyMapping(*pAddr, hNotification, port)) {
 		return ADSERR_CLIENT_REMOVEHASH;
 	}
-	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotification));
-	request.prepend(qToLittleEndian(hNotification));
-	return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+	return __DeleteNotification(*pAddr, hNotification, port);
 }
 
 void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
@@ -309,7 +307,20 @@ bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint1
 void AmsRouter::DeleteOrphanedNotifications(const uint16_t port)
 {
 	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
+
+	for (auto& table : tableMapping[port - Router::PORT_BASE]) {
+		for (auto& n : *table.second.get()) {
+			__DeleteNotification(table.first, n.first, port);
+		}
+	}
 	tableMapping[port - Router::PORT_BASE].clear();
+}
+
+long AmsRouter::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotify));
+	request.prepend(qToLittleEndian(hNotify));
+	return AdsRequest<AoEResponseHeader>(request, amsAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
