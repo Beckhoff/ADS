@@ -127,7 +127,7 @@ void AmsConnection::Read(const AoEHeader& header) const
 		ring.Write(chunk);
 		chunk = ring.WriteChunk();
 		bytesLeft -= chunk;
-		Sleep(0);
+		//TODO omit deadlock!
 	}
 	Read(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
