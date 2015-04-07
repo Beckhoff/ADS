@@ -346,9 +346,9 @@ void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSi
 	}
 
 	const auto length = ring.ReadFromLittleEndian<uint32_t>();
-	if (length != expectedSize) {
+	if (length != expectedSize - sizeof(length)) {
 		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << expectedSize);
-		ring.Read(expectedSize);
+		ring.Read(expectedSize - sizeof(length));
 		return;
 	}
 

@@ -161,7 +161,7 @@ void AmsConnection::Recv()
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			if (ReceiveNotification(header)) {
-				router.Dispatch(header.sourceAddr(), header.targetPort(), header.length() - sizeof(uint32_t));
+				router.Dispatch(header.sourceAddr(), header.targetPort(), header.length());
 			}
 			continue;
 		}
