@@ -601,9 +601,11 @@ struct TestAds : test_base < TestAds >
 struct TestAdsPerformance : test_base < TestAdsPerformance >
 {
 	std::ostream &out;
+	bool runEndurance;
 
 	TestAdsPerformance(std::ostream& outstream)
-		: out(outstream)
+		: out(outstream),
+		runEndurance(false)
 	{
 		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
 	}
@@ -664,6 +666,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
 		uint32_t hUser = 0xDEADBEEF;
 
+		runEndurance = true;
 		std::thread threads[8];
 		for (auto &t : threads) {
 			t = std::thread(&TestAdsPerformance::Read, this, 1024);
@@ -676,6 +679,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 
 		std::cout << "Hit ENTER to stop endurance test\n";
 		std::cin.ignore();
+		runEndurance = false;
 
 		for (hUser = 0; hUser < numNotifications; ++hUser) {
 			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
@@ -718,10 +722,13 @@ private:
 
 		uint32_t bytesRead;
 		uint32_t buffer;
-		for (size_t i = 0; i < numLoops; ++i) {
-			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
-			fructose_loop_assert(i, 0 == buffer);
+		std::cout << "HUHU" << std::endl;
+		while(runEndurance) {
+			for (size_t i = 0; i < numLoops; ++i) {
+				fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+				fructose_loop_assert(i, sizeof(buffer) == bytesRead);
+				fructose_loop_assert(i, 0 == buffer);
+			}
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
