@@ -13,7 +13,7 @@ AmsRouter::AmsRouter(AmsNetId netId)
 	std::fill(portTimeout.begin(), portTimeout.end(), DEFAULT_TIMEOUT);
 }
 
-bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
+long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
@@ -24,8 +24,8 @@ bool AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 	}
 
 	mapping[ams] = conn->second.get();
-	DeleteIfLastConnection(oldConnection);	
-	return true;
+	DeleteIfLastConnection(oldConnection);
+	return 0;
 }
 
 void AmsRouter::DelRoute(const AmsNetId& ams)

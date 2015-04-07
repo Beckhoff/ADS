@@ -30,7 +30,7 @@ struct AmsRouter : Router
 	long AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, const AdsNotificationAttrib* pAttrib, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t *pNotification);
 	long DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification);
 
-	bool AddRoute(AmsNetId ams, const IpV4& ip);
+	long AddRoute(AmsNetId ams, const IpV4& ip);
 	void DelRoute(const AmsNetId& ams);
 	void SetNetId(AmsNetId ams);
 	AmsConnection* GetConnection(const AmsNetId& pAddr);
