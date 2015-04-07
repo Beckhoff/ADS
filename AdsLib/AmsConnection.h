@@ -44,13 +44,13 @@ private:
 	std::thread receiver;
 	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
-	void ReadJunk(size_t bytesToRead) const;
-	void Read(uint8_t* buffer, size_t bytesToRead) const;
+	void ReceiveJunk(size_t bytesToRead) const;
+	void Receive(uint8_t* buffer, size_t bytesToRead) const;
 	void Recv();
 	void TryRecv();
 
 	template<class T> T Receive() const;
-	void Read(const AoEHeader& header) const;
+	void ReceiveNotification(const AoEHeader& header) const;
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 };

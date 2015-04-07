@@ -79,7 +79,7 @@ void AmsConnection::Release(AmsResponse* response)
 	response->invokeId = 0;
 }
 
-void AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
+void AmsConnection::Receive(uint8_t* buffer, size_t bytesToRead) const
 {
 	while (bytesToRead) {
 		const size_t bytesRead = socket.read(buffer, bytesToRead);
@@ -88,20 +88,20 @@ void AmsConnection::Read(uint8_t* buffer, size_t bytesToRead) const
 	}
 }
 
-void AmsConnection::ReadJunk(size_t bytesToRead) const
+void AmsConnection::ReceiveJunk(size_t bytesToRead) const
 {
 	uint8_t buffer[1024];
 	while (bytesToRead > sizeof(buffer)) {
-		Read(buffer, sizeof(buffer));
+		Receive(buffer, sizeof(buffer));
 		bytesToRead -= sizeof(buffer);
 	}
-	Read(buffer, bytesToRead);
+	Receive(buffer, bytesToRead);
 }
 
 template<class T> T AmsConnection::Receive() const
 {
 	uint8_t buffer[sizeof(T)];
-	Read(buffer, sizeof(buffer));
+	Receive(buffer, sizeof(buffer));
 	return T{ buffer };
 }
 
@@ -109,27 +109,31 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 {
 	if (bytesLeft > frame.capacity()) {
 		LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << frame.capacity());
-		ReadJunk(bytesLeft);
+		ReceiveJunk(bytesLeft);
 		return frame.clear();
 	}
-	Read(frame.rawData(), bytesLeft);
+	Receive(frame.rawData(), bytesLeft);
 	return frame.limit(bytesLeft);
 }
 
-void AmsConnection::Read(const AoEHeader& header) const
+void AmsConnection::ReceiveNotification(const AoEHeader& header) const
 {
 	auto &ring = router.GetRing(header.targetPort());
-
 	auto bytesLeft = header.length();
+	if (bytesLeft > ring.BytesFree()) {
+		ReceiveJunk(bytesLeft);
+		LOG_WARN("port " << std::dec << header.targetPort() << " receive buffer was full");
+		return;
+	}
+
 	auto chunk = ring.WriteChunk();
 	while (bytesLeft > chunk) {
-		Read(ring.write, chunk);
+		Receive(ring.write, chunk);
 		ring.Write(chunk);
-		chunk = ring.WriteChunk();
 		bytesLeft -= chunk;
-		//TODO omit deadlock!
+		chunk = ring.WriteChunk();
 	}
-	Read(ring.write, bytesLeft);
+	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
 }
 
@@ -149,13 +153,13 @@ void AmsConnection::Recv()
 		const auto amsTcp = Receive<AmsTcpHeader>();
 		if (amsTcp.length() < sizeof(AoEHeader)) {
 			LOG_WARN("Frame to short to be AoE");
-			ReadJunk(amsTcp.length());
+			ReceiveJunk(amsTcp.length());
 			continue;
 		}
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-			Read(header);
+			ReceiveNotification(header);
 			router.Dispatch(header.sourceAddr(), header.targetPort(), header.length() - sizeof(uint32_t));
 			continue;
 		}
@@ -163,7 +167,7 @@ void AmsConnection::Recv()
 		auto response = GetPending(header.invokeId(), header.targetPort());
 		if (!response) {
 			LOG_WARN("No response pending");
-			ReadJunk(header.length());
+			ReceiveJunk(header.length());
 			continue;
 		}
 

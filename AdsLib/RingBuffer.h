@@ -18,6 +18,11 @@ struct RingBuffer
 		return (write < read) ? read - write - 1 : dataSize - 1 - (write - read);
 	}
 
+	size_t BytesAvailable() const
+	{
+		return dataSize - BytesFree() - 1;
+	}
+
 	size_t WriteChunk() const
 	{
 		return (write < read) ? read - write - 1 : data.get() + dataSize - write - (data.get() == read);
@@ -41,6 +46,7 @@ struct RingBuffer
 
 	void Read(size_t n)
 	{
+		assert(n <= BytesAvailable());
 		read = Increment(read, n);
 	}
 

@@ -155,21 +155,25 @@ struct TestRingBuffer : test_base < TestRingBuffer >
 	{
 		RingBuffer testee{ 1 };
 		const auto data = testee.write;
+		fructose_assert(0 == testee.BytesAvailable());
 		fructose_assert(1 == testee.BytesFree());
 		fructose_assert(testee.write == testee.read);
 
 		*testee.write = 0xA5;
 		testee.Write(1);
+		fructose_assert(1 == testee.BytesAvailable());
 		fructose_assert(0 == testee.BytesFree());
 		fructose_assert(0xA5 == *testee.read);
 		fructose_assert(data + 1 == testee.write);
 
 		testee.ReadFromLittleEndian<uint8_t>();
+		fructose_assert(0 == testee.BytesAvailable());
 		fructose_assert(1 == testee.BytesFree());
 		fructose_assert(testee.write == testee.read);
 
 		*testee.write = 0x5A;
 		testee.Write(1);
+		fructose_assert(1 == testee.BytesAvailable());
 		fructose_assert(0 == testee.BytesFree());
 		fructose_assert(0x5A == *testee.read);
 	}
@@ -762,7 +766,7 @@ int main()
 	TestRingBuffer ringBufferTest(errorstream);
 	ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
 	ringBufferTest.add_test("testWriteChunk", &TestRingBuffer::testWriteChunk);
-//	ringBufferTest.run();
+	ringBufferTest.run();
 
 	TestAds adsTest(errorstream);
 	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
