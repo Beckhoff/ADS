@@ -116,14 +116,14 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 	return frame.limit(bytesLeft);
 }
 
-void AmsConnection::ReceiveNotification(const AoEHeader& header) const
+bool AmsConnection::ReceiveNotification(const AoEHeader& header) const
 {
 	auto &ring = router.GetRing(header.targetPort());
 	auto bytesLeft = header.length();
 	if (bytesLeft > ring.BytesFree()) {
 		ReceiveJunk(bytesLeft);
 		LOG_WARN("port " << std::dec << header.targetPort() << " receive buffer was full");
-		return;
+		return false;
 	}
 
 	auto chunk = ring.WriteChunk();
@@ -135,6 +135,7 @@ void AmsConnection::ReceiveNotification(const AoEHeader& header) const
 	}
 	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
+	return true;
 }
 
 void AmsConnection::TryRecv()
@@ -159,8 +160,9 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-			ReceiveNotification(header);
-			router.Dispatch(header.sourceAddr(), header.targetPort(), header.length() - sizeof(uint32_t));
+			if (ReceiveNotification(header)) {
+				router.Dispatch(header.sourceAddr(), header.targetPort(), header.length() - sizeof(uint32_t));
+			}
 			continue;
 		}
 
