@@ -337,13 +337,14 @@ std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 
 void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
+	auto &ring = GetRing(port);
 	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
 	if (table == tableMapping[port - Router::PORT_BASE].end()) {
 		LOG_WARN("Notifcation from unknown source: " << amsAddr.netId);
+		ring.Read(expectedSize);
 		return;
 	}
 
-	auto &ring = GetRing(port);
 	const auto length = ring.ReadFromLittleEndian<uint32_t>();
 	if (length != expectedSize) {
 		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << expectedSize);
