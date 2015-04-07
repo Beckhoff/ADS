@@ -2,6 +2,7 @@
 VPATH = AdsLib
 LIBS = -lpthread
 CC = g++
+LIB_NAME = AdsLib-$(shell uname).a
 
 ifeq ($(shell uname),Darwin)
 	CC = clang
@@ -13,16 +14,16 @@ all: AdsLibTest.bin
 .cpp.o:
 	$(CC) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/
 
-AdsLib.a: AdsLib.o AmsConnection.o AmsRouter.o Log.o Sockets.o Frame.o
+$(LIB_NAME): AdsLib.o AmsConnection.o AmsRouter.o Log.o Sockets.o Frame.o
 	ar rvs $@ $?
 
-AdsLibTest.bin: AdsLib.a
+AdsLibTest.bin: $(LIB_NAME)
 	$(CC) AdsLibTest/main.cpp $< -I AdsLib/ -I ../ -std=c++11 $(LIBS) -o $@
 	
 test: AdsLibTest.bin
 	./$<
 
-release: AdsLib.a AdsLib.h AdsDef.h
+release: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? AdsLibExample/
 
 clean:
