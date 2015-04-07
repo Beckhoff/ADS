@@ -657,7 +657,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 
 	void testEndurance(const std::string& testname)
 	{
-		static const size_t numNotifications = 128;
+		static const size_t numNotifications = 1024;
 		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
 		const long port = AdsPortOpenEx();
 		fructose_assert(0 != port);
@@ -667,7 +667,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		uint32_t hUser = 0xDEADBEEF;
 
 		runEndurance = true;
-		std::thread threads[8];
+		std::thread threads[1];
 		for (auto &t : threads) {
 			t = std::thread(&TestAdsPerformance::Read, this, 1024);
 		}
@@ -722,7 +722,6 @@ private:
 
 		uint32_t bytesRead;
 		uint32_t buffer;
-		std::cout << "HUHU" << std::endl;
 		while(runEndurance) {
 			for (size_t i = 0; i < numLoops; ++i) {
 				fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
