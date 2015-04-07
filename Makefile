@@ -24,7 +24,7 @@ test: AdsLibTest.bin
 	./$<
 
 release: $(LIB_NAME) AdsLib.h AdsDef.h
-	cp $? AdsLibExample/
+	cp $? example/
 
 clean:
 	rm -f *.a *.o *.bin
