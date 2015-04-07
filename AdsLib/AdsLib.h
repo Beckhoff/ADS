@@ -3,9 +3,8 @@
 
 #include <cstdint>
 #include "AdsDef.h"
-#include "Sockets.h"
 
-long AdsAddRoute(AmsNetId ams, IpV4 ip);
+long AdsAddRoute(AmsNetId ams, const char* ip);
 void AdsDelRoute(AmsNetId ams);
 void AdsSetNetId(AmsNetId ams);
 

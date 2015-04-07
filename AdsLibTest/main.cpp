@@ -199,7 +199,7 @@ struct TestAds : test_base < TestAds >
 	TestAds(std::ostream& outstream)
 		: out(outstream)
 	{
-		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
+		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, "192.168.0.232");
 	}
 #ifdef WIN32
 	~TestAds()
@@ -611,7 +611,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		: out(outstream),
 		runEndurance(false)
 	{
-		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, IpV4{ "192.168.0.232" });
+		AdsAddRoute(AmsNetId{ 192, 168, 0, 231, 1, 1 }, "192.168.0.232");
 	}
 #ifdef WIN32
 	~TestAdsPerformance()

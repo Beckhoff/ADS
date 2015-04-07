@@ -35,9 +35,9 @@ bool operator <(const AmsAddr_& lhs, const AmsAddr_& rhs)
 	} \
 } while (false)
 
-long AdsAddRoute(const AmsNetId ams, const IpV4 ip)
+long AdsAddRoute(const AmsNetId ams, const char* ip)
 {
-	return router.AddRoute(ams, ip);
+	return router.AddRoute(ams, IpV4(ip));
 }
 
 void AdsDelRoute(const AmsNetId ams)
