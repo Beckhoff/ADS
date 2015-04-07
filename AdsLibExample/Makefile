@@ -1,9 +1,10 @@
 
 CC = g++
+LIB_NAME = AdsLib-$(shell uname).a
 
 all: example.bin
 
-example.bin: AdsLib.a
+example.bin: $(LIB_NAME)
 	$(CC) example.cpp $< -std=c++11 -lpthread -o $@
 	
 test: example.bin
