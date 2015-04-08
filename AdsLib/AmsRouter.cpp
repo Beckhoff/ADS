@@ -62,13 +62,9 @@ uint16_t AmsRouter::OpenPort()
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	if (ports.all()) {
-		return 0;
-	}
-
-	for (uint16_t i = 0; i < ports.size(); ++i) {
-		if (!ports[i]) {
-			ports.set(i);
+	for (uint16_t i = 0; i < NUM_PORTS_MAX; ++i) {
+		if (!ports[i].IsOpen()) {
+			ports[i].Open();
 			return PORT_BASE + i;
 		}
 	}
@@ -80,10 +76,10 @@ long AmsRouter::ClosePort(uint16_t port)
 	DeleteOrphanedNotifications(port);
 
 	std::lock_guard<std::mutex> lock(mutex);
-	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports.test(port - PORT_BASE)) {
+	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports[port - PORT_BASE].IsOpen()) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
-	ports.reset(port - PORT_BASE);
+	ports[port - PORT_BASE].Close();
 	return 0;
 }
 
@@ -94,7 +90,7 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
 
-	if (ports.test(port - PORT_BASE)) {
+	if (ports[port - PORT_BASE].IsOpen()) {
 		memcpy(&pAddr->netId, &localAddr, sizeof(localAddr));
 		pAddr->port = port;
 		return 0;
@@ -337,6 +333,7 @@ std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 
 void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
+	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
 	auto &ring = GetRing(port);
 	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
 	if (table == tableMapping[port - Router::PORT_BASE].end()) {

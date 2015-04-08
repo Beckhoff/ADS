@@ -3,6 +3,7 @@
 
 #include "AdsDef.h"
 #include "AmsConnection.h"
+#include "AmsPort.h"
 #include "AdsNotification.h"
 
 #include <array>
@@ -40,7 +41,6 @@ struct AmsRouter : Router
 private:
 	static const uint32_t DEFAULT_TIMEOUT;
 
-	std::bitset<NUM_PORTS_MAX> ports;
 	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
 	AmsNetId localAddr;
 	std::mutex mutex;
@@ -63,5 +63,7 @@ private:
 	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
 	void DeleteOrphanedNotifications(uint16_t port);
 	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port);
+
+	AmsPort ports[NUM_PORTS_MAX];
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

@@ -76,6 +76,7 @@
     <ClInclude Include="AdsLib.h" />
     <ClInclude Include="AdsNotification.h" />
     <ClInclude Include="AmsHeader.h" />
+    <ClInclude Include="AmsPort.h" />
     <ClInclude Include="AmsRouter.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Log.h" />
@@ -89,6 +90,7 @@
   <ItemGroup>
     <ClCompile Include="AmsConnection.cpp" />
     <ClCompile Include="AdsLib.cpp" />
+    <ClCompile Include="AmsPort.cpp" />
     <ClCompile Include="AmsRouter.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Log.cpp" />

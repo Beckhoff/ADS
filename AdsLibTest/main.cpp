@@ -776,14 +776,14 @@ int main()
 	adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
+//	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
-	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
+//	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
 	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
-	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
+//	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
 	performance.run();
 
 	std::cout << "Hit ENTER to continue\n";
