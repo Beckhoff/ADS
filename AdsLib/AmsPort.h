@@ -1,17 +1,20 @@
 #ifndef _AMS_PORT_H_
 #define _AMS_PORT_H_
 
-#include <cstdint>
+#include "AdsDef.h"
 
 struct AmsPort
 {
-	AmsPort();
+	AmsPort(const AmsNetId *__localAddr = nullptr);
+	void operator=(const AmsPort &ref);
 	void Close();
+	long GetLocalAddress(AmsAddr* pAddr) const;
 	bool IsOpen() const;
-	void Open();
+	uint16_t Open(uint16_t __port);
 	uint32_t tmms;
+	uint16_t port;
 private:
 	static const uint32_t DEFAULT_TIMEOUT = 5000;
-	bool isOpen;	
+	const AmsNetId *const localAddr;
 };
 #endif /* #ifndef _AMS_PORT_H_ */

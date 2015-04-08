@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <memory>
 
 struct RingBuffer
 {

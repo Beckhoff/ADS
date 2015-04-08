@@ -1,6 +1,5 @@
 #include "AmsConnection.h"
 #include "AmsHeader.h"
-#include "AmsRouter.h"
 #include "Log.h"
 
 AmsResponse::AmsResponse()
@@ -35,6 +34,39 @@ AmsConnection::~AmsConnection()
 {
 	socket.Shutdown();
 	receiver.join();
+}
+
+void AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
+{
+	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
+
+	auto table = tableMapping[port - Router::PORT_BASE].emplace(addr, TableRef(new NotifyTable())).first->second.get();
+	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
+}
+
+bool AmsConnection::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
+{
+	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
+
+	auto table = tableMapping[port - Router::PORT_BASE].find(addr);
+	if (table != tableMapping[port - Router::PORT_BASE].end()) {
+		return table->second->erase(hNotify);
+	}
+	return false;
+}
+
+void AmsConnection::DeleteOrphanedNotifications(const AmsPort &port)
+{
+	std::unique_lock<std::mutex> lock(notificationLock[port.port - Router::PORT_BASE]);
+
+	for (auto& table : tableMapping[port.port - Router::PORT_BASE]) {
+		for (auto& n : *table.second.get()) {
+			Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(n.first));
+			request.prepend(qToLittleEndian(n.first));
+			AdsRequest<AoEResponseHeader>(request, table.first, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+		}
+	}
+	tableMapping[port.port - Router::PORT_BASE].clear();
 }
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)

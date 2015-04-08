@@ -51,16 +51,8 @@ private:
 	template<class T>
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr);
 
-	using NotifyTable = std::map < uint32_t, Notification >;
-	using NotifyPair = std::pair < AmsAddr, uint32_t >;
-	using TableRef = std::unique_ptr<NotifyTable>;
-	std::map<AmsAddr, TableRef> tableMapping[Router::NUM_PORTS_MAX];
-	std::array<std::mutex, Router::NUM_PORTS_MAX> notificationLock;
-	void CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
-	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
-	void DeleteOrphanedNotifications(uint16_t port);
 	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port);
 
-	AmsPort ports[NUM_PORTS_MAX];
+	std::array<AmsPort, NUM_PORTS_MAX> ports;
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

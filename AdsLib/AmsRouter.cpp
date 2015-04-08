@@ -7,7 +7,9 @@
 
 AmsRouter::AmsRouter(AmsNetId netId)
 	: localAddr(netId)
-{}
+{
+	std::fill(ports.begin(), ports.end(), AmsPort{ &localAddr });
+}
 
 long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
@@ -60,8 +62,7 @@ uint16_t AmsRouter::OpenPort()
 
 	for (uint16_t i = 0; i < NUM_PORTS_MAX; ++i) {
 		if (!ports[i].IsOpen()) {
-			ports[i].Open();
-			return PORT_BASE + i;
+			return ports[i].Open(PORT_BASE + i);
 		}
 	}
 	return 0;
@@ -69,11 +70,13 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	DeleteOrphanedNotifications(port);
-
 	std::lock_guard<std::mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports[port - PORT_BASE].IsOpen()) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
+	}
+
+	for (auto &conn : connections) {
+		conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
 	}
 	ports[port - PORT_BASE].Close();
 	return 0;
@@ -193,35 +196,12 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	if (bytesRead) {
 		*bytesRead = 0;
 	}
-	AmsAddr srcAddr;
-	const auto status = GetLocalAddress(port, &srcAddr);
-	if (status) {
-		return status;
-	}
 
 	auto ads = GetConnection(destAddr.netId);
 	if (!ads) {
 		return GLOBALERR_MISSING_ROUTE;
 	}
-
-	AmsResponse* response = ads->Write(request, destAddr, srcAddr, cmdId);
-	if (response) {
-		uint32_t timeout_ms;
-		GetTimeout(port, timeout_ms);
-		if (response->Wait(timeout_ms)){
-			const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
-			T header(response->frame.data());
-			memcpy(buffer, response->frame.data() + sizeof(T), bytesAvailable);
-			if (bytesRead) {
-				*bytesRead = bytesAvailable;
-			}
-			ads->Release(response);
-			return header.result();
-		}
-		ads->Release(response);
-		return ADSERR_CLIENT_SYNCTIMEOUT;
-	}
-	return -1;
+	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE], cmdId, bufferLength, buffer, bytesRead);
 }
 
 long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
@@ -264,48 +244,19 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 	const long status = AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(buffer), buffer);
 	if (!status) {
 		*pNotification = qFromLittleEndian<uint32_t>(buffer);
-		CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
+		AmsConnection &conn = *GetConnection(pAddr->netId);
+		conn.CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
 	}
 	return status;
 }
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	if (!DeleteNotifyMapping(*pAddr, hNotification, port)) {
+	AmsConnection *conn = GetConnection(pAddr->netId);
+	if (!conn || !conn->DeleteNotifyMapping(*pAddr, hNotification, port)) {
 		return ADSERR_CLIENT_REMOVEHASH;
 	}
 	return __DeleteNotification(*pAddr, hNotification, port);
-}
-
-void AmsRouter::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
-{
-	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-
-	auto table = tableMapping[port - Router::PORT_BASE].emplace(addr, TableRef(new NotifyTable())).first->second.get();
-	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
-}
-
-bool AmsRouter::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
-{
-	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-
-	auto table = tableMapping[port - Router::PORT_BASE].find(addr);
-	if (table != tableMapping[port - Router::PORT_BASE].end()) {
-		return table->second->erase(hNotify);
-	}
-	return false;
-}
-
-void AmsRouter::DeleteOrphanedNotifications(const uint16_t port)
-{
-	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-
-	for (auto& table : tableMapping[port - Router::PORT_BASE]) {
-		for (auto& n : *table.second.get()) {
-			__DeleteNotification(table.first, n.first, port);
-		}
-	}
-	tableMapping[port - Router::PORT_BASE].clear();
 }
 
 long AmsRouter::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port)
@@ -329,6 +280,7 @@ std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
 
 void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
+#if 0
 	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
 	auto &ring = GetRing(port);
 	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
@@ -367,4 +319,5 @@ void AmsRouter::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSi
 			}
 		}
 	}
+#endif
 }
