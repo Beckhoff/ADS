@@ -2,7 +2,8 @@
 #include "AmsPort.h"
 
 AmsPort::AmsPort()
-	:isOpen(false)
+	: tmms(DEFAULT_TIMEOUT),
+	isOpen(false)
 {}
 
 void AmsPort::Close()

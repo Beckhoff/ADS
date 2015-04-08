@@ -5,13 +5,9 @@
 
 #include <algorithm>
 
-const uint32_t AmsRouter::DEFAULT_TIMEOUT = 5000;
-
 AmsRouter::AmsRouter(AmsNetId netId)
 	: localAddr(netId)
-{
-	std::fill(portTimeout.begin(), portTimeout.end(), DEFAULT_TIMEOUT);
-}
+{}
 
 long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
@@ -105,7 +101,7 @@ long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
 
-	timeout = portTimeout[port - PORT_BASE];
+	timeout = ports[port - PORT_BASE].tmms;
 	return 0;
 }
 
@@ -116,7 +112,7 @@ long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
 
-	portTimeout[port - PORT_BASE] = timeout;
+	ports[port - PORT_BASE].tmms = timeout;
 	return 0;
 }
 

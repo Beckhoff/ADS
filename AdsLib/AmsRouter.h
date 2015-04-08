@@ -39,9 +39,6 @@ struct AmsRouter : Router
 	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
 
 private:
-	static const uint32_t DEFAULT_TIMEOUT;
-
-	std::array<uint32_t, NUM_PORTS_MAX> portTimeout;
 	AmsNetId localAddr;
 	std::mutex mutex;
 	std::map<IpV4, std::unique_ptr<AmsConnection>> connections;
