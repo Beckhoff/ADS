@@ -153,9 +153,9 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 	return frame.limit(bytesLeft);
 }
 
-bool AmsConnection::ReceiveNotification(const AoEHeader& header) const
+bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-	auto &ring = router.GetRing(header.targetPort());
+	auto &ring = GetRing(header.targetPort());
 	auto bytesLeft = header.length();
 	if (bytesLeft > ring.BytesFree()) {
 		ReceiveJunk(bytesLeft);
@@ -197,9 +197,13 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
+#if 1
 			if (ReceiveNotification(header)) {
-				router.Dispatch(header.sourceAddr(), header.targetPort(), header.length());
+				Dispatch(header.sourceAddr(), header.targetPort(), header.length());
 			}
+#else
+			ReceiveJunk(header.length());
+#endif
 			continue;
 		}
 
@@ -226,5 +230,59 @@ void AmsConnection::Recv()
 			response->frame.clear();
 		}
 		response->Notify();
+	}
+}
+
+const std::map<uint32_t, Notification>* AmsConnection::GetNotifyTable(const AmsAddr& amsAddr, uint16_t port)
+{
+	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
+	if (table == tableMapping[port - Router::PORT_BASE].end()) {
+		return nullptr;
+	}
+	return table->second.get();
+}
+
+void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
+{
+	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
+	auto table = GetNotifyTable(amsAddr, port);
+	auto &ring = GetRing(port);
+	
+	if (!table) {
+		LOG_WARN("Notification from unknown source: " << std::dec
+			<< (int)amsAddr.netId.b[0] << '.' << (int)amsAddr.netId.b[1] << '.' << (int)amsAddr.netId.b[2] << '.'
+			<< (int)amsAddr.netId.b[3] << '.' << (int)amsAddr.netId.b[4] << '.' << (int)amsAddr.netId.b[5] << '.');
+		ring.Read(expectedSize);
+		return;
+	}
+
+	const auto length = ring.ReadFromLittleEndian<uint32_t>();
+	if (length != expectedSize - sizeof(length)) {
+		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << expectedSize);
+		ring.Read(expectedSize - sizeof(length));
+		return;
+	}
+
+	const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
+	for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
+		const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
+		const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
+		for (uint32_t sample = 0; sample < numSamples; ++sample) {
+			const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
+			const auto size = ring.ReadFromLittleEndian<uint32_t>();
+			auto it = table->find(hNotify);
+			if (it != table->end()) {
+				auto &notification = it->second;
+				if (size != notification.Size()) {
+					LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
+					ring.Read(size);
+					return;
+				}
+				notification.Notify(timestamp, ring);
+			}
+			else {
+				ring.Read(size);
+			}
+		}
 	}
 }

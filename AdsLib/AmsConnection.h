@@ -89,9 +89,16 @@ private:
 	void TryRecv();
 
 	template<class T> T Receive() const;
-	bool ReceiveNotification(const AoEHeader& header) const;
+	bool ReceiveNotification(const AoEHeader& header);
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
+
+	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
+	
+	RingBuffer ringBuffer;
+	RingBuffer& GetRing(uint16_t port) { return ringBuffer; };
+
+	const std::map<uint32_t, Notification>* GetNotifyTable(const AmsAddr& amsAddr, uint16_t port);
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

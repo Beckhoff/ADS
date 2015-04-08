@@ -36,8 +36,6 @@ struct AmsRouter : Router
 	void SetNetId(AmsNetId ams);
 	AmsConnection* GetConnection(const AmsNetId& pAddr);
 
-	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
-
 private:
 	AmsNetId localAddr;
 	std::mutex mutex;

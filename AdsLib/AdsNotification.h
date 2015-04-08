@@ -21,7 +21,7 @@ struct Notification
 		header->cbSampleSize = length;
 	}
 
-	void Notify(uint64_t timestamp, RingBuffer& ring)
+	void Notify(uint64_t timestamp, RingBuffer& ring) const
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
 		for (size_t i = 0; i < header->cbSampleSize; ++i) {
