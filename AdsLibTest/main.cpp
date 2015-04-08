@@ -94,22 +94,22 @@ struct TestAmsRouter : test_base < TestAmsRouter >
 		AmsRouter testee;
 
 		// test new Ams with new Ip
-		fructose_assert(testee.AddRoute(netId_1, ip_local));
+		fructose_assert(0 == testee.AddRoute(netId_1, ip_local));
 		fructose_assert(testee.GetConnection(netId_1));
 		fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
 		// existent Ams with new Ip -> close old connection
-		fructose_assert(testee.AddRoute(netId_1, ip_remote));
+		fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
 		fructose_assert(testee.GetConnection(netId_1));
 		fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
 
 		// new Ams with existent Ip
-		fructose_assert(testee.AddRoute(netId_2, ip_remote));
+		fructose_assert(0 == testee.AddRoute(netId_2, ip_remote));
 		fructose_assert(testee.GetConnection(netId_2));
 		fructose_assert(ip_remote == testee.GetConnection(netId_2)->destIp);
 
 		// already exists
-		fructose_assert(testee.AddRoute(netId_1, ip_remote));
+		fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
 		fructose_assert(testee.GetConnection(netId_1));
 		fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
 	}
@@ -123,17 +123,17 @@ struct TestAmsRouter : test_base < TestAmsRouter >
 		AmsRouter testee;
 
 		// add + remove -> null
-		fructose_assert(testee.AddRoute(netId_1, ip_remote));
+		fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
 		fructose_assert(testee.GetConnection(netId_1));
 		fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
 		testee.DelRoute(netId_1);
 		fructose_assert(!testee.GetConnection(netId_1));
 
 		// add_1, add_2, remove_1 -> null_1 valid_2
-		fructose_assert(testee.AddRoute(netId_1, ip_remote));
+		fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
 		fructose_assert(testee.GetConnection(netId_1));
 		fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
-		fructose_assert(testee.AddRoute(netId_2, ip_local));
+		fructose_assert(0 == testee.AddRoute(netId_2, ip_local));
 		fructose_assert(testee.GetConnection(netId_2));
 		fructose_assert(ip_local == testee.GetConnection(netId_2)->destIp);
 		testee.DelRoute(netId_1);
@@ -726,13 +726,13 @@ private:
 
 		uint32_t bytesRead;
 		uint32_t buffer;
-		while(runEndurance) {
+		do {
 			for (size_t i = 0; i < numLoops; ++i) {
 				fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
 				fructose_loop_assert(i, sizeof(buffer) == bytesRead);
 				fructose_loop_assert(i, 0 == buffer);
 			}
-		}
+		} while(runEndurance);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };
@@ -761,7 +761,7 @@ int main()
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
-//	routerTest.run();
+	routerTest.run();
 
 	TestRingBuffer ringBufferTest(errorstream);
 	ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
@@ -778,11 +778,11 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-//	adsTest.run();
+	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
-//	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-//	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
+	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
 	performance.run();
 
