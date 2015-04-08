@@ -61,12 +61,17 @@ void AmsConnection::DeleteOrphanedNotifications(const AmsPort &port)
 
 	for (auto& table : tableMapping[port.port - Router::PORT_BASE]) {
 		for (auto& n : *table.second.get()) {
-			Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(n.first));
-			request.prepend(qToLittleEndian(n.first));
-			AdsRequest<AoEResponseHeader>(request, table.first, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+			__DeleteNotification(table.first, n.first, port);
 		}
 	}
 	tableMapping[port.port - Router::PORT_BASE].clear();
+}
+
+long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port)
+{
+	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotify));
+	request.prepend(qToLittleEndian(hNotify));
+	return AdsRequest<AoEResponseHeader>(request, amsAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)

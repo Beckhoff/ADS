@@ -51,8 +51,6 @@ private:
 	template<class T>
 	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr);
 
-	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port);
-
 	std::array<AmsPort, NUM_PORTS_MAX> ports;
 };
 #endif /* #ifndef _AMS_ROUTER_H_ */

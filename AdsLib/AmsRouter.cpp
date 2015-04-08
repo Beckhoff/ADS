@@ -256,14 +256,7 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 	if (!conn || !conn->DeleteNotifyMapping(*pAddr, hNotification, port)) {
 		return ADSERR_CLIENT_REMOVEHASH;
 	}
-	return __DeleteNotification(*pAddr, hNotification, port);
-}
-
-long AmsRouter::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint16_t port)
-{
-	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotify));
-	request.prepend(qToLittleEndian(hNotify));
-	return AdsRequest<AoEResponseHeader>(request, amsAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+	return conn->__DeleteNotification(*pAddr, hNotification, ports[port - Router::PORT_BASE]);
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
