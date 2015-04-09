@@ -7,9 +7,7 @@
 
 AmsRouter::AmsRouter(AmsNetId netId)
 	: localAddr(netId)
-{
-	std::fill(ports.begin(), ports.end(), AmsPort{ &localAddr });
-}
+{}
 
 long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
@@ -76,7 +74,7 @@ long AmsRouter::ClosePort(uint16_t port)
 	}
 
 	for (auto &conn : connections) {
-		//conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
+		conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
 	}
 	ports[port - PORT_BASE].Close();
 	return 0;
@@ -201,7 +199,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	if (!ads) {
 		return GLOBALERR_MISSING_ROUTE;
 	}
-	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE], cmdId, bufferLength, buffer, bytesRead);
+	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE], cmdId, 0, bufferLength, buffer, bytesRead);
 }
 
 long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)

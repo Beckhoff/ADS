@@ -20,6 +20,7 @@ struct AmsResponse
 {
 	Frame frame;
 	uint32_t invokeId;
+	uint32_t extra;
 
 	AmsResponse();
 	void Notify();
@@ -41,19 +42,19 @@ struct AmsConnection
 	void DeleteOrphanedNotifications(AmsPort & port);
 	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port);
 
-	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
+	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra = 0);
 	void Release(AmsResponse* response);
 	AmsResponse* GetPending(uint32_t id, uint16_t port);
 
 	template <class T>
-	long AdsRequest(Frame& request, const AmsAddr& destAddr, const AmsPort& port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr)
+	long AdsRequest(Frame& request, const AmsAddr& destAddr, const AmsPort& port, uint16_t cmdId, uint32_t extra = 0, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr)
 	{
 		AmsAddr srcAddr;
-		const auto status = port.GetLocalAddress(&srcAddr);
+		const auto status = router.GetLocalAddress(port.port, &srcAddr);
 		if (status) {
 			return status;
 		}
-		AmsResponse* response = Write(request, destAddr, srcAddr, cmdId);
+		AmsResponse* response = Write(request, destAddr, srcAddr, cmdId, extra);
 		if (response) {
 			if (response->Wait(port.tmms)){
 				const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));

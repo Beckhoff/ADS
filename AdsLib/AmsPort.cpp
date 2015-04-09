@@ -2,16 +2,10 @@
 #include "AmsPort.h"
 #include <cstring>
 
-AmsPort::AmsPort(const AmsNetId *__localAddr)
+AmsPort::AmsPort()
 	: tmms(DEFAULT_TIMEOUT),
-	port(0),
-	localAddr(__localAddr)
+	port(0)
 {}
-
-void AmsPort::operator=(const AmsPort &ref)
-{
-	memcpy(this, &ref, sizeof(*this));
-}
 
 void AmsPort::AddNotification(size_t hash)
 {
@@ -32,14 +26,9 @@ void AmsPort::DelNotification(size_t hash)
 	notifications.erase(hash);
 }
 
-long AmsPort::GetLocalAddress(AmsAddr* pAddr) const
+const std::set<size_t>& AmsPort::GetNotifications() const
 {
-	if (IsOpen()) {
-		memcpy(&pAddr->netId, localAddr, sizeof(pAddr->netId));
-		pAddr->port = port;
-		return 0;
-	}
-	return ADSERR_CLIENT_PORTNOTOPEN;
+	return notifications;
 }
 
 bool AmsPort::IsOpen() const

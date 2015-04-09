@@ -4,7 +4,8 @@
 
 AmsResponse::AmsResponse()
 	: frame(4096),
-	invokeId(0)
+	invokeId(0),
+	extra(0)
 {
 }
 
@@ -53,17 +54,18 @@ bool AmsConnection::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, u
 
 void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
-	for (auto hash = port.notifications.begin(); hash != port.notifications.end(); ++hash) {
+	for (auto hash : port.GetNotifications()) {
 		std::unique_lock<std::mutex> lock(notificationsLock);
-		auto it = notifications.find(*hash);
+		auto it = notifications.find(hash);
 		if (it != notifications.end()) {
 			const auto amsAddr = it->second.amsAddr;
 			const auto hNotify = it->second.hNotify();
 			lock.unlock();
-			__DeleteNotification(amsAddr, hNotify, port);
+			if (__DeleteNotification(amsAddr, hNotify, port)) {
+				lock.lock();
+				notifications.erase(hash);
+			}
 		}
-		lock.lock();
-		notifications.erase(*hash);
 	}
 }
 
@@ -74,7 +76,7 @@ long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotif
 	return AdsRequest<AoEResponseHeader>(request, amsAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
-AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
+AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra)
 {
 	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), ++invokeId };
 	request.prepend<AoEHeader>(aoeHeader);
@@ -83,7 +85,13 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 	request.prepend<AmsTcpHeader>(header);
 
 	auto response = Reserve(aoeHeader.invokeId(), srcAddr.port);
-	if (response && request.size() != socket.write(request)) {
+
+	if (!response) {
+		return nullptr;
+	}
+
+	response->extra = extra;
+	if (request.size() != socket.write(request)) {
 		Release(response);
 		return nullptr;
 	}
@@ -197,13 +205,9 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-#if 1
 			if (ReceiveNotification(header)) {
 				Dispatch(header.sourceAddr(), header.targetPort(), header.length());
 			}
-#else
-			ReceiveJunk(header.length());
-#endif
 			continue;
 		}
 
@@ -222,7 +226,14 @@ void AmsConnection::Recv()
 		case AoEHeader::READ_STATE:
 		case AoEHeader::WRITE_CONTROL:
 		case AoEHeader::ADD_DEVICE_NOTIFICATION:
+			break;
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:
+		{
+			const size_t hash = Hash(response->extra, header.sourceAddr(), header.targetPort());
+			std::lock_guard<std::mutex> lock(notificationsLock);
+			notifications.erase(hash);
+			break;
+		}
 		case AoEHeader::READ_WRITE:
 			break;
 		default:

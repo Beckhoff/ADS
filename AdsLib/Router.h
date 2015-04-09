@@ -11,6 +11,8 @@ struct Router {
 	static_assert(PORT_BASE + NUM_PORTS_MAX <= UINT16_MAX, "Port limit is out of range");
 
 	Frame& GetFrame() { return frame; };
+
+	virtual long GetLocalAddress(uint16_t port, AmsAddr* pAddr) = 0;
 private:
 	Frame frame{ 10240 };
 };
