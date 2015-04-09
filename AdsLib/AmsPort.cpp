@@ -13,9 +13,23 @@ void AmsPort::operator=(const AmsPort &ref)
 	memcpy(this, &ref, sizeof(*this));
 }
 
+void AmsPort::AddNotification(size_t hash)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	notifications.insert(hash);
+}
+
 void AmsPort::Close()
 {
+	std::lock_guard<std::mutex> lock(mutex);
+	notifications.clear();
 	port = 0;
+}
+
+void AmsPort::DelNotification(size_t hash)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	notifications.erase(hash);
 }
 
 long AmsPort::GetLocalAddress(AmsAddr* pAddr) const

@@ -36,35 +36,35 @@ AmsConnection::~AmsConnection()
 	receiver.join();
 }
 
-void AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
+size_t AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-
-	auto table = tableMapping[port - Router::PORT_BASE].emplace(addr, TableRef(new NotifyTable())).first->second.get();
-	table->emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
+	const auto hash = Hash(hNotify, addr, port);
+	std::lock_guard<std::mutex> lock(notificationsLock);
+	notifications.emplace(hash, Notification{ pFunc, hNotify, hUser, length, addr, port });
+	return hash;
 }
 
 bool AmsConnection::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-
-	auto table = tableMapping[port - Router::PORT_BASE].find(addr);
-	if (table != tableMapping[port - Router::PORT_BASE].end()) {
-		return table->second->erase(hNotify);
-	}
-	return false;
+	const auto hash = Hash(hNotify, addr, port);
+	std::lock_guard<std::mutex> lock(notificationsLock);
+	return notifications.erase(hash);
 }
 
-void AmsConnection::DeleteOrphanedNotifications(const AmsPort &port)
+void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
-	std::unique_lock<std::mutex> lock(notificationLock[port.port - Router::PORT_BASE]);
-
-	for (auto& table : tableMapping[port.port - Router::PORT_BASE]) {
-		for (auto& n : *table.second.get()) {
-			__DeleteNotification(table.first, n.first, port);
+	for (auto hash = port.notifications.begin(); hash != port.notifications.end(); ++hash) {
+		std::unique_lock<std::mutex> lock(notificationsLock);
+		auto it = notifications.find(*hash);
+		if (it != notifications.end()) {
+			const auto amsAddr = it->second.amsAddr;
+			const auto hNotify = it->second.hNotify();
+			lock.unlock();
+			__DeleteNotification(amsAddr, hNotify, port);
 		}
+		lock.lock();
+		notifications.erase(*hash);
 	}
-	tableMapping[port.port - Router::PORT_BASE].clear();
 }
 
 long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port)
@@ -233,28 +233,30 @@ void AmsConnection::Recv()
 	}
 }
 
-const std::map<uint32_t, Notification>* AmsConnection::GetNotifyTable(const AmsAddr& amsAddr, uint16_t port)
+namespace std {
+	template<>
+	struct hash < AmsAddr >
+	{
+		size_t operator()(const AmsAddr &addr) const
+		{
+			const size_t h1{ std::hash<uint8_t>()(addr.netId.b[5]) };
+			const size_t h2{ std::hash<uint16_t>()(addr.port) };
+			return h1 ^ (h2 << 1);
+		}
+	};
+}
+
+size_t AmsConnection::Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port)
 {
-	const auto table = tableMapping[port - Router::PORT_BASE].find(amsAddr);
-	if (table == tableMapping[port - Router::PORT_BASE].end()) {
-		return nullptr;
-	}
-	return table->second.get();
+	const size_t h1{ std::hash<AmsAddr>()(srcAddr) };
+	const size_t h2{ std::hash<uint16_t>()(port) };
+	const size_t h3{ std::hash<uint32_t>()(hNotify) };
+	return (h1 ^ (h2 << 1)) ^ (h3 << 1);
 }
 
 void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
-	std::unique_lock<std::mutex> lock(notificationLock[port - Router::PORT_BASE]);
-	auto table = GetNotifyTable(amsAddr, port);
 	auto &ring = GetRing(port);
-	
-	if (!table) {
-		LOG_WARN("Notification from unknown source: " << std::dec
-			<< (int)amsAddr.netId.b[0] << '.' << (int)amsAddr.netId.b[1] << '.' << (int)amsAddr.netId.b[2] << '.'
-			<< (int)amsAddr.netId.b[3] << '.' << (int)amsAddr.netId.b[4] << '.' << (int)amsAddr.netId.b[5] << '.');
-		ring.Read(expectedSize);
-		return;
-	}
 
 	const auto length = ring.ReadFromLittleEndian<uint32_t>();
 	if (length != expectedSize - sizeof(length)) {
@@ -270,8 +272,11 @@ void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expect
 		for (uint32_t sample = 0; sample < numSamples; ++sample) {
 			const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
 			const auto size = ring.ReadFromLittleEndian<uint32_t>();
-			auto it = table->find(hNotify);
-			if (it != table->end()) {
+
+			const auto hash = Hash(hNotify, amsAddr, port);
+			std::lock_guard<std::mutex> lock(notificationsLock);
+			auto it = notifications.find(hash);
+			if (it != notifications.end()) {
 				auto &notification = it->second;
 				if (size != notification.Size()) {
 					LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());

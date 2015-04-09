@@ -76,7 +76,7 @@ long AmsRouter::ClosePort(uint16_t port)
 	}
 
 	for (auto &conn : connections) {
-		conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
+		//conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
 	}
 	ports[port - PORT_BASE].Close();
 	return 0;
@@ -245,7 +245,8 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 	if (!status) {
 		*pNotification = qFromLittleEndian<uint32_t>(buffer);
 		AmsConnection &conn = *GetConnection(pAddr->netId);
-		conn.CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
+		const auto hash = conn.CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
+		ports[port - Router::PORT_BASE].AddNotification(hash);
 	}
 	return status;
 }

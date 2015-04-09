@@ -7,14 +7,15 @@
 
 struct Notification
 {
+	const AmsAddr amsAddr;
 	const uint16_t port;
 
 	Notification(PAdsNotificationFuncEx __func, uint32_t hNotify, uint32_t __hUser, uint32_t length, AmsAddr __amsAddr, uint16_t __port)
-		: port(__port),
+		: amsAddr(__amsAddr),
+		port(__port),
 		callback(__func),
 		buffer(new uint8_t[sizeof(AdsNotificationHeader) + length]),
-		hUser(__hUser),
-		amsAddr(__amsAddr)
+		hUser(__hUser)
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
 		header->hNotification = hNotify;
@@ -36,11 +37,17 @@ struct Notification
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
 		return header->cbSampleSize;
 	}
+
+	uint32_t hNotify() const
+	{
+		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
+		return header->hNotification;
+	}
+
 private:
 	const PAdsNotificationFuncEx callback;
 	const std::shared_ptr<uint8_t> buffer;
 	const uint32_t hUser;
-	const AmsAddr amsAddr;
 };
 
 #endif /* #ifndef _ADS_NOTIFICATION_H_ */

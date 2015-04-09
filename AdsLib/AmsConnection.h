@@ -9,6 +9,7 @@
 
 #include <array>
 #include <condition_variable>
+#include <functional>
 #include <list>
 #include <map>
 #include <mutex>
@@ -35,9 +36,9 @@ struct AmsConnection
 	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
 	~AmsConnection();
 
-	void CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
+	size_t CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
 	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
-	void DeleteOrphanedNotifications(const AmsPort & port);
+	void DeleteOrphanedNotifications(AmsPort & port);
 	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port);
 
 	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
@@ -78,11 +79,6 @@ private:
 	std::thread receiver;
 	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
-	using NotifyTable = std::map < uint32_t, Notification >;
-	using TableRef = std::unique_ptr<NotifyTable>;
-	std::map<AmsAddr, TableRef> tableMapping[Router::NUM_PORTS_MAX];
-	std::array<std::mutex, Router::NUM_PORTS_MAX> notificationLock;
-
 	void ReceiveJunk(size_t bytesToRead) const;
 	void Receive(uint8_t* buffer, size_t bytesToRead) const;
 	void Recv();
@@ -96,9 +92,13 @@ private:
 	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
 	
 	RingBuffer ringBuffer;
-	RingBuffer& GetRing(uint16_t port) { return ringBuffer; };
+	inline RingBuffer& GetRing(uint16_t) { return ringBuffer; };
 
-	const std::map<uint32_t, Notification>* GetNotifyTable(const AmsAddr& amsAddr, uint16_t port);
+	std::map < size_t, Notification > notifications;
+	std::mutex notificationsLock;
+
+	size_t Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port);
+
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

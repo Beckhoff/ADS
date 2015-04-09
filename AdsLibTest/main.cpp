@@ -622,7 +622,7 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 	}
 #endif
 
-	void testLargeFrames(const std::string& testname)
+	void testLargeFrames(const std::string&)
 	{
 		// TODO testLargeFrames
 		fructose_assert(false);
@@ -761,7 +761,7 @@ int main()
 	TestAmsRouter routerTest(errorstream);
 	routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
 	routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
-	routerTest.run();
+//	routerTest.run();
 
 	TestRingBuffer ringBufferTest(errorstream);
 	ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
