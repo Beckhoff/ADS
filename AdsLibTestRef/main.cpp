@@ -392,20 +392,20 @@ struct TestAds : test_base < TestAds >
 		unsigned long hUser = 0xDEADBEEF;
 
 		// provide out of range port
-		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide nullptr to AmsAddr
-		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide unknown AmsAddr
 		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-		fructose_assert(0x7 == AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(0x7 == AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide invalid indexGroup
-		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide invalid indexOffset
-		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide nullptr to attrib/callback/hNotification
 		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, nullptr, &NotifyCallback, hUser, &notification[0]));
@@ -455,12 +455,14 @@ struct TestAds : test_base < TestAds >
 struct TestAdsPerformance : test_base < TestAdsPerformance >
 {
 	std::ostream &out;
+	bool runEndurance;
 
 	TestAdsPerformance(std::ostream& outstream)
-		: out(outstream)
+		: out(outstream),
+		runEndurance(false)
 	{}
 
-	void testLargeFrames(const std::string& testname)
+	void testLargeFrames(const std::string&)
 	{
 		// TODO testLargeFrames
 		fructose_assert(false);
@@ -497,6 +499,44 @@ struct TestAdsPerformance : test_base < TestAdsPerformance >
 		out << testname << " took " << tmms << "ms\n";
 	}
 
+	void testEndurance(const std::string& testname)
+	{
+		static const size_t numNotifications = 1024;
+		AmsAddr server{ { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
+		const long port = AdsPortOpenEx();
+		fructose_assert(0 != port);
+
+		const auto notification = std::unique_ptr<unsigned long[]>(new unsigned long[numNotifications]);
+		AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+		unsigned long hUser = 0xDEADBEEF;
+
+		runEndurance = true;
+		std::thread threads[1];
+		for (auto &t : threads) {
+			t = std::thread(&TestAdsPerformance::Read, this, 1024);
+		}
+
+		const auto start = std::chrono::high_resolution_clock::now();
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		}
+
+		std::cout << "Hit ENTER to stop endurance test\n";
+		std::cin.ignore();
+		runEndurance = false;
+
+		for (hUser = 0; hUser < numNotifications; ++hUser) {
+			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+		}
+		const auto end = std::chrono::high_resolution_clock::now();
+		const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+		for (auto &t : threads) {
+			t.join();
+		}
+		out << testname << ' ' << 1000 * g_NumNotifications / tmms << " notifications/s (" << g_NumNotifications << '/' << tmms << ")\n";
+	}
+
 private:
 	void Notifications(size_t numNotifications)
 	{
@@ -526,11 +566,13 @@ private:
 
 		unsigned long bytesRead;
 		uint32_t buffer;
-		for (size_t i = 0; i < numLoops; ++i) {
-			fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-			fructose_loop_assert(i, sizeof(buffer) == bytesRead);
-			fructose_loop_assert(i, 0 == buffer);
-		}
+		do {
+			for (size_t i = 0; i < numLoops; ++i) {
+				fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+				fructose_loop_assert(i, sizeof(buffer) == bytesRead);
+				fructose_loop_assert(i, 0 == buffer);
+			}
+		} while(runEndurance);
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
 };
@@ -553,11 +595,12 @@ int main()
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
 	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
 	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-//	adsTest.run();
+	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
 	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-//	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+//	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
 	performance.run();
 
 	std::cout << "Hit ENTER to continue\n";

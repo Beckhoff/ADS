@@ -542,20 +542,20 @@ struct TestAds : test_base < TestAds >
 		uint32_t hUser = 0xDEADBEEF;
 
 		// provide out of range port
-		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide nullptr to AmsAddr
-		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide unknown AmsAddr
 		AmsAddr unknown{ { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-		fructose_assert(0x7 == AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(0x7 == AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide invalid indexGroup
-		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide invalid indexOffset
-		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+		fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback, hUser, &notification[0]));
 
 		// provide nullptr to attrib/callback/hNotification
 		fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, nullptr, &NotifyCallback, hUser, &notification[0]));
