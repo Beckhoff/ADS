@@ -11,7 +11,7 @@ AmsRouter::AmsRouter(AmsNetId netId)
 
 long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 
 	const auto oldConnection = GetConnection(ams);
 	auto conn = connections.find(ip);
@@ -26,7 +26,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 
 void AmsRouter::DelRoute(const AmsNetId& ams)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 
 	auto route = mapping.find(ams);
 	if (route != mapping.end()) {
@@ -38,7 +38,7 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
 
 void AmsRouter::SetNetId(AmsNetId ams)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	localAddr = ams;
 }
 
@@ -56,7 +56,7 @@ void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)
 
 uint16_t AmsRouter::OpenPort()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 
 	for (uint16_t i = 0; i < NUM_PORTS_MAX; ++i) {
 		if (!ports[i].IsOpen()) {
@@ -68,7 +68,7 @@ uint16_t AmsRouter::OpenPort()
 
 long AmsRouter::ClosePort(uint16_t port)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports[port - PORT_BASE].IsOpen()) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
@@ -82,7 +82,7 @@ long AmsRouter::ClosePort(uint16_t port)
 
 long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
@@ -97,7 +97,7 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
 
 long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
@@ -108,7 +108,7 @@ long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)
 
 long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}

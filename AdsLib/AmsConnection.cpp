@@ -40,7 +40,7 @@ AmsConnection::~AmsConnection()
 size_t AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
 	const auto hash = Hash(hNotify, addr, port);
-	std::lock_guard<std::mutex> lock(notificationsLock);
+	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	notifications.emplace(hash, Notification{ pFunc, hNotify, hUser, length, addr, port });
 	return hash;
 }
@@ -48,14 +48,14 @@ size_t AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotif
 bool AmsConnection::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
 {
 	const auto hash = Hash(hNotify, addr, port);
-	std::lock_guard<std::mutex> lock(notificationsLock);
+	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	return notifications.erase(hash);
 }
 
 void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
 	for (auto hash : port.GetNotifications()) {
-		std::unique_lock<std::mutex> lock(notificationsLock);
+		std::unique_lock<std::recursive_mutex> lock(notificationsLock);
 		auto it = notifications.find(hash);
 		if (it != notifications.end()) {
 			const auto amsAddr = it->second.amsAddr;
@@ -229,9 +229,6 @@ void AmsConnection::Recv()
 			break;
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:
 		{
-			const size_t hash = Hash(response->extra, header.sourceAddr(), header.targetPort());
-			std::lock_guard<std::mutex> lock(notificationsLock);
-			notifications.erase(hash);
 			break;
 		}
 		case AoEHeader::READ_WRITE:
@@ -285,7 +282,7 @@ void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expect
 			const auto size = ring.ReadFromLittleEndian<uint32_t>();
 
 			const auto hash = Hash(hNotify, amsAddr, port);
-			std::lock_guard<std::mutex> lock(notificationsLock);
+			std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 			auto it = notifications.find(hash);
 			if (it != notifications.end()) {
 				auto &notification = it->second;

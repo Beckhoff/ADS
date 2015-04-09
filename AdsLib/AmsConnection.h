@@ -96,7 +96,7 @@ private:
 	inline RingBuffer& GetRing(uint16_t) { return ringBuffer; };
 
 	std::map < size_t, Notification > notifications;
-	std::mutex notificationsLock;
+	std::recursive_mutex notificationsLock;
 
 	size_t Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port);
 

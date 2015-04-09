@@ -38,7 +38,7 @@ struct AmsRouter : Router
 
 private:
 	AmsNetId localAddr;
-	std::mutex mutex;
+	std::recursive_mutex mutex;
 	std::map<IpV4, std::unique_ptr<AmsConnection>> connections;
 	std::map<AmsNetId, AmsConnection*> mapping;
 
