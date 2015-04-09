@@ -60,11 +60,9 @@ void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 		if (it != notifications.end()) {
 			const auto amsAddr = it->second.amsAddr;
 			const auto hNotify = it->second.hNotify();
+			notifications.erase(hash);
 			lock.unlock();
-			if (__DeleteNotification(amsAddr, hNotify, port)) {
-				lock.lock();
-				notifications.erase(hash);
-			}
+			__DeleteNotification(amsAddr, hNotify, port);
 		}
 	}
 }
@@ -226,11 +224,7 @@ void AmsConnection::Recv()
 		case AoEHeader::READ_STATE:
 		case AoEHeader::WRITE_CONTROL:
 		case AoEHeader::ADD_DEVICE_NOTIFICATION:
-			break;
 		case AoEHeader::DEL_DEVICE_NOTIFICATION:
-		{
-			break;
-		}
 		case AoEHeader::READ_WRITE:
 			break;
 		default:

@@ -35,6 +35,8 @@ protected:
     int m_WSAInitialized;
     SOCKET m_Socket;
     sockaddr_in m_SockAddress;
+	const sockaddr *const m_DestAddr;
+	const size_t m_DestAddrLen;
 
     Socket(IpV4 ip, uint16_t port, int type);
     ~Socket();

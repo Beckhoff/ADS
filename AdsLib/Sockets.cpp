@@ -27,7 +27,10 @@ uint32_t IpV4::toNetworkOrder() const
 
 Socket::Socket(IpV4 ip, uint16_t port, int type)
     : m_WSAInitialized(!InitSocketLibrary()),
-      m_Socket(socket(AF_INET, type, 0))
+      m_Socket(socket(AF_INET, type, 0)),
+	  m_DestAddr(SOCK_DGRAM == type ? reinterpret_cast<const struct sockaddr*>(&m_SockAddress) : nullptr),
+	  m_DestAddrLen(m_DestAddr ? sizeof(m_SockAddress) : 0)
+
 {
     if (INVALID_SOCKET == m_Socket) {
         throw std::system_error(WSAGetLastError(), std::system_category());
@@ -117,9 +120,8 @@ size_t Socket::write(const Frame &frame) const
 
     const int bufferLength = static_cast<int>(frame.size());
     const char *const buffer = reinterpret_cast<const char*>(frame.data());
-    const struct sockaddr *const addr = reinterpret_cast<const struct sockaddr*>(&m_SockAddress);
 
-    const int  status = sendto(m_Socket, buffer, bufferLength, 0, addr, sizeof(m_SockAddress));
+	const int  status = sendto(m_Socket, buffer, bufferLength, 0, m_DestAddr, m_DestAddrLen);
     if (SOCKET_ERROR == status) {
         LOG_ERROR("write frame failed with error: " << WSAGetLastError());
         return 0;
@@ -130,6 +132,11 @@ size_t Socket::write(const Frame &frame) const
 TcpSocket::TcpSocket(const IpV4 ip, const uint16_t port)
     : Socket(ip, port, SOCK_STREAM)
 {
+	// AdsDll.lib seems to use TCP_NODELAY, we use it to be compatible
+	const int enable = 0;
+	if (setsockopt(m_Socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&enable, sizeof(enable))) {
+		LOG_WARN("Enabling TCP_NODELAY failed");
+	}
 }
 
 uint32_t TcpSocket::Connect() const
