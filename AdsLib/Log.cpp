@@ -22,7 +22,7 @@ static const char* CATEGORY[] = {
 };
 
 #if 0
-std::ofstream outFile("test.txt", std::ofstream::out | std::ofstream::trunc);
+std::ofstream outFile("log.txt", std::ofstream::out | std::ofstream::trunc);
 std::ostream& Logger::output = outFile;
 #else
 std::ostream& Logger::output = std::cerr;

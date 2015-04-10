@@ -235,25 +235,45 @@ void AmsConnection::Recv()
 	}
 }
 
+template<typename T>
+static void hash_combine(size_t & seed, T const& v)
+{
+	seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
 namespace std {
 	template<>
 	struct hash < AmsAddr >
 	{
-		size_t operator()(const AmsAddr &addr) const
+		size_t operator()(const AmsAddr &ams) const
 		{
-			const size_t h1{ std::hash<uint8_t>()(addr.netId.b[5]) };
-			const size_t h2{ std::hash<uint16_t>()(addr.port) };
-			return h1 ^ (h2 << 1);
+			size_t value = 0;
+			hash_combine(value, ams.netId.b[0]);
+			hash_combine(value, ams.netId.b[1]);
+			hash_combine(value, ams.netId.b[2]);
+			hash_combine(value, ams.netId.b[3]);
+			hash_combine(value, ams.netId.b[4]);
+			hash_combine(value, ams.netId.b[5]);
+			hash_combine(value, ams.port);
+			return value;
 		}
 	};
 }
 
+std::ostream& operator <<(std::ostream& out, const AmsAddr &ams)
+{
+	return out << std::dec << (int)ams.netId.b[0] << '.' << (int)ams.netId.b[1] << '.' << (int)ams.netId.b[2] << '.'
+		<< (int)ams.netId.b[3] << '.' << (int)ams.netId.b[4] << '.' << (int)ams.netId.b[5] << ':'
+		<< ams.port;
+}
+
 size_t AmsConnection::Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port)
 {
-	const size_t h1{ std::hash<AmsAddr>()(srcAddr) };
-	const size_t h2{ std::hash<uint16_t>()(port) };
-	const size_t h3{ std::hash<uint32_t>()(hNotify) };
-	return (h1 ^ (h2 << 1)) ^ (h3 << 1);
+	size_t value = 0;
+	hash_combine<uint32_t>(value, hNotify);
+	hash_combine(value, srcAddr);
+	hash_combine(value, port);
+	return value;
 }
 
 void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
