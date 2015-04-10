@@ -251,8 +251,10 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
+	const auto hash = AmsConnection::Hash(hNotification, *pAddr, port);
+	ports[port - Router::PORT_BASE].DelNotification(hash);
 	AmsConnection *conn = GetConnection(pAddr->netId);
-	if (!conn || !conn->DeleteNotifyMapping(*pAddr, hNotification, port)) {
+	if (!conn || !conn->DeleteNotifyMapping(hash)) {
 		return ADSERR_CLIENT_REMOVEHASH;
 	}
 	return conn->__DeleteNotification(*pAddr, hNotification, ports[port - Router::PORT_BASE]);

@@ -25,7 +25,8 @@ AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
 	router(__router),
 	socket(destIp, 48898),
-	invokeId(0)
+	invokeId(0),
+	ringBuffer(4 * 1024 * 1024)
 {
 	socket.Connect();
 	receiver = std::thread(&AmsConnection::TryRecv, this);
@@ -45,9 +46,8 @@ size_t AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotif
 	return hash;
 }
 
-bool AmsConnection::DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port)
+bool AmsConnection::DeleteNotifyMapping(size_t hash)
 {
-	const auto hash = Hash(hNotify, addr, port);
 	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	return notifications.erase(hash);
 }
@@ -259,6 +259,12 @@ size_t AmsConnection::Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port)
 void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
 	auto &ring = GetRing(port);
+
+//TODO move dispatching into seperate thread!
+#if 1
+	ring.Read(expectedSize);
+	return;
+#endif
 
 	const auto length = ring.ReadFromLittleEndian<uint32_t>();
 	if (length != expectedSize - sizeof(length)) {

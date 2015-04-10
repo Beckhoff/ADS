@@ -7,7 +7,7 @@
 
 struct RingBuffer
 {
-	RingBuffer(size_t N = 4*1024*1024)
+	RingBuffer(size_t N)
 		: dataSize(N+1),
 		data(new uint8_t[N + 1]),
 		write(data.get()),

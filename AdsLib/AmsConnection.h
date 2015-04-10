@@ -38,7 +38,7 @@ struct AmsConnection
 	~AmsConnection();
 
 	size_t CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
-	bool DeleteNotifyMapping(const AmsAddr &addr, uint32_t hNotify, uint16_t port);
+	bool DeleteNotifyMapping(size_t hash);
 	void DeleteOrphanedNotifications(AmsPort & port);
 	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port);
 
@@ -71,6 +71,7 @@ struct AmsConnection
 		}
 		return -1;
 	}
+	static size_t Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port);
 
 	const IpV4 destIp;
 private:
@@ -97,9 +98,6 @@ private:
 
 	std::map < size_t, Notification > notifications;
 	std::recursive_mutex notificationsLock;
-
-	size_t Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port);
-
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

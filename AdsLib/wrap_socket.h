@@ -21,6 +21,7 @@ typedef int socklen_t;
 
 #if defined(__gnu_linux__) || defined(__APPLE__)
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 #include <unistd.h>
 typedef int SOCKET;

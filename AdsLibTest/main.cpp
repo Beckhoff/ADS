@@ -2,7 +2,6 @@
 #include <AdsLib.h>
 
 #include "AmsRouter.h"
-#include "RingBuffer.h"
 
 #include <iostream>
 #include <iomanip>
@@ -713,9 +712,7 @@ private:
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(5));
 		for (hUser = 0; hUser < numNotifications; ++hUser) {
-			const auto status = AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]);
-
-			fructose_loop_assert(hUser, 0 == status || status == 0x714);
+			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}
@@ -771,20 +768,20 @@ int main()
 	ringBufferTest.run();
 #endif
 	TestAds adsTest(errorstream);
-/*	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
+	adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
 	adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
 	adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
 	adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
 	adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
 	adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
 	adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-*/	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
-//	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
+	adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
+	adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 	adsTest.run();
 
 	TestAdsPerformance performance(errorstream);
 	performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-//	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+	performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 //	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
 	performance.run();
 
