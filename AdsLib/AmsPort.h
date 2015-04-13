@@ -6,11 +6,29 @@
 #include <mutex>
 #include <set>
 
+struct VirtualConnection
+{
+	AmsAddr ams;
+	uint16_t port;
+
+	VirtualConnection(AmsAddr __ams, uint16_t __port)
+		: ams(__ams),
+		port(__port)
+	{}
+
+	bool operator<(const VirtualConnection& ref) const
+	{
+		if (port != ref.port) {
+			return port < ref.port;
+		}
+		return ams < ref.ams;
+	}
+};
+
 struct NotificationId
 {
 	NotificationId(AmsAddr __dest, uint16_t __port, uint32_t __hNotify)
-		: dest(__dest),
-		port(__port),
+		: connection(__dest, __port),
 		hNotify(__hNotify)
 	{}
 
@@ -19,14 +37,10 @@ struct NotificationId
 		if (hNotify != ref.hNotify) {
 			return hNotify < ref.hNotify;
 		}
-		if (port != ref.port) {
-			return port < ref.port;
-		}
-		return dest < ref.dest;
+		return connection < ref.connection;
 	}
 
-	const AmsAddr dest;
-	const uint16_t port;
+	const VirtualConnection connection;
 	const uint32_t hNotify;
 };
 

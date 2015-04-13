@@ -81,6 +81,7 @@
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="NetId.h" />
+    <ClInclude Include="NotificationDispatcher.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Router.h" />
     <ClInclude Include="Semaphore.h" />

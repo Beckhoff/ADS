@@ -45,8 +45,7 @@ NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, P
 
 bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 {
-	const VirtualConnection connection{ hash.dest, hash.port };
-	const auto dispatcher = dispatcherList.Get(connection);
+	const auto dispatcher = dispatcherList.Get(hash.connection);
 	if (dispatcher) {
 		return dispatcher->Erase(hash.hNotify);
 	}
@@ -56,9 +55,9 @@ bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
 	for (auto hash : port.GetNotifications()) {
-		auto dispatcher = dispatcherList.Get(VirtualConnection{ hash.dest, hash.port });
+		auto dispatcher = dispatcherList.Get(hash.connection);
 		dispatcher->Erase(hash.hNotify);
-		__DeleteNotification(hash.dest, hash.hNotify, port);
+		__DeleteNotification(hash.connection.ams, hash.hNotify, port);
 	}
 }
 

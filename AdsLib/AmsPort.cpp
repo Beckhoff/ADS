@@ -33,7 +33,7 @@ const std::set<NotificationId>& AmsPort::GetNotifications() const
 
 bool AmsPort::IsOpen() const
 {
-	return port;
+	return !!port;
 }
 
 uint16_t AmsPort::Open(uint16_t __port)
