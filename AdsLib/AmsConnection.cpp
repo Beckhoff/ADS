@@ -191,6 +191,7 @@ bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 	}
 	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
+	it->second->sem.Post();
 	return true;
 }
 
@@ -216,9 +217,7 @@ void AmsConnection::Recv()
 
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-			if (ReceiveNotification(header)) {
-				dispatcherList.at(VirtualConnection{ header.sourceAddr(), header.targetPort() })->sem.Post();
-			}
+			ReceiveNotification(header);
 			continue;
 		}
 

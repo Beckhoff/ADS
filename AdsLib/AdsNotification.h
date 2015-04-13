@@ -25,8 +25,9 @@ struct Notification
 	void Notify(uint64_t timestamp, RingBuffer& ring) const
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
+		auto data = buffer.get() + sizeof(header);
 		for (size_t i = 0; i < header->cbSampleSize; ++i) {
-			header->data[i] = ring.ReadFromLittleEndian<uint8_t>();
+			data[i] = ring.ReadFromLittleEndian<uint8_t>();
 		}
 		header->nTimeStamp = timestamp;
 		callback(&amsAddr, header, hUser);
