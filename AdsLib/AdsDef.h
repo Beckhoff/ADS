@@ -255,16 +255,18 @@ typedef struct
 	};
 } AdsNotificationAttrib, *PAdsNotificationAttrib;
 
+#ifdef __cplusplus
+#include <array>
+#define ZERO_SIZED_ARRAY(TYPE, NAME) std::array<TYPE, 0> NAME
+#else
+#define ZERO_SIZED_ARRAY(TYPE, NAME) TYPE NAME[]
+#endif
 typedef struct
 {
 	uint64_t nTimeStamp;
 	uint32_t hNotification;
 	uint32_t cbSampleSize;
-#ifdef __cplusplus
-#pragma warning(push, 0)
-	uint8_t data[];
-#pragma warning(pop)
-#endif
+	ZERO_SIZED_ARRAY(uint8_t, data);
 } AdsNotificationHeader, *PAdsNotificationHeader;
 
 typedef void(*PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser);
