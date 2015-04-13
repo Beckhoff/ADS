@@ -72,10 +72,6 @@ long AmsRouter::ClosePort(uint16_t port)
 	if (port < PORT_BASE || port >= PORT_BASE + NUM_PORTS_MAX || !ports[port - PORT_BASE].IsOpen()) {
 		return ADSERR_CLIENT_PORTNOTOPEN;
 	}
-
-	for (auto &conn : connections) {
-		conn.second->DeleteOrphanedNotifications(ports[port - PORT_BASE]);
-	}
 	ports[port - PORT_BASE].Close();
 	return 0;
 }
@@ -199,7 +195,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	if (!ads) {
 		return GLOBALERR_MISSING_ROUTE;
 	}
-	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE], cmdId, 0, bufferLength, buffer, bytesRead);
+	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE].tmms, port, cmdId, 0, bufferLength, buffer, bytesRead);
 }
 
 long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)
@@ -251,13 +247,8 @@ long AmsRouter::AddNotification(uint16_t port, const AmsAddr* pAddr, uint32_t in
 
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-	const NotificationId hash{ *pAddr, port, hNotification };
-	ports[port - Router::PORT_BASE].DelNotification(hash);
-	AmsConnection *conn = GetConnection(pAddr->netId);
-	if (!conn || !conn->DeleteNotifyMapping(hash)) {
-		return ADSERR_CLIENT_REMOVEHASH;
-	}
-	return conn->__DeleteNotification(*pAddr, hNotification, ports[port - Router::PORT_BASE]);
+	auto &p = ports[port - Router::PORT_BASE];
+	return p.DelNotification(*pAddr, hNotification) ? 0 : ADSERR_CLIENT_REMOVEHASH;
 }
 
 template<class T> T extractLittleEndian(Frame& frame)

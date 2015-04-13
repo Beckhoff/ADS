@@ -39,33 +39,15 @@ AmsConnection::~AmsConnection()
 
 NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	const auto dispatcher = dispatcherList.Add(VirtualConnection { addr, port });
-	return dispatcher->Emplace(pFunc, hUser, length, hNotify);
+	const auto dispatcher = dispatcherList.Add(VirtualConnection { addr, port}, *this);
+	return dispatcher->Emplace(pFunc, hUser, length, hNotify, dispatcher);
 }
 
-bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
-{
-	const auto dispatcher = dispatcherList.Get(hash.connection);
-	if (dispatcher) {
-		return dispatcher->Erase(hash.hNotify);
-	}
-	return false;
-}
-
-void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
-{
-	for (auto hash : port.GetNotifications()) {
-		auto dispatcher = dispatcherList.Get(hash.connection);
-		dispatcher->Erase(hash.hNotify);
-		__DeleteNotification(hash.connection.ams, hash.hNotify, port);
-	}
-}
-
-long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port)
+long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)
 {
 	Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotify));
 	request.prepend(qToLittleEndian(hNotify));
-	return AdsRequest<AoEResponseHeader>(request, amsAddr, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+	return AdsRequest<AoEResponseHeader>(request, amsAddr, tmms, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra)

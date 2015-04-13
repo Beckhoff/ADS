@@ -1,7 +1,7 @@
 #ifndef _AMSCONNECTION_H_
 #define _AMSCONNECTION_H_
 
-#include "NotificationDispatcher.h"
+#include "AmsPort.h"
 #include "Sockets.h"
 #include "Router.h"
 
@@ -27,13 +27,13 @@ private:
 
 struct DispatcherList
 {
-	std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection)
+	std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy &proxy)
 	{
 		const auto dispatcher = Get(connection);
 		if (dispatcher) {
 			return dispatcher;
 		}
-		return list.emplace(connection, std::make_shared<NotificationDispatcher>(connection.ams, connection.port)).first->second;
+		return list.emplace(connection, std::make_shared<NotificationDispatcher>(proxy, connection.ams, connection.port)).first->second;
 	}
 
 	std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection &connection)
@@ -51,31 +51,29 @@ struct DispatcherList
 	std::recursive_mutex mutex;
 };
 
-struct AmsConnection
+struct AmsConnection : AmsProxy
 {
 	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
 	~AmsConnection();
 
 	NotificationId CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
-	bool DeleteNotifyMapping(NotificationId hash);
-	void DeleteOrphanedNotifications(AmsPort & port);
-	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, const AmsPort &port);
+	long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
 	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra = 0);
 	void Release(AmsResponse* response);
 	AmsResponse* GetPending(uint32_t id, uint16_t port);
 
 	template <class T>
-	long AdsRequest(Frame& request, const AmsAddr& destAddr, const AmsPort& port, uint16_t cmdId, uint32_t extra = 0, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr)
+	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint32_t tmms, uint16_t port, uint16_t cmdId, uint32_t extra = 0, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr)
 	{
 		AmsAddr srcAddr;
-		const auto status = router.GetLocalAddress(port.port, &srcAddr);
+		const auto status = router.GetLocalAddress(port, &srcAddr);
 		if (status) {
 			return status;
 		}
 		AmsResponse* response = Write(request, destAddr, srcAddr, cmdId, extra);
 		if (response) {
-			if (response->Wait(port.tmms)){
+			if (response->Wait(tmms)){
 				const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
 				T header(response->frame.data());
 				memcpy(buffer, response->frame.data() + sizeof(T), bytesAvailable);
@@ -92,6 +90,7 @@ struct AmsConnection
 	}
 
 	const IpV4 destIp;
+	DispatcherList dispatcherList;
 private:
 	Router &router;
 	TcpSocket socket;
@@ -108,7 +107,6 @@ private:
 	bool ReceiveNotification(const AoEHeader& header);
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
-	DispatcherList dispatcherList;
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

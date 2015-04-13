@@ -2,6 +2,13 @@
 #include "AmsPort.h"
 #include <cstring>
 
+namespace std {
+	bool operator==(const AmsAddr& lhs, const AmsAddr& rhs)
+	{
+		return 0 == memcmp(&lhs, &rhs, sizeof(lhs));
+	}
+}
+
 AmsPort::AmsPort()
 	: tmms(DEFAULT_TIMEOUT),
 	port(0)
@@ -16,19 +23,28 @@ void AmsPort::AddNotification(NotificationId hash)
 void AmsPort::Close()
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	notifications.clear();
+
+	auto it = std::begin(notifications);
+	while (it != std::end(notifications)) {
+		it->dispatcher->Erase(it->hNotify, tmms);
+		it = notifications.erase(it);
+	}
 	port = 0;
 }
 
-void AmsPort::DelNotification(NotificationId hash)
+bool AmsPort::DelNotification(const AmsAddr &ams, uint32_t hNotify)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	notifications.erase(hash);
-}
-
-const std::set<NotificationId>& AmsPort::GetNotifications() const
-{
-	return notifications;
+	for (auto it = notifications.begin(); it != notifications.end(); ++it) {
+		if (it->hNotify == hNotify) {
+			if (std::ref(it->dispatcher->amsAddr) == ams) {
+				it->dispatcher->Erase(hNotify, tmms);
+				notifications.erase(it);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool AmsPort::IsOpen() const
