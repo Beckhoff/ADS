@@ -31,10 +31,13 @@ private:
 	std::condition_variable cv;
 };
 
+#include "Log.h"
 struct NotificationDispatcher
 {
-	NotificationDispatcher()
+	NotificationDispatcher(AmsAddr __amsAddr, uint16_t __port)
 		: ring(4*1024*1024),
+		amsAddr(__amsAddr),
+		port(__port),
 		thread(&NotificationDispatcher::Run, this)
 	{
 
@@ -57,11 +60,8 @@ struct NotificationDispatcher
 				for (uint32_t sample = 0; sample < numSamples; ++sample) {
 					const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
 					const auto size = ring.ReadFromLittleEndian<uint32_t>();
-// TODO implement this
-#if 0
-					const NotificationId hash{ amsAddr, port, hNotify };
 					std::lock_guard<std::recursive_mutex> lock(notificationsLock);
-					auto it = notifications.find(hash);
+					auto it = notifications.find(hNotify);
 					if (it != notifications.end()) {
 						auto &notification = it->second;
 						if (size != notification.Size()) {
@@ -72,8 +72,6 @@ struct NotificationDispatcher
 						notification.Notify(timestamp, ring);
 					}
 					else {
-#endif
-					{
 						ring.Read(size);
 					}
 				}
@@ -84,8 +82,31 @@ struct NotificationDispatcher
 
 	RingBuffer ring;
 	Semaphore sem;
+	std::map<uint32_t, Notification> notifications;
+	std::recursive_mutex notificationsLock;
 private:
+	const AmsAddr amsAddr;
+	const uint16_t port;
 	std::thread thread;
+};
+
+struct VirtualConnection
+{
+	AmsAddr ams;
+	uint16_t port;
+
+	VirtualConnection(AmsAddr __ams, uint16_t __port)
+		: ams(__ams),
+		port(__port)
+	{}
+
+	bool operator<(const VirtualConnection& ref) const
+	{
+		if (port != ref.port) {
+			return port < ref.port;
+		}
+		return ams < ref.ams;
+	}
 };
 
 struct AmsConnection
@@ -146,9 +167,16 @@ private:
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-	NotificationDispatcher dispatcher;
-	
-	inline RingBuffer& GetRing(uint16_t) { return dispatcher.ring; };
+	NotificationDispatcher dispatcherDummy;
+
+	std::map<VirtualConnection, std::unique_ptr<NotificationDispatcher>> dispatcher;
+	RingBuffer& GetRing(const AmsAddr& ams, uint16_t port)
+	{
+		auto it = dispatcher.find(VirtualConnection{ ams, port });
+		if (it != dispatcher.end()) {
+			return it->second->ring;
+		}
+		return dispatcherDummy.ring; };
 
 	std::map < NotificationId, Notification > notifications;
 	std::recursive_mutex notificationsLock;

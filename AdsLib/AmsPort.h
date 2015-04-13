@@ -24,10 +24,10 @@ struct NotificationId
 		}
 		return dest < ref.dest;
 	}
-private:
-	AmsAddr dest;
-	uint16_t port;
-	uint32_t hNotify;
+
+	const AmsAddr dest;
+	const uint16_t port;
+	const uint32_t hNotify;
 };
 
 struct AmsPort
