@@ -41,12 +41,12 @@ NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, P
 {
 	const VirtualConnection connection{ addr, port };
 	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
-	const auto it = dispatcher.find(connection);
-	if (it == dispatcher.end()) {
-		dispatcher.emplace(connection, std::unique_ptr<NotificationDispatcher>(new NotificationDispatcher(addr, port)));
+	const auto it = dispatcherList.find(connection);
+	if (it == dispatcherList.end()) {
+		dispatcherList.emplace(connection, std::unique_ptr<NotificationDispatcher>(new NotificationDispatcher(addr, port)));
 	}
-	std::lock_guard<std::recursive_mutex> xxLock(dispatcher[connection]->notificationsLock);
-	dispatcher[connection]->notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
+	std::lock_guard<std::recursive_mutex> xxLock(dispatcherList[connection]->notificationsLock);
+	dispatcherList[connection]->notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
 	return NotificationId{ addr, port, hNotify };
 }
 
@@ -54,8 +54,8 @@ bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 {
 	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	const VirtualConnection connection{ hash.dest, hash.port };
-	const auto it = dispatcher.find(connection);
-	if (it != dispatcher.end()) {
+	const auto it = dispatcherList.find(connection);
+	if (it != dispatcherList.end()) {
 		std::lock_guard<std::recursive_mutex> lock(it->second->notificationsLock);
 		return it->second->notifications.erase(hash.hNotify);
 	}
@@ -66,7 +66,7 @@ void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
 	for (auto hash : port.GetNotifications()) {
 		std::unique_lock<std::recursive_mutex> lock(notificationsLock);
-		auto dispatch = dispatcher[VirtualConnection{ hash.dest, hash.port }].get();
+		auto dispatch = dispatcherList[VirtualConnection{ hash.dest, hash.port }].get();
 		std::unique_lock<std::recursive_mutex> xxlock(dispatch->notificationsLock);
 		dispatch->notifications.erase(hash.hNotify);
 		__DeleteNotification(hash.dest, hash.hNotify, port);
@@ -167,8 +167,8 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-	auto it = dispatcher.find(VirtualConnection{ header.sourceAddr(), header.targetPort() });
-	if (it == dispatcher.end()) {
+	auto it = dispatcherList.find(VirtualConnection{ header.sourceAddr(), header.targetPort() });
+	if (it == dispatcherList.end()) {
 		ReceiveJunk(header.length());
 		LOG_WARN("No dispatcher found for notification");
 		return false;
@@ -217,7 +217,7 @@ void AmsConnection::Recv()
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			if (ReceiveNotification(header)) {
-				dispatcher.at(VirtualConnection{ header.sourceAddr(), header.targetPort() })->sem.Post();
+				dispatcherList.at(VirtualConnection{ header.sourceAddr(), header.targetPort() })->sem.Post();
 			}
 			continue;
 		}

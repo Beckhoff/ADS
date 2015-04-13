@@ -167,7 +167,7 @@ private:
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-	std::map<VirtualConnection, std::unique_ptr<NotificationDispatcher>> dispatcher;
+	std::map<VirtualConnection, std::unique_ptr<NotificationDispatcher>> dispatcherList;
 	std::recursive_mutex notificationsLock;
 };
 
