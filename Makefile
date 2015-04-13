@@ -14,7 +14,7 @@ all: AdsLibTest.bin
 .cpp.o:
 	$(CC) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/
 
-$(LIB_NAME): AdsLib.o AmsConnection.o AmsPort.o AmsRouter.o Log.o Sockets.o Frame.o
+$(LIB_NAME): AdsLib.o AmsConnection.o AmsPort.o AmsRouter.o Log.o NotificationDispatcher.o Sockets.o Frame.o
 	ar rvs $@ $?
 
 AdsLibTest.bin: $(LIB_NAME)
