@@ -4,15 +4,14 @@
 #include "AdsNotification.h"
 #include "AmsHeader.h"
 #include "AmsPort.h"
+#include "Semaphore.h"
 #include "Sockets.h"
 #include "Router.h"
 
 #include <array>
-#include <condition_variable>
 #include <functional>
 #include <list>
 #include <map>
-#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -30,6 +29,63 @@ struct AmsResponse
 private:
 	std::mutex mutex;
 	std::condition_variable cv;
+};
+
+struct NotificationDispatcher
+{
+	NotificationDispatcher()
+		: ring(4*1024*1024),
+		thread(&NotificationDispatcher::Run, this)
+	{
+
+	}
+
+	~NotificationDispatcher()
+	{
+		sem.Stop();
+		thread.join();
+	}
+
+	void Run()
+	{
+		while (sem.Wait()) {
+			const auto length = ring.ReadFromLittleEndian<uint32_t>();
+			const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
+			for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
+				const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
+				const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
+				for (uint32_t sample = 0; sample < numSamples; ++sample) {
+					const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
+					const auto size = ring.ReadFromLittleEndian<uint32_t>();
+// TODO implement this
+#if 0
+					const NotificationId hash{ amsAddr, port, hNotify };
+					std::lock_guard<std::recursive_mutex> lock(notificationsLock);
+					auto it = notifications.find(hash);
+					if (it != notifications.end()) {
+						auto &notification = it->second;
+						if (size != notification.Size()) {
+							LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
+							ring.Read(size);
+							return;
+						}
+						notification.Notify(timestamp, ring);
+					}
+					else {
+#endif
+					{
+						ring.Read(size);
+					}
+				}
+			}
+		}
+	}
+
+
+	RingBuffer ring;
+	Semaphore sem;
+private:
+	std::thread thread;
 };
 
 struct AmsConnection
@@ -90,10 +146,9 @@ private:
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-	void Dispatch(AmsAddr amsAddr, uint16_t port, size_t expectedSize);
+	NotificationDispatcher dispatcher;
 	
-	RingBuffer ringBuffer;
-	inline RingBuffer& GetRing(uint16_t) { return ringBuffer; };
+	inline RingBuffer& GetRing(uint16_t) { return dispatcher.ring; };
 
 	std::map < NotificationId, Notification > notifications;
 	std::recursive_mutex notificationsLock;

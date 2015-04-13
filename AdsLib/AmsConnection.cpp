@@ -25,8 +25,7 @@ AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
 	router(__router),
 	socket(destIp, 48898),
-	invokeId(0),
-	ringBuffer(4 * 1024 * 1024)
+	invokeId(0)
 {
 	socket.Connect();
 	receiver = std::thread(&AmsConnection::TryRecv, this);
@@ -204,7 +203,7 @@ void AmsConnection::Recv()
 		const auto header = Receive<AoEHeader>();
 		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
 			if (ReceiveNotification(header)) {
-				Dispatch(header.sourceAddr(), header.targetPort(), header.length());
+				dispatcher.sem.Post();
 			}
 			continue;
 		}
@@ -232,49 +231,5 @@ void AmsConnection::Recv()
 			response->frame.clear();
 		}
 		response->Notify();
-	}
-}
-
-void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
-{
-	auto &ring = GetRing(port);
-
-//TODO move dispatching into seperate thread!
-#if 1
-	ring.Read(expectedSize);
-	return;
-#endif
-
-	const auto length = ring.ReadFromLittleEndian<uint32_t>();
-	if (length != expectedSize - sizeof(length)) {
-		LOG_WARN("Notification length: " << std::dec << length << " doesn't match: " << expectedSize);
-		ring.Read(expectedSize - sizeof(length));
-		return;
-	}
-
-	const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
-	for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
-		const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
-		const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
-		for (uint32_t sample = 0; sample < numSamples; ++sample) {
-			const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
-			const auto size = ring.ReadFromLittleEndian<uint32_t>();
-
-			const NotificationId hash{ amsAddr, port, hNotify };
-			std::lock_guard<std::recursive_mutex> lock(notificationsLock);
-			auto it = notifications.find(hash);
-			if (it != notifications.end()) {
-				auto &notification = it->second;
-				if (size != notification.Size()) {
-					LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
-					ring.Read(size);
-					return;
-				}
-				notification.Notify(timestamp, ring);
-			}
-			else {
-				ring.Read(size);
-			}
-		}
 	}
 }
