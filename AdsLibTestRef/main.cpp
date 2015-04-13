@@ -549,11 +549,11 @@ private:
 		unsigned long hUser = 0xDEADBEEF;
 
 		for (hUser = 0; hUser < numNotifications; ++hUser) {
-			fructose_loop_assert(hUser, 0 == AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
+			fructose_assert_eq(0, AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser, &notification[hUser]));
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(5));
 		for (hUser = 0; hUser < numNotifications; ++hUser) {
-			fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+			fructose_assert_eq(0, AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
 		}
 		fructose_assert(0 == AdsPortCloseEx(port));
 	}

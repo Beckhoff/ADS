@@ -752,7 +752,7 @@ int main()
 #else
 	std::ostream& errorstream = std::cout;
 #endif
-#if 0
+#if 1
 	TestAmsAddr amsAddrTest(errorstream);
 	amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
 	amsAddrTest.run();
