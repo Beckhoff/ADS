@@ -260,7 +260,11 @@ typedef struct
 	uint64_t nTimeStamp;
 	uint32_t hNotification;
 	uint32_t cbSampleSize;
+#ifdef __cplusplus
+#pragma warning(push, 0)
 	uint8_t data[];
+#pragma warning(pop)
+#endif
 } AdsNotificationHeader, *PAdsNotificationHeader;
 
 typedef void(*PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser);
