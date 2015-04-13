@@ -167,18 +167,7 @@ private:
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-	NotificationDispatcher dispatcherDummy;
-
 	std::map<VirtualConnection, std::unique_ptr<NotificationDispatcher>> dispatcher;
-	RingBuffer& GetRing(const AmsAddr& ams, uint16_t port)
-	{
-		auto it = dispatcher.find(VirtualConnection{ ams, port });
-		if (it != dispatcher.end()) {
-			return it->second->ring;
-		}
-		return dispatcherDummy.ring; };
-
-	std::map < NotificationId, Notification > notifications;
 	std::recursive_mutex notificationsLock;
 };
 

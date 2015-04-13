@@ -25,8 +25,7 @@ AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
 	router(__router),
 	socket(destIp, 48898),
-	invokeId(0),
-	dispatcherDummy(AmsAddr{}, 0)
+	invokeId(0)
 {
 	socket.Connect();
 	receiver = std::thread(&AmsConnection::TryRecv, this);
@@ -40,46 +39,37 @@ AmsConnection::~AmsConnection()
 
 NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	const NotificationId hash{ addr, port, hNotify };
-	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
-	notifications.emplace(hash, Notification{ pFunc, hNotify, hUser, length, addr, port });
 	const VirtualConnection connection{ addr, port };
+	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	const auto it = dispatcher.find(connection);
 	if (it == dispatcher.end()) {
 		dispatcher.emplace(connection, std::unique_ptr<NotificationDispatcher>(new NotificationDispatcher(addr, port)));
 	}
 	std::lock_guard<std::recursive_mutex> xxLock(dispatcher[connection]->notificationsLock);
 	dispatcher[connection]->notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
-	return hash;
+	return NotificationId{ addr, port, hNotify };
 }
 
 bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 {
+	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	const VirtualConnection connection{ hash.dest, hash.port };
 	const auto it = dispatcher.find(connection);
 	if (it != dispatcher.end()) {
 		std::lock_guard<std::recursive_mutex> lock(it->second->notificationsLock);
-		it->second->notifications.erase(hash.hNotify);
+		return it->second->notifications.erase(hash.hNotify);
 	}
-	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
-	return notifications.erase(hash);
+	return false;
 }
 
 void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
 	for (auto hash : port.GetNotifications()) {
+		std::unique_lock<std::recursive_mutex> lock(notificationsLock);
 		auto dispatch = dispatcher[VirtualConnection{ hash.dest, hash.port }].get();
 		std::unique_lock<std::recursive_mutex> xxlock(dispatch->notificationsLock);
 		dispatch->notifications.erase(hash.hNotify);
-		std::unique_lock<std::recursive_mutex> lock(notificationsLock);
-		auto it = notifications.find(hash);
-		if (it != notifications.end()) {
-			const auto amsAddr = it->second.amsAddr;
-			const auto hNotify = it->second.hNotify();
-			notifications.erase(hash);
-			lock.unlock();
-			__DeleteNotification(amsAddr, hNotify, port);
-		}
+		__DeleteNotification(hash.dest, hash.hNotify, port);
 	}
 }
 
