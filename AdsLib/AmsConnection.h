@@ -49,6 +49,24 @@ struct NotificationDispatcher
 		thread.join();
 	}
 
+	NotificationId Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
+	{
+		std::lock_guard<std::recursive_mutex> lock(mutex);
+		notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, amsAddr, port });
+		return NotificationId{ amsAddr, port, hNotify };
+	}
+
+	bool Erase(uint32_t hNotify)
+	{
+		std::lock_guard<std::recursive_mutex> lock(mutex);
+		return notifications.erase(hNotify);
+	}
+
+	void Notify()
+	{
+		sem.Post();
+	}
+
 	void Run()
 	{
 		while (sem.Wait()) {
@@ -60,7 +78,7 @@ struct NotificationDispatcher
 				for (uint32_t sample = 0; sample < numSamples; ++sample) {
 					const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
 					const auto size = ring.ReadFromLittleEndian<uint32_t>();
-					std::lock_guard<std::recursive_mutex> lock(notificationsLock);
+					std::lock_guard<std::recursive_mutex> lock(mutex);
 					auto it = notifications.find(hNotify);
 					if (it != notifications.end()) {
 						auto &notification = it->second;
@@ -79,14 +97,13 @@ struct NotificationDispatcher
 		}
 	}
 
-
 	RingBuffer ring;
-	Semaphore sem;
-	std::map<uint32_t, Notification> notifications;
-	std::recursive_mutex notificationsLock;
 private:
+	std::map<uint32_t, Notification> notifications;
+	std::recursive_mutex mutex;
 	const AmsAddr amsAddr;
 	const uint16_t port;
+	Semaphore sem;
 	std::thread thread;
 };
 

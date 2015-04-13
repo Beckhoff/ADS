@@ -40,9 +40,7 @@ AmsConnection::~AmsConnection()
 NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
 	const auto dispatcher = dispatcherList.Add(VirtualConnection { addr, port });
-	std::lock_guard<std::recursive_mutex> lock(dispatcher->notificationsLock);
-	dispatcher->notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, addr, port });
-	return NotificationId{ addr, port, hNotify };
+	return dispatcher->Emplace(pFunc, hUser, length, hNotify);
 }
 
 bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
@@ -50,8 +48,7 @@ bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 	const VirtualConnection connection{ hash.dest, hash.port };
 	const auto dispatcher = dispatcherList.Get(connection);
 	if (dispatcher) {
-		std::lock_guard<std::recursive_mutex> lock(dispatcher->notificationsLock);
-		return dispatcher->notifications.erase(hash.hNotify);
+		return dispatcher->Erase(hash.hNotify);
 	}
 	return false;
 }
@@ -60,8 +57,7 @@ void AmsConnection::DeleteOrphanedNotifications(AmsPort &port)
 {
 	for (auto hash : port.GetNotifications()) {
 		auto dispatcher = dispatcherList.Get(VirtualConnection{ hash.dest, hash.port });
-		std::unique_lock<std::recursive_mutex> xxlock(dispatcher->notificationsLock);
-		dispatcher->notifications.erase(hash.hNotify);
+		dispatcher->Erase(hash.hNotify);
 		__DeleteNotification(hash.dest, hash.hNotify, port);
 	}
 }
@@ -160,14 +156,12 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-	//std::unique_lock<std::recursive_mutex> lock(notificationsLock);
-	auto it = dispatcherList.list.find(VirtualConnection{ header.sourceAddr(), header.targetPort() });
-	if (it == dispatcherList.list.end()) {
+	const auto dispatcher = dispatcherList.Get(VirtualConnection{ header.sourceAddr(), header.targetPort() });
+	if (!dispatcher) {
 		ReceiveJunk(header.length());
 		LOG_WARN("No dispatcher found for notification");
 		return false;
 	}
-	std::shared_ptr<NotificationDispatcher> dispatcher = it->second;
 
 	auto &ring = dispatcher->ring;
 	auto bytesLeft = header.length();
@@ -186,7 +180,7 @@ bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 	}
 	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
-	dispatcher->sem.Post();
+	dispatcher->Notify();
 	return true;
 }
 
