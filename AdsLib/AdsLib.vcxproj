@@ -97,6 +97,7 @@
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="NetId.cpp" />
+    <ClCompile Include="NotificationDispatcher.cpp" />
     <ClCompile Include="Sockets.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

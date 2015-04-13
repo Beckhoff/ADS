@@ -92,5 +92,8 @@
     <ClCompile Include="AmsPort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NotificationDispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
