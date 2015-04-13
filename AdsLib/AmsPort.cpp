@@ -7,7 +7,7 @@ AmsPort::AmsPort()
 	port(0)
 {}
 
-void AmsPort::AddNotification(size_t hash)
+void AmsPort::AddNotification(NotificationId hash)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	notifications.insert(hash);
@@ -20,13 +20,13 @@ void AmsPort::Close()
 	port = 0;
 }
 
-void AmsPort::DelNotification(size_t hash)
+void AmsPort::DelNotification(NotificationId hash)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	notifications.erase(hash);
 }
 
-const std::set<size_t>& AmsPort::GetNotifications() const
+const std::set<NotificationId>& AmsPort::GetNotifications() const
 {
 	return notifications;
 }

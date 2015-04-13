@@ -38,15 +38,15 @@ AmsConnection::~AmsConnection()
 	receiver.join();
 }
 
-size_t AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
+NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	const auto hash = Hash(hNotify, addr, port);
+	const NotificationId hash{ addr, port, hNotify };
 	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	notifications.emplace(hash, Notification{ pFunc, hNotify, hUser, length, addr, port });
 	return hash;
 }
 
-bool AmsConnection::DeleteNotifyMapping(size_t hash)
+bool AmsConnection::DeleteNotifyMapping(NotificationId hash)
 {
 	std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 	return notifications.erase(hash);
@@ -235,47 +235,6 @@ void AmsConnection::Recv()
 	}
 }
 
-template<typename T>
-static void hash_combine(size_t & seed, T const& v)
-{
-	seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
-
-namespace std {
-	template<>
-	struct hash < AmsAddr >
-	{
-		size_t operator()(const AmsAddr &ams) const
-		{
-			size_t value = 0;
-			hash_combine(value, ams.netId.b[0]);
-			hash_combine(value, ams.netId.b[1]);
-			hash_combine(value, ams.netId.b[2]);
-			hash_combine(value, ams.netId.b[3]);
-			hash_combine(value, ams.netId.b[4]);
-			hash_combine(value, ams.netId.b[5]);
-			hash_combine(value, ams.port);
-			return value;
-		}
-	};
-}
-
-std::ostream& operator <<(std::ostream& out, const AmsAddr &ams)
-{
-	return out << std::dec << (int)ams.netId.b[0] << '.' << (int)ams.netId.b[1] << '.' << (int)ams.netId.b[2] << '.'
-		<< (int)ams.netId.b[3] << '.' << (int)ams.netId.b[4] << '.' << (int)ams.netId.b[5] << ':'
-		<< ams.port;
-}
-
-size_t AmsConnection::Hash(uint32_t hNotify, AmsAddr srcAddr, uint16_t port)
-{
-	size_t value = 0;
-	hash_combine<uint32_t>(value, hNotify);
-	hash_combine(value, srcAddr);
-	hash_combine(value, port);
-	return value;
-}
-
 void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expectedSize)
 {
 	auto &ring = GetRing(port);
@@ -301,7 +260,7 @@ void AmsConnection::Dispatch(const AmsAddr amsAddr, uint16_t port, size_t expect
 			const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
 			const auto size = ring.ReadFromLittleEndian<uint32_t>();
 
-			const auto hash = Hash(hNotify, amsAddr, port);
+			const NotificationId hash{ amsAddr, port, hNotify };
 			std::lock_guard<std::recursive_mutex> lock(notificationsLock);
 			auto it = notifications.find(hash);
 			if (it != notifications.end()) {
