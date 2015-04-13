@@ -109,6 +109,32 @@ struct VirtualConnection
 	}
 };
 
+struct DispatcherList
+{
+	std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection)
+	{
+		const auto dispatcher = Get(connection);
+		if (dispatcher) {
+			return dispatcher;
+		}
+		return list.emplace(connection, std::make_shared<NotificationDispatcher>(connection.ams, connection.port)).first->second;
+	}
+
+	std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection &connection)
+	{
+		std::lock_guard<std::recursive_mutex> lock(mutex);
+
+		const auto it = list.find(connection);
+		if (it != list.end()) {
+			return it->second;
+		}
+		return std::shared_ptr < NotificationDispatcher > {};
+	}
+
+	std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher>> list;
+	std::recursive_mutex mutex;
+};
+
 struct AmsConnection
 {
 	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
@@ -166,9 +192,7 @@ private:
 	bool ReceiveNotification(const AoEHeader& header);
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
-
-	std::map<VirtualConnection, std::unique_ptr<NotificationDispatcher>> dispatcherList;
-	std::recursive_mutex notificationsLock;
+	DispatcherList dispatcherList;
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */
