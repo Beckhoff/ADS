@@ -74,7 +74,7 @@ private:
 	bool ReceiveNotification(const AoEHeader &header); 
 	void ReceiveJunk(size_t bytesToRead) const;
 	void Receive(void* buffer, size_t bytesToRead) const;
-	template<class T> void Receive(T &buffer) const { Receive(&buffer, sizeof(T)); };
+	template<class T> void Receive(T &buffer) const { Receive(&buffer, sizeof(T)); }
 
 	void Recv();
 	void TryRecv();
