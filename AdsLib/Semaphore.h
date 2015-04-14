@@ -13,9 +13,9 @@ struct Semaphore
 		cv.notify_one();
 	}
 
-	void Stop()
+	void Close()
 	{
-		running = false;
+		isOpen = false;
 		Post();
 	}
 
@@ -24,11 +24,11 @@ struct Semaphore
 		std::unique_lock<std::mutex> lock(mutex);
 		cv.wait(lock, [&](){return count > 0; });
 		--count;
-		return running;
+		return isOpen;
 	}
 
 private:
-	bool running = true;
+	bool isOpen = true;
 	int count = 0;
 	std::mutex mutex;
 	std::condition_variable cv;

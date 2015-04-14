@@ -21,6 +21,27 @@ bool AmsResponse::Wait(uint32_t timeout_ms)
 	return cv.wait_for(lock, std::chrono::milliseconds(timeout_ms), [&]() { return !invokeId; });
 }
 
+std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Add(const VirtualConnection& connection, AmsProxy &proxy)
+{
+	const auto dispatcher = Get(connection);
+	if (dispatcher) {
+		return dispatcher;
+	}
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	return list.emplace(connection, std::make_shared<NotificationDispatcher>(proxy, connection.second, connection.first)).first->second;
+}
+
+std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Get(const VirtualConnection &connection)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+
+	const auto it = list.find(connection);
+	if (it != list.end()) {
+		return it->second;
+	}
+	return std::shared_ptr < NotificationDispatcher > {};
+}
+
 AmsConnection::AmsConnection(Router &__router, IpV4 destIp)
 	: destIp(destIp),
 	router(__router),
@@ -39,7 +60,7 @@ AmsConnection::~AmsConnection()
 
 NotificationId AmsConnection::CreateNotifyMapping(uint16_t port, AmsAddr addr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
-	const auto dispatcher = dispatcherList.Add(VirtualConnection { addr, port}, *this);
+	const auto dispatcher = dispatcherList.Add(VirtualConnection { port, addr }, *this);
 	return dispatcher->Emplace(pFunc, hUser, length, hNotify, dispatcher);
 }
 
@@ -146,7 +167,7 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-	const auto dispatcher = dispatcherList.Get(VirtualConnection{ header.sourceAddr(), header.targetPort() });
+	const auto dispatcher = dispatcherList.Get(VirtualConnection{ header.targetPort(), header.sourceAddr() });
 	if (!dispatcher) {
 		ReceiveJunk(header.length());
 		LOG_WARN("No dispatcher found for notification");

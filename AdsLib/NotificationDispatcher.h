@@ -16,25 +16,6 @@ struct AmsProxy
 	virtual long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
 };
 
-struct VirtualConnection
-{
-	AmsAddr ams;
-	uint16_t port;
-
-	VirtualConnection(AmsAddr __ams, uint16_t __port)
-		: ams(__ams),
-		port(__port)
-	{}
-
-	bool operator<(const VirtualConnection& ref) const
-	{
-		if (port != ref.port) {
-			return port < ref.port;
-		}
-		return ams < ref.ams;
-	}
-};
-
 struct NotificationDispatcher
 {
 	NotificationDispatcher(AmsProxy &__proxy, AmsAddr __amsAddr, uint16_t __port);

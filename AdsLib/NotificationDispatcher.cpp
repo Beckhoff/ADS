@@ -11,7 +11,7 @@ NotificationDispatcher::NotificationDispatcher(AmsProxy &__proxy, AmsAddr __amsA
 
 NotificationDispatcher::~NotificationDispatcher()
 {
-	sem.Stop();
+	sem.Close();
 	thread.join();
 }
 

@@ -26,31 +26,7 @@ private:
 	std::condition_variable cv;
 };
 
-struct DispatcherList
-{
-	std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy &proxy)
-	{
-		const auto dispatcher = Get(connection);
-		if (dispatcher) {
-			return dispatcher;
-		}
-		return list.emplace(connection, std::make_shared<NotificationDispatcher>(proxy, connection.ams, connection.port)).first->second;
-	}
-
-	std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection &connection)
-	{
-		std::lock_guard<std::recursive_mutex> lock(mutex);
-
-		const auto it = list.find(connection);
-		if (it != list.end()) {
-			return it->second;
-		}
-		return std::shared_ptr < NotificationDispatcher > {};
-	}
-
-	std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher>> list;
-	std::recursive_mutex mutex;
-};
+using VirtualConnection = std::pair<uint16_t, AmsAddr>;
 
 struct AmsConnection : AmsProxy
 {
@@ -91,7 +67,6 @@ struct AmsConnection : AmsProxy
 	}
 
 	const IpV4 destIp;
-	DispatcherList dispatcherList;
 private:
 	Router &router;
 	TcpSocket socket;
@@ -109,6 +84,16 @@ private:
 	bool ReceiveNotification(const AoEHeader& header);
 	Frame& ReceiveFrame(Frame &frame, size_t length) const;
 	AmsResponse* Reserve(uint32_t id, uint16_t port);
+
+	struct DispatcherList
+	{
+		std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy &proxy);
+		std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection &connection);
+
+	private:
+		std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher>> list;
+		std::recursive_mutex mutex;
+	} dispatcherList;
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */
