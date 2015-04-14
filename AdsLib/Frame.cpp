@@ -1,4 +1,5 @@
 #include "Frame.h"
+
 #include <algorithm>
 #include <cstring>
 #include <new>

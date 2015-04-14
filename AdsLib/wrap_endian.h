@@ -1,7 +1,7 @@
 #ifndef QENDIAN_H
 #define QENDIAN_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // WARNING code was never tested on a big endian machine!
 #if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)

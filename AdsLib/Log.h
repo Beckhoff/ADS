@@ -1,10 +1,8 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <cstdint>
 #include <iosfwd>
 #include <sstream>
-#include <vector>
 
 #define asHex(X) "0x" << std::hex << (int)(X)
 

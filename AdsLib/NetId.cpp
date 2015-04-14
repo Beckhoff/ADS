@@ -1,5 +1,5 @@
 #include "NetId.h"
-#include <cstring>
+
 #include <sstream>
 
 NetId::NetId(const uint32_t ipv4Addr)

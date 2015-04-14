@@ -1,21 +1,11 @@
 #ifndef _AMS_ROUTER_H_
 #define _AMS_ROUTER_H_
 
-#include "AdsDef.h"
 #include "AmsConnection.h"
-#include "AmsPort.h"
-#include "AdsNotification.h"
-
-#include <array>
-#include <bitset>
-#include <map>
-#include <mutex>
-#include <thread>
-#include <vector>
 
 struct AmsRouter : Router
 {
-	AmsRouter(AmsNetId netId = AmsNetId{0, 0, 0, 0, 0, 0});
+	AmsRouter(AmsNetId netId = AmsNetId{});
 
 	uint16_t OpenPort();
 	long ClosePort(uint16_t port);

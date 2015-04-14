@@ -1,4 +1,5 @@
 #include "Log.h"
+
 #include <algorithm>
 #include <chrono>
 #include <ctime>

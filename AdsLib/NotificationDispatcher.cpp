@@ -1,4 +1,3 @@
-
 #include "NotificationDispatcher.h"
 #include "Log.h"
 
@@ -15,6 +14,12 @@ NotificationDispatcher::~NotificationDispatcher()
 	sem.Close();
 	thread.join();
 }
+
+bool NotificationDispatcher::operator <(const NotificationDispatcher &ref) const
+{
+	return amsAddr < ref.amsAddr;
+}
+
 
 void NotificationDispatcher::Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {

@@ -3,7 +3,6 @@
 
 #include "AdsDef.h"
 #include "RingBuffer.h"
-#include <memory>
 
 struct Notification
 {

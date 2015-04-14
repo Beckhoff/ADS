@@ -1,6 +1,4 @@
-
 #include "AmsPort.h"
-#include <cstring>
 
 namespace std {
 	bool operator==(const AmsAddr& lhs, const AmsAddr& rhs)
@@ -26,7 +24,7 @@ void AmsPort::Close()
 
 	auto it = std::begin(notifications);
 	while (it != std::end(notifications)) {
-		it->dispatcher->Erase(it->hNotify, tmms);
+		it->second->Erase(it->first, tmms);
 		it = notifications.erase(it);
 	}
 	port = 0;
@@ -36,9 +34,9 @@ bool AmsPort::DelNotification(const AmsAddr &ams, uint32_t hNotify)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	for (auto it = notifications.begin(); it != notifications.end(); ++it) {
-		if (it->hNotify == hNotify) {
-			if (std::ref(it->dispatcher->amsAddr) == ams) {
-				it->dispatcher->Erase(hNotify, tmms);
+		if (it->first == hNotify) {
+			if (std::ref(it->second->amsAddr) == ams) {
+				it->second->Erase(hNotify, tmms);
 				notifications.erase(it);
 				return true;
 			}

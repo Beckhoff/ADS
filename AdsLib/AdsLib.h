@@ -1,7 +1,6 @@
 #ifndef _ADSLIB_H_
 #define _ADSLIB_H_
 
-#include <cstdint>
 #include "AdsDef.h"
 
 long AdsAddRoute(AmsNetId ams, const char* ip);

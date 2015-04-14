@@ -5,10 +5,7 @@
 #include "Sockets.h"
 #include "Router.h"
 
-#include <array>
 #include <atomic>
-#include <functional>
-#include <vector>
 
 struct AmsResponse
 {

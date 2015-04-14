@@ -1,10 +1,10 @@
 #ifndef AMSHEADER_H
 #define AMSHEADER_H
 
+#include "AdsDef.h"
 #include "NetId.h"
 #include "wrap_endian.h"
 
-#include "AdsDef.h"
 #include <array>
 #include <cstddef>
 #include <cstring>

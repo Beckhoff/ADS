@@ -1,5 +1,4 @@
 #include "AmsConnection.h"
-#include "AmsHeader.h"
 #include "Log.h"
 
 AmsResponse::AmsResponse()

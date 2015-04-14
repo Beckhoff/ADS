@@ -2,6 +2,7 @@
 #define WRAP_SOCKET_H
 
 #include <cstdint>
+
 #ifdef _WIN32
 #include <WinSock2.h>
 inline int InitSocketLibrary(void)

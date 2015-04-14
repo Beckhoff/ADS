@@ -1,10 +1,11 @@
 #ifndef _AMS_PORT_H_
 #define _AMS_PORT_H_
 
-#include "AdsDef.h"
 #include "NotificationDispatcher.h"
 
 #include <set>
+
+using NotificationId = std::pair <uint32_t, std::shared_ptr<NotificationDispatcher>>;
 
 struct AmsPort
 {
