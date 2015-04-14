@@ -4,7 +4,6 @@
 #include "AdsDef.h"
 #include "NotificationDispatcher.h"
 
-#include <mutex>
 #include <set>
 
 struct AmsPort

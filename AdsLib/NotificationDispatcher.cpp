@@ -1,12 +1,13 @@
 
 #include "NotificationDispatcher.h"
+#include "Log.h"
 
 NotificationDispatcher::NotificationDispatcher(AmsProxy &__proxy, AmsAddr __amsAddr, uint16_t __port)
-	: ring(4 * 1024 * 1024),
-	amsAddr(__amsAddr),
+	: amsAddr(__amsAddr),
+	ring(4 * 1024 * 1024),
 	port(__port),
-	thread(&NotificationDispatcher::Run, this),
-	proxy(__proxy)
+	proxy(__proxy),
+	thread(&NotificationDispatcher::Run, this)
 {}
 
 NotificationDispatcher::~NotificationDispatcher()
@@ -15,16 +16,15 @@ NotificationDispatcher::~NotificationDispatcher()
 	thread.join();
 }
 
-NotificationId NotificationDispatcher::Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify, std::shared_ptr<NotificationDispatcher> dispatcher)
+void NotificationDispatcher::Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	notifications.emplace(hNotify, Notification{ pFunc, hNotify, hUser, length, amsAddr, port });
-	return NotificationId{ hNotify, dispatcher };
 }
 
 bool NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
-	const auto status = proxy.__DeleteNotification(amsAddr, hNotify, tmms, port);
+	const auto status = proxy.DeleteNotification(amsAddr, hNotify, tmms, port);
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	return !!notifications.erase(hNotify) && status;
 }

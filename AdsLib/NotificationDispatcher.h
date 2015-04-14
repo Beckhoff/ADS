@@ -3,17 +3,14 @@
 
 #include "AdsNotification.h"
 #include "AmsHeader.h"
-#include "Log.h"
 #include "Semaphore.h"
 
 #include <map>
 #include <thread>
 
-struct NotificationId;
-
 struct AmsProxy
 {
-	virtual long __DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
+	virtual long DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
 };
 
 struct NotificationDispatcher
@@ -21,20 +18,20 @@ struct NotificationDispatcher
 	NotificationDispatcher(AmsProxy &__proxy, AmsAddr __amsAddr, uint16_t __port);
 
 	~NotificationDispatcher();
-	NotificationId Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify, std::shared_ptr<NotificationDispatcher> dispatcher);
+	void Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
 	bool Erase(uint32_t hNotify, uint32_t tmms);
 	inline void Notify() { sem.Post(); }
 	void Run();
 
-	RingBuffer ring;
 	const AmsAddr amsAddr;
+	RingBuffer ring;
 private:
 	std::map<uint32_t, Notification> notifications;
 	std::recursive_mutex mutex;
 	const uint16_t port;
+	AmsProxy &proxy;
 	Semaphore sem;
 	std::thread thread;
-	AmsProxy &proxy;
 };
 
 struct NotificationId
