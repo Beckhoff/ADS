@@ -202,6 +202,8 @@ typedef struct AmsAddr_
 #ifdef __cplusplus
 bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs);
 bool operator <(const AmsAddr_& lhs, const AmsAddr_& rhs);
+#include <string>
+AmsNetId make_AmsNetId(const std::string &addr);
 #endif /* #ifdef __cplusplus */
 
 typedef	struct

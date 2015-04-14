@@ -36,9 +36,6 @@
     <ClInclude Include="AmsHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NetId.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="wrap_endian.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -78,9 +75,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Frame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NetId.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Log.cpp">

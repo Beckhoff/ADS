@@ -80,7 +80,6 @@
     <ClInclude Include="AmsRouter.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="NetId.h" />
     <ClInclude Include="NotificationDispatcher.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Router.h" />
@@ -96,7 +95,6 @@
     <ClCompile Include="AmsRouter.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="NetId.cpp" />
     <ClCompile Include="NotificationDispatcher.cpp" />
     <ClCompile Include="Sockets.cpp" />
   </ItemGroup>

@@ -2,7 +2,6 @@
 #define AMSHEADER_H
 
 #include "AdsDef.h"
-#include "NetId.h"
 #include "wrap_endian.h"
 
 #include <array>
@@ -145,22 +144,42 @@ struct AoEHeader
 	uint16_t cmdId() const
 	{
 		return qFromLittleEndian<uint16_t>((const uint8_t*)&leCmdId);
-	}
+    }
 
-	uint32_t invokeId() const
-	{
-		return qFromLittleEndian<uint32_t>((const uint8_t*)&leInvokeId);
-	}
+    uint32_t errorCode() const
+    {
+        return qFromLittleEndian<uint32_t>((const uint8_t*)&leErrorCode);
+    }
+
+    uint32_t invokeId() const
+    {
+        return qFromLittleEndian<uint32_t>((const uint8_t*)&leInvokeId);
+    }
 
 	uint32_t length() const
 	{
 		return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
-	}
+    }
 
-	AmsAddr_ sourceAddr() const
-	{
-		return AmsAddr_{ sourceNetId, qFromLittleEndian<uint16_t>((const uint8_t*)&leSourcePort) };
-	}
+    AmsAddr_ sourceAddr() const
+    {
+        return AmsAddr_{ sourceNetId, sourcePort() };
+    }
+
+    uint16_t sourcePort() const
+    {
+        return qFromLittleEndian<uint16_t>((const uint8_t*)&leSourcePort);
+    }
+
+    uint16_t stateFlags() const
+    {
+        return qFromLittleEndian<uint16_t>((const uint8_t*)&leStateFlags);
+    }
+
+    AmsAddr_ targetAddr() const
+    {
+        return AmsAddr_{ targetNetId, targetPort() };
+    }
 
 	uint16_t targetPort() const
 	{
@@ -203,15 +222,20 @@ private:
 struct AoEReadResponseHeader : AoEResponseHeader
 {
 	AoEReadResponseHeader()
-		: readLength(0)
+        : leReadLength(0)
 	{}
 
     AoEReadResponseHeader(const uint8_t *frame)
 	{
 		memcpy(this, frame, sizeof(*this));
 	}
+
+    uint32_t readLength() const
+    {
+        return qFromLittleEndian<uint32_t>((const uint8_t*)&leReadLength);
+    }
 private:
-	uint32_t readLength;
+    uint32_t leReadLength;
 };
 #pragma pack (pop)
 #endif // AMSHEADER_H

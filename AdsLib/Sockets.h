@@ -19,7 +19,6 @@ struct IpV4
 		return this->toNetworkOrder() == ref.toNetworkOrder();
 	}
 
-
 private:
     uint32_t value;
 };
