@@ -195,7 +195,7 @@ long AmsRouter::AdsRequest(Frame& request, const AmsAddr& destAddr, uint16_t por
 	if (!ads) {
 		return GLOBALERR_MISSING_ROUTE;
 	}
-	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE].tmms, port, cmdId, 0, bufferLength, buffer, bytesRead);
+	return ads->AdsRequest<T>(request, destAddr, ports[port - Router::PORT_BASE].tmms, port, cmdId, bufferLength, buffer, bytesRead);
 }
 
 long AmsRouter::Write(uint16_t port, const AmsAddr* pAddr, uint32_t indexGroup, uint32_t indexOffset, uint32_t bufferLength, const void* buffer)

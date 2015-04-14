@@ -4,8 +4,7 @@
 
 AmsResponse::AmsResponse()
 	: frame(4096),
-	invokeId(0),
-	extra(0)
+	invokeId(0)
 {
 }
 
@@ -71,7 +70,7 @@ long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotif
 	return AdsRequest<AoEResponseHeader>(request, amsAddr, tmms, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
 }
 
-AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra)
+AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
 {
 	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), GetInvokeId() };
 	request.prepend<AoEHeader>(aoeHeader);
@@ -85,7 +84,6 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 		return nullptr;
 	}
 
-	response->extra = extra;
 	if (request.size() != socket.write(request)) {
 		Release(response);
 		return nullptr;
@@ -104,7 +102,7 @@ uint32_t AmsConnection::GetInvokeId()
 
 AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 {
-	const auto currentId = queue[port - Router::PORT_BASE].invokeId;
+	const uint32_t currentId = queue[port - Router::PORT_BASE].invokeId;
 	if (currentId == id) {
 		return &queue[port - Router::PORT_BASE];
 	}
@@ -114,11 +112,11 @@ AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 
 AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 {
-	if (queue[port - Router::PORT_BASE].invokeId) {
-		LOG_WARN("Port: " << port << " already in use");
+	uint32_t isFree = 0;
+	if (!queue[port - Router::PORT_BASE].invokeId.compare_exchange_weak(isFree, id)) {
+		LOG_WARN("Port: " << port << " already in use as " << isFree);
 		return nullptr;
 	}
-	queue[port - Router::PORT_BASE].invokeId = id;
 	return &queue[port - Router::PORT_BASE];
 }
 
@@ -128,12 +126,13 @@ void AmsConnection::Release(AmsResponse* response)
 	response->invokeId = 0;
 }
 
-void AmsConnection::Receive(uint8_t* buffer, size_t bytesToRead) const
+void AmsConnection::Receive(void* buffer, size_t bytesToRead) const
 {
+	auto pos = reinterpret_cast<uint8_t*>(buffer);
 	while (bytesToRead) {
-		const size_t bytesRead = socket.read(buffer, bytesToRead);
+		const size_t bytesRead = socket.read(pos, bytesToRead);
 		bytesToRead -= bytesRead;
-		buffer += bytesRead;
+		pos += bytesRead;
 	}
 }
 
@@ -145,13 +144,6 @@ void AmsConnection::ReceiveJunk(size_t bytesToRead) const
 		bytesToRead -= sizeof(buffer);
 	}
 	Receive(buffer, bytesToRead);
-}
-
-template<class T> T AmsConnection::Receive() const
-{
-	uint8_t buffer[sizeof(T)];
-	Receive(buffer, sizeof(buffer));
-	return T{ buffer };
 }
 
 Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
@@ -207,29 +199,31 @@ void AmsConnection::TryRecv()
 
 void AmsConnection::Recv()
 {
+	AmsTcpHeader amsTcpHeader;
+	AoEHeader aoeHeader;
 	for (;;) {
-		const auto amsTcp = Receive<AmsTcpHeader>();
-		if (amsTcp.length() < sizeof(AoEHeader)) {
+		Receive(amsTcpHeader);
+		if (amsTcpHeader.length() < sizeof(aoeHeader)) {
 			LOG_WARN("Frame to short to be AoE");
-			ReceiveJunk(amsTcp.length());
+			ReceiveJunk(amsTcpHeader.length());
 			continue;
 		}
 
-		const auto header = Receive<AoEHeader>();
-		if (header.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
-			ReceiveNotification(header);
+		Receive(aoeHeader);
+		if (aoeHeader.cmdId() == AoEHeader::DEVICE_NOTIFICATION) {
+			ReceiveNotification(aoeHeader);
 			continue;
 		}
 
-		auto response = GetPending(header.invokeId(), header.targetPort());
+		auto response = GetPending(aoeHeader.invokeId(), aoeHeader.targetPort());
 		if (!response) {
 			LOG_WARN("No response pending");
-			ReceiveJunk(header.length());
+			ReceiveJunk(aoeHeader.length());
 			continue;
 		}
 
-		ReceiveFrame(response->frame, header.length());
-		switch (header.cmdId()) {
+		ReceiveFrame(response->frame, aoeHeader.length());
+		switch (aoeHeader.cmdId()) {
 		case AoEHeader::READ_DEVICE_INFO:
 		case AoEHeader::READ:
 		case AoEHeader::WRITE:
