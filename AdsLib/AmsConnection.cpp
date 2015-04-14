@@ -52,7 +52,7 @@ long AmsConnection::__DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotif
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId, uint32_t extra)
 {
-	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), ++invokeId };
+	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), GetInvokeId() };
 	request.prepend<AoEHeader>(aoeHeader);
 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
@@ -70,6 +70,15 @@ AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const 
 		return nullptr;
 	}
 	return response;
+}
+
+uint32_t AmsConnection::GetInvokeId()
+{
+	uint32_t result;
+	do {
+		result = invokeId.fetch_add(1);
+	} while(!result);
+	return result;
 }
 
 AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)

@@ -6,6 +6,7 @@
 #include "Router.h"
 
 #include <array>
+#include <atomic>
 #include <functional>
 #include <vector>
 
@@ -94,7 +95,7 @@ struct AmsConnection : AmsProxy
 private:
 	Router &router;
 	TcpSocket socket;
-	uint32_t invokeId;
+	std::atomic<uint32_t> invokeId;
 	std::thread receiver;
 	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
@@ -102,6 +103,7 @@ private:
 	void Receive(uint8_t* buffer, size_t bytesToRead) const;
 	void Recv();
 	void TryRecv();
+	uint32_t GetInvokeId();
 
 	template<class T> T Receive() const;
 	bool ReceiveNotification(const AoEHeader& header);
