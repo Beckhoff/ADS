@@ -41,7 +41,7 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Get(const
     if (it != list.end()) {
         return it->second;
     }
-    return std::shared_ptr<NotificationDispatcher> {}
+    return std::shared_ptr < NotificationDispatcher > {};
 }
 
 AmsConnection::AmsConnection(Router& __router, IpV4 destIp)

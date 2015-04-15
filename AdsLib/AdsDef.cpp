@@ -4,16 +4,6 @@
 #include <ostream>
 #include <sstream>
 
-bool operator<(const AmsNetId_& lhs, const AmsNetId_& rhs)
-{
-    for (unsigned int i = 0; i < sizeof(rhs.b); ++i) {
-        if (lhs.b[i] != rhs.b[i]) {
-            return lhs.b[i] < rhs.b[i];
-        }
-    }
-    return false;
-}
-
 bool operator<(const AmsAddr_& lhs, const AmsAddr_& rhs)
 {
     if (memcmp(&lhs.netId, &rhs.netId, sizeof(lhs.netId))) {
@@ -62,6 +52,18 @@ AmsNetId_::AmsNetId_(const std::string& addr)
     if (i != sizeof(b)) {
         memset(b, 0, sizeof(b));
     }
+}
+
+bool AmsNetId_::operator<(const AmsNetId_& rhs) const
+{
+    for (unsigned int i = 0; i < sizeof(rhs.b); ++i)
+    {
+        if (b[i] != rhs.b[i])
+        {
+            return b[i] < rhs.b[i];
+        }
+    }
+    return false;
 }
 
 AmsNetId_::operator bool() const
