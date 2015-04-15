@@ -1,0 +1,28 @@
+#!/bin/sh
+
+##################################################################
+# SETTINGS
+# set uncrustify path or executable
+# UNCRUSTIFY="/usr/bin/uncrustify"
+UNCRUSTIFY=uncrustify
+GIT=git
+
+# set uncrustify config location
+# CONFIG="/home/user/.config/uncrustify.cfg"
+CONFIG="tools/uncrustify.cfg"
+
+# remove any older patches from previous commits. Set to true or false.
+# DELETE_OLD_PATCHES=false
+DELETE_OLD_PATCHES=false
+
+# only parse files with the extensions in FILE_EXTS. Set to true or false.
+# if false every changed file in the commit will be parsed with Uncrustify.
+# if true only files matching one of the extensions are parsed with Uncrustify.
+# PARSE_EXTS=true
+PARSE_EXTS=true
+
+# file types to parse. Only effective when PARSE_EXTS is true.
+# FILE_EXTS=".c .h .cpp .hpp"
+FILE_EXTS=".c .h .cpp .hpp"
+
+##################################################################
