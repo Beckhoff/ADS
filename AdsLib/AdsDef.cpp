@@ -50,7 +50,8 @@ AmsNetId_::AmsNetId_(const std::string& addr)
     }
 
     if (i != sizeof(b)) {
-        memset(b, 0, sizeof(b));
+        static const AmsNetId empty {};
+        memcpy(b, empty.b, sizeof(b));
     }
 }
 
