@@ -7,89 +7,98 @@
 
 #include <atomic>
 
-struct AmsResponse
-{
-	Frame frame;
-	std::atomic<uint32_t> invokeId;
+struct AmsResponse {
+    Frame frame;
+    std::atomic<uint32_t> invokeId;
 
-	AmsResponse();
-	void Notify();
+    AmsResponse();
+    void Notify();
 
-	// return true if notified before timeout
-	bool Wait(uint32_t timeout_ms);
+    // return true if notified before timeout
+    bool Wait(uint32_t timeout_ms);
 private:
-	std::mutex mutex;
-	std::condition_variable cv;
+    std::mutex mutex;
+    std::condition_variable cv;
 };
 
 using VirtualConnection = std::pair<uint16_t, AmsAddr>;
 
-struct AmsConnection : AmsProxy
-{
-	AmsConnection(Router &__router, IpV4 destIp = IpV4{ "" });
-	~AmsConnection();
+struct AmsConnection : AmsProxy {
+    AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
+    ~AmsConnection();
 
-	NotificationId CreateNotifyMapping(uint16_t port, AmsAddr destAddr, PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
-	long DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
+    NotificationId CreateNotifyMapping(uint16_t               port,
+                                       AmsAddr                destAddr,
+                                       PAdsNotificationFuncEx pFunc,
+                                       uint32_t               hUser,
+                                       uint32_t               length,
+                                       uint32_t               hNotify);
+    long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
-	AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
-	void Release(AmsResponse* response);
-	AmsResponse* GetPending(uint32_t id, uint16_t port);
+    AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
+    void Release(AmsResponse* response);
+    AmsResponse* GetPending(uint32_t id, uint16_t port);
 
-	template <class T>
-	long AdsRequest(Frame& request, const AmsAddr& destAddr, uint32_t tmms, uint16_t port, uint16_t cmdId, uint32_t bufferLength = 0, void* buffer = nullptr, uint32_t *bytesRead = nullptr)
-	{
-		AmsAddr srcAddr;
-		const auto status = router.GetLocalAddress(port, &srcAddr);
-		if (status) {
-			return status;
-		}
-		AmsResponse* response = Write(request, destAddr, srcAddr, cmdId);
-		if (response) {
-			if (response->Wait(tmms)){
-				const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
-				T header(response->frame.data());
-				memcpy(buffer, response->frame.data() + sizeof(T), bytesAvailable);
-				if (bytesRead) {
-					*bytesRead = bytesAvailable;
-				}
-				Release(response);
-				return header.result();
-			}
-			Release(response);
-			return ADSERR_CLIENT_SYNCTIMEOUT;
-		}
-		return -1;
-	}
+    template<class T>
+    long AdsRequest(Frame&         request,
+                    const AmsAddr& destAddr,
+                    uint32_t       tmms,
+                    uint16_t       port,
+                    uint16_t       cmdId,
+                    uint32_t       bufferLength = 0,
+                    void*          buffer = nullptr,
+                    uint32_t*      bytesRead = nullptr)
+    {
+        AmsAddr srcAddr;
+        const auto status = router.GetLocalAddress(port, &srcAddr);
+        if (status) {
+            return status;
+        }
+        AmsResponse* response = Write(request, destAddr, srcAddr, cmdId);
+        if (response) {
+            if (response->Wait(tmms)) {
+                const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
+                T header(response->frame.data());
+                memcpy(buffer, response->frame.data() + sizeof(T), bytesAvailable);
+                if (bytesRead) {
+                    *bytesRead = bytesAvailable;
+                }
+                Release(response);
+                return header.result();
+            }
+            Release(response);
+            return ADSERR_CLIENT_SYNCTIMEOUT;
+        }
+        return -1;
+    }
 
-	const IpV4 destIp;
+    const IpV4 destIp;
 private:
-	Router &router;
-	TcpSocket socket;
-	std::thread receiver;
-	std::atomic<uint32_t> invokeId;
-	std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
+    Router& router;
+    TcpSocket socket;
+    std::thread receiver;
+    std::atomic<uint32_t> invokeId;
+    std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
-	Frame& ReceiveFrame(Frame &frame, size_t length) const;
-	bool ReceiveNotification(const AoEHeader &header); 
-	void ReceiveJunk(size_t bytesToRead) const;
-	void Receive(void* buffer, size_t bytesToRead) const;
-	template<class T> void Receive(T &buffer) const { Receive(&buffer, sizeof(T)); }
+    Frame& ReceiveFrame(Frame& frame, size_t length) const;
+    bool ReceiveNotification(const AoEHeader& header);
+    void ReceiveJunk(size_t bytesToRead) const;
+    void Receive(void* buffer, size_t bytesToRead) const;
+    template<class T> void Receive(T& buffer) const { Receive(&buffer, sizeof(T)); }
 
-	void Recv();
-	void TryRecv();
-	uint32_t GetInvokeId();
-	AmsResponse* Reserve(uint32_t id, uint16_t port);
+    void Recv();
+    void TryRecv();
+    uint32_t GetInvokeId();
+    AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-	struct DispatcherList
-	{
-		std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy &proxy);
-		std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection &connection);
+    struct DispatcherList {
+        std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy& proxy);
+        std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection& connection);
 
-	private:
-		std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher>> list;
-		std::recursive_mutex mutex;
-	} dispatcherList;
+private:
+        std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > list;
+        std::recursive_mutex mutex;
+    } dispatcherList;
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

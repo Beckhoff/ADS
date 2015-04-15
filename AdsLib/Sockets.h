@@ -5,51 +5,47 @@
 #include "wrap_socket.h"
 #include <string>
 
-struct IpV4
-{
+struct IpV4 {
     IpV4(const std::string& addr);
-	uint32_t toNetworkOrder() const;
-	bool operator < (const IpV4& ref) const
-	{
-		return this->toNetworkOrder() < ref.toNetworkOrder();
-	}
+    uint32_t toNetworkOrder() const;
+    bool operator<(const IpV4& ref) const
+    {
+        return this->toNetworkOrder() < ref.toNetworkOrder();
+    }
 
-	bool operator == (const IpV4& ref) const
-	{
-		return this->toNetworkOrder() == ref.toNetworkOrder();
-	}
+    bool operator==(const IpV4& ref) const
+    {
+        return this->toNetworkOrder() == ref.toNetworkOrder();
+    }
 
 private:
     uint32_t value;
 };
 
-struct Socket
-{
-    Frame& read(Frame &frame) const;
-	size_t read(uint8_t *buffer, size_t maxBytes) const;
-    size_t write(const Frame &frame) const;
-	void Shutdown();
+struct Socket {
+    Frame& read(Frame& frame) const;
+    size_t read(uint8_t* buffer, size_t maxBytes) const;
+    size_t write(const Frame& frame) const;
+    void Shutdown();
 
 protected:
     int m_WSAInitialized;
     SOCKET m_Socket;
     sockaddr_in m_SockAddress;
-	const sockaddr *const m_DestAddr;
-	const size_t m_DestAddrLen;
+    const sockaddr* const m_DestAddr;
+    const size_t m_DestAddrLen;
 
     Socket(IpV4 ip, uint16_t port, int type);
     ~Socket();
-    bool Select(timeval *timeout) const;
+    bool Select(timeval* timeout) const;
 };
 
-struct TcpSocket : Socket
-{
+struct TcpSocket : Socket {
     TcpSocket(IpV4 ip, uint16_t port);
     uint32_t Connect() const;
 };
 
-struct UdpSocket : Socket
-{
+struct UdpSocket : Socket {
     UdpSocket(IpV4 ip, uint16_t port);
 };
 

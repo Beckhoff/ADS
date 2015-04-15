@@ -8,10 +8,10 @@
 
 #ifdef _WIN32
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) do { \
-    struct tm temp; \
-    localtime_s(&temp, TIME_T); \
-    std::strftime(DATE_TIME, sizeof(DATE_TIME), "%Y-%m-%dT%H:%M:%S ", &temp); \
-    } while (0, 0);
+        struct tm temp; \
+        localtime_s(&temp, TIME_T); \
+        std::strftime(DATE_TIME, sizeof(DATE_TIME), "%Y-%m-%dT%H:%M:%S ", &temp); \
+} while (0, 0);
 #else
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) std::strftime(DATE_TIME, sizeof(DATE_TIME), "%FT%T%z ", localtime(TIME_T));
 #endif
@@ -29,7 +29,7 @@ std::ostream& Logger::output = outFile;
 std::ostream& Logger::output = std::cerr;
 #endif
 
-void Logger::Log(const size_t level, const std::string &msg)
+void Logger::Log(const size_t level, const std::string& msg)
 {
     std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     char dateTime[28];

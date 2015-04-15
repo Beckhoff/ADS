@@ -39,25 +39,25 @@ const uint8_t* Frame::data() const
 
 Frame& Frame::limit(size_t newSize)
 {
-	m_Size = std::min(m_Size, newSize);
-	m_Pos = m_Data.get();
-	return *this;
+    m_Size = std::min(m_Size, newSize);
+    m_Pos = m_Data.get();
+    return *this;
 }
 
 Frame& Frame::reset()
 {
-	m_Size = m_OriginalSize;
-	m_Pos = m_Data.get() + m_Size;
-	return *this;
+    m_Size = m_OriginalSize;
+    m_Pos = m_Data.get() + m_Size;
+    return *this;
 }
 
-Frame& Frame::prepend(const void *const data, const size_t size)
+Frame& Frame::prepend(const void* const data, const size_t size)
 {
     const size_t bytesFree = m_Pos - m_Data.get();
     if (size > bytesFree) {
         auto newData = new uint8_t[size + m_Size];
         if (NULL == newData) {
-			throw std::bad_alloc();
+            throw std::bad_alloc();
         }
 
         m_Pos = newData + bytesFree + size;

@@ -15,7 +15,7 @@
             stream << ARGS; \
             Logger::Log(LEVEL, stream.str()); \
         } \
-    } while(0)
+    } while (0)
 
 #define LOG_INFO(ARGS) LOG(0, ARGS)
 #define LOG_WARN(ARGS) LOG(1, ARGS)
@@ -24,7 +24,7 @@
 struct Logger {
     static void Log(size_t level, const std::string& msg);
 private:
-	static std::ostream& output;
+    static std::ostream& output;
 };
 
 #endif // LOG_H

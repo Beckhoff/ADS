@@ -5,8 +5,7 @@
 #include <cstdint>
 #include <memory>
 
-struct Frame
-{
+struct Frame {
     /**
      * @brief Frame
      * @param length number of bytes preallocated in the internale buffer
@@ -59,7 +58,7 @@ struct Frame
      * @param size number of bytes in <data>
      * @return reference to self
      */
-    Frame& prepend(const void *const data, const size_t size);
+    Frame& prepend(const void* const data, const size_t size);
 
     /**
      * prepend a header of type <T>
@@ -102,7 +101,7 @@ struct Frame
 
 private:
     std::unique_ptr<uint8_t[]> m_Data;
-    uint8_t *m_Pos;
+    uint8_t* m_Pos;
     size_t m_Size;
     size_t m_OriginalSize;
 };
