@@ -28,3 +28,6 @@ release: $(LIB_NAME) AdsLib.h AdsDef.h
 
 clean:
 	rm -f *.a *.o *.bin
+
+uncrustify:
+	uncrustify --no-backup -c uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp
