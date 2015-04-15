@@ -255,8 +255,3 @@ template<class T> T extractLittleEndian(Frame& frame)
 	frame.remove(sizeof(T));
 	return value;
 }
-
-std::ostream& operator<<(std::ostream& out, const AmsNetId& netId)
-{
-	return out << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' << (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
-}

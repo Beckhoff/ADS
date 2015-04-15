@@ -72,7 +72,7 @@ long AmsConnection::DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify,
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
 {
-	AoEHeader aoeHeader{ destAddr, srcAddr, cmdId, static_cast<uint32_t>(request.size()), GetInvokeId() };
+	AoEHeader aoeHeader{ destAddr.netId, destAddr.port, srcAddr.netId, srcAddr.port, cmdId, static_cast<uint32_t>(request.size()), GetInvokeId() };
 	request.prepend<AoEHeader>(aoeHeader);
 
 	AmsTcpHeader header{ static_cast<uint32_t>(request.size()) };
@@ -159,7 +159,7 @@ Frame& AmsConnection::ReceiveFrame(Frame &frame, size_t bytesLeft) const
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-	const auto dispatcher = dispatcherList.Get(VirtualConnection{ header.targetPort(), header.sourceAddr() });
+	const auto dispatcher = dispatcherList.Get(VirtualConnection{ header.targetPort(), header.sourceAms() });
 	if (!dispatcher) {
 		ReceiveJunk(header.length());
 		LOG_WARN("No dispatcher found for notification");

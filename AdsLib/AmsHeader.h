@@ -123,11 +123,11 @@ struct AoEHeader
 	{
 	}
 
-	AoEHeader(const AmsAddr &__targetAddr, const AmsAddr &__sourceAddr, uint16_t __cmdId, uint32_t __length, uint32_t __invokeId)
-		: targetNetId(__targetAddr.netId),
-		leTargetPort(qToLittleEndian(__targetAddr.port)),
-		sourceNetId(__sourceAddr.netId),
-		leSourcePort(qToLittleEndian(__sourceAddr.port)),
+    AoEHeader(const AmsNetId &__targetAddr, uint16_t __targetPort, const AmsNetId &__sourceAddr, uint16_t __sourcePort, uint16_t __cmdId, uint32_t __length, uint32_t __invokeId)
+        : targetNetId(__targetAddr),
+        leTargetPort(qToLittleEndian(__targetPort)),
+        sourceNetId(__sourceAddr),
+        leSourcePort(qToLittleEndian(__sourcePort)),
 		leCmdId(qToLittleEndian(__cmdId)),
 		leStateFlags(qToLittleEndian(AMS_REQUEST)),
 		leLength(qToLittleEndian(__length)),
@@ -161,9 +161,14 @@ struct AoEHeader
 		return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
     }
 
-    AmsAddr_ sourceAddr() const
+	AmsAddr sourceAms() const
+	{
+		return AmsAddr{ sourceAddr(), sourcePort() };
+	}
+
+    AmsNetId sourceAddr() const
     {
-        return AmsAddr_{ sourceNetId, sourcePort() };
+        return sourceNetId;
     }
 
     uint16_t sourcePort() const
@@ -176,9 +181,9 @@ struct AoEHeader
         return qFromLittleEndian<uint16_t>((const uint8_t*)&leStateFlags);
     }
 
-    AmsAddr_ targetAddr() const
+    AmsNetId targetAddr() const
     {
-        return AmsAddr_{ targetNetId, targetPort() };
+        return targetNetId;
     }
 
 	uint16_t targetPort() const
@@ -187,9 +192,9 @@ struct AoEHeader
 	}
 
 private:
-	AmsNetId_ targetNetId;
+    AmsNetId targetNetId;
 	uint16_t leTargetPort;
-	AmsNetId sourceNetId;
+    AmsNetId sourceNetId;
 	uint16_t leSourcePort;
 	uint16_t leCmdId;
 	uint16_t leStateFlags;

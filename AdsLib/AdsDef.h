@@ -8,7 +8,13 @@
 #ifndef __ADSDEF_H__
 #define __ADSDEF_H__
 
+#ifdef __cplusplus
+#include <cstdint>
+#include <iosfwd>
+#include <string>
+#else
 #include <stdint.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // AMS Ports
@@ -191,6 +197,12 @@
 typedef struct AmsNetId_
 {
 	uint8_t b[6];
+#ifdef __cplusplus
+    AmsNetId_(uint32_t ipv4Addr = 0);
+	AmsNetId_(const std::string &addr);
+	AmsNetId_(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
+    operator bool() const;
+#endif
 } AmsNetId, *PAmsNetId;
 
 typedef struct AmsAddr_
@@ -202,8 +214,7 @@ typedef struct AmsAddr_
 #ifdef __cplusplus
 bool operator <(const AmsNetId_& lhs, const AmsNetId_& rhs);
 bool operator <(const AmsAddr_& lhs, const AmsAddr_& rhs);
-#include <string>
-AmsNetId make_AmsNetId(const std::string &addr);
+std::ostream& operator<<(std::ostream& os, const AmsNetId_& netId);
 #endif /* #ifdef __cplusplus */
 
 typedef	struct
