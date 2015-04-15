@@ -56,10 +56,8 @@ AmsNetId_::AmsNetId_(const std::string& addr)
 
 bool AmsNetId_::operator<(const AmsNetId_& rhs) const
 {
-    for (unsigned int i = 0; i < sizeof(rhs.b); ++i)
-    {
-        if (b[i] != rhs.b[i])
-        {
+    for (unsigned int i = 0; i < sizeof(rhs.b); ++i) {
+        if (b[i] != rhs.b[i]) {
             return b[i] < rhs.b[i];
         }
     }
