@@ -11,11 +11,6 @@ IpV4::IpV4(const std::string& addr)
     : value(ntohl(inet_addr(addr.c_str())))
 {}
 
-uint32_t IpV4::toNetworkOrder() const
-{
-    return htonl(value);
-}
-
 bool IpV4::operator<(const IpV4& ref) const
 {
     return value < ref.value;
