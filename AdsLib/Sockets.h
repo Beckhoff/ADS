@@ -6,20 +6,10 @@
 #include <string>
 
 struct IpV4 {
+    const uint32_t value;
     IpV4(const std::string& addr);
-    uint32_t toNetworkOrder() const;
-    bool operator<(const IpV4& ref) const
-    {
-        return this->toNetworkOrder() < ref.toNetworkOrder();
-    }
-
-    bool operator==(const IpV4& ref) const
-    {
-        return this->toNetworkOrder() == ref.toNetworkOrder();
-    }
-
-private:
-    uint32_t value;
+    bool operator<(const IpV4& ref) const;
+    bool operator==(const IpV4& ref) const;
 };
 
 struct Socket {

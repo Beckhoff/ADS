@@ -8,22 +8,22 @@
 #include <system_error>
 
 IpV4::IpV4(const std::string& addr)
-{
-    std::istringstream iss(addr);
-    std::string s;
-    int shift = 32;
-    uint32_t result = 0;
-
-    while (shift && std::getline(iss, s, '.')) {
-        shift -= 8;
-        result |= (atoi(s.c_str()) % 256) << shift;
-    }
-    value = shift ? 0 : result;
-}
+    : value(ntohl(inet_addr(addr.c_str())))
+{}
 
 uint32_t IpV4::toNetworkOrder() const
 {
     return htonl(value);
+}
+
+bool IpV4::operator<(const IpV4& ref) const
+{
+    return value < ref.value;
+}
+
+bool IpV4::operator==(const IpV4& ref) const
+{
+    return value == ref.value;
 }
 
 Socket::Socket(IpV4 ip, uint16_t port, int type)
@@ -37,7 +37,7 @@ Socket::Socket(IpV4 ip, uint16_t port, int type)
     }
     m_SockAddress.sin_family = AF_INET;
     m_SockAddress.sin_port = htons(port);
-    m_SockAddress.sin_addr.s_addr = ip.toNetworkOrder();
+    m_SockAddress.sin_addr.s_addr = htonl(ip.value);
 }
 
 Socket::~Socket()

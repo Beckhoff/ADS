@@ -60,10 +60,10 @@ struct TestAmsAddr : test_base<TestAmsAddr> {
 
     void testAmsAddrCompare(const std::string&)
     {
-        static const AmsAddr testee      { AmsNetId { 192, 168, 0, 231, 1, 1 }, 1000 };
-        static const AmsAddr lower_last  { AmsNetId { 192, 168, 0, 231, 1, 0 }, 1000 };
-        static const AmsAddr lower_middle { AmsNetId { 192, 168, 0, 1, 1, 1 }, 1000 };
-        static const AmsAddr lower_port  { AmsNetId { 192, 168, 0, 231, 1, 1 }, 999 };
+        static const AmsAddr testee {AmsNetId {192, 168, 0, 231, 1, 1}, 1000};
+        static const AmsAddr lower_last {AmsNetId {192, 168, 0, 231, 1, 0}, 1000};
+        static const AmsAddr lower_middle {AmsNetId {192, 168, 0, 1, 1, 1}, 1000};
+        static const AmsAddr lower_port {AmsNetId {192, 168, 0, 231, 1, 1}, 999};
 
         fructose_assert(lower_last < testee);
         fructose_assert(lower_middle < testee);
@@ -136,6 +136,37 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         testee.DelRoute(netId_1);
         fructose_assert(!testee.GetConnection(netId_1));
         fructose_assert(testee.GetConnection(netId_2));
+    }
+};
+
+struct TestIpV4 : test_base<TestIpV4> {
+    std::ostream& out;
+
+    TestIpV4(std::ostream& outstream)
+        : out(outstream)
+    {}
+
+    void testComparsion(const std::string&)
+    {
+        static const IpV4 testee {"192.168.000.01"};
+        static const IpV4 lower {"192.167.0.1"};
+        static const IpV4 higher {"193.0.0.0"};
+        static const IpV4 tooLong {"192.168.0.1."};
+        static const IpV4 tooShort {"192.168.0."};
+        static const IpV4 tooHigh {"0.0.0.257"};
+        static const IpV4 tooLow {"-1.0.0.254"};
+        static const IpV4 invalid {"192.d.0.254"};
+
+        fructose_assert_eq(0xC0A80001, testee.value);
+        fructose_assert_eq(0xC0A70001, lower.value);
+        fructose_assert_eq(0xC1000000, higher.value);
+        fructose_assert_eq(0xFFFFFFFF, tooLong.value);
+        fructose_assert_eq(0xFFFFFFFF, tooShort.value);
+        fructose_assert_eq(0xFFFFFFFF, tooHigh.value);
+        fructose_assert_eq(0xFFFFFFFF, tooLow.value);
+        fructose_assert_eq(0xFFFFFFFF, invalid.value);
+        fructose_assert(lower < testee);
+        fructose_assert(testee < higher);
     }
 };
 
@@ -855,7 +886,7 @@ int main()
 #else
     std::ostream& errorstream = std::cout;
 #endif
-#if 0
+#if 1
     TestAmsAddr amsAddrTest(errorstream);
     amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
     amsAddrTest.run();
@@ -864,6 +895,10 @@ int main()
     routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
     routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
     routerTest.run();
+
+    TestIpV4 ipv4Test(errorstream);
+    ipv4Test.add_test("testComparsion", &TestIpV4::testComparsion);
+    ipv4Test.run();
 
     TestRingBuffer ringBufferTest(errorstream);
     ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);

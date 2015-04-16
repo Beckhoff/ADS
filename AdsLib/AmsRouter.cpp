@@ -138,7 +138,7 @@ long AmsRouter::Read(uint16_t       port,
                      uint32_t*      bytesRead)
 {
     Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
-    request.prepend<AoERequestHeader>({
+    request.prepend(AoERequestHeader {
         indexGroup,
         indexOffset,
         bufferLength
@@ -197,7 +197,7 @@ long AmsRouter::ReadWrite(uint16_t       port,
 {
     Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoEReadWriteReqHeader) + writeLength);
     request.prepend(writeData, writeLength);
-    request.prepend<AoEReadWriteReqHeader>({
+    request.prepend(AoEReadWriteReqHeader {
         indexGroup,
         indexOffset,
         readLength,
@@ -283,7 +283,7 @@ long AmsRouter::AddNotification(uint16_t                     port,
                                 uint32_t*                    pNotification)
 {
     Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AdsAddDeviceNotificationRequest));
-    request.prepend<AdsAddDeviceNotificationRequest>({
+    request.prepend(AdsAddDeviceNotificationRequest {
         indexGroup,
         indexOffset,
         pAttrib->cbLength,
@@ -308,7 +308,7 @@ long AmsRouter::AddNotification(uint16_t                     port,
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
     auto& p = ports[port - Router::PORT_BASE];
-    return p.DelNotification(*pAddr, hNotification) ? 0 : ADSERR_CLIENT_REMOVEHASH;
+    return p.DelNotification(*pAddr, hNotification) ? ADSERR_NOERR : ADSERR_CLIENT_REMOVEHASH;
 }
 
 template<class T> T extractLittleEndian(Frame& frame)
