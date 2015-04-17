@@ -300,7 +300,8 @@ long AmsRouter::AddNotification(uint16_t                     port,
     if (!status) {
         *pNotification = qFromLittleEndian<uint32_t>(buffer);
         AmsConnection& conn = *GetConnection(pAddr->netId);
-        const auto hash = conn.CreateNotifyMapping(port, *pAddr, pFunc, hUser, pAttrib->cbLength, *pNotification);
+        const auto hash = conn.CreateNotifyMapping(Notification {pFunc, *pNotification, hUser, pAttrib->cbLength,
+                                                                 *pAddr, port});
         ports[port - Router::PORT_BASE].AddNotification(hash);
     }
     return status;

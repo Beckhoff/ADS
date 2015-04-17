@@ -20,10 +20,10 @@ bool NotificationDispatcher::operator<(const NotificationDispatcher& ref) const
     return amsAddr < ref.amsAddr;
 }
 
-void NotificationDispatcher::Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify)
+void NotificationDispatcher::Emplace(Notification notify)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    notifications.emplace(hNotify, Notification { pFunc, hNotify, hUser, length, amsAddr, port });
+    notifications.emplace(notify.hNotify(), notify);
 }
 
 bool NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)

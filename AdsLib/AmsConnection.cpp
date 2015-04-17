@@ -60,16 +60,11 @@ AmsConnection::~AmsConnection()
     receiver.join();
 }
 
-NotificationId AmsConnection::CreateNotifyMapping(uint16_t               port,
-                                                  AmsAddr                addr,
-                                                  PAdsNotificationFuncEx pFunc,
-                                                  uint32_t               hUser,
-                                                  uint32_t               length,
-                                                  uint32_t               hNotify)
+NotificationId AmsConnection::CreateNotifyMapping(Notification notify)
 {
-    const auto dispatcher = dispatcherList.Add(VirtualConnection { port, addr }, *this);
-    dispatcher->Emplace(pFunc, hUser, length, hNotify);
-    return NotificationId { hNotify, dispatcher };
+    const auto dispatcher = dispatcherList.Add(VirtualConnection {notify.port, notify.amsAddr}, *this);
+    dispatcher->Emplace(notify);
+    return NotificationId { notify.hNotify(), dispatcher };
 }
 
 long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)

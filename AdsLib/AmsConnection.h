@@ -27,12 +27,7 @@ struct AmsConnection : AmsProxy {
     AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
     ~AmsConnection();
 
-    NotificationId CreateNotifyMapping(uint16_t               port,
-                                       AmsAddr                destAddr,
-                                       PAdsNotificationFuncEx pFunc,
-                                       uint32_t               hUser,
-                                       uint32_t               length,
-                                       uint32_t               hNotify);
+    NotificationId CreateNotifyMapping(Notification notify);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
     AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);

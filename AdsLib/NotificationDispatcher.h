@@ -16,7 +16,7 @@ struct NotificationDispatcher {
     NotificationDispatcher(AmsProxy& __proxy, AmsAddr __amsAddr, uint16_t __port);
     ~NotificationDispatcher();
     bool operator<(const NotificationDispatcher& ref) const;
-    void Emplace(PAdsNotificationFuncEx pFunc, uint32_t hUser, uint32_t length, uint32_t hNotify);
+    void Emplace(Notification notification);
     bool Erase(uint32_t hNotify, uint32_t tmms);
     inline void Notify() { sem.Post(); }
     void Run();
