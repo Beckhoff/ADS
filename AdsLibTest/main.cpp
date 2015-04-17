@@ -13,6 +13,9 @@ using namespace fructose;
 
 #pragma warning(disable: 4800)
 
+static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
+static const AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
+
 static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
@@ -225,14 +228,14 @@ struct TestAds : test_base<TestAds> {
     TestAds(std::ostream& outstream)
         : out(outstream)
     {
-        AdsAddRoute(AmsNetId { 192, 168, 0, 231, 1, 1 }, "192.168.0.232");
+        AdsAddRoute(serverNetId, "192.168.0.232");
     }
 #ifdef WIN32
     ~TestAds()
     {
         // WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
         //             of the static AdsRouter object and hangs in receive.join()
-        AdsDelRoute(AmsNetId { 192, 168, 0, 231, 1, 1 });
+        AdsDelRoute(serverNetId);
     }
 #endif
 
@@ -258,7 +261,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsReadReqEx2(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -330,7 +332,6 @@ struct TestAds : test_base<TestAds> {
     void testAdsReadDeviceInfoReqEx(const std::string&)
     {
         static const char NAME[] = "Plc30 App";
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -364,7 +365,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsReadStateReqEx(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -392,7 +392,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsReadWriteReqEx2(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         char handleName[] = "MAIN.byByte";
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
@@ -520,7 +519,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteReqEx(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -586,7 +584,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteControlReqEx(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -633,7 +630,6 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsNotification(const std::string&)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
 
         fructose_assert(0 != port);
@@ -734,14 +730,14 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         : out(outstream),
         runEndurance(false)
     {
-        AdsAddRoute(AmsNetId { 192, 168, 0, 231, 1, 1 }, "192.168.0.232");
+        AdsAddRoute(serverNetId, "192.168.0.232");
     }
 #ifdef WIN32
     ~TestAdsPerformance()
     {
         // WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
         //             of the static AdsRouter object and hangs in receive.join()
-        AdsDelRoute(AmsNetId { 192, 168, 0, 231, 1, 1 });
+        AdsDelRoute(serverNetId);
     }
 #endif
 
@@ -786,7 +782,6 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
     void testEndurance(const std::string& testname)
     {
         static const size_t numNotifications = 1024;
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -828,7 +823,6 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 private:
     void Notifications(size_t numNotifications)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -851,7 +845,6 @@ private:
 
     void Read(const size_t numLoops)
     {
-        AmsAddr server { { 192, 168, 0, 231, 1, 1 }, AMSPORT_R0_PLC_TC3 };
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
