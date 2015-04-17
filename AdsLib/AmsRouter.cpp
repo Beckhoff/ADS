@@ -113,6 +113,7 @@ long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 
 AmsConnection* AmsRouter::GetConnection(const AmsNetId& amsDest)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     const auto it = __GetConnection(amsDest);
     if (it == connections.end()) {
         return nullptr;

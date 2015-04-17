@@ -140,6 +140,38 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(!testee.GetConnection(netId_1));
         fructose_assert(testee.GetConnection(netId_2));
     }
+
+    void testConcurrentRoutes(const std::string&)
+    {
+        std::thread threads[256];
+        AmsRouter testee;
+        uint8_t i = 0;
+        for (auto& t : threads) {
+            t = std::thread(&TestAmsRouter::Run, this, std::ref(testee), ++i);
+        }
+
+        for (auto& t : threads) {
+            t.join();
+        }
+    }
+private:
+    void Run(AmsRouter& testee, uint8_t id)
+    {
+        static const IpV4 ip {"192.168.0.232"};
+        for (uint8_t i = 0; i < 255; ++i) {
+            AmsNetId netId {192, 168, 0, i, 0, id};
+            fructose_assert_eq(0, testee.AddRoute(netId, ip));
+            fructose_assert(testee.GetConnection(netId));
+            fructose_assert(ip == testee.GetConnection(netId)->destIp);
+        }
+
+        for (uint8_t i = 0; i < 255; ++i) {
+            AmsNetId netId {192, 168, 0, i, 0, id};
+            testee.DelRoute(netId);
+            fructose_assert(!testee.GetConnection(netId));
+        }
+        std::cout << std::dec << (int)id << '\n';
+    }
 };
 
 struct TestIpV4 : test_base<TestIpV4> {
@@ -887,6 +919,7 @@ int main()
     TestAmsRouter routerTest(errorstream);
     routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
     routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
+//    routerTest.add_test("testConcurrentRoutes", &TestAmsRouter::testConcurrentRoutes);
     routerTest.run();
 
     TestIpV4 ipv4Test(errorstream);

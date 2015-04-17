@@ -8,6 +8,7 @@
 struct IpV4 {
     const uint32_t value;
     IpV4(const std::string& addr);
+    IpV4(uint32_t __val);
     bool operator<(const IpV4& ref) const;
     bool operator==(const IpV4& ref) const;
 };

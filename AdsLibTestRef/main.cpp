@@ -609,11 +609,10 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 
         const auto start = std::chrono::high_resolution_clock::now();
         for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_loop_assert(hUser,
-                                 0 ==
-                                 AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback,
-                                                                   hUser,
-                                                                   &notification[hUser]));
+            fructose_assert_eq(0,
+                               AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback,
+                                                                 hUser,
+                                                                 &notification[hUser]));
         }
 
         std::cout << "Hit ENTER to stop endurance test\n";
@@ -621,7 +620,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         runEndurance = false;
 
         for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
+            fructose_assert_eq(0, AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
         }
         const auto end = std::chrono::high_resolution_clock::now();
         const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

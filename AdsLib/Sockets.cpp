@@ -11,6 +11,10 @@ IpV4::IpV4(const std::string& addr)
     : value(ntohl(inet_addr(addr.c_str())))
 {}
 
+IpV4::IpV4(uint32_t __val)
+    : value(__val)
+{}
+
 bool IpV4::operator<(const IpV4& ref) const
 {
     return value < ref.value;
