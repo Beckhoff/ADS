@@ -130,15 +130,23 @@ std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator AmsRouter::__GetConnec
     return connections.end();
 }
 
-long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, Notification notify)
+long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, Notification& notify)
 {
-    const long status = AdsRequest<AoEResponseHeader>(request);
+    if (request.bytesRead) {
+        *request.bytesRead = 0;
+    }
+
+    auto ads = GetConnection(request.destAddr.netId);
+    if (!ads) {
+        return GLOBALERR_MISSING_ROUTE;
+    }
+
+    auto& port = ports[request.port - Router::PORT_BASE];
+    const long status = ads->AdsRequest<AoEResponseHeader>(request, port.tmms);
     if (!status) {
         *pNotification = qFromLittleEndian<uint32_t>((uint8_t*)request.buffer);
-        AmsConnection& conn = *GetConnection(request.destAddr.netId);
-        notify.hNotify(*pNotification);
-        const auto hash = conn.CreateNotifyMapping(notify);
-        ports[request.port - Router::PORT_BASE].AddNotification(hash);
+        const auto notifyId = ads->CreateNotifyMapping(*pNotification, notify);
+        port.AddNotification(notifyId);
     }
     return status;
 }

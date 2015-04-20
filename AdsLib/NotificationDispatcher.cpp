@@ -1,10 +1,9 @@
 #include "NotificationDispatcher.h"
 #include "Log.h"
 
-NotificationDispatcher::NotificationDispatcher(AmsProxy& __proxy, AmsAddr __amsAddr, uint16_t __port)
-    : amsAddr(__amsAddr),
+NotificationDispatcher::NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn)
+    : conn(__conn),
     ring(4 * 1024 * 1024),
-    port(__port),
     proxy(__proxy),
     thread(&NotificationDispatcher::Run, this)
 {}
@@ -17,18 +16,18 @@ NotificationDispatcher::~NotificationDispatcher()
 
 bool NotificationDispatcher::operator<(const NotificationDispatcher& ref) const
 {
-    return amsAddr < ref.amsAddr;
+    return conn.second < ref.conn.second;
 }
 
-void NotificationDispatcher::Emplace(Notification notify)
+void NotificationDispatcher::Emplace(uint32_t hNotify, Notification& notification)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    notifications.emplace(notify.hNotify(), notify);
+    notifications.emplace(hNotify, notification);
 }
 
 bool NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
-    const auto status = proxy.DeleteNotification(amsAddr, hNotify, tmms, port);
+    const auto status = proxy.DeleteNotification(conn.second, hNotify, tmms, conn.first);
     std::lock_guard<std::recursive_mutex> lock(mutex);
     return !!notifications.erase(hNotify) && status;
 }

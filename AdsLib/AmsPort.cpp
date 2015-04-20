@@ -36,7 +36,7 @@ bool AmsPort::DelNotification(const AmsAddr& ams, uint32_t hNotify)
     std::lock_guard<std::mutex> lock(mutex);
     for (auto it = notifications.begin(); it != notifications.end(); ++it) {
         if (it->first == hNotify) {
-            if (std::ref(it->second->amsAddr) == ams) {
+            if (std::ref(it->second->conn.second) == ams) {
                 it->second->Erase(hNotify, tmms);
                 notifications.erase(it);
                 return true;

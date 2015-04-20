@@ -11,7 +11,7 @@ struct AmsRouter : Router {
     long GetLocalAddress(uint16_t port, AmsAddr* pAddr);
     long GetTimeout(uint16_t port, uint32_t& timeout);
     long SetTimeout(uint16_t port, uint32_t timeout);
-    long AddNotification(AmsRequest& request, uint32_t* pNotification, Notification notify);
+    long AddNotification(AmsRequest& request, uint32_t* pNotification, Notification& notify);
     long DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification);
 
     long AddRoute(AmsNetId ams, const IpV4& ip);

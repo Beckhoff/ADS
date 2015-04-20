@@ -4,9 +4,12 @@
 #include "AdsDef.h"
 #include "RingBuffer.h"
 
+#include <utility>
+
+using VirtualConnection = std::pair<uint16_t, AmsAddr>;
+
 struct Notification {
-    const AmsAddr amsAddr;
-    const uint16_t port;
+    const VirtualConnection connection;
 
     Notification(PAdsNotificationFuncEx __func,
                  uint32_t               hNotify,
@@ -14,8 +17,7 @@ struct Notification {
                  uint32_t               length,
                  AmsAddr                __amsAddr,
                  uint16_t               __port)
-        : amsAddr(__amsAddr),
-        port(__port),
+        : connection({__port, __amsAddr}),
         callback(__func),
         buffer(new uint8_t[sizeof(AdsNotificationHeader) + length]),
         hUser(__hUser)
@@ -33,7 +35,7 @@ struct Notification {
             data[i] = ring.ReadFromLittleEndian<uint8_t>();
         }
         header->nTimeStamp = timestamp;
-        callback(&amsAddr, header, hUser);
+        callback(&connection.second, header, hUser);
     }
 
     uint32_t Size() const

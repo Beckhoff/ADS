@@ -28,9 +28,7 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Add(const
         return dispatcher;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    return list.emplace(connection,
-                        std::make_shared<NotificationDispatcher>(proxy, connection.second,
-                                                                 connection.first)).first->second;
+    return list.emplace(connection, std::make_shared<NotificationDispatcher>(proxy, connection)).first->second;
 }
 
 std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Get(const VirtualConnection& connection)
@@ -60,11 +58,12 @@ AmsConnection::~AmsConnection()
     receiver.join();
 }
 
-NotificationId AmsConnection::CreateNotifyMapping(Notification notify)
+NotificationId AmsConnection::CreateNotifyMapping(uint32_t hNotify, Notification& notification)
 {
-    const auto dispatcher = dispatcherList.Add(VirtualConnection {notify.port, notify.amsAddr}, *this);
-    dispatcher->Emplace(notify);
-    return NotificationId { notify.hNotify(), dispatcher };
+    const auto dispatcher = dispatcherList.Add(notification.connection, *this);
+    notification.hNotify(hNotify);
+    dispatcher->Emplace(hNotify, notification);
+    return NotificationId { hNotify, dispatcher };
 }
 
 long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)

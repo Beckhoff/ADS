@@ -47,13 +47,11 @@ private:
     std::condition_variable cv;
 };
 
-using VirtualConnection = std::pair<uint16_t, AmsAddr>;
-
 struct AmsConnection : AmsProxy {
     AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
     ~AmsConnection();
 
-    NotificationId CreateNotifyMapping(Notification notify);
+    NotificationId CreateNotifyMapping(uint32_t hNotify, Notification& notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
     AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);

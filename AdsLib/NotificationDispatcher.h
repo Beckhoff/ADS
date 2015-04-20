@@ -13,20 +13,19 @@ struct AmsProxy {
 };
 
 struct NotificationDispatcher {
-    NotificationDispatcher(AmsProxy& __proxy, AmsAddr __amsAddr, uint16_t __port);
+    NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn);
     ~NotificationDispatcher();
     bool operator<(const NotificationDispatcher& ref) const;
-    void Emplace(Notification notification);
+    void Emplace(uint32_t hNotify, Notification& notification);
     bool Erase(uint32_t hNotify, uint32_t tmms);
     inline void Notify() { sem.Post(); }
     void Run();
 
-    const AmsAddr amsAddr;
+    const VirtualConnection conn;
     RingBuffer ring;
 private:
     std::map<uint32_t, Notification> notifications;
     std::recursive_mutex mutex;
-    const uint16_t port;
     AmsProxy& proxy;
     Semaphore sem;
     std::thread thread;

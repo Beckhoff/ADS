@@ -245,10 +245,11 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
         pAttrib->nMaxDelay,
         pAttrib->nCycleTime
     });
+    Notification notify {pFunc, 0, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port};
     return router.AddNotification(
         request,
         pNotification,
-        Notification {pFunc, 0, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port});
+        notify);
 }
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
