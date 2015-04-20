@@ -12,7 +12,6 @@ struct Notification {
     const VirtualConnection connection;
 
     Notification(PAdsNotificationFuncEx __func,
-                 uint32_t               hNotify,
                  uint32_t               __hUser,
                  uint32_t               length,
                  AmsAddr                __amsAddr,
@@ -23,7 +22,7 @@ struct Notification {
         hUser(__hUser)
     {
         auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
-        header->hNotification = hNotify;
+        header->hNotification = 0;
         header->cbSampleSize = length;
     }
 
@@ -42,12 +41,6 @@ struct Notification {
     {
         auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
         return header->cbSampleSize;
-    }
-
-    uint32_t hNotify() const
-    {
-        auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
-        return header->hNotification;
     }
 
     void hNotify(uint32_t value)
