@@ -54,10 +54,6 @@ struct AmsConnection : AmsProxy {
     NotifyMapping CreateNotifyMapping(uint32_t hNotify, Notification& notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
-    AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
-    void Release(AmsResponse* response);
-    AmsResponse* GetPending(uint32_t id, uint16_t port);
-
     template<class T> long AdsRequest(AmsRequest& request, uint32_t tmms)
     {
         AmsAddr srcAddr;
@@ -97,11 +93,14 @@ private:
     void ReceiveJunk(size_t bytesToRead) const;
     void Receive(void* buffer, size_t bytesToRead) const;
     template<class T> void Receive(T& buffer) const { Receive(&buffer, sizeof(T)); }
+    AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
 
     void Recv();
     void TryRecv();
     uint32_t GetInvokeId();
+    void Release(AmsResponse* response);
     AmsResponse* Reserve(uint32_t id, uint16_t port);
+    AmsResponse* GetPending(uint32_t id, uint16_t port);
 
     std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > dispatcherList;
     std::recursive_mutex dispatcherListMutex;
