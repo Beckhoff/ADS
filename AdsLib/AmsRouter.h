@@ -29,12 +29,6 @@ struct AmsRouter : Router {
                    uint32_t       writeLength,
                    const void*    writeData,
                    uint32_t*      bytesRead);
-    long Write(uint16_t       port,
-               const AmsAddr* pAddr,
-               uint32_t       indexGroup,
-               uint32_t       indexOffset,
-               uint32_t       bufferLength,
-               const void*    buffer);
     long WriteControl(uint16_t       port,
                       const AmsAddr* pAddr,
                       uint16_t       adsState,
@@ -56,6 +50,17 @@ struct AmsRouter : Router {
     void SetNetId(AmsNetId ams);
     AmsConnection* GetConnection(const AmsNetId& pAddr);
 
+    template<class T> long AdsRequest(AmsRequest& request)
+    {
+        return AdsRequest<T>(request.frame,
+                             request.destAddr,
+                             request.port,
+                             request.cmdId,
+                             request.bufferLength,
+                             request.buffer,
+                             request.bytesRead);
+    }
+
 private:
     AmsNetId localAddr;
     std::recursive_mutex mutex;
@@ -65,8 +70,6 @@ private:
     std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator __GetConnection(const AmsNetId& pAddr);
     void DeleteIfLastConnection(const AmsConnection* conn);
     void Recv();
-
-    template<class T> long AdsRequest(AmsRequest& request);
 
     template<class T>
     long AdsRequest(Frame&         request,

@@ -117,7 +117,22 @@ long AdsSyncWriteReqEx(long           port,
     if (!buffer) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.Write((uint16_t)port, pAddr, indexGroup, indexOffset, bufferLength, buffer);
+
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::WRITE,
+        0, nullptr, nullptr,
+        sizeof(AoERequestHeader) + bufferLength,
+    };
+
+    request.frame.prepend(buffer, bufferLength);
+    request.frame.prepend<AoERequestHeader>({
+        indexGroup,
+        indexOffset,
+        bufferLength
+    });
+    return router.AdsRequest<AoEReadResponseHeader>(request);
 }
 
 long AdsSyncWriteControlReqEx(long           port,

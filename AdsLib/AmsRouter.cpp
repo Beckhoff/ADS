@@ -224,17 +224,6 @@ long AmsRouter::ReadWrite(uint16_t       port,
     return AdsRequest<AoEReadResponseHeader>(request);
 }
 
-template<class T> long AmsRouter::AdsRequest(AmsRequest& request)
-{
-    return AdsRequest<T>(request.frame,
-                         request.destAddr,
-                         request.port,
-                         request.cmdId,
-                         request.bufferLength,
-                         request.buffer,
-                         request.bytesRead);
-}
-
 template<class T>
 long AmsRouter::AdsRequest(Frame&         request,
                            const AmsAddr& destAddr,
@@ -260,23 +249,6 @@ long AmsRouter::AdsRequest(Frame&         request,
                               bufferLength,
                               buffer,
                               bytesRead);
-}
-
-long AmsRouter::Write(uint16_t       port,
-                      const AmsAddr* pAddr,
-                      uint32_t       indexGroup,
-                      uint32_t       indexOffset,
-                      uint32_t       bufferLength,
-                      const void*    buffer)
-{
-    Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader) + bufferLength);
-    request.prepend(buffer, bufferLength);
-    request.prepend<AoERequestHeader>({
-        indexGroup,
-        indexOffset,
-        bufferLength
-    });
-    return AdsRequest<AoEResponseHeader>(request, *pAddr, port, AoEHeader::WRITE);
 }
 
 long AmsRouter::WriteControl(uint16_t       port,
