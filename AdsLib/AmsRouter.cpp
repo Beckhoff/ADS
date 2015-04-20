@@ -159,14 +159,15 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 {
     static const size_t NAME_LENGTH = 16;
     uint8_t buffer[sizeof(*version) + NAME_LENGTH];
-
-    const auto status = AdsRequest<AoEResponseHeader>(AmsRequest {
+    AmsRequest request {
         *pAddr,
         port,
         AoEHeader::READ_DEVICE_INFO,
         sizeof(buffer),
         buffer
-    });
+    };
+
+    const auto status = AdsRequest<AoEResponseHeader>(request);
     if (!status) {
         version->version = buffer[0];
         version->revision = buffer[1];
@@ -179,14 +180,14 @@ long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devNam
 long AmsRouter::ReadState(uint16_t port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
 {
     uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
-
-    const auto status = AdsRequest<AoEResponseHeader>(AmsRequest {
+    AmsRequest request {
         *pAddr,
         port,
         AoEHeader::READ_STATE,
         sizeof(buffer),
         buffer
-    });
+    };
+    const auto status = AdsRequest<AoEResponseHeader>(request);
     if (!status) {
         *adsState = qFromLittleEndian<uint16_t>(buffer);
         *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
