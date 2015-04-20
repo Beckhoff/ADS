@@ -51,7 +51,7 @@ struct AmsConnection : AmsProxy {
     AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
     ~AmsConnection();
 
-    NotificationId CreateNotifyMapping(uint32_t hNotify, Notification& notification);
+    NotifyMapping CreateNotifyMapping(uint32_t hNotify, Notification& notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
     AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
@@ -136,14 +136,10 @@ private:
     uint32_t GetInvokeId();
     AmsResponse* Reserve(uint32_t id, uint16_t port);
 
-    struct DispatcherList {
-        std::shared_ptr<NotificationDispatcher> Add(const VirtualConnection& connection, AmsProxy& proxy);
-        std::shared_ptr<NotificationDispatcher> Get(const VirtualConnection& connection);
-
-private:
-        std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > list;
-        std::recursive_mutex mutex;
-    } dispatcherList;
+    std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > dispatcherList;
+    std::recursive_mutex dispatcherListMutex;
+    std::shared_ptr<NotificationDispatcher> DispatcherListAdd(const VirtualConnection& connection);
+    std::shared_ptr<NotificationDispatcher> DispatcherListGet(const VirtualConnection& connection);
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

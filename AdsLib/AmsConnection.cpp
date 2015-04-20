@@ -20,23 +20,23 @@ bool AmsResponse::Wait(uint32_t timeout_ms)
     });
 }
 
-std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Add(const VirtualConnection& connection,
-                                                                           AmsProxy&                proxy)
+std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListAdd(const VirtualConnection& connection)
 {
-    const auto dispatcher = Get(connection);
+    const auto dispatcher = DispatcherListGet(connection);
     if (dispatcher) {
         return dispatcher;
     }
-    std::lock_guard<std::recursive_mutex> lock(mutex);
-    return list.emplace(connection, std::make_shared<NotificationDispatcher>(proxy, connection)).first->second;
+    std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
+    return dispatcherList.emplace(connection,
+                                  std::make_shared<NotificationDispatcher>(*this, connection)).first->second;
 }
 
-std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherList::Get(const VirtualConnection& connection)
+std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListGet(const VirtualConnection& connection)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex);
+    std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
 
-    const auto it = list.find(connection);
-    if (it != list.end()) {
+    const auto it = dispatcherList.find(connection);
+    if (it != dispatcherList.end()) {
         return it->second;
     }
     return std::shared_ptr<NotificationDispatcher>();
@@ -58,12 +58,12 @@ AmsConnection::~AmsConnection()
     receiver.join();
 }
 
-NotificationId AmsConnection::CreateNotifyMapping(uint32_t hNotify, Notification& notification)
+NotifyMapping AmsConnection::CreateNotifyMapping(uint32_t hNotify, Notification& notification)
 {
-    const auto dispatcher = dispatcherList.Add(notification.connection, *this);
+    const auto dispatcher = DispatcherListAdd(notification.connection);
     notification.hNotify(hNotify);
     dispatcher->Emplace(hNotify, notification);
-    return NotificationId { hNotify, dispatcher };
+    return NotifyMapping {hNotify, dispatcher};
 }
 
 long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)
@@ -163,7 +163,7 @@ Frame& AmsConnection::ReceiveFrame(Frame& frame, size_t bytesLeft) const
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
 {
-    const auto dispatcher = dispatcherList.Get(VirtualConnection { header.targetPort(), header.sourceAms() });
+    const auto dispatcher = DispatcherListGet(VirtualConnection { header.targetPort(), header.sourceAms() });
     if (!dispatcher) {
         ReceiveJunk(header.length());
         LOG_WARN("No dispatcher found for notification");

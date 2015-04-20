@@ -13,10 +13,10 @@ AmsPort::AmsPort()
     port(0)
 {}
 
-void AmsPort::AddNotification(NotificationId hash)
+void AmsPort::AddNotification(NotifyMapping mapping)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    notifications.insert(hash);
+    notifications.insert(mapping);
 }
 
 void AmsPort::Close()
