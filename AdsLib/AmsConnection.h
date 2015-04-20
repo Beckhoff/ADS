@@ -16,13 +16,13 @@ struct AmsRequest {
     void* buffer;
     uint32_t* bytesRead;
 
-    AmsRequest(size_t         payloadLength,
-               const AmsAddr& ams,
+    AmsRequest(const AmsAddr& ams,
                uint16_t       __port,
                uint16_t       __cmdId,
                uint32_t       __bufferLength = 0,
                void*          __buffer = nullptr,
-               uint32_t*      __bytesRead = nullptr)
+               uint32_t*      __bytesRead = nullptr,
+               size_t         payloadLength = 0)
         : frame(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + payloadLength),
         destAddr(ams),
         port(__port),
