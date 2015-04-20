@@ -60,7 +60,22 @@ long AdsSyncReadReqEx2(long           port,
     if (!buffer) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.Read((uint16_t)port, pAddr, indexGroup, indexOffset, bufferLength, buffer, bytesRead);
+
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::READ,
+        bufferLength,
+        buffer,
+        bytesRead,
+        sizeof(AoERequestHeader)
+    };
+    request.frame.prepend(AoERequestHeader {
+        indexGroup,
+        indexOffset,
+        bufferLength
+    });
+    return router.AdsRequest<AoEReadResponseHeader>(request);
 }
 
 long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -69,7 +84,24 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
     if (!devName || !version) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.ReadDeviceInfo((uint16_t)port, pAddr, devName, version);
+
+    static const size_t NAME_LENGTH = 16;
+    uint8_t buffer[sizeof(*version) + NAME_LENGTH];
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::READ_DEVICE_INFO,
+        sizeof(buffer),
+        buffer
+    };
+    const auto status = router.AdsRequest<AoEResponseHeader>(request);
+    if (!status) {
+        version->version = buffer[0];
+        version->revision = buffer[1];
+        version->build = qFromLittleEndian<uint16_t>(buffer + offsetof(AdsVersion, build));
+        memcpy(devName, buffer + sizeof(*version), NAME_LENGTH);
+    }
+    return status;
 }
 
 long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
@@ -78,7 +110,21 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
     if (!adsState || !devState) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.ReadState((uint16_t)port, pAddr, adsState, devState);
+
+    uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::READ_STATE,
+        sizeof(buffer),
+        buffer
+    };
+    const auto status = router.AdsRequest<AoEResponseHeader>(request);
+    if (!status) {
+        *adsState = qFromLittleEndian<uint16_t>(buffer);
+        *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
+    }
+    return status;
 }
 
 long AdsSyncReadWriteReqEx2(long           port,
@@ -95,15 +141,24 @@ long AdsSyncReadWriteReqEx2(long           port,
     if (!readData || !writeData) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.ReadWrite((uint16_t)port,
-                            pAddr,
-                            indexGroup,
-                            indexOffset,
-                            readLength,
-                            readData,
-                            writeLength,
-                            writeData,
-                            bytesRead);
+
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::READ_WRITE,
+        readLength,
+        readData,
+        bytesRead,
+        sizeof(AoEReadWriteReqHeader) + writeLength
+    };
+    request.frame.prepend(writeData, writeLength);
+    request.frame.prepend(AoEReadWriteReqHeader {
+        indexGroup,
+        indexOffset,
+        readLength,
+        writeLength
+    });
+    return router.AdsRequest<AoEReadResponseHeader>(request);
 }
 
 long AdsSyncWriteReqEx(long           port,
@@ -125,7 +180,6 @@ long AdsSyncWriteReqEx(long           port,
         0, nullptr, nullptr,
         sizeof(AoERequestHeader) + bufferLength,
     };
-
     request.frame.prepend(buffer, bufferLength);
     request.frame.prepend<AoERequestHeader>({
         indexGroup,
@@ -143,7 +197,20 @@ long AdsSyncWriteControlReqEx(long           port,
                               const void*    buffer)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
-    return router.WriteControl((uint16_t)port, pAddr, adsState, devState, bufferLength, buffer);
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::WRITE_CONTROL,
+        0, nullptr, nullptr,
+        sizeof(AdsWriteCtrlRequest) + bufferLength
+    };
+    request.frame.prepend(buffer, bufferLength);
+    request.frame.prepend<AdsWriteCtrlRequest>({
+        adsState,
+        devState,
+        bufferLength
+    });
+    return router.AdsRequest<AoEResponseHeader>(request);
 }
 
 long AdsSyncAddDeviceNotificationReqEx(long                         port,

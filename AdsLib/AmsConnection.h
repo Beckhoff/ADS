@@ -93,6 +93,32 @@ struct AmsConnection : AmsProxy {
         return -1;
     }
 
+    template<class T> long AdsRequest(AmsRequest& request, uint32_t tmms)
+    {
+        AmsAddr srcAddr;
+        const auto status = router.GetLocalAddress(request.port, &srcAddr);
+        if (status) {
+            return status;
+        }
+        AmsResponse* response = Write(request.frame, request.destAddr, srcAddr, request.cmdId);
+        if (response) {
+            if (response->Wait(tmms)) {
+                const uint32_t bytesAvailable = std::min<uint32_t>(request.bufferLength,
+                                                                   response->frame.size() - sizeof(T));
+                T header(response->frame.data());
+                memcpy(request.buffer, response->frame.data() + sizeof(T), bytesAvailable);
+                if (request.bytesRead) {
+                    *request.bytesRead = bytesAvailable;
+                }
+                Release(response);
+                return header.result();
+            }
+            Release(response);
+            return ADSERR_CLIENT_SYNCTIMEOUT;
+        }
+        return -1;
+    }
+
     const IpV4 destIp;
 private:
     Router& router;
