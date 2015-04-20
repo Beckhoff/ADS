@@ -138,13 +138,21 @@ long AmsRouter::Read(uint16_t       port,
                      void*          buffer,
                      uint32_t*      bytesRead)
 {
-    Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(AoERequestHeader));
-    request.prepend(AoERequestHeader {
+    AmsRequest request {
+        sizeof(AoERequestHeader),
+        *pAddr,
+        port,
+        AoEHeader::READ,
+        bufferLength,
+        buffer,
+        bytesRead
+    };
+    request.frame.prepend(AoERequestHeader {
         indexGroup,
         indexOffset,
         bufferLength
     });
-    return AdsRequest<AoEReadResponseHeader>(request, *pAddr, port, AoEHeader::READ, bufferLength, buffer, bytesRead);
+    return AdsRequest<AoEReadResponseHeader>(request);
 }
 
 long AmsRouter::ReadDeviceInfo(uint16_t port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -211,6 +219,17 @@ long AmsRouter::ReadWrite(uint16_t       port,
                                              readLength,
                                              readData,
                                              bytesRead);
+}
+
+template<class T> long AmsRouter::AdsRequest(AmsRequest& request)
+{
+    return AdsRequest<T>(request.frame,
+                         request.destAddr,
+                         request.port,
+                         request.cmdId,
+                         request.bufferLength,
+                         request.buffer,
+                         request.bytesRead);
 }
 
 template<class T>

@@ -66,6 +66,8 @@ private:
     void DeleteIfLastConnection(const AmsConnection* conn);
     void Recv();
 
+    template<class T> long AdsRequest(AmsRequest& request);
+
     template<class T>
     long AdsRequest(Frame&         request,
                     const AmsAddr& destAddr,

@@ -7,6 +7,32 @@
 
 #include <atomic>
 
+struct AmsRequest {
+    Frame frame;
+    const AmsAddr& destAddr;
+    uint16_t port;
+    uint16_t cmdId;
+    uint32_t bufferLength;
+    void* buffer;
+    uint32_t* bytesRead;
+
+    AmsRequest(size_t         payloadLength,
+               const AmsAddr& ams,
+               uint16_t       __port,
+               uint16_t       __cmdId,
+               uint32_t       __bufferLength = 0,
+               void*          __buffer = nullptr,
+               uint32_t*      __bytesRead = nullptr)
+        : frame(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + payloadLength),
+        destAddr(ams),
+        port(__port),
+        cmdId(__cmdId),
+        bufferLength(__bufferLength),
+        buffer(__buffer),
+        bytesRead(__bytesRead)
+    {}
+};
+
 struct AmsResponse {
     Frame frame;
     std::atomic<uint32_t> invokeId;
