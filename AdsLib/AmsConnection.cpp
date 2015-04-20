@@ -68,9 +68,15 @@ NotifyMapping AmsConnection::CreateNotifyMapping(uint32_t hNotify, Notification&
 
 long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)
 {
-    Frame request(sizeof(AmsTcpHeader) + sizeof(AoEHeader) + sizeof(hNotify));
-    request.prepend(qToLittleEndian(hNotify));
-    return AdsRequest<AoEResponseHeader>(request, amsAddr, tmms, port, AoEHeader::DEL_DEVICE_NOTIFICATION);
+    AmsRequest request {
+        amsAddr,
+        port, AoEHeader::DEL_DEVICE_NOTIFICATION,
+        0, nullptr, nullptr,
+        sizeof(hNotify)
+    };
+    request.frame.prepend(qToLittleEndian(hNotify));
+
+    return AdsRequest<AoEResponseHeader>(request, tmms);
 }
 
 AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)

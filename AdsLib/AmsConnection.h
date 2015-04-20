@@ -58,39 +58,6 @@ struct AmsConnection : AmsProxy {
     void Release(AmsResponse* response);
     AmsResponse* GetPending(uint32_t id, uint16_t port);
 
-    template<class T>
-    long AdsRequest(Frame&         request,
-                    const AmsAddr& destAddr,
-                    uint32_t       tmms,
-                    uint16_t       port,
-                    uint16_t       cmdId,
-                    uint32_t       bufferLength = 0,
-                    void*          buffer = nullptr,
-                    uint32_t*      bytesRead = nullptr)
-    {
-        AmsAddr srcAddr;
-        const auto status = router.GetLocalAddress(port, &srcAddr);
-        if (status) {
-            return status;
-        }
-        AmsResponse* response = Write(request, destAddr, srcAddr, cmdId);
-        if (response) {
-            if (response->Wait(tmms)) {
-                const uint32_t bytesAvailable = std::min<uint32_t>(bufferLength, response->frame.size() - sizeof(T));
-                T header(response->frame.data());
-                memcpy(buffer, response->frame.data() + sizeof(T), bytesAvailable);
-                if (bytesRead) {
-                    *bytesRead = bytesAvailable;
-                }
-                Release(response);
-                return header.result();
-            }
-            Release(response);
-            return ADSERR_CLIENT_SYNCTIMEOUT;
-        }
-        return -1;
-    }
-
     template<class T> long AdsRequest(AmsRequest& request, uint32_t tmms)
     {
         AmsAddr srcAddr;
