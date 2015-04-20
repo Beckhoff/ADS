@@ -48,6 +48,12 @@ struct Notification {
         return header->hNotification;
     }
 
+    void hNotify(uint32_t value)
+    {
+        auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
+        header->hNotification = value;
+    }
+
 private:
     const PAdsNotificationFuncEx callback;
     const std::shared_ptr<uint8_t> buffer;

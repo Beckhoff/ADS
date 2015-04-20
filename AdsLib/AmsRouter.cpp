@@ -130,34 +130,15 @@ std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator AmsRouter::__GetConnec
     return connections.end();
 }
 
-long AmsRouter::AddNotification(uint16_t                     port,
-                                const AmsAddr*               pAddr,
-                                uint32_t                     indexGroup,
-                                uint32_t                     indexOffset,
-                                const AdsNotificationAttrib* pAttrib,
-                                PAdsNotificationFuncEx       pFunc,
-                                uint32_t                     hUser,
-                                uint32_t*                    pNotification)
+long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, Notification notify)
 {
-    uint8_t buffer[sizeof(*pNotification)];
-    AmsRequest request {*pAddr, port, AoEHeader::ADD_DEVICE_NOTIFICATION, sizeof(buffer), buffer, nullptr,
-                        sizeof(AdsAddDeviceNotificationRequest)};
-    request.frame.prepend(AdsAddDeviceNotificationRequest {
-        indexGroup,
-        indexOffset,
-        pAttrib->cbLength,
-        pAttrib->nTransMode,
-        pAttrib->nMaxDelay,
-        pAttrib->nCycleTime
-    });
-
     const long status = AdsRequest<AoEResponseHeader>(request);
     if (!status) {
-        *pNotification = qFromLittleEndian<uint32_t>(buffer);
-        AmsConnection& conn = *GetConnection(pAddr->netId);
-        const auto hash = conn.CreateNotifyMapping(Notification {pFunc, *pNotification, hUser, pAttrib->cbLength,
-                                                                 *pAddr, port});
-        ports[port - Router::PORT_BASE].AddNotification(hash);
+        *pNotification = qFromLittleEndian<uint32_t>((uint8_t*)request.buffer);
+        AmsConnection& conn = *GetConnection(request.destAddr.netId);
+        notify.hNotify(*pNotification);
+        const auto hash = conn.CreateNotifyMapping(notify);
+        ports[request.port - Router::PORT_BASE].AddNotification(hash);
     }
     return status;
 }

@@ -226,7 +226,29 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
     if (!pAttrib || !pFunc || !pNotification) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
-    return router.AddNotification((uint16_t)port, pAddr, indexGroup, indexOffset, pAttrib, pFunc, hUser, pNotification);
+
+    uint8_t buffer[sizeof(*pNotification)];
+    AmsRequest request {
+        *pAddr,
+        (uint16_t)port,
+        AoEHeader::ADD_DEVICE_NOTIFICATION,
+        sizeof(buffer),
+        buffer,
+        nullptr,
+        sizeof(AdsAddDeviceNotificationRequest)
+    };
+    request.frame.prepend(AdsAddDeviceNotificationRequest {
+        indexGroup,
+        indexOffset,
+        pAttrib->cbLength,
+        pAttrib->nTransMode,
+        pAttrib->nMaxDelay,
+        pAttrib->nCycleTime
+    });
+    return router.AddNotification(
+        request,
+        pNotification,
+        Notification {pFunc, 0, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port});
 }
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
