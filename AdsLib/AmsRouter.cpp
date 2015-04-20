@@ -156,10 +156,3 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
     auto& p = ports[port - Router::PORT_BASE];
     return p.DelNotification(*pAddr, hNotification) ? ADSERR_NOERR : ADSERR_CLIENT_REMOVEHASH;
 }
-
-template<class T> T extractLittleEndian(Frame& frame)
-{
-    const auto value = qFromLittleEndian<T>(frame.data());
-    frame.remove(sizeof(T));
-    return value;
-}
