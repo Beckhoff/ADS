@@ -25,6 +25,7 @@ test: AdsLibTest.bin
 
 release: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? example/
+	cp $? ../TwinSAFE_App/AdsLib/
 
 clean:
 	rm -f *.a *.o *.bin
