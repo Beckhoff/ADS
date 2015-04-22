@@ -17,6 +17,7 @@
 #endif
 
 static const char* CATEGORY[] = {
+    "Verbose: ",
     "Info: ",
     "Warning: ",
     "Error: "
@@ -28,6 +29,7 @@ std::ostream& Logger::output = outFile;
 #else
 std::ostream& Logger::output = std::cerr;
 #endif
+size_t Logger::level = 1;
 
 void Logger::Log(const size_t level, const std::string& msg)
 {
