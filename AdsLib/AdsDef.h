@@ -15,6 +15,8 @@
 #include <stdint.h>
 #endif
 
+#define ADS_TCP_SERVER_PORT 0xBF02
+
 ////////////////////////////////////////////////////////////////////////////////
 // AMS Ports
 #define AMSPORT_LOGGER                  100
