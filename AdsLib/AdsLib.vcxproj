@@ -41,6 +41,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -56,6 +60,13 @@
     <Lib>
       <AdditionalDependencies>WS2_32.lib</AdditionalDependencies>
     </Lib>
+    <CustomBuildStep>
+      <Command>copy AdsLib.h ..\..\TwinSAFE_App\AdsLib\
+copy AdsDef.h ..\..\TwinSAFE_App\AdsLib\
+copy $(TARGETPATH)  ..\..\TwinSAFE_App\AdsLib\</Command>
+      <Inputs>AdsLib.h;AdsDef</Inputs>
+      <Outputs>../../TwinSAFE_App/AdsLib/AdsDef.h;../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -76,7 +87,7 @@
 copy AdsDef.h ..\..\TwinSAFE_App\AdsLib\
 copy $(TARGETPATH)  ..\..\TwinSAFE_App\AdsLib\</Command>
       <Outputs>../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
-      <Inputs>AdsLib.h</Inputs>
+      <Inputs>AdsLib.h;AdsDef</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
