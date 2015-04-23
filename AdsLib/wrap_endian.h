@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-// WARNING code was never tested on a big endian machine!
 #if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
 template<class T>
 T qToLittleEndian(const T value);

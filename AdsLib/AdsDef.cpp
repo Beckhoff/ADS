@@ -3,6 +3,7 @@
 #include <cstring>
 #include <ostream>
 #include <sstream>
+#include <cstdlib>
 
 bool operator<(const AmsAddr_& lhs, const AmsAddr_& rhs)
 {
