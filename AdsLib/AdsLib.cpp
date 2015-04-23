@@ -26,11 +26,6 @@ void AdsDelRoute(const AmsNetId ams)
     router.DelRoute(ams);
 }
 
-void AdsSetNetId(AmsNetId ams)
-{
-    router.SetNetId(ams);
-}
-
 long AdsPortCloseEx(long port)
 {
     ASSERT_PORT(port);

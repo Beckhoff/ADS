@@ -42,13 +42,13 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListGet(const V
     return std::shared_ptr<NotificationDispatcher>();
 }
 
-AmsConnection::AmsConnection(Router& __router, IpV4 destIp)
-    : destIp(destIp),
-    router(__router),
-    socket(destIp, ADS_TCP_SERVER_PORT),
-    invokeId(0)
+AmsConnection::AmsConnection(Router& __router, IpV4 __destIp)
+    : router(__router),
+    socket(__destIp, ADS_TCP_SERVER_PORT),
+    invokeId(0),
+    destIp(__destIp),
+    ownIp(socket.Connect())
 {
-    socket.Connect();
     receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 

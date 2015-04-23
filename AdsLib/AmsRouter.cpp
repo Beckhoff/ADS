@@ -14,7 +14,11 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
     const auto oldConnection = GetConnection(ams);
     auto conn = connections.find(ip);
     if (conn == connections.end()) {
+        const auto isFirst = connections.empty();
         conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
+        if (isFirst) {
+            localAddr = AmsNetId {conn->second->ownIp};
+        }
     }
 
     mapping[ams] = conn->second.get();
@@ -32,12 +36,6 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
         mapping.erase(route);
         DeleteIfLastConnection(conn);
     }
-}
-
-void AmsRouter::SetNetId(AmsNetId ams)
-{
-    std::lock_guard<std::recursive_mutex> lock(mutex);
-    localAddr = ams;
 }
 
 void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)

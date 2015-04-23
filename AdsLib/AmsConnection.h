@@ -80,7 +80,6 @@ struct AmsConnection : AmsProxy {
         return -1;
     }
 
-    const IpV4 destIp;
 private:
     Router& router;
     TcpSocket socket;
@@ -106,6 +105,10 @@ private:
     std::recursive_mutex dispatcherListMutex;
     std::shared_ptr<NotificationDispatcher> DispatcherListAdd(const VirtualConnection& connection);
     std::shared_ptr<NotificationDispatcher> DispatcherListGet(const VirtualConnection& connection);
+
+public:
+    const IpV4 destIp;
+    const uint32_t ownIp;
 };
 
 #endif /* #ifndef _AMSCONNECTION_H_ */

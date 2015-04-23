@@ -5,7 +5,6 @@
 
 long AdsAddRoute(AmsNetId ams, const char* ip);
 void AdsDelRoute(AmsNetId ams);
-void AdsSetNetId(AmsNetId ams);
 
 long AdsPortCloseEx(long port);
 long AdsPortOpenEx();

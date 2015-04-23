@@ -16,7 +16,6 @@ struct AmsRouter : Router {
 
     long AddRoute(AmsNetId ams, const IpV4& ip);
     void DelRoute(const AmsNetId& ams);
-    void SetNetId(AmsNetId ams);
     AmsConnection* GetConnection(const AmsNetId& pAddr);
 
     template<class T> long AdsRequest(AmsRequest& request)
