@@ -113,6 +113,7 @@
 #define ADSIGRP_IOIMAGE_RISIZE              0xF025      // read input size (in byte)
 #define ADSIGRP_IOIMAGE_RWOB                0xF030      // read/write output byte(s)
 #define ADSIGRP_IOIMAGE_RWOX                0xF031      // read/write output bit
+#define ADSIGRP_IOIMAGE_ROSIZE              0xF035      // read output size (in byte)
 #define ADSIGRP_IOIMAGE_CLEARI              0xF040      // write inputs to null
 #define ADSIGRP_IOIMAGE_CLEARO              0xF050      // write outputs to null
 #define ADSIGRP_IOIMAGE_RWIOB               0xF060      // read input and write output byte(s)
