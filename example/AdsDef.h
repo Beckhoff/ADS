@@ -1,8 +1,24 @@
-///////////////////////////////////////////////////////////////////////////////
-// This is a part of the Beckhoff TwinCAT ADS API
-// Copyright (C) Beckhoff Automation GmbH & Co. KG
-// All rights reserved.
-////////////////////////////////////////////////////////////////////////////////
+/**
+   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+ */
 
 #ifndef __ADSDEF_H__
 #define __ADSDEF_H__
@@ -14,6 +30,8 @@
 #else
 #include <stdint.h>
 #endif
+
+#define ADS_TCP_SERVER_PORT 0xBF02
 
 ////////////////////////////////////////////////////////////////////////////////
 // AMS Ports
@@ -95,6 +113,7 @@
 #define ADSIGRP_IOIMAGE_RISIZE              0xF025      // read input size (in byte)
 #define ADSIGRP_IOIMAGE_RWOB                0xF030      // read/write output byte(s)
 #define ADSIGRP_IOIMAGE_RWOX                0xF031      // read/write output bit
+#define ADSIGRP_IOIMAGE_ROSIZE              0xF035      // read output size (in byte)
 #define ADSIGRP_IOIMAGE_CLEARI              0xF040      // write inputs to null
 #define ADSIGRP_IOIMAGE_CLEARO              0xF050      // write outputs to null
 #define ADSIGRP_IOIMAGE_RWIOB               0xF060      // read input and write output byte(s)
@@ -223,6 +242,10 @@ typedef enum nAdsTransMode {
     ADSTRANS_CLIENTONCHA = 2,
     ADSTRANS_SERVERCYCLE = 3,
     ADSTRANS_SERVERONCHA = 4,
+    ADSTRANS_SERVERCYCLE2 = 5,
+    ADSTRANS_SERVERONCHA2 = 6,
+    ADSTRANS_CLIENT1REQ = 10,
+    ADSTRANS_MAXMODES
 }ADSTRANSMODE;
 
 typedef enum nAdsState {
@@ -244,6 +267,8 @@ typedef enum nAdsState {
     ADSSTATE_CONFIG = 15,
     ADSSTATE_RECONFIG = 16,
     ADSSTATE_STOPPING = 17,
+    ADSSTATE_INCOMPATIBLE = 18,
+    ADSSTATE_EXCEPTION = 19,
     ADSSTATE_MAXSTATES
 } ADSSTATE;
 
