@@ -25,13 +25,13 @@ test: AdsLibTest.bin
 
 release: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? example/
-	cp $? ../TwinSAFE_App/AdsLib/
 
 clean:
 	rm -f *.a *.o *.bin
+	rm -f example/*.h
 
 uncrustify:
-	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp
+	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
 
 prepare-hooks:
 	rm -f .git/hooks/pre-commit
