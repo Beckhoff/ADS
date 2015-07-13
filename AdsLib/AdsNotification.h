@@ -51,7 +51,7 @@ struct Notification {
     void Notify(uint64_t timestamp, RingBuffer& ring) const
     {
         auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.get());
-        auto data = buffer.get() + sizeof(header);
+        uint8_t* data = reinterpret_cast<uint8_t*>(header + 1);
         for (size_t i = 0; i < header->cbSampleSize; ++i) {
             data[i] = ring.ReadFromLittleEndian<uint8_t>();
         }
