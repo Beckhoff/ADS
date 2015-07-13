@@ -22,7 +22,7 @@ void notificationExample(std::ostream& out, long port, const AmsAddr& server)
         1,
         ADSTRANS_SERVERCYCLE,
         0,
-        4000000
+        {4000000}
     };
     uint32_t hNotify;
     uint32_t hUser = 0;
