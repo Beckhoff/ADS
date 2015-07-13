@@ -5,10 +5,15 @@
 
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(pNotification + 1);
     std::cout << "hUser 0x" << std::hex << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
-        " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
+        " value:";
+    for (size_t i = 0; i < pNotification->cbSampleSize; ++i) {
+        std::cout << " 0x" << std::hex << (int)data[i];
+    }
+    std::cout << '\n';
 }
 
 void notificationExample(std::ostream& out, long port, const AmsAddr& server)
@@ -20,7 +25,7 @@ void notificationExample(std::ostream& out, long port, const AmsAddr& server)
         4000000
     };
     uint32_t hNotify;
-    uint32_t hUser;
+    uint32_t hUser = 0;
 
     const long addStatus = AdsSyncAddDeviceNotificationReqEx(port,
                                                              &server,
@@ -63,11 +68,7 @@ void readExample(std::ostream& out, long port, const AmsAddr& server)
 void runExample(std::ostream& out)
 {
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
-    static const AmsNetId localNetId  { 192, 168, 0, 164, 1, 1 };
     static const char remoteIpV4[] = "192.168.0.232";
-
-    // register own AMSNetId locally (make sure it was added to the routing table of your EtherCAT Master)
-    AdsSetNetId(localNetId);
 
     // add local route to your EtherCAT Master
     if (AdsAddRoute(remoteNetId, remoteIpV4)) {
