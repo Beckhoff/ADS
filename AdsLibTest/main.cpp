@@ -94,7 +94,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         AmsRouter testee;
 
         // test new Ams with new Ip
-        fructose_assert(0 == testee.AddRoute(netId_1, ip_local));
+        fructose_assert(1 == testee.AddRoute(netId_1, ip_local));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
@@ -133,7 +133,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
-        fructose_assert(0 == testee.AddRoute(netId_2, ip_local));
+        fructose_assert(1 == testee.AddRoute(netId_2, ip_local));
         fructose_assert(testee.GetConnection(netId_2));
         fructose_assert(ip_local == testee.GetConnection(netId_2)->destIp);
         testee.DelRoute(netId_1);

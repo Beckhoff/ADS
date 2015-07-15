@@ -45,7 +45,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 
     mapping[ams] = conn->second.get();
     DeleteIfLastConnection(oldConnection);
-    return 0;
+    return !conn->second->ownIp;
 }
 
 void AmsRouter::DelRoute(const AmsNetId& ams)
