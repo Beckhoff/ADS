@@ -9,7 +9,6 @@ ifeq ($(shell uname),Darwin)
 	LIBS += -lc++
 endif
 
-all: AdsLibTest.bin
 
 .cpp.o:
 	$(CC) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/
@@ -23,12 +22,11 @@ AdsLibTest.bin: $(LIB_NAME)
 test: AdsLibTest.bin
 	./$<
 
-release: $(LIB_NAME) AdsLib.h AdsDef.h
+update_example: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? example/
 
 clean:
 	rm -f *.a *.o *.bin
-	rm -f example/*.h
 
 uncrustify:
 	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
