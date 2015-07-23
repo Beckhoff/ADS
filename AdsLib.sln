@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibTestRef", "AdsLibTest
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLib", "AdsLib\AdsLib.vcxproj", "{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example\example.vcxproj", "{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -30,6 +32,10 @@ Global
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Debug|Win32.Build.0 = Debug|Win32
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Release|Win32.ActiveCfg = Release|Win32
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Release|Win32.Build.0 = Release|Win32
+		{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}.Debug|Win32.Build.0 = Debug|Win32
+		{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}.Release|Win32.ActiveCfg = Release|Win32
+		{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
