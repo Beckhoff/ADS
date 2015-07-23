@@ -3,13 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibTest", "AdsLibTest\AdsLibTest.vcxproj", "{B422110C-9936-4EB0-B949-2148E4F6231A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB} = {F94F5A05-3A40-4F66-AEBD-68A4A55579DB}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibTestRef", "AdsLibTestRef\AdsLibTestRef.vcxproj", "{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLib", "AdsLib\AdsLib.vcxproj", "{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example\example.vcxproj", "{5EC73EC6-0393-4B82-9565-AD2EB4FE84A4}"
@@ -20,14 +13,6 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B422110C-9936-4EB0-B949-2148E4F6231A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{B422110C-9936-4EB0-B949-2148E4F6231A}.Debug|Win32.Build.0 = Debug|Win32
-		{B422110C-9936-4EB0-B949-2148E4F6231A}.Release|Win32.ActiveCfg = Release|Win32
-		{B422110C-9936-4EB0-B949-2148E4F6231A}.Release|Win32.Build.0 = Release|Win32
-		{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}.Debug|Win32.Build.0 = Debug|Win32
-		{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}.Release|Win32.ActiveCfg = Release|Win32
-		{D39B96CF-4E78-42D1-8DAD-CE02083C0FC1}.Release|Win32.Build.0 = Release|Win32
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Debug|Win32.Build.0 = Debug|Win32
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB}.Release|Win32.ActiveCfg = Release|Win32
