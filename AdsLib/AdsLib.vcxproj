@@ -61,9 +61,9 @@
       <AdditionalDependencies>WS2_32.lib</AdditionalDependencies>
     </Lib>
     <CustomBuildStep>
-      <Command>copy AdsLib.h ..\..\TwinSAFE_App\AdsLib\
-copy AdsDef.h ..\..\TwinSAFE_App\AdsLib\
-copy $(TARGETPATH)  ..\..\TwinSAFE_App\AdsLib\</Command>
+      <Command>copy AdsLib.h ..\example\
+copy AdsDef.h ..\example\
+copy $(TARGETPATH)  ..\example\</Command>
       <Inputs>AdsLib.h;AdsDef</Inputs>
       <Outputs>../../TwinSAFE_App/AdsLib/AdsDef.h;../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
     </CustomBuildStep>

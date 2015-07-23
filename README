@@ -1,0 +1,45 @@
+
+
+git clone https://github.com/Beckhoff/ADS.git
+cd ADS/
+
+
+compile AdsLib:
+===============
+make
+
+# copy compiled lib and headers to example/ subdirectory
+make update_example
+
+
+prepare your target:
+====================
+- add ams route:
+The ams address of your client is derived from it's ip address, which is used to connect to your target.
+
+ip + ".1.1" -> ams NetId
+f.e.: ip: 192.168.0.1 -> ams: 192.168.0.1.1.1
+
+prepare example/example.cpp:
+- set "remoteNetId" and "remoteIpV4"
+
+build and run the example:
+==========================
+cd example/
+make
+make test
+
+
+
+
+
+
+
+
+
+
+
+
+Run AdsLibTest:
+===============
+To test the stability and performance of AdsLib a fructose based test program was developed. To run 
