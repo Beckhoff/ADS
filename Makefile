@@ -22,7 +22,7 @@ AdsLibTest.bin: $(LIB_NAME)
 test: AdsLibTest.bin
 	./$<
 
-update_example: $(LIB_NAME) AdsLib.h AdsDef.h
+install_example: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? example/
 
 clean:
