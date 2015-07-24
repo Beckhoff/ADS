@@ -33,7 +33,7 @@ make install
 prepare your target to run the example
 ======================================
 - download your PLC project to your target e.g. "PCL-TestProject"
-- on your target add an AMS route to your client. The client's AMS NetId is derived from it's IP address, which is used to connect to your target. ".1.1" is appended to that IP.
+- on your target add an AMS route to your client. The client's AMS NetId is derived from his IP address, which is used to connect to your target. ".1.1" is appended to that IP.
 e.g.: ip: 192.168.0.1 -> ams: 192.168.0.1.1.1
 - set "remoteNetId" and "remoteIpV4" in "example/example.cpp" according to your own setup
 
