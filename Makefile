@@ -3,6 +3,7 @@ VPATH = AdsLib
 LIBS = -lpthread
 CC = g++
 LIB_NAME = AdsLib-$(shell uname).a
+INSTALL_DIR=example
 
 ifeq ($(shell uname),Darwin)
 	CC = clang
@@ -22,8 +23,8 @@ AdsLibTest.bin: $(LIB_NAME)
 test: AdsLibTest.bin
 	./$<
 
-install_example: $(LIB_NAME) AdsLib.h AdsDef.h
-	cp $? example/
+install: $(LIB_NAME) AdsLib.h AdsDef.h
+	cp $? $(INSTALL_DIR)/
 
 clean:
 	rm -f *.a *.o *.bin

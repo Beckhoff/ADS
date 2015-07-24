@@ -1,31 +1,47 @@
+This library is intended to provide easy use of ADS in ADS client applications running on systems without local TwinCAT/ADS router.
+
+To build this library a recent compiler with C++11 support is required. C++14 might follow soon, so keep your toolchain up to date.
+
+Currently (2015-07-24) tested with:
+===================================
+Ubuntu 14.04 LTS x86_64 | gcc 4.9.2
+OSX 10.10               | clang 3.5
+Win7 64-bit             | gcc 4.9.3 + cygwin64
+Win7 64-bit             | gcc 4.9.3 + cygwin32
+Win7 64-bit             | MS Visual C++ 2013 (untended)
 
 
-git clone https://github.com/Beckhoff/ADS.git
-cd ADS/
-
-
-compile AdsLib:
+compile & usage
 ===============
+# clone the repository
+git clone https://github.com/Beckhoff/ADS.git
+
+# change into root of the cloned repository
+cd ADS
+
+# build the library
 make
 
-# copy compiled lib and headers to example/ subdirectory
-make install_example
+# copy compiled lib and headers to your client application
+make install
+
+# by default this will copy library and headers into the example/ subdirectory
+# to change the target location adjust $(INSTALL_DIR) in the Makefile
 
 
-prepare your target:
-====================
-- add ams route:
-The ams address of your client is derived from it's ip address, which is used to connect to your target.
+
+prepare your target to run the example
+======================================
 - download your PLC project to your target e.g. "PCL-TestProject"
-
-ip + ".1.1" -> ams NetId
+- on your target add an AMS route to your client. The client's AMS NetId is derived from it's IP address, which is used to connect to your target. ".1.1" is appended to that IP.
 e.g.: ip: 192.168.0.1 -> ams: 192.168.0.1.1.1
+- set "remoteNetId" and "remoteIpV4" in "example/example.cpp" according to your own setup
 
-prepare example/example.cpp:
-- set "remoteNetId" and "remoteIpV4"
-
-build and run the example:
-==========================
+# make sure you are in the correct directory
 cd example/
+
+# build
 make
+
+# and run the example
 make test
