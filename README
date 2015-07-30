@@ -40,12 +40,12 @@ Sample AMS route:
   Address:        192.168.0.1     # Use the IP which is connected to the TwinCAT target
   Transport Type: TCP/IP
   
-Routes can be configure by several possibilities
+Routes can be configured by several possibilities
 TwinCAT Engineering:  Go to the tree item SYSTEM/Routes and add a static route.
-TwinCAT Systray:      Open the context menue by right click the TwinCAT systray icon. (not possible on Windows CE) 
-  TC2*: Go to Properties/AMS Router/Remote Computers/Add
+TwinCAT Systray:      Open the context menue by right click the TwinCAT systray icon. (not available on Windows CE devices) 
+  TC2*: Go to Properties/AMS Router/Remote Computers
   TC3:  Go to  Router/Edit routes.
-TcAmsRemoteMgr: Windows CE devices can configure routes locally (TC2*/TC3). Tool location: /Hard Disk/System/TcAmsRemoteMgr.exe
+TcAmsRemoteMgr: Windows CE devices can be configured locally (TC2*/TC3). Tool location: /Hard Disk/System/TcAmsRemoteMgr.exe
 IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/
 
 *Requires a TwinCAT restart.
