@@ -46,7 +46,7 @@ TwinCAT Systray:      Open the context menue by right click the TwinCAT systray 
   TC2*: Go to Properties/AMS Router/Remote Computers
   TC3:  Go to  Router/Edit routes.
 TcAmsRemoteMgr: Windows CE devices can be configured locally (TC2*/TC3). Tool location: /Hard Disk/System/TcAmsRemoteMgr.exe
-IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/
+IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/index.html?id=286
 
 *Requires a TwinCAT restart.
 
