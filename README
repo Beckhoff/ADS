@@ -1,4 +1,4 @@
-This library is intended to provide easy use of ADS in ADS client applications running on systems without local TwinCAT/ADS router.
+This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. Linux, Mac OS...) to communicate with TwinCAT devices via TCP/IP.
 
 To build this library a recent compiler with C++11 support is required. C++14 might follow soon, so keep your toolchain up to date.
 
@@ -29,12 +29,27 @@ make install
 # to change the target location adjust $(INSTALL_DIR) in the Makefile
 
 
-
-prepare your target to run the example
+Prepare your target to run the example
 ======================================
-- download your PLC project to your target e.g. "PCL-TestProject"
-- on your target add an AMS route to your client. The client's AMS NetId is derived from his IP address, which is used to connect to your target. ".1.1" is appended to that IP.
-e.g.: ip: 192.168.0.1 -> ams: 192.168.0.1.1.1
+- Download your PLC project to your target e.g. "PLC-TestProject" of our GitHub repository.
+- Authorise your ADS client for the TwinCAT target by adding an AMS route.
+
+Sample AMS route:
+  Name:           MyAdsClient     
+  AMS Net Id:     192.168.0.1.1.1 # Derived from the IP address of your ADS client
+  Address:        192.168.0.1     # Use the IP which is connected to the TwinCAT target
+  Transport Type: TCP/IP
+  
+Routes can be configure by several possibilities
+TwinCAT Engineering:  Go to the tree item SYSTEM/Routes and add a static route.
+TwinCAT Systray:      Open the context menue by right click the TwinCAT systray icon. (not possible on Windows CE) 
+  TC2*: Go to Properties/AMS Router/Remote Computers/Add
+  TC3:  Go to  Router/Edit routes.
+TcAmsRemoteMgr: Windows CE devices can configure routes locally (TC2*/TC3). Tool location: /Hard Disk/System/TcAmsRemoteMgr.exe
+IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/
+
+*Requires a TwinCAT restart.
+
 - set "remoteNetId" and "remoteIpV4" in "example/example.cpp" according to your own setup
 
 # make sure you are in the correct directory
