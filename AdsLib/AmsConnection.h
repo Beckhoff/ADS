@@ -58,6 +58,7 @@ struct AmsRequest {
 struct AmsResponse {
     Frame frame;
     std::atomic<uint32_t> invokeId;
+    uint32_t errorCode;
 
     AmsResponse();
     void Notify();
@@ -93,8 +94,9 @@ struct AmsConnection : AmsProxy {
                 if (request.bytesRead) {
                     *request.bytesRead = bytesAvailable;
                 }
+                const auto errorCode = response->errorCode;
                 Release(response);
-                return header.result();
+                return errorCode ? errorCode : header.result();
             }
             Release(response);
             return ADSERR_CLIENT_SYNCTIMEOUT;

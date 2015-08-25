@@ -126,6 +126,7 @@
 // Global Return codes
 #define ERR_GLOBAL                          0x0000
 
+#define GLOBALERR_TARGET_PORT               (0x06 + ERR_GLOBAL)
 #define GLOBALERR_MISSING_ROUTE             (0x07 + ERR_GLOBAL)
 #define GLOBALERR_NO_MEMORY                 (0x19 + ERR_GLOBAL)
 #define GLOBALERR_TCP_SEND                  (0x1A + ERR_GLOBAL)

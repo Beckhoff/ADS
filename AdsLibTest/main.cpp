@@ -15,6 +15,7 @@ using namespace fructose;
 
 static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
 static const AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
+static const AmsAddr serverBadPort {serverNetId, 1000};
 
 static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
@@ -94,7 +95,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         AmsRouter testee;
 
         // test new Ams with new Ip
-        fructose_assert(1 == testee.AddRoute(netId_1, ip_local));
+        fructose_assert(0 == testee.AddRoute(netId_1, ip_local));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
@@ -133,7 +134,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
-        fructose_assert(1 == testee.AddRoute(netId_2, ip_local));
+        fructose_assert(0 == testee.AddRoute(netId_2, ip_local));
         fructose_assert(testee.GetConnection(netId_2));
         fructose_assert(ip_local == testee.GetConnection(netId_2)->destIp);
         testee.DelRoute(netId_1);
@@ -405,6 +406,9 @@ struct TestAds : test_base<TestAds> {
         fructose_assert(0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
         fructose_assert(ADSSTATE_RUN == adsState);
         fructose_assert(0 == devState);
+
+        // provide bad server port
+        fructose_assert(GLOBALERR_TARGET_PORT == AdsSyncReadStateReqEx(port, &serverBadPort, &adsState, &devState));
 
         // provide out of range port
         fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadStateReqEx(0, &server, &adsState, &devState));
@@ -924,6 +928,7 @@ int main()
     ringBufferTest.run();
 #endif
     TestAds adsTest(errorstream);
+
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);

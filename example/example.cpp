@@ -36,7 +36,7 @@ void notificationExample(std::ostream& out, long port, const AmsAddr& server)
                                                              hUser,
                                                              &hNotify);
     if (addStatus) {
-        out << "Add device notification failed with: " << std::dec << addStatus;
+        out << "Add device notification failed with: " << std::dec << addStatus << '\n';
         return;
     }
 
@@ -65,6 +65,19 @@ void readExample(std::ostream& out, long port, const AmsAddr& server)
     }
 }
 
+void readStateExample(std::ostream& out, long port, const AmsAddr& server)
+{
+    uint16_t adsState;
+    uint16_t devState;
+
+    const long status = AdsSyncReadStateReqEx(port, &server, &adsState, &devState);
+    if (status) {
+        out << "ADS read failed with: " << std::dec << status << '\n';
+        return;
+    }
+    out << "ADS state: " << std::dec << adsState << " devState: " << std::dec << devState << '\n';
+}
+
 void runExample(std::ostream& out)
 {
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
@@ -86,6 +99,7 @@ void runExample(std::ostream& out)
     const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
     notificationExample(out, port, remote);
     readExample(out, port, remote);
+    readStateExample(out, port, remote);
 
     const long closeStatus = AdsPortCloseEx(port);
     if (closeStatus) {

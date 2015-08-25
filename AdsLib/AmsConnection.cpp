@@ -271,6 +271,7 @@ void AmsConnection::Recv()
             response->frame.clear();
         }
 
+        response->errorCode = aoeHeader.errorCode();
         response->Notify();
     }
 }
