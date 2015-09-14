@@ -1,6 +1,6 @@
 This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. Linux, Mac OS...) to communicate with TwinCAT devices via TCP/IP.
 
-To build this library a recent compiler with C++11 support is required. C++14 might follow soon, so keep your toolchain up to date.
+To build this library a recent compiler with C++11 support is required. 
 
 Currently (2015-07-24) tested with:
 ===================================
