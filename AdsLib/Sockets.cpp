@@ -76,9 +76,9 @@ void Socket::Shutdown()
     shutdown(m_Socket, SHUT_RDWR);
 }
 
-size_t Socket::read(uint8_t* buffer, size_t maxBytes) const
+size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
 {
-    if (!Select(nullptr)) {
+    if (!Select(timeout)) {
         return 0;
     }
 
@@ -96,9 +96,9 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes) const
     return 0;
 }
 
-Frame& Socket::read(Frame& frame) const
+Frame& Socket::read(Frame& frame, timeval* timeout) const
 {
-    const size_t bytesRead = read(frame.rawData(), frame.capacity());
+    const size_t bytesRead = read(frame.rawData(), frame.capacity(), timeout);
     if (bytesRead) {
         return frame.limit(bytesRead);
     }
@@ -142,8 +142,8 @@ size_t Socket::write(const Frame& frame) const
 
     const int bufferLength = static_cast<int>(frame.size());
     const char* const buffer = reinterpret_cast<const char*>(frame.data());
-
     const int status = sendto(m_Socket, buffer, bufferLength, 0, m_DestAddr, m_DestAddrLen);
+
     if (SOCKET_ERROR == status) {
         LOG_ERROR("write frame failed with error: " << WSAGetLastError());
         return 0;

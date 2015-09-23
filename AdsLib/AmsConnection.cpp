@@ -162,7 +162,7 @@ void AmsConnection::Receive(void* buffer, size_t bytesToRead) const
 {
     auto pos = reinterpret_cast<uint8_t*>(buffer);
     while (bytesToRead) {
-        const size_t bytesRead = socket.read(pos, bytesToRead);
+        const size_t bytesRead = socket.read(pos, bytesToRead, nullptr);
         bytesToRead -= bytesRead;
         pos += bytesRead;
     }
