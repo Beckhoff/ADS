@@ -60,3 +60,6 @@ make
 
 # and run the example
 make test
+
+---
+AMS/ADS Specification: http://infosys.beckhoff.de/content/1031/tc3_adscommon/html/tcadsamsspec_amstcppackage.htm
