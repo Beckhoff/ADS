@@ -924,7 +924,6 @@ int main()
     ringBufferTest.run();
 #endif
     TestAds adsTest(errorstream);
-
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);

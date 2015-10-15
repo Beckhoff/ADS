@@ -1,6 +1,7 @@
 
 #include <Windows.h>
 #include <TcAdsDef.h>
+#define GLOBALERR_TARGET_PORT 0x06
 #include <TcAdsAPI.h>
 #include <cstdint>
 #include <chrono>
@@ -10,12 +11,12 @@
 #include <iostream>
 #include <iomanip>
 
-#pragma warning(push, 0)
 #include <fructose/fructose.h>
-#pragma warning(pop)
 using namespace fructose;
 
-static AmsAddr server {{192, 168, 0, 231, 1, 1}, AMSPORT_R0_PLC_TC3};
+static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
+static AmsAddr server{serverNetId, AMSPORT_R0_PLC_TC3};
+static AmsAddr serverBadPort{serverNetId, 1000};
 
 static size_t g_NumNotifications = 0;
 static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
@@ -68,12 +69,12 @@ struct TestAds : test_base<TestAds> {
         static const size_t NUM_TEST_PORTS = 2;
         long port[NUM_TEST_PORTS];
 
-        for (int i = 0; i < NUM_TEST_PORTS; ++i) {
+        for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             port[i] = testPortOpen(out);
             fructose_loop_assert(i, 0 != port[i]);
         }
 
-        for (int i = 0; i < NUM_TEST_PORTS; ++i) {
+        for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             if (port[i]) {
                 fructose_loop_assert(i, !AdsPortCloseEx(port[i]));
             }
@@ -165,7 +166,7 @@ struct TestAds : test_base<TestAds> {
             fructose_loop_assert(i, 0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
             fructose_loop_assert(i, 3 == version.version);
             fructose_loop_assert(i, 1 == version.revision);
-            fructose_loop_assert(i, 1101 == version.build);
+            fructose_loop_assert(i, 1202 == version.build);
             fructose_loop_assert(i, 0 == strncmp(devName, NAME, sizeof(NAME)));
         }
 
@@ -197,6 +198,9 @@ struct TestAds : test_base<TestAds> {
         fructose_assert(0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
         fructose_assert(ADSSTATE_RUN == adsState);
         fructose_assert(0 == devState);
+
+        // provide bad server port
+        fructose_assert(GLOBALERR_TARGET_PORT == AdsSyncReadStateReqEx(port, &serverBadPort, &adsState, &devState));
 
         // provide out of range port
         fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadStateReqEx(0, &server, &adsState, &devState));
@@ -459,7 +463,7 @@ struct TestAds : test_base<TestAds> {
         static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
         static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
         unsigned long notification[MAX_NOTIFICATIONS_PER_PORT];
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         unsigned long hUser = 0xDEADBEEF;
 
         // provide out of range port
@@ -598,7 +602,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         fructose_assert(0 != port);
 
         const auto notification = std::unique_ptr<unsigned long[]>(new unsigned long[numNotifications]);
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         unsigned long hUser = 0xDEADBEEF;
 
         runEndurance = true;
@@ -639,7 +643,7 @@ private:
         fructose_assert(0 != port);
 
         const auto notification = std::unique_ptr<unsigned long[]>(new unsigned long[numNotifications]);
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         unsigned long hUser = 0xDEADBEEF;
 
         for (hUser = 0; hUser < numNotifications; ++hUser) {
