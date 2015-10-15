@@ -25,7 +25,7 @@ install: $(LIB_NAME) AdsLib.h AdsDef.h
 	cp $? $(INSTALL_DIR)/
 
 clean:
-	rm -f *.a *.o *.bin
+	rm -f *.a *.o *.bin AdsLibTest/*.o
 
 uncrustify:
 	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp

@@ -277,12 +277,12 @@ struct TestAds : test_base<TestAds> {
         static const size_t NUM_TEST_PORTS = 2;
         long port[NUM_TEST_PORTS];
 
-        for (int i = 0; i < NUM_TEST_PORTS; ++i) {
+        for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             port[i] = testPortOpen(out);
             fructose_loop_assert(i, 0 != port[i]);
         }
 
-        for (int i = 0; i < NUM_TEST_PORTS; ++i) {
+        for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             if (port[i]) {
                 fructose_loop_assert(i, !AdsPortCloseEx(port[i]));
             }
