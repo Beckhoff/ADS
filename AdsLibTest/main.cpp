@@ -6,12 +6,8 @@
 #include <iostream>
 #include <iomanip>
 
-#pragma warning(push, 0)
 #include <fructose/fructose.h>
-#pragma warning(pop)
 using namespace fructose;
-
-#pragma warning(disable: 4800)
 
 static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
 static const AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
@@ -949,4 +945,3 @@ int main()
     std::cout << "Hit ENTER to continue\n";
     std::cin.ignore();
 }
-#pragma warning(default: 4800)
