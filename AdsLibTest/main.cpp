@@ -673,7 +673,7 @@ struct TestAds : test_base<TestAds> {
         static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
         static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
         uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         uint32_t hUser = 0xDEADBEEF;
 
         // provide out of range port
@@ -822,7 +822,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         fructose_assert(0 != port);
 
         const auto notification = std::unique_ptr<uint32_t[]>(new uint32_t[numNotifications]);
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         uint32_t hUser = 0xDEADBEEF;
 
         runEndurance = true;
@@ -863,7 +863,7 @@ private:
         fructose_assert(0 != port);
 
         const auto notification = std::unique_ptr<uint32_t[]>(new uint32_t[numNotifications]);
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, 1000000 };
+        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         uint32_t hUser = 0xDEADBEEF;
 
         for (hUser = 0; hUser < numNotifications; ++hUser) {
