@@ -1,25 +1,23 @@
 
 VPATH = AdsLib
 LIBS = -lpthread
-CC = g++
 LIB_NAME = AdsLib-$(shell uname).a
 INSTALL_DIR=example
 
 ifeq ($(shell uname),Darwin)
-	CC = clang
 	LIBS += -lc++
 endif
 
 
 .cpp.o:
-	$(CC) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/
+	$(CXX) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/ -I ../
 
 $(LIB_NAME): AdsDef.o AdsLib.o AmsConnection.o AmsPort.o AmsRouter.o Log.o NotificationDispatcher.o Sockets.o Frame.o
-	ar rvs $@ $?
+	$(AR) rvs $@ $?
 
-AdsLibTest.bin: $(LIB_NAME)
-	$(CC) AdsLibTest/main.cpp $< -I AdsLib/ -I ../ -std=c++11 $(LIBS) -o $@
-	
+AdsLibTest.bin: AdsLibTest/main.o $(LIB_NAME)
+	$(CXX) $^ $(LIBS) -o $@
+
 test: AdsLibTest.bin
 	./$<
 
