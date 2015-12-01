@@ -134,11 +134,17 @@ uint32_t AmsConnection::GetInvokeId()
 
 AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 {
-    const uint32_t currentId = queue[port - Router::PORT_BASE].invokeId;
-    if (currentId == id) {
-        return &queue[port - Router::PORT_BASE];
+    const uint16_t portIndex = port - Router::PORT_BASE;
+    if (portIndex >= Router::NUM_PORTS_MAX) {
+        LOG_WARN("Port 0x" << std::hex << port << " is out of range");
+        return nullptr;
     }
-    LOG_WARN("InvokeId missmatch: waiting for 0x" << std::hex << currentId << " received 0x" << id);
+
+    const uint32_t currentId = queue[portIndex].invokeId;
+    if (currentId == id) {
+        return &queue[portIndex];
+    }
+    LOG_WARN("InvokeId mismatch: waiting for 0x" << std::hex << currentId << " received 0x" << id);
     return nullptr;
 }
 
