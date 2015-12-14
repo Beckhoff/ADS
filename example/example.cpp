@@ -55,6 +55,7 @@ void readExample(std::ostream& out, long port, const AmsAddr& server)
     uint32_t bytesRead;
     uint32_t buffer;
 
+    out << __FUNCTION__ << "():\n";
     for (size_t i = 0; i < 8; ++i) {
         const long status = AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead);
         if (status) {
@@ -62,6 +63,34 @@ void readExample(std::ostream& out, long port, const AmsAddr& server)
             return;
         }
         out << "ADS read " << std::dec << bytesRead << " bytes, value: 0x" << std::hex << buffer << '\n';
+    }
+}
+
+void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
+{
+    uint32_t bytesRead;
+    uint32_t buffer;
+    char handleName[] = "MAIN.byByte";
+    uint32_t handle;
+
+    out << __FUNCTION__ << "():\n";
+    const long handleStatus = AdsSyncReadWriteReqEx2(port, &server, ADSIGRP_SYM_HNDBYNAME, 0, sizeof(handle), &handle, sizeof(handleName), handleName, &bytesRead);
+    if (handleStatus) {
+        out << "Create handle for '" << handleName << "' failed with: 0x" << std::hex << handleStatus << '\n';
+        return;
+    }
+
+    for (size_t i = 0; i < 8; ++i) {
+        const long status = AdsSyncReadReqEx2(port, &server, ADSIGRP_SYM_VALBYHND, handle, sizeof(buffer), &buffer, &bytesRead);
+        if (status) {
+            out << "ADS read failed with: " << std::dec << status << '\n';
+            return;
+        }
+        out << "ADS read " << std::dec << bytesRead << " bytes, value: 0x" << std::hex << buffer << '\n';
+    }
+    const long releaseHandle = AdsSyncWriteReqEx(port, &server, ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
+    if (releaseHandle) {
+        out << "Release handle 0x" << std::hex << handle << " for '" << handleName << "' failed with: 0x" << releaseHandle << '\n';
     }
 }
 
@@ -99,6 +128,7 @@ void runExample(std::ostream& out)
     const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
     notificationExample(out, port, remote);
     readExample(out, port, remote);
+    readByNameExample(out, port, remote);
     readStateExample(out, port, remote);
 
     const long closeStatus = AdsPortCloseEx(port);
@@ -106,10 +136,10 @@ void runExample(std::ostream& out)
         out << "Close ADS port failed with: " << std::dec << closeStatus << '\n';
     }
 
-#ifdef WIN32
+#ifdef _WIN32
     // WORKAROUND: On Win7 std::thread::join() called in destructors
     //             of static objects might wait forever...
-    AdsDelRoute(AmsNetId { 192, 168, 0, 231, 1, 1 });
+    AdsDelRoute(remoteNetId);
 #endif
 }
 
