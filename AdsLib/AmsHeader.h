@@ -23,6 +23,8 @@
 #ifndef AMSHEADER_H
 #define AMSHEADER_H
 
+#define UNUSED(x) (void)x;
+
 #include "AdsDef.h"
 #include "wrap_endian.h"
 
@@ -40,7 +42,9 @@ struct AmsTcpHeader {
     AmsTcpHeader(const uint32_t numBytes = 0)
         : reserved(0),
         leLength(qToLittleEndian<uint32_t>(numBytes))
-    {}
+    {
+        UNUSED(reserved);
+    }
 
     uint32_t length() const
     {
@@ -106,7 +110,9 @@ struct AdsAddDeviceNotificationRequest {
         leMaxDelay(qToLittleEndian<uint32_t>(__maxDelay)),
         leCycleTime(qToLittleEndian<uint32_t>(__cycleTime)),
         reserved()
-    {}
+    {
+        UNUSED(reserved);
+    }
 
 private:
     const uint32_t leGroup;
