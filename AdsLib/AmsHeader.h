@@ -23,7 +23,7 @@
 #ifndef AMSHEADER_H
 #define AMSHEADER_H
 
-#define UNUSED(x) (void)x;
+#define UNUSED(x) (void)(x)
 
 #include "AdsDef.h"
 #include "wrap_endian.h"
