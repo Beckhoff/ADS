@@ -284,8 +284,8 @@ typedef struct {
 } AdsNotificationAttrib, * PAdsNotificationAttrib;
 
 typedef struct {
-    uint64_t nTimeStamp;
     uint32_t hNotification;
+    uint64_t nTimeStamp;
     uint32_t cbSampleSize;
 #ifndef __cplusplus
     uint8_t data[];
