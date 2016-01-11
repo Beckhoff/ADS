@@ -1,5 +1,5 @@
-/**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+/** @file
+   Copyright (c) 2015 - 2016 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -210,34 +210,54 @@
 #define ADSERR_CLIENT_SYNCPORTLOCKED        (0x55 + ERR_ADSERRS) // sync port is locked
 
 #pragma pack( push, 1)
-typedef struct AmsNetId_ {
+
+/**
+ * @brief The NetId of and ADS device can be represented in this structure.
+ */
+struct AmsNetId {
+    /** NetId, consisting of 6 digits. */
     uint8_t b[6];
+
 #ifdef __cplusplus
-    AmsNetId_(uint32_t ipv4Addr = 0);
-    AmsNetId_(const std::string& addr);
-    AmsNetId_(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
-    bool operator<(const AmsNetId_& rhs) const;
+    AmsNetId(uint32_t ipv4Addr = 0);
+    AmsNetId(const std::string& addr);
+    AmsNetId(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
+    bool operator<(const AmsNetId& rhs) const;
     operator bool() const;
 #endif
-} AmsNetId, * PAmsNetId;
+};
 
-typedef struct AmsAddr_ {
+/**
+ * @brief The complete address of an ADS device can be stored in this structure.
+ */
+struct AmsAddr {
+    /** AMS Net Id */
     AmsNetId netId;
+
+    /** AMS Port number */
     uint16_t port;
-} AmsAddr, * PAmsAddr;
+};
 
 #ifdef __cplusplus
-bool operator<(const AmsAddr_& lhs, const AmsAddr_& rhs);
-std::ostream& operator<<(std::ostream& os, const AmsNetId_& netId);
+bool operator<(const AmsAddr& lhs, const AmsAddr& rhs);
+std::ostream& operator<<(std::ostream& os, const AmsNetId& netId);
 #endif /* #ifdef __cplusplus */
 
-typedef struct {
+/**
+ * @brief The structure contains the version number, revision number and build number.
+ */
+struct AdsVersion {
+    /** Version number. */
     uint8_t version;
-    uint8_t revision;
-    uint16_t build;
-} AdsVersion;
 
-typedef enum nAdsTransMode {
+    /** Revision number. */
+    uint8_t revision;
+
+    /** Build number */
+    uint16_t build;
+};
+
+enum ADSTRANSMODE {
     ADSTRANS_NOTRANS = 0,
     ADSTRANS_CLIENTCYCLE = 1,
     ADSTRANS_CLIENTONCHA = 2,
@@ -247,9 +267,9 @@ typedef enum nAdsTransMode {
     ADSTRANS_SERVERONCHA2 = 6,
     ADSTRANS_CLIENT1REQ = 10,
     ADSTRANS_MAXMODES
-}ADSTRANSMODE;
+};
 
-typedef enum nAdsState {
+enum ADSSTATE {
     ADSSTATE_INVALID = 0,
     ADSSTATE_IDLE = 1,
     ADSSTATE_RESET = 2,
@@ -271,27 +291,75 @@ typedef enum nAdsState {
     ADSSTATE_INCOMPATIBLE = 18,
     ADSSTATE_EXCEPTION = 19,
     ADSSTATE_MAXSTATES
-} ADSSTATE;
+};
 
-typedef struct {
+/**
+ * @brief This structure contains all the attributes for the definition of a notification.
+ *
+ * The ADS DLL is buffered from the real time transmission by a FIFO.
+ * TwinCAT first writes every value that is to be transmitted by means
+ * of the callback function into the FIFO. If the buffer is full, or if
+ * the nMaxDelay time has elapsed, then the callback function is invoked
+ * for each entry. The nTransMode parameter affects this process as follows:
+ * ADSTRANS_SERVERCYCLE
+ * The value is written cyclically into the FIFO at intervals of
+ * nCycleTime. The smallest possible value for nCycleTime is the cycle
+ * time of the ADS server; for the PLC, this is the task cycle time.
+ * The cycle time can be handled in 1ms steps. If you enter a cycle time
+ * of 0 ms, then the value is written into the FIFO with every task cycle.
+ *
+ * ADSTRANS_SERVERONCHA
+ * A value is only written into the FIFO if it has changed. The real-time
+ * sampling is executed in the time given in nCycleTime. The cycle time
+ * can be handled in 1ms steps. If you enter 0 ms as the cycle time, the
+ * variable is written into the FIFO every time it changes.
+ *
+ * Warning: Too many read operations can load the system so heavily that
+ * the user interface becomes much slower.
+ *
+ * Tip: Set the cycle time to the most appropriate values, and always
+ * close connections when they are no longer required.
+ */
+struct AdsNotificationAttrib {
+    /** Length of the data that is to be passed to the callback function. */
     uint32_t cbLength;
+
+    /**
+     * ADSTRANS_SERVERCYCLE: The notification's callback function is invoked cyclically.
+     * ADSTRANS_SERVERONCHA: The notification's callback function is only invoked when the value changes.
+     */
     uint32_t nTransMode;
+
+    /** The notification's callback function is invoked at the latest when this time has elapsed. The unit is 100 ns. */
     uint32_t nMaxDelay;
+
     union {
+        /** The ADS server checks whether the variable has changed after this time interval. The unit is 100 ns. */
         uint32_t nCycleTime;
         uint32_t dwChangeFilter;
     };
-} AdsNotificationAttrib, * PAdsNotificationAttrib;
+};
 
-typedef struct {
+/**
+ * @brief This structure is also passed to the callback function.
+ */
+struct AdsNotificationHeader {
+    /** Contains a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (UTC). */
     uint64_t nTimeStamp;
-    uint32_t hNotification;
-    uint32_t cbSampleSize;
-#ifndef __cplusplus
-    uint8_t data[];
-#endif
-} AdsNotificationHeader, * PAdsNotificationHeader;
 
+    /** Handle for the notification. Is specified when the notification is defined. */
+    uint32_t hNotification;
+
+    /** Number of bytes transferred. */
+    uint32_t cbSampleSize;
+};
+
+/**
+ * @brief Type definition of the callback function required by the AdsSyncAddDeviceNotificationReqEx() function.
+ * @param pAddr [in] Structure with NetId and port number of the ADS server.
+ * @param pNotification [in] pointer to a AdsNotificationHeader structure
+ * @param hUser [in] custom handle pass to AdsSyncAddDeviceNotificationReqEx() during registration
+ */
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
 
