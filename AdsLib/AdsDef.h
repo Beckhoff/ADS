@@ -356,9 +356,9 @@ struct AdsNotificationHeader {
 
 /**
  * @brief Type definition of the callback function required by the AdsSyncAddDeviceNotificationReqEx() function.
- * @param pAddr [in] Structure with NetId and port number of the ADS server.
- * @param pNotification [in] pointer to a AdsNotificationHeader structure
- * @param hUser [in] custom handle pass to AdsSyncAddDeviceNotificationReqEx() during registration
+ * @param[in] pAddr Structure with NetId and port number of the ADS server.
+ * @param[in] pNotification pointer to a AdsNotificationHeader structure
+ * @param[in] hUser custom handle pass to AdsSyncAddDeviceNotificationReqEx() during registration
  */
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
