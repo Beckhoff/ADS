@@ -68,6 +68,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li class="current"><a href="globals.html"><span>All</span></a></li>
       <li><a href="globals_func.html"><span>Functions</span></a></li>
       <li><a href="globals_type.html"><span>Typedefs</span></a></li>
+      <li><a href="globals_defs.html"><span>Macros</span></a></li>
+    </ul>
+  </div>
+  <div id="navrow4" class="tabs3">
+    <ul class="tablist">
+      <li><a href="#index_a"><span>a</span></a></li>
+      <li><a href="#index_g"><span>g</span></a></li>
+      <li><a href="#index_p"><span>p</span></a></li>
+      <li class="current"><a href="#index_r"><span>r</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -76,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Macros</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -86,15 +95,269 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented file members with links to the documentation:</div><ul>
+<div class="textblock">Here is a list of all documented file members with links to the documentation:</div>
+
+<h3><a class="anchor" id="index_a"></a>- a -</h3><ul>
 <li>AdsAddRoute()
 : <a class="el" href="AdsLib_8h.html#a6903314c3a6a587bad07abd4ae326164">AdsLib.h</a>
 </li>
 <li>AdsDelRoute()
 : <a class="el" href="AdsLib_8h.html#af798481942ac6872dd6106f4583a1936">AdsLib.h</a>
 </li>
+<li>ADSERR_CLIENT_ADDHASH
+: <a class="el" href="AdsDef_8h.html#a2579870bca9ad535f061f33d736c8eb9">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_DUPLINVOKEID
+: <a class="el" href="AdsDef_8h.html#a724f107b7d1a080d329082563443c6e9">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_ERROR
+: <a class="el" href="AdsDef_8h.html#a4fa7a637dc27475dcbc8be698652b5a7">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_INVALIDPARM
+: <a class="el" href="AdsDef_8h.html#a7d29fd2acce8f4d78cc11352fcf6797d">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_LISTEMPTY
+: <a class="el" href="AdsDef_8h.html#a76a51a557fa7a65a7346a58a234b7019">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_NOAMSADDR
+: <a class="el" href="AdsDef_8h.html#a15b0a6e0f3fb7052fcaede90a8655a9e">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_NOMORESYM
+: <a class="el" href="AdsDef_8h.html#a6be62e89cf64c154a46498b424435c28">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_PORTNOTOPEN
+: <a class="el" href="AdsDef_8h.html#a82d8e2d20d9fa30b48d03f0064dbc0af">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_REMOVEHASH
+: <a class="el" href="AdsDef_8h.html#aeb2ee0a28e18a09b59ec97403346ceff">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_SYNCINTERNAL
+: <a class="el" href="AdsDef_8h.html#aa74133f96d88f111de06240f7a625a40">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_SYNCPORTLOCKED
+: <a class="el" href="AdsDef_8h.html#ae3966bba226253b8b39e044b910fef96">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_SYNCRESINVALID
+: <a class="el" href="AdsDef_8h.html#a034ada44347991607a4ba23f544898ad">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_SYNCTIMEOUT
+: <a class="el" href="AdsDef_8h.html#a9dc3e13c7799d2d76031d8a55724d094">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_TIMEOUTINVALID
+: <a class="el" href="AdsDef_8h.html#a9ca8c0b7441f788d272e8c69e03397d5">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_VARUSED
+: <a class="el" href="AdsDef_8h.html#a48f241de785961ee47d37c5aa46f1d24">AdsDef.h</a>
+</li>
+<li>ADSERR_CLIENT_W32ERROR
+: <a class="el" href="AdsDef_8h.html#a64005cb1b0c030cb67b42ecad73fb07d">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_ABORTED
+: <a class="el" href="AdsDef_8h.html#a8cbf433b68e33f628755e8eb27341a82">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_ACCESSDENIED
+: <a class="el" href="AdsDef_8h.html#ac5f26c32731bd5e4e0d6828920694517">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_BUSY
+: <a class="el" href="AdsDef_8h.html#a185daa222bc346c465ab866a4c26c316">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_CERTIFICATEINVALID
+: <a class="el" href="AdsDef_8h.html#a5b30b518445829b1bcc205dd41ef4ecb">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_CLIENTUNKNOWN
+: <a class="el" href="AdsDef_8h.html#a1b3d49a3ab43660b0a3e8207a1d52a3c">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_ERROR
+: <a class="el" href="AdsDef_8h.html#a4c27bb0803f0a959d60e0c3bc2c93175">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_EXCEPTION
+: <a class="el" href="AdsDef_8h.html#a66bb7e53baa92f979e5da7e6700bb71c">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_EXISTS
+: <a class="el" href="AdsDef_8h.html#ac045723f9654d0f8cbf6637aaf6666ba">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INCOMPATIBLE
+: <a class="el" href="AdsDef_8h.html#af193783fb92bd717e36edace5bf2656e">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDACCESS
+: <a class="el" href="AdsDef_8h.html#a2388a855c47a3836f9181a7c1593accf">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDARRAYIDX
+: <a class="el" href="AdsDef_8h.html#ab346a2bee999aa4612d2a039c8b16889">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDCLSID
+: <a class="el" href="AdsDef_8h.html#a6e29a87a460a7e8cb62bd1c1d23040c1">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDCONTEXT
+: <a class="el" href="AdsDef_8h.html#a9b143f6a7beb8ab22f4ab26beb32e19c">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDDATA
+: <a class="el" href="AdsDef_8h.html#a61b9a660cfceba8e57f0af0b0b8ff8b1">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDGRP
+: <a class="el" href="AdsDef_8h.html#a589036127cadeb70bf6b5a163b4fba33">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDINTERFACE
+: <a class="el" href="AdsDef_8h.html#a099a28fd30a27518d83c425189668233">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDOBJID
+: <a class="el" href="AdsDef_8h.html#a8c08c27027171ad4e26ae92aa49a18f8">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDOFFSET
+: <a class="el" href="AdsDef_8h.html#aeb79d290511d72b6dac95b6ae0e1dd49">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDPARM
+: <a class="el" href="AdsDef_8h.html#a99cfcb11dbf390a872e62155e33cd5a0">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDSIZE
+: <a class="el" href="AdsDef_8h.html#aa7d89a3e9e0f96e54a0556ee888beb7c">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDSTATE
+: <a class="el" href="AdsDef_8h.html#a9db54841ac964156998f4ec3da7e8046">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_INVALIDWATCHSIZE
+: <a class="el" href="AdsDef_8h.html#acc6f18c0d463f7314d029166d7d3df7f">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSEDUPLICATED
+: <a class="el" href="AdsDef_8h.html#a027dc28cbc156c552ecd49b6f77b8134">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSEEXCEEDED
+: <a class="el" href="AdsDef_8h.html#a3889b81a7b7a349c2ab96e6e62374c6d">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSEEXPIRED
+: <a class="el" href="AdsDef_8h.html#a08dee3572c416ff80fee00ad3bd80543">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSEFUTUREISSUE
+: <a class="el" href="AdsDef_8h.html#ac7696191717d41830c6bcd8b702343ae">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSEINVALID
+: <a class="el" href="AdsDef_8h.html#ac1694ead9d453110a25ab1b72b115583">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSENOTFOUND
+: <a class="el" href="AdsDef_8h.html#a8a7cbcfb580dd9bfd00e23572df62660">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSENOTIMELIMIT
+: <a class="el" href="AdsDef_8h.html#a6c1782d85747513bb287fdc8d1588e90">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSESYSTEMID
+: <a class="el" href="AdsDef_8h.html#a842926fef6d15309720bd4eb2b93ba8e">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_LICENSETIMETOLONG
+: <a class="el" href="AdsDef_8h.html#ad62de5dbcbd4028f0cf3f008e7f8be65">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOINTERFACE
+: <a class="el" href="AdsDef_8h.html#a10effed67c2a8267719024d7133c5b9c">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOMEMORY
+: <a class="el" href="AdsDef_8h.html#ae5cc95c1fcce360b58f691cf4d09738b">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOMOREHDLS
+: <a class="el" href="AdsDef_8h.html#a5665580d5e46c7fc4cca00e7436527d6">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOTFOUND
+: <a class="el" href="AdsDef_8h.html#ae25a9fda531cd14b875c02eeda233826">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOTIFYHNDINVALID
+: <a class="el" href="AdsDef_8h.html#a87cc08b21a72f813deaf32fbe4b511af">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOTINIT
+: <a class="el" href="AdsDef_8h.html#a6eed03f47135c1c5682a19c02935e67a">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_NOTREADY
+: <a class="el" href="AdsDef_8h.html#a4d4ef3d1b23c840dad7e19aabea94b89">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_PENDING
+: <a class="el" href="AdsDef_8h.html#ae0c21f5d10afe3cddf8c0a714489c2a5">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SIGNATUREINVALID
+: <a class="el" href="AdsDef_8h.html#a1e9ad94d59207b6dabe90a8ba6024405">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SRVNOTSUPP
+: <a class="el" href="AdsDef_8h.html#aaa8abc277b32d1ea7e9a206fc0bd60f2">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SYMBOLNOTACTIVE
+: <a class="el" href="AdsDef_8h.html#abc90ec0b7bcdf8e9158055e0d8be463e">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SYMBOLNOTFOUND
+: <a class="el" href="AdsDef_8h.html#ad74951f1ddbeb2d95f1fa8ad8dced506">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SYMBOLVERSIONINVALID
+: <a class="el" href="AdsDef_8h.html#a8b06e1c5b6f7dc5d115628c1ad0b6aaf">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_SYNTAX
+: <a class="el" href="AdsDef_8h.html#a75f97fad21d448d8faf65d4eee53d4f3">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_TIMEOUT
+: <a class="el" href="AdsDef_8h.html#a0066c1b844fb722dad0ba6303929f8e8">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_TRANSMODENOTSUPP
+: <a class="el" href="AdsDef_8h.html#a40ff7e0a5c4fdb97f98692e59c831646">AdsDef.h</a>
+</li>
+<li>ADSERR_DEVICE_WARNING
+: <a class="el" href="AdsDef_8h.html#a67026e9d5b88a704604dc8078c80d2ae">AdsDef.h</a>
+</li>
 <li>AdsGetLocalAddressEx()
 : <a class="el" href="AdsLib_8h.html#a0fe92987c4e1e706d7a1d74cd0012b6e">AdsLib.h</a>
+</li>
+<li>ADSIGRP_DEVICE_DATA
+: <a class="el" href="AdsDef_8h.html#a932d9f187269e539d460dfa4526b310b">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_CLEARI
+: <a class="el" href="AdsDef_8h.html#ae34c1ca090f309f2691b10054869a8f6">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_CLEARO
+: <a class="el" href="AdsDef_8h.html#a885b660857d45fc9e6b800c728c12095">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RISIZE
+: <a class="el" href="AdsDef_8h.html#accbfabc232e00f5ad3557d7aed13f2b0">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_ROSIZE
+: <a class="el" href="AdsDef_8h.html#acc532c6dbc7ce0720b224b4df7055d44">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RWIB
+: <a class="el" href="AdsDef_8h.html#ad311ccfae1331647146b853f46d50120">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RWIOB
+: <a class="el" href="AdsDef_8h.html#a01b4e05ce1029bac54b50e62ded2e83f">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RWIX
+: <a class="el" href="AdsDef_8h.html#ac9140fcf3694ba9de0e687d296c60ccb">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RWOB
+: <a class="el" href="AdsDef_8h.html#a7777900a57a409fcd5c109fb34ad60e9">AdsDef.h</a>
+</li>
+<li>ADSIGRP_IOIMAGE_RWOX
+: <a class="el" href="AdsDef_8h.html#a93c4aaaea8980cb1428d15831d98415e">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_ADDDEVNOTE
+: <a class="el" href="AdsDef_8h.html#a82372806ac6359bac56dfaacb2db3f9a">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_DELDEVNOTE
+: <a class="el" href="AdsDef_8h.html#a6bec05b213e788c8859d315e068a4dfe">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_READ
+: <a class="el" href="AdsDef_8h.html#aa32f14f243fc065622b95e312a290a26">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_READEX
+: <a class="el" href="AdsDef_8h.html#ae3c3a63ac17e998461b75f85ee029006">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_READEX2
+: <a class="el" href="AdsDef_8h.html#a105f73e8469002b47a4e169204cc9ee1">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_READWRITE
+: <a class="el" href="AdsDef_8h.html#ab36a0907ee21bb5fed63bde76d6fb885">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SUMUP_WRITE
+: <a class="el" href="AdsDef_8h.html#a56264d4188e2c4df111e93f22b648c6f">AdsDef.h</a>
+</li>
+<li>ADSIGRP_SYMNOTE
+: <a class="el" href="AdsDef_8h.html#af014e1c454f6ddcd657cb791841d4dc7">AdsDef.h</a>
+</li>
+<li>ADSIOFFS_DEVDATA_ADSSTATE
+: <a class="el" href="AdsDef_8h.html#a394e57823205f83e76a42321b7f9af71">AdsDef.h</a>
+</li>
+<li>ADSIOFFS_DEVDATA_DEVSTATE
+: <a class="el" href="AdsDef_8h.html#a236ff9cee712708638a2045c0e5e1eb7">AdsDef.h</a>
 </li>
 <li>AdsPortCloseEx()
 : <a class="el" href="AdsLib_8h.html#ac3cce3961b8c1ad0ad8d3eca4b7df8c3">AdsLib.h</a>
@@ -132,14 +395,44 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>AdsSyncWriteReqEx()
 : <a class="el" href="AdsLib_8h.html#a4c3a92a9dd71bb7526870b0063fec8ec">AdsLib.h</a>
 </li>
+</ul>
+
+
+<h3><a class="anchor" id="index_g"></a>- g -</h3><ul>
+<li>GLOBALERR_MISSING_ROUTE
+: <a class="el" href="AdsDef_8h.html#a9c50163e4e3bdf13e7761dab80fd2a15">AdsDef.h</a>
+</li>
+<li>GLOBALERR_NO_MEMORY
+: <a class="el" href="AdsDef_8h.html#ab00031b8656326feadd56f5639a2e0ff">AdsDef.h</a>
+</li>
+<li>GLOBALERR_TARGET_PORT
+: <a class="el" href="AdsDef_8h.html#a29dbd62863de5b007d80bb8dd26528d3">AdsDef.h</a>
+</li>
+<li>GLOBALERR_TCP_SEND
+: <a class="el" href="AdsDef_8h.html#ab795c451c9f57aa6555a4e826ee72f92">AdsDef.h</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_p"></a>- p -</h3><ul>
 <li>PAdsNotificationFuncEx
 : <a class="el" href="AdsDef_8h.html#a4f3ae09cd32bbb483092d9ee4858c886">AdsDef.h</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
+<li>ROUTERERR_NOMOREQUEUES
+: <a class="el" href="AdsDef_8h.html#a95d20b818c026e0d5519c508fc88c897">AdsDef.h</a>
+</li>
+<li>ROUTERERR_NOTREGISTERED
+: <a class="el" href="AdsDef_8h.html#aa2eaa319e5e44e3c28578ce7353f75bf">AdsDef.h</a>
 </li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jan 11 2016 16:54:24 for AdsLib by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Jan 12 2016 13:29:01 for AdsLib by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
