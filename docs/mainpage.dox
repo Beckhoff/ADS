@@ -1,0 +1,12 @@
+/**
+ * @brief Mainpage for AdsLib API documentation.
+ * @author Patrick Brünn <p.bruenn@beckhoff.com>
+ * @file
+ */
+/**
+ * @mainpage AdsLib - Open Source ADS Library
+ * @par AdsLib API functions are defined in:
+ * AdsLib.h
+ * @par Structures and constants in:
+ * AdsDef.h
+ */
