@@ -328,14 +328,15 @@ enum ADSSTATE {
  * of the callback function into the FIFO. If the buffer is full, or if
  * the nMaxDelay time has elapsed, then the callback function is invoked
  * for each entry. The nTransMode parameter affects this process as follows:
- * ADSTRANS_SERVERCYCLE
+ *
+ * @par ADSTRANS_SERVERCYCLE
  * The value is written cyclically into the FIFO at intervals of
  * nCycleTime. The smallest possible value for nCycleTime is the cycle
  * time of the ADS server; for the PLC, this is the task cycle time.
  * The cycle time can be handled in 1ms steps. If you enter a cycle time
  * of 0 ms, then the value is written into the FIFO with every task cycle.
  *
- * ADSTRANS_SERVERONCHA
+ * @par ADSTRANS_SERVERONCHA
  * A value is only written into the FIFO if it has changed. The real-time
  * sampling is executed in the time given in nCycleTime. The cycle time
  * can be handled in 1ms steps. If you enter 0 ms as the cycle time, the
