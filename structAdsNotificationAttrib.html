@@ -113,8 +113,9 @@ union {</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This structure contains all the attributes for the definition of a notification. </p>
-<p>The ADS DLL is buffered from the real time transmission by a FIFO. TwinCAT first writes every value that is to be transmitted by means of the callback function into the FIFO. If the buffer is full, or if the nMaxDelay time has elapsed, then the callback function is invoked for each entry. The nTransMode parameter affects this process as follows: ADSTRANS_SERVERCYCLE The value is written cyclically into the FIFO at intervals of nCycleTime. The smallest possible value for nCycleTime is the cycle time of the ADS server; for the PLC, this is the task cycle time. The cycle time can be handled in 1ms steps. If you enter a cycle time of 0 ms, then the value is written into the FIFO with every task cycle.</p>
-<p>ADSTRANS_SERVERONCHA A value is only written into the FIFO if it has changed. The real-time sampling is executed in the time given in nCycleTime. The cycle time can be handled in 1ms steps. If you enter 0 ms as the cycle time, the variable is written into the FIFO every time it changes.</p>
+<p>The ADS DLL is buffered from the real time transmission by a FIFO. TwinCAT first writes every value that is to be transmitted by means of the callback function into the FIFO. If the buffer is full, or if the nMaxDelay time has elapsed, then the callback function is invoked for each entry. The nTransMode parameter affects this process as follows:</p>
+<dl class="section user"><dt>ADSTRANS_SERVERCYCLE</dt><dd>The value is written cyclically into the FIFO at intervals of nCycleTime. The smallest possible value for nCycleTime is the cycle time of the ADS server; for the PLC, this is the task cycle time. The cycle time can be handled in 1ms steps. If you enter a cycle time of 0 ms, then the value is written into the FIFO with every task cycle.</dd></dl>
+<dl class="section user"><dt>ADSTRANS_SERVERONCHA</dt><dd>A value is only written into the FIFO if it has changed. The real-time sampling is executed in the time given in nCycleTime. The cycle time can be handled in 1ms steps. If you enter 0 ms as the cycle time, the variable is written into the FIFO every time it changes.</dd></dl>
 <p>Warning: Too many read operations can load the system so heavily that the user interface becomes much slower.</p>
 <p>Tip: Set the cycle time to the most appropriate values, and always close connections when they are no longer required. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
@@ -176,7 +177,7 @@ union {</td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jan 12 2016 13:29:01 for AdsLib by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Jan 12 2016 15:51:10 for AdsLib by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
