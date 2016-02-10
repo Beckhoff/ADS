@@ -39,6 +39,7 @@ typedef int SOCKET;
 #define WSAGetLastError() errno
 #define WSAENOTSOCK EBADF
 #define CONNECTION_CLOSED ENOTCONN
+#define CONNECTION_ABORTED ECONNABORTED
 inline int InitSocketLibrary(void)
 {
     return 0;
@@ -60,5 +61,6 @@ inline int InitSocketLibrary(void)
 typedef int socklen_t;
 #define SHUT_RDWR SD_BOTH
 #define CONNECTION_CLOSED WSAESHUTDOWN
+#define CONNECTION_ABORTED WSAECONNABORTED
 #endif
 #endif // WRAP_SOCKET_H
