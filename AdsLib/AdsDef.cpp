@@ -72,7 +72,7 @@ AmsNetId::AmsNetId(const std::string& addr)
         ++i;
     }
 
-    if (i != sizeof(b) || std::getline(iss, s, '.')) {
+    if ((i != sizeof(b)) || std::getline(iss, s, '.')) {
         static const AmsNetId empty {};
         memcpy(b, empty.b, sizeof(b));
     }

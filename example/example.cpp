@@ -74,14 +74,28 @@ void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
     uint32_t handle;
 
     out << __FUNCTION__ << "():\n";
-    const long handleStatus = AdsSyncReadWriteReqEx2(port, &server, ADSIGRP_SYM_HNDBYNAME, 0, sizeof(handle), &handle, sizeof(handleName), handleName, &bytesRead);
+    const long handleStatus = AdsSyncReadWriteReqEx2(port,
+                                                     &server,
+                                                     ADSIGRP_SYM_HNDBYNAME,
+                                                     0,
+                                                     sizeof(handle),
+                                                     &handle,
+                                                     sizeof(handleName),
+                                                     handleName,
+                                                     &bytesRead);
     if (handleStatus) {
         out << "Create handle for '" << handleName << "' failed with: 0x" << std::hex << handleStatus << '\n';
         return;
     }
 
     for (size_t i = 0; i < 8; ++i) {
-        const long status = AdsSyncReadReqEx2(port, &server, ADSIGRP_SYM_VALBYHND, handle, sizeof(buffer), &buffer, &bytesRead);
+        const long status = AdsSyncReadReqEx2(port,
+                                              &server,
+                                              ADSIGRP_SYM_VALBYHND,
+                                              handle,
+                                              sizeof(buffer),
+                                              &buffer,
+                                              &bytesRead);
         if (status) {
             out << "ADS read failed with: " << std::dec << status << '\n';
             return;
@@ -90,7 +104,8 @@ void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
     }
     const long releaseHandle = AdsSyncWriteReqEx(port, &server, ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
     if (releaseHandle) {
-        out << "Release handle 0x" << std::hex << handle << " for '" << handleName << "' failed with: 0x" << releaseHandle << '\n';
+        out << "Release handle 0x" << std::hex << handle << " for '" << handleName << "' failed with: 0x" <<
+            releaseHandle << '\n';
     }
 }
 

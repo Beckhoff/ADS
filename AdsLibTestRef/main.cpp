@@ -15,8 +15,8 @@
 using namespace fructose;
 
 static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
-static AmsAddr server{serverNetId, AMSPORT_R0_PLC_TC3};
-static AmsAddr serverBadPort{serverNetId, 1000};
+static AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
+static AmsAddr serverBadPort {serverNetId, 1000};
 
 static size_t g_NumNotifications = 0;
 static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
