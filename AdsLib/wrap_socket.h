@@ -47,7 +47,7 @@ inline int InitSocketLibrary(void)
 #define NATIVE_SELECT(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT) \
     ::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 #else // defined(_WIN32) && !defined(__CYGWIN__)
-#include <WinSock2.h>
+#include <winsock2.h>
 inline int InitSocketLibrary(void)
 {
     WSADATA wsaData;

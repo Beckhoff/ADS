@@ -1,11 +1,17 @@
 
+OS_NAME ?=$(shell uname)
 VPATH = AdsLib
 LIBS = -lpthread
-LIB_NAME = AdsLib-$(shell uname).a
+LIB_NAME = AdsLib-$(OS_NAME).a
 INSTALL_DIR=example
+CXX :=$(CROSS_COMPILE)$(CXX)
 
-ifeq ($(shell uname),Darwin)
+ifeq ($(OS_NAME),Darwin)
 	LIBS += -lc++
+endif
+
+ifeq ($(OS_NAME),win32)
+	LIBS += -lws2_32
 endif
 
 

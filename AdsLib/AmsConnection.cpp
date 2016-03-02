@@ -238,7 +238,7 @@ void AmsConnection::Recv()
 {
     AmsTcpHeader amsTcpHeader;
     AoEHeader aoeHeader;
-    for ( ; ; ) {
+    for ( ; ownIp; ) {
         Receive(amsTcpHeader);
         if (amsTcpHeader.length() < sizeof(aoeHeader)) {
             LOG_WARN("Frame to short to be AoE");
