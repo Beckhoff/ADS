@@ -5,6 +5,9 @@ LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
 INSTALL_DIR=example
 CXX :=$(CROSS_COMPILE)$(CXX)
+CFLAGS += -std=c++11
+CFLAGS += -pedantic
+CFLAGS += -Wall
 
 ifeq ($(OS_NAME),Darwin)
 	LIBS += -lc++
@@ -16,7 +19,7 @@ endif
 
 
 .cpp.o:
-	$(CXX) -Wall -pedantic -c -g -std=c++11 $< -o $@ -I AdsLib/ -I ../
+	$(CXX) -c $(CFLAGS) $< -o $@ -I AdsLib/ -I ../
 
 $(LIB_NAME): AdsDef.o AdsLib.o AmsConnection.o AmsPort.o AmsRouter.o Log.o NotificationDispatcher.o Sockets.o Frame.o
 	$(AR) rvs $@ $?
