@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2016 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ inline int InitSocketLibrary(void)
     ::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 #else // defined(_WIN32) && !defined(__CYGWIN__)
 #include <winsock2.h>
+#include <Ws2tcpip.h>
 inline int InitSocketLibrary(void)
 {
     WSADATA wsaData;

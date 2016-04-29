@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2016 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,18 @@
 #include <sstream>
 #include <system_error>
 
+static uint32_t StrToIpV4(const std::string& addr)
+{
+    in_addr tmp;
+
+    if (1 == inet_pton(AF_INET, addr.c_str(), &tmp)) {
+        return ntohl(tmp.s_addr);
+    }
+    return INADDR_NONE;
+}
+
 IpV4::IpV4(const std::string& addr)
-    : value(ntohl(inet_addr(addr.c_str())))
+    : value(StrToIpV4(addr))
 {}
 
 IpV4::IpV4(uint32_t __val)
