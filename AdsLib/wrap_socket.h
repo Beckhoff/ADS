@@ -48,7 +48,7 @@ inline int InitSocketLibrary(void)
     ::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 #else // defined(_WIN32) && !defined(__CYGWIN__)
 #include <winsock2.h>
-#include <Ws2tcpip.h>
+#include <ws2tcpip.h>
 inline int InitSocketLibrary(void)
 {
     WSADATA wsaData;
