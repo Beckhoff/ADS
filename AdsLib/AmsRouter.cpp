@@ -174,5 +174,5 @@ long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, No
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification)
 {
     auto& p = ports[port - Router::PORT_BASE];
-    return p.DelNotification(*pAddr, hNotification) ? ADSERR_NOERR : ADSERR_CLIENT_REMOVEHASH;
+    return p.DelNotification(*pAddr, hNotification);
 }

@@ -47,11 +47,12 @@ void NotificationDispatcher::Emplace(uint32_t hNotify, Notification& notificatio
     notifications.emplace(hNotify, notification);
 }
 
-bool NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
+long NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
     const auto status = proxy.DeleteNotification(conn.second, hNotify, tmms, conn.first);
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    return !!notifications.erase(hNotify) && status;
+    notifications.erase(hNotify);
+    return status;
 }
 
 void NotificationDispatcher::Run()

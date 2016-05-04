@@ -39,7 +39,7 @@ struct NotificationDispatcher {
     ~NotificationDispatcher();
     bool operator<(const NotificationDispatcher& ref) const;
     void Emplace(uint32_t hNotify, Notification& notification);
-    bool Erase(uint32_t hNotify, uint32_t tmms);
+    long Erase(uint32_t hNotify, uint32_t tmms);
     inline void Notify() { sem.Post(); }
     void Run();
 

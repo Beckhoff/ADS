@@ -38,7 +38,7 @@ struct AmsPort {
     uint16_t port;
 
     void AddNotification(NotifyMapping mapping);
-    bool DelNotification(const AmsAddr& ams, uint32_t hNotify);
+    long DelNotification(const AmsAddr& ams, uint32_t hNotify);
 
 private:
     static const uint32_t DEFAULT_TIMEOUT = 5000;
