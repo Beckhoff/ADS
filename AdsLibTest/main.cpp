@@ -180,7 +180,7 @@ struct TestIpV4 : test_base<TestIpV4> {
 
     void testComparsion(const std::string&)
     {
-        static const IpV4 testee {"192.168.000.01"};
+        static const IpV4 testee {"192.168.0.1"};
         static const IpV4 lower {"192.167.0.1"};
         static const IpV4 higher {"193.0.0.0"};
         static const IpV4 tooLong {"192.168.0.1."};
