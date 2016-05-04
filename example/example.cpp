@@ -45,7 +45,7 @@ void notificationExample(std::ostream& out, long port, const AmsAddr& server)
 
     const long delStatus = AdsSyncDelDeviceNotificationReqEx(port, &server, hNotify);
     if (delStatus) {
-        out << "Delete device notification failed with: " << std::dec << addStatus;
+        out << "Delete device notification failed with: " << std::dec << delStatus;
         return;
     }
 }
