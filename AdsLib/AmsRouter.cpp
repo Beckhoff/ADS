@@ -37,7 +37,12 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
     auto conn = connections.find(ip);
     if (conn == connections.end()) {
         const auto isFirst = connections.empty();
-        conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
+        try{
+            conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
+        } catch (std::bad_alloc badAllocException) {
+            return GLOBALERR_NO_MEMORY;
+        }
+
         if (isFirst) {
             localAddr = AmsNetId {conn->second->ownIp};
         }
