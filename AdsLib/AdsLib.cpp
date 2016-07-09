@@ -78,21 +78,25 @@ long AdsSyncReadReqEx2(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::READ,
-        bufferLength,
-        buffer,
-        bytesRead,
-        sizeof(AoERequestHeader)
-    };
-    request.frame.prepend(AoERequestHeader {
-        indexGroup,
-        indexOffset,
-        bufferLength
-    });
-    return router.AdsRequest<AoEReadResponseHeader>(request);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::READ,
+            bufferLength,
+            buffer,
+            bytesRead,
+            sizeof(AoERequestHeader)
+        };
+        request.frame.prepend(AoERequestHeader {
+            indexGroup,
+            indexOffset,
+            bufferLength
+        });
+        return router.AdsRequest<AoEReadResponseHeader>(request);
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, AdsVersion* version)
@@ -104,21 +108,25 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
 
     static const size_t NAME_LENGTH = 16;
     uint8_t buffer[sizeof(*version) + NAME_LENGTH];
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::READ_DEVICE_INFO,
-        sizeof(buffer),
-        buffer
-    };
-    const auto status = router.AdsRequest<AoEResponseHeader>(request);
-    if (!status) {
-        version->version = buffer[0];
-        version->revision = buffer[1];
-        version->build = qFromLittleEndian<uint16_t>(buffer + offsetof(AdsVersion, build));
-        memcpy(devName, buffer + sizeof(*version), NAME_LENGTH);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::READ_DEVICE_INFO,
+            sizeof(buffer),
+            buffer
+        };
+        const auto status = router.AdsRequest<AoEResponseHeader>(request);
+        if (!status) {
+            version->version = buffer[0];
+            version->revision = buffer[1];
+            version->build = qFromLittleEndian<uint16_t>(buffer + offsetof(AdsVersion, build));
+            memcpy(devName, buffer + sizeof(*version), NAME_LENGTH);
+        }
+        return status;
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
     }
-    return status;
 }
 
 long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
@@ -129,19 +137,23 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
     }
 
     uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::READ_STATE,
-        sizeof(buffer),
-        buffer
-    };
-    const auto status = router.AdsRequest<AoEResponseHeader>(request);
-    if (!status) {
-        *adsState = qFromLittleEndian<uint16_t>(buffer);
-        *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::READ_STATE,
+            sizeof(buffer),
+            buffer
+        };
+        const auto status = router.AdsRequest<AoEResponseHeader>(request);
+        if (!status) {
+            *adsState = qFromLittleEndian<uint16_t>(buffer);
+            *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
+        }
+        return status;
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
     }
-    return status;
 }
 
 long AdsSyncReadWriteReqEx2(long           port,
@@ -159,23 +171,27 @@ long AdsSyncReadWriteReqEx2(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::READ_WRITE,
-        readLength,
-        readData,
-        bytesRead,
-        sizeof(AoEReadWriteReqHeader) + writeLength
-    };
-    request.frame.prepend(writeData, writeLength);
-    request.frame.prepend(AoEReadWriteReqHeader {
-        indexGroup,
-        indexOffset,
-        readLength,
-        writeLength
-    });
-    return router.AdsRequest<AoEReadResponseHeader>(request);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::READ_WRITE,
+            readLength,
+            readData,
+            bytesRead,
+            sizeof(AoEReadWriteReqHeader) + writeLength
+        };
+        request.frame.prepend(writeData, writeLength);
+        request.frame.prepend(AoEReadWriteReqHeader {
+            indexGroup,
+            indexOffset,
+            readLength,
+            writeLength
+        });
+        return router.AdsRequest<AoEReadResponseHeader>(request);
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncWriteReqEx(long           port,
@@ -190,20 +206,24 @@ long AdsSyncWriteReqEx(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::WRITE,
-        0, nullptr, nullptr,
-        sizeof(AoERequestHeader) + bufferLength,
-    };
-    request.frame.prepend(buffer, bufferLength);
-    request.frame.prepend<AoERequestHeader>({
-        indexGroup,
-        indexOffset,
-        bufferLength
-    });
-    return router.AdsRequest<AoEReadResponseHeader>(request);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::WRITE,
+            0, nullptr, nullptr,
+            sizeof(AoERequestHeader) + bufferLength,
+        };
+        request.frame.prepend(buffer, bufferLength);
+        request.frame.prepend<AoERequestHeader>({
+            indexGroup,
+            indexOffset,
+            bufferLength
+        });
+        return router.AdsRequest<AoEReadResponseHeader>(request);
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncWriteControlReqEx(long           port,
@@ -214,20 +234,24 @@ long AdsSyncWriteControlReqEx(long           port,
                               const void*    buffer)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::WRITE_CONTROL,
-        0, nullptr, nullptr,
-        sizeof(AdsWriteCtrlRequest) + bufferLength
-    };
-    request.frame.prepend(buffer, bufferLength);
-    request.frame.prepend<AdsWriteCtrlRequest>({
-        adsState,
-        devState,
-        bufferLength
-    });
-    return router.AdsRequest<AoEResponseHeader>(request);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::WRITE_CONTROL,
+            0, nullptr, nullptr,
+            sizeof(AdsWriteCtrlRequest) + bufferLength
+        };
+        request.frame.prepend(buffer, bufferLength);
+        request.frame.prepend<AdsWriteCtrlRequest>({
+            adsState,
+            devState,
+            bufferLength
+        });
+        return router.AdsRequest<AoEResponseHeader>(request);
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncAddDeviceNotificationReqEx(long                         port,
@@ -245,28 +269,32 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
     }
 
     uint8_t buffer[sizeof(*pNotification)];
-    AmsRequest request {
-        *pAddr,
-        (uint16_t)port,
-        AoEHeader::ADD_DEVICE_NOTIFICATION,
-        sizeof(buffer),
-        buffer,
-        nullptr,
-        sizeof(AdsAddDeviceNotificationRequest)
-    };
-    request.frame.prepend(AdsAddDeviceNotificationRequest {
-        indexGroup,
-        indexOffset,
-        pAttrib->cbLength,
-        pAttrib->nTransMode,
-        pAttrib->nMaxDelay,
-        pAttrib->nCycleTime
-    });
-    Notification notify {pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port};
-    return router.AddNotification(
-        request,
-        pNotification,
-        notify);
+    try{
+        AmsRequest request {
+            *pAddr,
+            (uint16_t)port,
+            AoEHeader::ADD_DEVICE_NOTIFICATION,
+            sizeof(buffer),
+            buffer,
+            nullptr,
+            sizeof(AdsAddDeviceNotificationRequest)
+        };
+        request.frame.prepend(AdsAddDeviceNotificationRequest {
+            indexGroup,
+            indexOffset,
+            pAttrib->cbLength,
+            pAttrib->nTransMode,
+            pAttrib->nMaxDelay,
+            pAttrib->nCycleTime
+        });
+        Notification notify { pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port };
+        return router.AddNotification(
+            request,
+            pNotification,
+            notify);
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
