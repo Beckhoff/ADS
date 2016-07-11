@@ -42,7 +42,7 @@ long AdsAddRoute(const AmsNetId ams, const char* ip)
 {
     try {
         return router.AddRoute(ams, IpV4(ip));
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -98,7 +98,7 @@ long AdsSyncReadReqEx2(long           port,
             bufferLength
         });
         return router.AdsRequest<AoEReadResponseHeader>(request);
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -128,7 +128,7 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
             memcpy(devName, buffer + sizeof(*version), NAME_LENGTH);
         }
         return status;
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -155,7 +155,7 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
             *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
         }
         return status;
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -193,7 +193,7 @@ long AdsSyncReadWriteReqEx2(long           port,
             writeLength
         });
         return router.AdsRequest<AoEReadResponseHeader>(request);
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -225,7 +225,7 @@ long AdsSyncWriteReqEx(long           port,
             bufferLength
         });
         return router.AdsRequest<AoEReadResponseHeader>(request);
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -253,7 +253,7 @@ long AdsSyncWriteControlReqEx(long           port,
             bufferLength
         });
         return router.AdsRequest<AoEResponseHeader>(request);
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }
@@ -296,7 +296,7 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
             request,
             pNotification,
             notify);
-    } catch (std::bad_alloc badAllocException) {
+    } catch (const std::bad_alloc& e) {
         return GLOBALERR_NO_MEMORY;
     }
 }

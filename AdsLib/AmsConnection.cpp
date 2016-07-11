@@ -229,7 +229,7 @@ void AmsConnection::TryRecv()
 {
     try {
         Recv();
-    }catch (std::runtime_error& e) {
+    } catch (const std::runtime_error& e) {
         LOG_INFO(e.what());
     }
 }
