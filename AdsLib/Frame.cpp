@@ -78,9 +78,6 @@ Frame& Frame::prepend(const void* const data, const size_t size)
     const size_t bytesFree = m_Pos - m_Data.get();
     if (size > bytesFree) {
         auto newData = new uint8_t[size + m_Size];
-        if (NULL == newData) {
-            throw std::bad_alloc();
-        }
 
         m_Pos = newData + bytesFree + size;
         memcpy(m_Pos, m_Data.get() + bytesFree, m_Size - bytesFree);
