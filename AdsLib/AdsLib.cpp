@@ -40,7 +40,11 @@ static AmsRouter router;
 
 long AdsAddRoute(const AmsNetId ams, const char* ip)
 {
-    return router.AddRoute(ams, IpV4(ip));
+    try {
+        return router.AddRoute(ams, IpV4(ip));
+    } catch (std::bad_alloc badAllocException) {
+        return GLOBALERR_NO_MEMORY;
+    }
 }
 
 void AdsDelRoute(const AmsNetId ams)
@@ -106,9 +110,9 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    static const size_t NAME_LENGTH = 16;
-    uint8_t buffer[sizeof(*version) + NAME_LENGTH];
     try {
+        static const size_t NAME_LENGTH = 16;
+        uint8_t buffer[sizeof(*version) + NAME_LENGTH];
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -136,8 +140,8 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
     try {
+        uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -268,8 +272,8 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    uint8_t buffer[sizeof(*pNotification)];
     try {
+        uint8_t buffer[sizeof(*pNotification)];
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
