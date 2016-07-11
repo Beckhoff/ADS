@@ -78,7 +78,7 @@ long AdsSyncReadReqEx2(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -108,7 +108,7 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
 
     static const size_t NAME_LENGTH = 16;
     uint8_t buffer[sizeof(*version) + NAME_LENGTH];
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -137,7 +137,7 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
     }
 
     uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -171,7 +171,7 @@ long AdsSyncReadWriteReqEx2(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -206,7 +206,7 @@ long AdsSyncWriteReqEx(long           port,
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -234,7 +234,7 @@ long AdsSyncWriteControlReqEx(long           port,
                               const void*    buffer)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -269,7 +269,7 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
     }
 
     uint8_t buffer[sizeof(*pNotification)];
-    try{
+    try {
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
