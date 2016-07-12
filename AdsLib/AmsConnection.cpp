@@ -25,7 +25,8 @@
 
 AmsResponse::AmsResponse()
     : frame(4096),
-    invokeId(0)
+    invokeId(0),
+    errorCode(0)
 {}
 
 void AmsResponse::Notify()
