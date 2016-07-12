@@ -60,7 +60,7 @@ struct RingBuffer {
     {
         T result = 0;
         for (size_t i = 0; i < sizeof(T); ++i) {
-            result += (*read << (8 * i));
+            result += (((T)(*read)) << (8 * i));
             read = Increment(read, 1);
         }
         return result;
