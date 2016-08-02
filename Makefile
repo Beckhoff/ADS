@@ -30,14 +30,14 @@ AdsLibTest.bin: AdsLibTest/main.o $(LIB_NAME)
 test: AdsLibTest.bin
 	./$<
 
-install: $(LIB_NAME) AdsLib.h AdsDef.h
-	cp $? $(INSTALL_DIR)/
+install: $(LIB_NAME) AdsLib.h AdsDef.h AdsClient
+	cp --recursive $? $(INSTALL_DIR)/
 
 clean:
 	rm -f *.a *.o *.bin AdsLibTest/*.o
 
 uncrustify:
-	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
+	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp AdsLib*/AdsClient/*
 
 prepare-hooks:
 	rm -f .git/hooks/pre-commit
