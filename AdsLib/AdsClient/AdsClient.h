@@ -24,7 +24,8 @@
 
 class AdsClient {
 public:
-    AdsClient()
+    AdsClient(const AmsAddr amsAddr)
+        : address(amsAddr)
     {
         m_Port = AdsPortOpenEx();
         if (0 == m_Port) {
@@ -72,7 +73,7 @@ public:
     }
 
     // Device info
-    const DeviceInfo ReadDeviceInfo(const AmsAddr& address) const
+    const DeviceInfo ReadDeviceInfo() const
     {
         DeviceInfo deviceInfo;
         auto error = AdsSyncReadDeviceInfoReqEx(m_Port, &address, deviceInfo.name, &deviceInfo.version);
@@ -83,10 +84,9 @@ public:
     // Read variables by symbolic name
     template<typename T>
     const AdsReadResponse<T> Read(
-        const AmsAddr&     address,
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(address, symbolName.c_str());
+        auto handle = GetHandle(symbolName.c_str());
         AdsReadResponse<T> response;
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(
@@ -97,7 +97,7 @@ public:
             sizeof(T),
             response.GetPointer(),
             &bytesRead);
-        ReleaseHandle(address, handle);
+        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
         response.SetBytesRead(bytesRead);
         return response;
@@ -106,7 +106,6 @@ public:
     // Read variables by index group and index offset
     template<typename T>
     const AdsReadResponse<T> Read(
-        const AmsAddr& address,
         const uint32_t indexGroup,
         const uint32_t indexOffset) const
     {
@@ -129,10 +128,9 @@ public:
     // Read arrays by symbolic name
     template<typename T, uint32_t count = 1>
     const AdsReadArrayResponse<T, count> ReadArray(
-        const AmsAddr&     address,
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(address, symbolName.c_str());
+        auto handle = GetHandle(symbolName.c_str());
         AdsReadArrayResponse<T, count> response;
         uint32_t bytesRead = 0;
 
@@ -144,7 +142,7 @@ public:
             sizeof(T) * count,
             response.GetPointer(),
             &bytesRead);
-        ReleaseHandle(address, handle);
+        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
         response.SetBytesRead(bytesRead);
         return response;
@@ -153,7 +151,6 @@ public:
     // Read arrays by index group and index offset
     template<typename T, uint32_t count = 1>
     const AdsReadArrayResponse<T, count> ReadArray(
-        const AmsAddr& address,
         const uint32_t indexGroup,
         const uint32_t indexOffset) const
     {
@@ -175,11 +172,10 @@ public:
 
     // Write variable by symbolic name
     template<typename T, uint32_t count = 1> void Write(
-        const AmsAddr&     address,
         const std::string& symbolName,
         const T&           value)
     {
-        auto handle = GetHandle(address, symbolName.c_str());
+        auto handle = GetHandle(symbolName.c_str());
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
@@ -187,13 +183,12 @@ public:
             handle,
             sizeof(T) * count,
             &value);
-        ReleaseHandle(address, handle);
+        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
     }
 
     // Write variable by index group and index offset
     template<typename T, uint32_t count = 1> void Write(
-        const AmsAddr& address,
         const uint32_t indexGroup,
         const uint32_t indexOffset,
         const T&       value)
@@ -211,11 +206,10 @@ public:
 
     // Write array by symbolic name
     template<typename T, uint32_t count = 1> void WriteArray(
-        const AmsAddr&     address,
         const std::string& symbolName,
         const T*           pValue)
     {
-        auto handle = GetHandle(address, symbolName.c_str());
+        auto handle = GetHandle(symbolName.c_str());
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
@@ -223,13 +217,12 @@ public:
             handle,
             sizeof(T) * count,
             pValue);
-        ReleaseHandle(address, handle);
+        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
     }
 
     // Write array by index group and index offset
     template<typename T, uint32_t count = 1> void WriteArray(
-        const AmsAddr& address,
         const uint32_t indexGroup,
         const uint32_t indexOffset,
         const T*       pValue)
@@ -246,11 +239,11 @@ public:
     }
 
 private:
+    const AmsAddr address;
     uint32_t m_Port;
 
     // Get the handle for a given symbol name
     const uint32_t GetHandle(
-        const AmsAddr&    address,
         const char* const symbolName) const
     {
         uint32_t handle = 0;
@@ -273,7 +266,6 @@ private:
 
     // Release a given handle
     void ReleaseHandle(
-        const AmsAddr& address,
         const uint32_t handle) const
     {
         uint32_t error = AdsSyncWriteReqEx(

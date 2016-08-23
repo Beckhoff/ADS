@@ -218,28 +218,28 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsClient adsClient;
+        AdsClient adsClient {remoteNetAddress};
 
         // Add routes
         adsClient.AddRoute(remoteNetId, remoteIpV4);
 
         // Write and read values
         uint8_t valueToWrite = 0x99;
-        adsClient.Write<uint8_t>(remoteNetAddress, "MAIN.byByte[0]", valueToWrite);
-        auto readValue = adsClient.Read<uint8_t>(remoteNetAddress, "MAIN.byByte");
+        adsClient.Write<uint8_t>("MAIN.byByte[0]", valueToWrite);
+        auto readValue = adsClient.Read<uint8_t>("MAIN.byByte");
         out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)readValue << " back\n";
 
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
-        adsClient.WriteArray<uint8_t, arrayToWrite.size()>(remoteNetAddress, "MAIN.byByte", &arrayToWrite[0]);
-        auto readArray = adsClient.ReadArray<uint8_t, arrayToWrite.size()>(remoteNetAddress, "MAIN.byByte");
+        adsClient.WriteArray<uint8_t, arrayToWrite.size()>("MAIN.byByte", &arrayToWrite[0]);
+        auto readArray = adsClient.ReadArray<uint8_t, arrayToWrite.size()>("MAIN.byByte");
         out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
         (uint32_t)arrayToWrite[3] << "\n";
         out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
         (uint32_t)readArray[3] << "\n";
 
         // Read device info
-        auto deviceInfo = adsClient.ReadDeviceInfo(remoteNetAddress);
+        auto deviceInfo = adsClient.ReadDeviceInfo();
         out << "Read device info from device " << deviceInfo.name << ". Version is " <<
         (uint32_t)deviceInfo.version.version << "." << (uint32_t)deviceInfo.version.revision << "." <<
         (uint32_t)deviceInfo.version.build << "\n";
