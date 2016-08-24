@@ -86,18 +86,17 @@ public:
     const AdsReadResponse<T> Read(
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(symbolName.c_str());
+        auto handle = GetHandle(symbolName);
         AdsReadResponse<T> response;
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            handle,
+            *handle,
             sizeof(T),
             response.GetPointer(),
             &bytesRead);
-        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
         response.SetBytesRead(bytesRead);
         return response;
@@ -130,7 +129,7 @@ public:
     const AdsReadArrayResponse<T, count> ReadArray(
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(symbolName.c_str());
+        auto handle = GetHandle(symbolName);
         AdsReadArrayResponse<T, count> response;
         uint32_t bytesRead = 0;
 
@@ -138,11 +137,10 @@ public:
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            handle,
+            *handle,
             sizeof(T) * count,
             response.GetPointer(),
             &bytesRead);
-        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
         response.SetBytesRead(bytesRead);
         return response;
@@ -175,15 +173,14 @@ public:
         const std::string& symbolName,
         const T&           value)
     {
-        auto handle = GetHandle(symbolName.c_str());
+        auto handle = GetHandle(symbolName);
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            handle,
+            *handle,
             sizeof(T) * count,
             &value);
-        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
     }
 
@@ -209,15 +206,14 @@ public:
         const std::string& symbolName,
         const T*           pValue)
     {
-        auto handle = GetHandle(symbolName.c_str());
+        auto handle = GetHandle(symbolName);
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            handle,
+            *handle,
             sizeof(T) * count,
             pValue);
-        ReleaseHandle(handle);
         if (error) {throw AdsException(error); }
     }
 
@@ -242,9 +238,29 @@ private:
     const AmsAddr address;
     uint32_t m_Port;
 
+    // Release a given handle
+    void ReleaseHandle(uint32_t* handle) const
+    {
+        uint32_t error = AdsSyncWriteReqEx(
+            m_Port,
+            &address,
+            ADSIGRP_SYM_RELEASEHND, 0,
+            sizeof(*handle), handle
+            );
+
+        if (error) {
+            throw AdsException(error);
+        }
+    }
+
+    using AdsHandle =
+              std::unique_ptr<uint32_t,
+                              decltype(std::bind(& AdsClient::ReleaseHandle, (const AdsClient*)0,
+                                                 std::placeholders::_1))>;
+
     // Get the handle for a given symbol name
-    const uint32_t GetHandle(
-        const char* const symbolName) const
+    AdsHandle GetHandle(
+        const std::string& symbolName) const
     {
         uint32_t handle = 0;
         uint32_t bytesRead = 0;
@@ -253,31 +269,15 @@ private:
             &address,
             ADSIGRP_SYM_HNDBYNAME, 0,
             sizeof(handle), &handle,
-            strlen(symbolName),
-            (void*)symbolName,
+            symbolName.size(),
+            symbolName.c_str(),
             &bytesRead
             );
 
         if (error || (sizeof(handle) != bytesRead)) {
             throw AdsException(error);
         }
-        return handle;
-    }
-
-    // Release a given handle
-    void ReleaseHandle(
-        const uint32_t handle) const
-    {
-        uint32_t error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_RELEASEHND, 0,
-            sizeof(handle), &handle
-            );
-
-        if (error) {
-            throw AdsException(error);
-        }
+        return AdsHandle {new uint32_t {handle}, std::bind(&AdsClient::ReleaseHandle, this, std::placeholders::_1)};
     }
 };
 
