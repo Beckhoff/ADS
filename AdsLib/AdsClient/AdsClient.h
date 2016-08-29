@@ -17,6 +17,7 @@
 #if (__cplusplus > 199711L || _MSC_VER >= 1700) // Check for c++11 support
 #include <memory>
 #include <cstring>
+#include <utility>
 #include "..\AdsLib.h"
 #include "AdsException.h"
 #include "AdsReadResponse.h"
@@ -255,7 +256,7 @@ private:
 
     using AdsHandle =
               std::unique_ptr<uint32_t,
-                              decltype(std::bind(& AdsClient::ReleaseHandle, (const AdsClient*)0,
+                              decltype(std::bind(& AdsClient::ReleaseHandle, std::declval<const AdsClient*>(),
                                                  std::placeholders::_1))>;
 
     // Get the handle for a given symbol name
