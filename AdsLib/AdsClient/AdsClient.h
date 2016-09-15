@@ -24,7 +24,7 @@
 #include "AdsReadArrayResponse.h"
 
 class AdsHandle {
-    static void ReleaseHandle(const AmsAddr address, uint32_t port, uint32_t* handle)
+    static void ReleaseHandle(const AmsAddr address, long port, uint32_t* handle)
     {
         uint32_t error = AdsSyncWriteReqEx(
             port,
@@ -41,10 +41,10 @@ class AdsHandle {
     using AdsHandleGuard =
               std::unique_ptr<uint32_t,
                               decltype(std::bind(& ReleaseHandle, std::declval<const AmsAddr>(),
-                                                 std::declval<uint32_t>(), std::placeholders::_1))>;
+                                                 std::declval<long>(), std::placeholders::_1))>;
 
-    AdsHandleGuard GetHandle(const AmsAddr address, uint32_t port,
-                             const std::string& symbolName) const
+    static AdsHandleGuard GetHandle(const AmsAddr address, long port,
+                                    const std::string& symbolName)
     {
         uint32_t handle = 0;
         uint32_t bytesRead = 0;
@@ -66,15 +66,60 @@ class AdsHandle {
 
     AdsHandleGuard m_Handle;
 public:
-    AdsHandle(const AmsAddr address, uint32_t port,
+    AdsHandle(const AmsAddr address, long port,
               const std::string& symbolName)
         : m_Handle{GetHandle(address, port, symbolName)}
     {}
 
-    operator uint32_t()
+    operator uint32_t() const
     {
         return *m_Handle;
     }
+};
+
+template<typename T>
+struct AdsVariable {
+    AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
+        : m_RemoteAddr(address),
+        m_LocalPort(localPort),
+        m_Handle(address, localPort, symbolName)
+    {}
+
+    operator T() const
+    {
+        T buffer;
+        uint32_t bytesRead = 0;
+        auto error = AdsSyncReadReqEx2(m_LocalPort,
+                                       &m_RemoteAddr,
+                                       ADSIGRP_SYM_VALBYHND,
+                                       m_Handle,
+                                       sizeof(buffer),
+                                       &buffer,
+                                       &bytesRead);
+
+        if (error || (sizeof(buffer) != bytesRead)) {
+            throw AdsException(error);
+        }
+        return buffer;
+    }
+
+    void operator=(const T& value) const
+    {
+        auto error = AdsSyncWriteReqEx(m_LocalPort,
+                                       &m_RemoteAddr,
+                                       ADSIGRP_SYM_VALBYHND,
+                                       m_Handle,
+                                       sizeof(T),
+                                       &value);
+
+        if (error) {
+            throw AdsException(error);
+        }
+    }
+private:
+    const AmsAddr m_RemoteAddr;
+    const long m_LocalPort;
+    const AdsHandle m_Handle;
 };
 
 class AdsClient {

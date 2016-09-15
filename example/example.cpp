@@ -224,10 +224,12 @@ void runAdsClientExample(std::ostream& out)
         adsClient.AddRoute(remoteNetId, remoteIpV4);
 
         // Write and read values
-        uint8_t valueToWrite = 0x99;
-        adsClient.Write<uint8_t>("MAIN.byByte[0]", valueToWrite);
-        auto readValue = adsClient.Read<uint8_t>("MAIN.byByte");
-        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)readValue << " back\n";
+        {
+            uint8_t valueToWrite = 0x99;
+            AdsVariable<uint8_t> var1 {remoteNetAddress, "MAIN.byByte[0]", AdsPortOpenEx()};
+            var1 = valueToWrite;
+            out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)var1 << " back\n";
+        }
 
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
