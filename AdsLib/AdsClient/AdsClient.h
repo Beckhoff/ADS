@@ -167,32 +167,29 @@ private:
     const AdsHandle m_Handle;
 };
 
-class AdsClient {
-public:
-    AdsClient(const AmsAddr amsAddr)
+struct AdsClient {
+    AdsClient(const AmsAddr amsAddr, const std::string& ip)
         : address(amsAddr)
     {
+        auto error = AdsAddRoute(amsAddr.netId, ip.c_str());
+        if (error) {
+            throw AdsException(error);
+        }
+
         m_Port = AdsPortOpenEx();
         if (0 == m_Port) {
             throw AdsException(ADSERR_CLIENT_PORTNOTOPEN);
         }
     }
+    AdsClient(const AdsClient&) = delete;
+    AdsClient(AdsClient&&) = delete;
+    AdsClient& operator=(const AdsClient&)& = delete;
+    AdsClient& operator=(AdsClient&&)& = delete;
 
     ~AdsClient()
     {
         AdsPortCloseEx(m_Port);
-    }
-
-    // Routing
-    static void AddRoute(const AmsNetId amsNetId, const std::string& ip)
-    {
-        auto error = AdsAddRoute(amsNetId, ip.c_str());
-        if (error) {throw AdsException(error); }
-    }
-
-    static void DeleteRoute(const AmsNetId amsNetId)
-    {
-        AdsDelRoute(amsNetId);
+        AdsDelRoute(address.netId);
     }
 
     const AmsAddr GetLocalAddress() const

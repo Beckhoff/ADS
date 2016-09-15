@@ -218,10 +218,7 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsClient adsClient {remoteNetAddress};
-
-        // Add routes
-        adsClient.AddRoute(remoteNetId, remoteIpV4);
+        AdsClient adsClient {remoteNetAddress, remoteIpV4};
 
         // Write and read values
         uint8_t valueToWrite = 0x99;
@@ -244,9 +241,6 @@ void runAdsClientExample(std::ostream& out)
         out << "Read device info from device " << deviceInfo.name << ". Version is " <<
         (uint32_t)deviceInfo.version.version << "." << (uint32_t)deviceInfo.version.revision << "." <<
         (uint32_t)deviceInfo.version.build << "\n";
-
-        // Delete routes
-        //adsClient.DeleteRoute(remoteNetId);
     } catch (const AdsException& ex) {
         auto errorCode = ex.getErrorCode();
         out << "Error: " << errorCode << "\n";
@@ -256,6 +250,6 @@ void runAdsClientExample(std::ostream& out)
 
 int main()
 {
-    runExample(std::cout);
+//    runExample(std::cout);
     runAdsClientExample(std::cout);
 }
