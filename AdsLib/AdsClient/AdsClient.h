@@ -119,7 +119,7 @@ struct AdsVariable {
 private:
     const AmsAddr m_RemoteAddr;
     const long m_LocalPort;
-    const AdsHandle m_Handle;
+    AdsHandle m_Handle;
 };
 
 template<typename T, size_t N>
@@ -164,7 +164,7 @@ struct AdsVariable<std::array<T, N> > {
 private:
     const AmsAddr m_RemoteAddr;
     const long m_LocalPort;
-    const AdsHandle m_Handle;
+    AdsHandle m_Handle;
 };
 
 struct AdsClient {
@@ -212,6 +212,12 @@ struct AdsClient {
     {
         uint32_t error = AdsSyncSetTimeoutEx(m_Port, timeout);
         if (error) {throw AdsException(error); }
+    }
+
+    template<typename T>
+    AdsVariable<T> GetAdsVariable(const std::string& symbolName)
+    {
+        return AdsVariable<T>(address, symbolName, m_Port);
     }
 
     // Device info

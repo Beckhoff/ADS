@@ -222,13 +222,13 @@ void runAdsClientExample(std::ostream& out)
 
         // Write and read values
         uint8_t valueToWrite = 0x99;
-        AdsVariable<uint8_t> simpleVar {remoteNetAddress, "MAIN.byByte[0]", AdsPortOpenEx()};
+        auto simpleVar = adsClient.GetAdsVariable<uint8_t>("MAIN.byByte[0]");
         simpleVar = valueToWrite;
-        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVar << "back\n";
+        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVar << " back\n";
 
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
-        AdsVariable<std::array<uint8_t, 4> > arrayVar {remoteNetAddress, "MAIN.byByte", AdsPortOpenEx()};
+        auto arrayVar = adsClient.GetAdsVariable<std::array<uint8_t, 4> >("MAIN.byByte");
         arrayVar = arrayToWrite;
         std::array<uint8_t, 4> readArray = arrayVar;
         out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
