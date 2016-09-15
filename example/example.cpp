@@ -226,6 +226,12 @@ void runAdsClientExample(std::ostream& out)
         simpleVar = valueToWrite;
         out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVar << " back\n";
 
+        // Write and read values by index group/offset
+        auto simpleVarIndex = adsClient.GetAdsVariable<uint8_t>(0x4020, 0);
+        simpleVarIndex = valueToWrite;
+        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVarIndex <<
+            " back\n";
+
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
         auto arrayVar = adsClient.GetAdsVariable<std::array<uint8_t, 4> >("MAIN.byByte");
@@ -235,6 +241,15 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)arrayToWrite[3] << "\n";
         out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
         (uint32_t)readArray[3] << "\n";
+
+        // Write and read arrays by index group/offset
+        auto arrayVarIndex = adsClient.GetAdsVariable<std::array<uint8_t, 4> >(0x4020, 0);
+        arrayVarIndex = arrayToWrite;
+        std::array<uint8_t, 4> readArrayIndex = arrayVarIndex;
+        out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
+        (uint32_t)arrayToWrite[3] << "\n";
+        out << "Read back array with first value " << (uint32_t)readArrayIndex[0] << " and last value " <<
+        (uint32_t)readArrayIndex[3] << "\n";
 
         // Read device info
         auto deviceInfo = adsClient.ReadDeviceInfo();

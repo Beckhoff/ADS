@@ -24,6 +24,7 @@
 #include "AdsReadArrayResponse.h"
 
 class AdsHandle {
+    static void ReleaseHandleDummy(const AmsAddr address, long port, uint32_t* handle) {}
     static void ReleaseHandle(const AmsAddr address, long port, uint32_t* handle)
     {
         uint32_t error = AdsSyncWriteReqEx(
@@ -47,6 +48,7 @@ class AdsHandle {
                                     const std::string& symbolName)
     {
         uint32_t handle = 0;
+
         uint32_t bytesRead = 0;
         uint32_t error = AdsSyncReadWriteReqEx2(
             port,
@@ -66,6 +68,10 @@ class AdsHandle {
 
     AdsHandleGuard m_Handle;
 public:
+    AdsHandle(uint32_t offset)
+        : m_Handle{new uint32_t {offset}, std::bind(&ReleaseHandleDummy, AmsAddr {}, 0L, std::placeholders::_1)}
+    {}
+
     AdsHandle(const AmsAddr address, long port,
               const std::string& symbolName)
         : m_Handle{GetHandle(address, port, symbolName)}
@@ -82,7 +88,15 @@ struct AdsVariable {
     AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
         : m_RemoteAddr(address),
         m_LocalPort(localPort),
+        m_IndexGroup(ADSIGRP_SYM_VALBYHND),
         m_Handle(address, localPort, symbolName)
+    {}
+
+    AdsVariable(const AmsAddr address, const uint32_t group, const uint32_t offset, const long localPort)
+        : m_RemoteAddr(address),
+        m_LocalPort(localPort),
+        m_IndexGroup(group),
+        m_Handle(offset)
     {}
 
     operator T() const
@@ -91,7 +105,7 @@ struct AdsVariable {
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(m_LocalPort,
                                        &m_RemoteAddr,
-                                       ADSIGRP_SYM_VALBYHND,
+                                       m_IndexGroup,
                                        m_Handle,
                                        sizeof(buffer),
                                        &buffer,
@@ -107,7 +121,7 @@ struct AdsVariable {
     {
         auto error = AdsSyncWriteReqEx(m_LocalPort,
                                        &m_RemoteAddr,
-                                       ADSIGRP_SYM_VALBYHND,
+                                       m_IndexGroup,
                                        m_Handle,
                                        sizeof(T),
                                        &value);
@@ -119,6 +133,7 @@ struct AdsVariable {
 private:
     const AmsAddr m_RemoteAddr;
     const long m_LocalPort;
+    const uint32_t m_IndexGroup;
     AdsHandle m_Handle;
 };
 
@@ -127,7 +142,15 @@ struct AdsVariable<std::array<T, N> > {
     AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
         : m_RemoteAddr(address),
         m_LocalPort(localPort),
+        m_IndexGroup(ADSIGRP_SYM_VALBYHND),
         m_Handle(address, localPort, symbolName)
+    {}
+
+    AdsVariable(const AmsAddr address, const uint32_t group, const uint32_t offset, const long localPort)
+        : m_RemoteAddr(address),
+        m_LocalPort(localPort),
+        m_IndexGroup(group),
+        m_Handle(offset)
     {}
 
     operator std::array<T, N>() const
@@ -136,7 +159,7 @@ struct AdsVariable<std::array<T, N> > {
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(m_LocalPort,
                                        &m_RemoteAddr,
-                                       ADSIGRP_SYM_VALBYHND,
+                                       m_IndexGroup,
                                        m_Handle,
                                        sizeof(T) * N,
                                        buffer.data(),
@@ -152,7 +175,7 @@ struct AdsVariable<std::array<T, N> > {
     {
         auto error = AdsSyncWriteReqEx(m_LocalPort,
                                        &m_RemoteAddr,
-                                       ADSIGRP_SYM_VALBYHND,
+                                       m_IndexGroup,
                                        m_Handle,
                                        sizeof(T) * N,
                                        value.data());
@@ -164,6 +187,7 @@ struct AdsVariable<std::array<T, N> > {
 private:
     const AmsAddr m_RemoteAddr;
     const long m_LocalPort;
+    const uint32_t m_IndexGroup;
     AdsHandle m_Handle;
 };
 
@@ -218,6 +242,12 @@ struct AdsClient {
     AdsVariable<T> GetAdsVariable(const std::string& symbolName)
     {
         return AdsVariable<T>(address, symbolName, m_Port);
+    }
+
+    template<typename T>
+    AdsVariable<T> GetAdsVariable(const uint32_t group, const uint32_t offset)
+    {
+        return AdsVariable<T>(address, group, offset, m_Port);
     }
 
     // Device info
