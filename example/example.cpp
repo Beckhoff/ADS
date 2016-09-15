@@ -224,17 +224,16 @@ void runAdsClientExample(std::ostream& out)
         adsClient.AddRoute(remoteNetId, remoteIpV4);
 
         // Write and read values
-        {
-            uint8_t valueToWrite = 0x99;
-            AdsVariable<uint8_t> var1 {remoteNetAddress, "MAIN.byByte[0]", AdsPortOpenEx()};
-            var1 = valueToWrite;
-            out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)var1 << " back\n";
-        }
+        uint8_t valueToWrite = 0x99;
+        AdsVariable<uint8_t> simpleVar {remoteNetAddress, "MAIN.byByte[0]", AdsPortOpenEx()};
+        simpleVar = valueToWrite;
+        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVar << "back\n";
 
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
-        adsClient.WriteArray<uint8_t, arrayToWrite.size()>("MAIN.byByte", &arrayToWrite[0]);
-        auto readArray = adsClient.ReadArray<uint8_t, arrayToWrite.size()>("MAIN.byByte");
+        AdsVariable<std::array<uint8_t, 4> > arrayVar {remoteNetAddress, "MAIN.byByte", AdsPortOpenEx()};
+        arrayVar = arrayToWrite;
+        std::array<uint8_t, 4> readArray = arrayVar;
         out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
         (uint32_t)arrayToWrite[3] << "\n";
         out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
@@ -247,7 +246,7 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)deviceInfo.version.build << "\n";
 
         // Delete routes
-        adsClient.DeleteRoute(remoteNetId);
+        //adsClient.DeleteRoute(remoteNetId);
     } catch (const AdsException& ex) {
         auto errorCode = ex.getErrorCode();
         out << "Error: " << errorCode << "\n";

@@ -122,6 +122,51 @@ private:
     const AdsHandle m_Handle;
 };
 
+template<typename T, size_t N>
+struct AdsVariable<std::array<T, N> > {
+    AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
+        : m_RemoteAddr(address),
+        m_LocalPort(localPort),
+        m_Handle(address, localPort, symbolName)
+    {}
+
+    operator std::array<T, N>() const
+    {
+        std::array<T, N> buffer;
+        uint32_t bytesRead = 0;
+        auto error = AdsSyncReadReqEx2(m_LocalPort,
+                                       &m_RemoteAddr,
+                                       ADSIGRP_SYM_VALBYHND,
+                                       m_Handle,
+                                       sizeof(T) * N,
+                                       buffer.data(),
+                                       &bytesRead);
+
+        if (error || (sizeof(T) * N != bytesRead)) {
+            throw AdsException(error);
+        }
+        return buffer;
+    }
+
+    void operator=(const std::array<T, N>& value) const
+    {
+        auto error = AdsSyncWriteReqEx(m_LocalPort,
+                                       &m_RemoteAddr,
+                                       ADSIGRP_SYM_VALBYHND,
+                                       m_Handle,
+                                       sizeof(T) * N,
+                                       value.data());
+
+        if (error) {
+            throw AdsException(error);
+        }
+    }
+private:
+    const AmsAddr m_RemoteAddr;
+    const long m_LocalPort;
+    const AdsHandle m_Handle;
+};
+
 class AdsClient {
 public:
     AdsClient(const AmsAddr amsAddr)
