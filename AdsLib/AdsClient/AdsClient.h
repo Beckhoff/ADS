@@ -98,70 +98,60 @@ struct AdsVariable {
         m_Handle(offset)
     {}
 
-    operator T() const
+    void Read(const size_t size, void* data) const
     {
-        T buffer;
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(m_LocalPort,
                                        &m_RemoteAddr,
                                        m_IndexGroup,
                                        m_Handle,
-                                       sizeof(buffer),
-                                       &buffer,
+                                       size,
+                                       data,
                                        &bytesRead);
 
-        if (error || (sizeof(buffer) != bytesRead)) {
+        if (error || (size != bytesRead)) {
             throw AdsException(error);
         }
-        return buffer;
     }
 
-    void operator=(const T& value) const
+    void Write(const size_t size, const void* data) const
     {
         auto error = AdsSyncWriteReqEx(m_LocalPort,
                                        &m_RemoteAddr,
                                        m_IndexGroup,
                                        m_Handle,
-                                       sizeof(T),
-                                       &value);
+                                       size,
+                                       data);
 
         if (error) {
             throw AdsException(error);
         }
+    }
+
+    operator T() const
+    {
+        T buffer;
+        Read(sizeof(buffer), &buffer);
+        return buffer;
+    }
+
+    void operator=(const T& value) const
+    {
+        Write(sizeof(T), &value);
     }
 
     template<typename U, size_t N>
     operator std::array<U, N>() const
     {
         std::array<U, N> buffer;
-        uint32_t bytesRead = 0;
-        auto error = AdsSyncReadReqEx2(m_LocalPort,
-                                       &m_RemoteAddr,
-                                       m_IndexGroup,
-                                       m_Handle,
-                                       sizeof(U) * N,
-                                       buffer.data(),
-                                       &bytesRead);
-
-        if (error || (sizeof(U) * N != bytesRead)) {
-            throw AdsException(error);
-        }
+        Read(sizeof(U) * N, buffer.data());
         return buffer;
     }
 
     template<typename U, size_t N>
     void operator=(const std::array<U, N>& value) const
     {
-        auto error = AdsSyncWriteReqEx(m_LocalPort,
-                                       &m_RemoteAddr,
-                                       m_IndexGroup,
-                                       m_Handle,
-                                       sizeof(U) * N,
-                                       value.data());
-
-        if (error) {
-            throw AdsException(error);
-        }
+        Write(sizeof(U) * N, value.data());
     }
 private:
     const AmsAddr m_RemoteAddr;
