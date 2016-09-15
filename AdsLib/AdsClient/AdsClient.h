@@ -23,6 +23,60 @@
 #include "AdsReadResponse.h"
 #include "AdsReadArrayResponse.h"
 
+class AdsHandle {
+    static void ReleaseHandle(const AmsAddr address, uint32_t port, uint32_t* handle)
+    {
+        uint32_t error = AdsSyncWriteReqEx(
+            port,
+            &address,
+            ADSIGRP_SYM_RELEASEHND, 0,
+            sizeof(*handle), handle
+            );
+
+        if (error) {
+            throw AdsException(error);
+        }
+    }
+
+    using AdsHandleGuard =
+              std::unique_ptr<uint32_t,
+                              decltype(std::bind(& ReleaseHandle, std::declval<const AmsAddr>(),
+                                                 std::declval<uint32_t>(), std::placeholders::_1))>;
+
+    AdsHandleGuard GetHandle(const AmsAddr address, uint32_t port,
+                             const std::string& symbolName) const
+    {
+        uint32_t handle = 0;
+        uint32_t bytesRead = 0;
+        uint32_t error = AdsSyncReadWriteReqEx2(
+            port,
+            &address,
+            ADSIGRP_SYM_HNDBYNAME, 0,
+            sizeof(handle), &handle,
+            symbolName.size(),
+            symbolName.c_str(),
+            &bytesRead
+            );
+
+        if (error || (sizeof(handle) != bytesRead)) {
+            throw AdsException(error);
+        }
+        return AdsHandleGuard {new uint32_t {handle}, std::bind(&ReleaseHandle, address, port, std::placeholders::_1)};
+    }
+
+    AdsHandleGuard m_Handle;
+public:
+    AdsHandle(const AmsAddr address, uint32_t port,
+              const std::string& symbolName)
+        : m_Handle{GetHandle(address, port, symbolName)}
+    {}
+
+    operator uint32_t()
+    {
+        return *m_Handle;
+    }
+};
+
 class AdsClient {
 public:
     AdsClient(const AmsAddr amsAddr)
@@ -87,14 +141,14 @@ public:
     const AdsReadResponse<T> Read(
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(symbolName);
+        AdsHandle handle {address, m_Port, symbolName};
         AdsReadResponse<T> response;
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            *handle,
+            handle,
             sizeof(T),
             response.GetPointer(),
             &bytesRead);
@@ -130,7 +184,7 @@ public:
     const AdsReadArrayResponse<T, count> ReadArray(
         const std::string& symbolName) const
     {
-        auto handle = GetHandle(symbolName);
+        AdsHandle handle {address, m_Port, symbolName};
         AdsReadArrayResponse<T, count> response;
         uint32_t bytesRead = 0;
 
@@ -138,7 +192,7 @@ public:
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            *handle,
+            handle,
             sizeof(T) * count,
             response.GetPointer(),
             &bytesRead);
@@ -174,12 +228,12 @@ public:
         const std::string& symbolName,
         const T&           value)
     {
-        auto handle = GetHandle(symbolName);
+        AdsHandle handle {address, m_Port, symbolName};
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            *handle,
+            handle,
             sizeof(T) * count,
             &value);
         if (error) {throw AdsException(error); }
@@ -207,12 +261,12 @@ public:
         const std::string& symbolName,
         const T*           pValue)
     {
-        auto handle = GetHandle(symbolName);
+        AdsHandle handle {address, m_Port, symbolName};
         auto error = AdsSyncWriteReqEx(
             m_Port,
             &address,
             ADSIGRP_SYM_VALBYHND,
-            *handle,
+            handle,
             sizeof(T) * count,
             pValue);
         if (error) {throw AdsException(error); }
@@ -238,48 +292,6 @@ public:
 private:
     const AmsAddr address;
     uint32_t m_Port;
-
-    // Release a given handle
-    void ReleaseHandle(uint32_t* handle) const
-    {
-        uint32_t error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_RELEASEHND, 0,
-            sizeof(*handle), handle
-            );
-
-        if (error) {
-            throw AdsException(error);
-        }
-    }
-
-    using AdsHandle =
-              std::unique_ptr<uint32_t,
-                              decltype(std::bind(& AdsClient::ReleaseHandle, std::declval<const AdsClient*>(),
-                                                 std::placeholders::_1))>;
-
-    // Get the handle for a given symbol name
-    AdsHandle GetHandle(
-        const std::string& symbolName) const
-    {
-        uint32_t handle = 0;
-        uint32_t bytesRead = 0;
-        uint32_t error = AdsSyncReadWriteReqEx2(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_HNDBYNAME, 0,
-            sizeof(handle), &handle,
-            symbolName.size(),
-            symbolName.c_str(),
-            &bytesRead
-            );
-
-        if (error || (sizeof(handle) != bytesRead)) {
-            throw AdsException(error);
-        }
-        return AdsHandle {new uint32_t {handle}, std::bind(&AdsClient::ReleaseHandle, this, std::placeholders::_1)};
-    }
 };
 
 #endif
