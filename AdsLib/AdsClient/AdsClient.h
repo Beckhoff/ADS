@@ -129,54 +129,34 @@ struct AdsVariable {
             throw AdsException(error);
         }
     }
-private:
-    const AmsAddr m_RemoteAddr;
-    const long m_LocalPort;
-    const uint32_t m_IndexGroup;
-    AdsHandle m_Handle;
-};
 
-template<typename T, size_t N>
-struct AdsVariable<std::array<T, N> > {
-    AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
-        : m_RemoteAddr(address),
-        m_LocalPort(localPort),
-        m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(address, localPort, symbolName)
-    {}
-
-    AdsVariable(const AmsAddr address, const uint32_t group, const uint32_t offset, const long localPort)
-        : m_RemoteAddr(address),
-        m_LocalPort(localPort),
-        m_IndexGroup(group),
-        m_Handle(offset)
-    {}
-
-    operator std::array<T, N>() const
+    template<typename U, size_t N>
+    operator std::array<U, N>() const
     {
-        std::array<T, N> buffer;
+        std::array<U, N> buffer;
         uint32_t bytesRead = 0;
         auto error = AdsSyncReadReqEx2(m_LocalPort,
                                        &m_RemoteAddr,
                                        m_IndexGroup,
                                        m_Handle,
-                                       sizeof(T) * N,
+                                       sizeof(U) * N,
                                        buffer.data(),
                                        &bytesRead);
 
-        if (error || (sizeof(T) * N != bytesRead)) {
+        if (error || (sizeof(U) * N != bytesRead)) {
             throw AdsException(error);
         }
         return buffer;
     }
 
-    void operator=(const std::array<T, N>& value) const
+    template<typename U, size_t N>
+    void operator=(const std::array<U, N>& value) const
     {
         auto error = AdsSyncWriteReqEx(m_LocalPort,
                                        &m_RemoteAddr,
                                        m_IndexGroup,
                                        m_Handle,
-                                       sizeof(T) * N,
+                                       sizeof(U) * N,
                                        value.data());
 
         if (error) {
