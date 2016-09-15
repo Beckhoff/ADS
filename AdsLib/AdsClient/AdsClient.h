@@ -223,27 +223,6 @@ struct AdsClient {
         return deviceInfo;
     }
 
-    // Read variables by symbolic name
-    template<typename T>
-    const AdsReadResponse<T> Read(
-        const std::string& symbolName) const
-    {
-        AdsHandle handle {address, m_Port, symbolName};
-        AdsReadResponse<T> response;
-        uint32_t bytesRead = 0;
-        auto error = AdsSyncReadReqEx2(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_VALBYHND,
-            handle,
-            sizeof(T),
-            response.GetPointer(),
-            &bytesRead);
-        if (error) {throw AdsException(error); }
-        response.SetBytesRead(bytesRead);
-        return response;
-    }
-
     // Read variables by index group and index offset
     template<typename T>
     const AdsReadResponse<T> Read(
@@ -259,28 +238,6 @@ struct AdsClient {
             indexGroup,
             indexOffset,
             sizeof(T),
-            response.GetPointer(),
-            &bytesRead);
-        if (error) {throw AdsException(error); }
-        response.SetBytesRead(bytesRead);
-        return response;
-    }
-
-    // Read arrays by symbolic name
-    template<typename T, uint32_t count = 1>
-    const AdsReadArrayResponse<T, count> ReadArray(
-        const std::string& symbolName) const
-    {
-        AdsHandle handle {address, m_Port, symbolName};
-        AdsReadArrayResponse<T, count> response;
-        uint32_t bytesRead = 0;
-
-        auto error = AdsSyncReadReqEx2(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_VALBYHND,
-            handle,
-            sizeof(T) * count,
             response.GetPointer(),
             &bytesRead);
         if (error) {throw AdsException(error); }
@@ -310,22 +267,6 @@ struct AdsClient {
         return response;
     }
 
-    // Write variable by symbolic name
-    template<typename T, uint32_t count = 1> void Write(
-        const std::string& symbolName,
-        const T&           value)
-    {
-        AdsHandle handle {address, m_Port, symbolName};
-        auto error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_VALBYHND,
-            handle,
-            sizeof(T) * count,
-            &value);
-        if (error) {throw AdsException(error); }
-    }
-
     // Write variable by index group and index offset
     template<typename T, uint32_t count = 1> void Write(
         const uint32_t indexGroup,
@@ -340,22 +281,6 @@ struct AdsClient {
             sizeof(T) * count,
             &value
             );
-        if (error) {throw AdsException(error); }
-    }
-
-    // Write array by symbolic name
-    template<typename T, uint32_t count = 1> void WriteArray(
-        const std::string& symbolName,
-        const T*           pValue)
-    {
-        AdsHandle handle {address, m_Port, symbolName};
-        auto error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            ADSIGRP_SYM_VALBYHND,
-            handle,
-            sizeof(T) * count,
-            pValue);
         if (error) {throw AdsException(error); }
     }
 
