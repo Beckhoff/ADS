@@ -48,7 +48,6 @@ class AdsHandle {
                                     const std::string& symbolName)
     {
         uint32_t handle = 0;
-
         uint32_t bytesRead = 0;
         uint32_t error = AdsSyncReadWriteReqEx2(
             port,
@@ -257,84 +256,6 @@ struct AdsClient {
         auto error = AdsSyncReadDeviceInfoReqEx(m_Port, &address, deviceInfo.name, &deviceInfo.version);
         if (error) {throw AdsException(error); }
         return deviceInfo;
-    }
-
-    // Read variables by index group and index offset
-    template<typename T>
-    const AdsReadResponse<T> Read(
-        const uint32_t indexGroup,
-        const uint32_t indexOffset) const
-    {
-        AdsReadResponse<T> response;
-        uint32_t bytesRead = 0;
-
-        auto error = AdsSyncReadReqEx2(
-            m_Port,
-            &address,
-            indexGroup,
-            indexOffset,
-            sizeof(T),
-            response.GetPointer(),
-            &bytesRead);
-        if (error) {throw AdsException(error); }
-        response.SetBytesRead(bytesRead);
-        return response;
-    }
-
-    // Read arrays by index group and index offset
-    template<typename T, uint32_t count = 1>
-    const AdsReadArrayResponse<T, count> ReadArray(
-        const uint32_t indexGroup,
-        const uint32_t indexOffset) const
-    {
-        AdsReadArrayResponse<T, count> response;
-        uint32_t bytesRead = 0;
-
-        auto error = AdsSyncReadReqEx2(
-            m_Port,
-            &address,
-            indexGroup,
-            indexOffset,
-            sizeof(T) * count,
-            response.GetPointer(),
-            &bytesRead);
-        if (error) {throw AdsException(error); }
-        response.SetBytesRead(bytesRead);
-        return response;
-    }
-
-    // Write variable by index group and index offset
-    template<typename T, uint32_t count = 1> void Write(
-        const uint32_t indexGroup,
-        const uint32_t indexOffset,
-        const T&       value)
-    {
-        auto error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            indexGroup,
-            indexOffset,
-            sizeof(T) * count,
-            &value
-            );
-        if (error) {throw AdsException(error); }
-    }
-
-    // Write array by index group and index offset
-    template<typename T, uint32_t count = 1> void WriteArray(
-        const uint32_t indexGroup,
-        const uint32_t indexOffset,
-        const T*       pValue)
-    {
-        auto error = AdsSyncWriteReqEx(
-            m_Port,
-            &address,
-            indexGroup,
-            indexOffset,
-            sizeof(T) * count,
-            pValue
-            );
-        if (error) {throw AdsException(error); }
     }
 
 private:
