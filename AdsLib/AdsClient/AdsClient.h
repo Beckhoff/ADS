@@ -4,11 +4,10 @@
    Example usage:
    try
    {
-   AdsClient client;
-   auto readUIntResponse = client.Read<uint32_t>(...);
-   auto readUIntArrayResponse = client.Read<uint32_t, 10>(...);
-   client.Write<uint32_t>(...);
-   client.WriteArray<uint32_t, 10>(...);
+     AdsClient client;
+     auto adsVar = client.GetAdsVariable<uint32_t>(...);
+     adsVar = 1; // Writes a variable
+     uint32_t currentValue = adsVar; // Reads the value of the variable
    }
    catch (AdsException& ex){};
  */
@@ -20,8 +19,6 @@
 #include <utility>
 #include "..\AdsLib.h"
 #include "AdsException.h"
-#include "AdsReadResponse.h"
-#include "AdsReadArrayResponse.h"
 
 class AdsHandle {
     static void ReleaseHandleDummy(const AmsAddr address, long port, uint32_t* handle) {}
