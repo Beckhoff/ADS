@@ -218,7 +218,8 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsClient adsClient {remoteNetAddress, remoteIpV4};
+        AdsRoute {remoteNetId, remoteIpV4};
+        AdsClient adsClient {remoteNetAddress};
 
         // Write and read values
         uint8_t valueToWrite = 0x99;

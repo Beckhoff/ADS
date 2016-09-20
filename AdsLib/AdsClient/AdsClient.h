@@ -42,24 +42,40 @@ private:
     std::unique_ptr<long, decltype(& PortClose)> port;
 };
 
-struct AdsClient {
-    AdsClient(const AmsAddr amsAddr, const std::string& ip)
-        : address(amsAddr)
+class AdsRoute {
+    static void DelRoute(AmsNetId* netId)
     {
-        auto error = AdsAddRoute(amsAddr.netId, ip.c_str());
+        AdsPortCloseEx(*netId);
+    }
+
+    using RouteGuard = std::unique_ptr<AmsNetId, decltype(& DelRoute)>;
+
+    static RouteGuard MakeRoute(const AmsNetId remoteNetId, const std::string& ip)
+    {
+        auto error = AdsAddRoute(remoteNetId, ip.c_str());
         if (error) {
             throw AdsException(error);
         }
+        return RouteGuard {new AmsNetId {remoteNetId}, &DelRoute};
     }
-    AdsClient(const AdsClient&) = delete;
-    AdsClient(AdsClient&&) = delete;
-    AdsClient& operator=(const AdsClient&)& = delete;
-    AdsClient& operator=(AdsClient&&)& = delete;
 
-    ~AdsClient()
+    std::unique_ptr<AmsNetId, decltype(& DelRoute)> netId;
+
+public:
+    AdsRoute(const AmsNetId remoteNetId, const std::string& ip)
+        : netId(MakeRoute(remoteNetId, ip))
+    {}
+
+    operator AmsNetId() const
     {
-        AdsDelRoute(address.netId);
+        return *netId;
     }
+};
+
+struct AdsClient {
+    AdsClient(const AmsAddr amsAddr)
+        : address(amsAddr)
+    {}
 
     const AmsAddr GetLocalAddress() const
     {
