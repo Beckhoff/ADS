@@ -4,14 +4,14 @@
 
 template<typename T>
 struct AdsVariable {
-    AdsVariable(const AmsAddr address, const std::string& symbolName, const long localPort)
+    AdsVariable(const AmsAddr address, const long localPort, const std::string& symbolName)
         : m_RemoteAddr(address),
         m_LocalPort(localPort),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
         m_Handle(address, localPort, symbolName)
     {}
 
-    AdsVariable(const AmsAddr address, const uint32_t group, const uint32_t offset, const long localPort)
+    AdsVariable(const AmsAddr address, const long localPort, const uint32_t group, const uint32_t offset)
         : m_RemoteAddr(address),
         m_LocalPort(localPort),
         m_IndexGroup(group),

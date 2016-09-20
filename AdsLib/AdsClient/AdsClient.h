@@ -38,6 +38,19 @@ struct AdsLocalPort {
     {
         return *port;
     }
+
+    const uint32_t Timeout() const
+    {
+        uint32_t timeout = 0;
+        auto error = AdsSyncGetTimeoutEx(*port, &timeout);
+        if (error) {throw AdsException(error); }
+        return timeout;
+    }
+    void Timeout(const uint32_t timeout) const
+    {
+        auto error = AdsSyncSetTimeoutEx(*port, timeout);
+        if (error) {throw AdsException(error); }
+    }
 private:
     std::unique_ptr<long, decltype(& PortClose)> port;
 };
@@ -72,8 +85,8 @@ public:
     }
 };
 
-struct AdsClient {
-    AdsClient(const AmsAddr amsAddr)
+struct AdsDevice {
+    AdsDevice(const AmsAddr amsAddr)
         : address(amsAddr)
     {}
 
@@ -85,34 +98,8 @@ struct AdsClient {
         return address;
     }
 
-    // Timeout
-    const uint32_t GetTimeout() const
-    {
-        uint32_t timeout = 0;
-        uint32_t error = AdsSyncGetTimeoutEx(m_Port, &timeout);
-        if (error) {throw AdsException(error); }
-        return timeout;
-    }
-    void SetTimeout(const uint32_t timeout) const
-    {
-        uint32_t error = AdsSyncSetTimeoutEx(m_Port, timeout);
-        if (error) {throw AdsException(error); }
-    }
-
-    template<typename T>
-    AdsVariable<T> GetAdsVariable(const std::string& symbolName)
-    {
-        return AdsVariable<T>(address, symbolName, m_Port);
-    }
-
-    template<typename T>
-    AdsVariable<T> GetAdsVariable(const uint32_t group, const uint32_t offset)
-    {
-        return AdsVariable<T>(address, group, offset, m_Port);
-    }
-
     // Device info
-    const DeviceInfo ReadDeviceInfo() const
+    const DeviceInfo Info() const
     {
         DeviceInfo deviceInfo;
         auto error = AdsSyncReadDeviceInfoReqEx(m_Port, &address, deviceInfo.name, &deviceInfo.version);
