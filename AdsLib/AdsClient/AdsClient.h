@@ -20,6 +20,28 @@
 #include "AdsVariable.h"
 #include "AdsException.h"
 
+struct AdsLocalPort {
+    static void PortClose(long* port)
+    {
+        AdsPortCloseEx(*port);
+    }
+
+    AdsLocalPort()
+        : port(new long {AdsPortOpenEx()}, &PortClose)
+    {
+        if (!*port) {
+            throw AdsException(ADSERR_CLIENT_PORTNOTOPEN);
+        }
+    }
+
+    operator long() const
+    {
+        return *port;
+    }
+private:
+    std::unique_ptr<long, decltype(& PortClose)> port;
+};
+
 struct AdsClient {
     AdsClient(const AmsAddr amsAddr, const std::string& ip)
         : address(amsAddr)
@@ -27,11 +49,6 @@ struct AdsClient {
         auto error = AdsAddRoute(amsAddr.netId, ip.c_str());
         if (error) {
             throw AdsException(error);
-        }
-
-        m_Port = AdsPortOpenEx();
-        if (0 == m_Port) {
-            throw AdsException(ADSERR_CLIENT_PORTNOTOPEN);
         }
     }
     AdsClient(const AdsClient&) = delete;
@@ -41,7 +58,6 @@ struct AdsClient {
 
     ~AdsClient()
     {
-        AdsPortCloseEx(m_Port);
         AdsDelRoute(address.netId);
     }
 
@@ -90,7 +106,7 @@ struct AdsClient {
 
 private:
     const AmsAddr address;
-    uint32_t m_Port;
+    AdsLocalPort m_Port;
 };
 
 #endif
