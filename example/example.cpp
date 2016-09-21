@@ -2,6 +2,7 @@
 #include "AdsLib.h"
 
 #include <iostream>
+#include <array>
 
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
@@ -218,23 +219,24 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsClient adsClient {remoteNetAddress, remoteIpV4};
+        AdsRoute {remoteNetId, remoteIpV4};
+        AdsLocalPort port;
 
         // Write and read values
         uint8_t valueToWrite = 0x99;
-        auto simpleVar = adsClient.GetAdsVariable<uint8_t>("MAIN.byByte[0]");
+        AdsVariable<uint8_t> simpleVar {remoteNetAddress, port, "MAIN.byByte[0]"};
         simpleVar = valueToWrite;
         out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVar << " back\n";
 
         // Write and read values by index group/offset
-        auto simpleVarIndex = adsClient.GetAdsVariable<uint8_t>(0x4020, 0);
+        AdsVariable<uint8_t> simpleVarIndex {remoteNetAddress, port, 0x4020, 0};
         simpleVarIndex = valueToWrite;
         out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)simpleVarIndex <<
             " back\n";
 
         // Write and read arrays
         std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
-        auto arrayVar = adsClient.GetAdsVariable<std::array<uint8_t, 4> >("MAIN.byByte");
+        AdsVariable<std::array<uint8_t, 4> > arrayVar {remoteNetAddress, port, "MAIN.byByte"};
         arrayVar = arrayToWrite;
         std::array<uint8_t, 4> readArray = arrayVar;
         out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
@@ -243,7 +245,7 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)readArray[3] << "\n";
 
         // Write and read arrays by index group/offset
-        auto arrayVarIndex = adsClient.GetAdsVariable<std::array<uint8_t, 4> >(0x4020, 0);
+        AdsVariable<std::array<uint8_t, 4> > arrayVarIndex {remoteNetAddress, port, 0x4020, 0};
         arrayVarIndex = arrayToWrite;
         std::array<uint8_t, 4> readArrayIndex = arrayVarIndex;
         out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
@@ -252,7 +254,8 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)readArrayIndex[3] << "\n";
 
         // Read device info
-        auto deviceInfo = adsClient.ReadDeviceInfo();
+        AdsDevice device {remoteNetAddress};
+        auto deviceInfo = device.Info();
         out << "Read device info from device " << deviceInfo.name << ". Version is " <<
         (uint32_t)deviceInfo.version.version << "." << (uint32_t)deviceInfo.version.revision << "." <<
         (uint32_t)deviceInfo.version.build << "\n";

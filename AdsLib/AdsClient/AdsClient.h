@@ -20,30 +20,77 @@
 #include "AdsVariable.h"
 #include "AdsException.h"
 
-struct AdsClient {
-    AdsClient(const AmsAddr amsAddr, const std::string& ip)
-        : address(amsAddr)
+struct AdsLocalPort {
+    static void PortClose(long* port)
     {
-        auto error = AdsAddRoute(amsAddr.netId, ip.c_str());
-        if (error) {
-            throw AdsException(error);
-        }
+        AdsPortCloseEx(*port);
+        delete port;
+    }
 
-        m_Port = AdsPortOpenEx();
-        if (0 == m_Port) {
+    AdsLocalPort()
+        : port(new long {AdsPortOpenEx()}, &PortClose)
+    {
+        if (!*port) {
             throw AdsException(ADSERR_CLIENT_PORTNOTOPEN);
         }
     }
-    AdsClient(const AdsClient&) = delete;
-    AdsClient(AdsClient&&) = delete;
-    AdsClient& operator=(const AdsClient&)& = delete;
-    AdsClient& operator=(AdsClient&&)& = delete;
 
-    ~AdsClient()
+    operator long() const
     {
-        AdsPortCloseEx(m_Port);
-        AdsDelRoute(address.netId);
+        return *port;
     }
+
+    const uint32_t Timeout() const
+    {
+        uint32_t timeout = 0;
+        auto error = AdsSyncGetTimeoutEx(*port, &timeout);
+        if (error) {throw AdsException(error); }
+        return timeout;
+    }
+    void Timeout(const uint32_t timeout) const
+    {
+        auto error = AdsSyncSetTimeoutEx(*port, timeout);
+        if (error) {throw AdsException(error); }
+    }
+private:
+    std::unique_ptr<long, decltype(& PortClose)> port;
+};
+
+class AdsRoute {
+    static void DelRoute(AmsNetId* netId)
+    {
+        AdsPortCloseEx(*netId);
+        delete netId;
+    }
+
+    using RouteGuard = std::unique_ptr<AmsNetId, decltype(& DelRoute)>;
+
+    static RouteGuard MakeRoute(const AmsNetId remoteNetId, const std::string& ip)
+    {
+        auto error = AdsAddRoute(remoteNetId, ip.c_str());
+        if (error) {
+            throw AdsException(error);
+        }
+        return RouteGuard {new AmsNetId {remoteNetId}, &DelRoute};
+    }
+
+    std::unique_ptr<AmsNetId, decltype(& DelRoute)> netId;
+
+public:
+    AdsRoute(const AmsNetId remoteNetId, const std::string& ip)
+        : netId(MakeRoute(remoteNetId, ip))
+    {}
+
+    operator AmsNetId() const
+    {
+        return *netId;
+    }
+};
+
+struct AdsDevice {
+    AdsDevice(const AmsAddr amsAddr)
+        : address(amsAddr)
+    {}
 
     const AmsAddr GetLocalAddress() const
     {
@@ -53,34 +100,8 @@ struct AdsClient {
         return address;
     }
 
-    // Timeout
-    const uint32_t GetTimeout() const
-    {
-        uint32_t timeout = 0;
-        uint32_t error = AdsSyncGetTimeoutEx(m_Port, &timeout);
-        if (error) {throw AdsException(error); }
-        return timeout;
-    }
-    void SetTimeout(const uint32_t timeout) const
-    {
-        uint32_t error = AdsSyncSetTimeoutEx(m_Port, timeout);
-        if (error) {throw AdsException(error); }
-    }
-
-    template<typename T>
-    AdsVariable<T> GetAdsVariable(const std::string& symbolName)
-    {
-        return AdsVariable<T>(address, symbolName, m_Port);
-    }
-
-    template<typename T>
-    AdsVariable<T> GetAdsVariable(const uint32_t group, const uint32_t offset)
-    {
-        return AdsVariable<T>(address, group, offset, m_Port);
-    }
-
     // Device info
-    const DeviceInfo ReadDeviceInfo() const
+    const DeviceInfo Info() const
     {
         DeviceInfo deviceInfo;
         auto error = AdsSyncReadDeviceInfoReqEx(m_Port, &address, deviceInfo.name, &deviceInfo.version);
@@ -90,7 +111,7 @@ struct AdsClient {
 
 private:
     const AmsAddr address;
-    uint32_t m_Port;
+    AdsLocalPort m_Port;
 };
 
 #endif
