@@ -2,6 +2,7 @@
 #include "AdsLib.h"
 
 #include <iostream>
+#include <array>
 
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
