@@ -24,6 +24,7 @@ struct AdsLocalPort {
     static void PortClose(long* port)
     {
         AdsPortCloseEx(*port);
+        delete port;
     }
 
     AdsLocalPort()
@@ -59,6 +60,7 @@ class AdsRoute {
     static void DelRoute(AmsNetId* netId)
     {
         AdsPortCloseEx(*netId);
+        delete netId;
     }
 
     using RouteGuard = std::unique_ptr<AmsNetId, decltype(& DelRoute)>;

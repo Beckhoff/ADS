@@ -14,6 +14,7 @@ class AdsHandle {
             sizeof(*handle), handle
             );
 
+        delete handle;
         if (error) {
             throw AdsException(error);
         }
