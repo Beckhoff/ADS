@@ -51,7 +51,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4127;4512</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4127;4512;4100</DisableSpecificWarnings>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
@@ -63,7 +63,9 @@
     <CustomBuildStep>
       <Command>copy AdsLib.h ..\example\
 copy AdsDef.h ..\example\
-copy $(TARGETPATH)  ..\example\</Command>
+xcopy /sy AdsClient\*.h ..\example\AdsClient\
+copy $(TARGETPATH)  ..\example\
+</Command>
       <Inputs>AdsLib.h;AdsDef</Inputs>
       <Outputs>../../TwinSAFE_App/AdsLib/AdsDef.h;../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
     </CustomBuildStep>
@@ -75,7 +77,7 @@ copy $(TARGETPATH)  ..\example\</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4127;4512</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4127;4512;4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -85,12 +87,22 @@ copy $(TARGETPATH)  ..\example\</Command>
     <CustomBuildStep>
       <Command>copy AdsLib.h ..\example\
 copy AdsDef.h ..\example\
-copy $(TARGETPATH)  ..\example\</Command>
+xcopy /sy AdsClient\*.h ..\example\AdsClient\
+copy $(TARGETPATH)  ..\example\
+</Command>
       <Outputs>../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
       <Inputs>AdsLib.h;AdsDef</Inputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AdsClient\AdsLibOOI.h" />
+    <ClInclude Include="AdsClient\AdsNotification.h" />
+    <ClInclude Include="AdsClient\AdsRoute.h" />
+    <ClInclude Include="AdsClient\AdsException.h" />
+    <ClInclude Include="AdsClient\AdsHandle.h" />
+    <ClInclude Include="AdsClient\AdsVariable.h" />
+    <ClInclude Include="AdsClient\AdsDevice.h" />
+    <ClInclude Include="AdsClient\AdsNotificationCallbacks.h" />
     <ClInclude Include="AmsConnection.h" />
     <ClInclude Include="AdsDef.h" />
     <ClInclude Include="AdsLib.h" />
@@ -109,7 +121,11 @@ copy $(TARGETPATH)  ..\example\</Command>
     <ClInclude Include="wrap_socket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AdsClient\AdsNotification.cpp" />
+    <ClCompile Include="AdsClient\AdsRoute.cpp" />
     <ClCompile Include="AdsDef.cpp" />
+    <ClCompile Include="AdsClient\AdsDevice.cpp" />
+    <ClCompile Include="AdsClient\AdsNotificationCallbacks.cpp" />
     <ClCompile Include="AmsConnection.cpp" />
     <ClCompile Include="AdsLib.cpp" />
     <ClCompile Include="AmsPort.cpp" />
