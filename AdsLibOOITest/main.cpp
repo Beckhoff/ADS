@@ -132,65 +132,81 @@ struct TestAds : test_base<TestAds> {
     void testAdsReadDeviceInfoReqEx(const std::string&)
     {
         static const char NAME[] = "Plc30 App";
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            fructose_assert(0 != route->GetLocalPort());
 
-        for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-            AdsVersion version { 0, 0, 0 };
-            char devName[16 + 1] {};
-            fructose_loop_assert(i, 0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
-            fructose_loop_assert(i, 3 == version.version);
-            fructose_loop_assert(i, 1 == version.revision);
-            fructose_loop_assert(i, 1202 == version.build);
-            fructose_loop_assert(i, 0 == strncmp(devName, NAME, sizeof(NAME)));
+            AdsDevice device {route};
+            for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+                fructose_loop_assert(i, 3 == device.m_Info.version.version);
+                fructose_loop_assert(i, 1 == device.m_Info.version.revision);
+                fructose_loop_assert(i, 1202 == device.m_Info.version.build);
+                fructose_loop_assert(i, 0 == strncmp(device.m_Info.name, NAME, sizeof(NAME)));
+            }
         }
 
         // provide out of range port
-        AdsVersion version { 0, 0, 0 };
-        char devName[16 + 1] {};
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadDeviceInfoReqEx(0, &server, devName, &version));
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadDeviceInfoReqEx(port, nullptr, devName, &version));
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsDevice device {unknownAmsAddrRoute};
+            fructose_assert(0 == device.m_Info.version.version);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide nullptr to devName/version
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, nullptr, &version));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, devName, nullptr));
-        fructose_assert(0 == AdsPortCloseEx(port));
+        /* not possible with OOI */
     }
 
     void testAdsReadStateReqEx(const std::string&)
     {
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            fructose_assert(0 != route->GetLocalPort());
 
-        uint16_t adsState;
-        uint16_t devState;
-        fructose_assert(0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
-        fructose_assert(ADSSTATE_RUN == adsState);
-        fructose_assert(0 == devState);
+            AdsDevice device {route};
+            const auto state = device.GetState();
+            fructose_assert(ADSSTATE_RUN == state.ads);
+            fructose_assert(0 == state.device);
+        }
 
         // provide bad server port
-        fructose_assert(GLOBALERR_TARGET_PORT == AdsSyncReadStateReqEx(port, &serverBadPort, &adsState, &devState));
+        try {
+            AdsRoute badAmsAddrRoute {"192.168.0.232", serverNetId, 1000, 1000};
+            AdsDevice device {badAmsAddrRoute};
+            const auto state = device.GetState();
+            fructose_assert(0 == state.device);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_TARGET_PORT == ex.getErrorCode());
+        }
 
         // provide out of range port
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncReadStateReqEx(0, &server, &adsState, &devState));
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR == AdsSyncReadStateReqEx(port, nullptr, &adsState, &devState));
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsDevice device {unknownAmsAddrRoute};
+            const auto state = device.GetState();
+            fructose_assert(0 == state.device);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide nullptr to adsState/devState
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, nullptr, &devState));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, &adsState, nullptr));
-        fructose_assert(0 == AdsPortCloseEx(port));
+        /* not possible with OOI */
     }
 
     void testAdsReadWriteReqEx2(const std::string&)
@@ -683,9 +699,9 @@ int main()
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
-#if 0
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
     adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
+#if 0
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
