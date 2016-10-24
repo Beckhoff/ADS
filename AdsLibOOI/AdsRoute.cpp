@@ -2,17 +2,17 @@
 #include "AdsException.h"
 #include "AdsLib/AdsLib.h"
 
+static void CloseLocalPort(const long* port)
+{
+    AdsPortCloseEx(*port);
+    delete port;
+}
+
 AdsRouteImpl::AdsRouteImpl(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort)
     : m_Ip(ipV4), m_NetId(netId), m_TaskPort(taskPort), m_SymbolPort(symbolPort), m_LocalPort(
         new long { AdsPortOpenEx() }, CloseLocalPort)
 {
     AdsAddRoute(netId, ipV4.c_str());
-}
-
-void AdsRouteImpl::CloseLocalPort(const long* port)
-{
-    AdsPortCloseEx(*port);
-    delete port;
 }
 
 const AmsNetId AdsRouteImpl::GetAmsNetId() const

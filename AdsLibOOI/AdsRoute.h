@@ -15,13 +15,11 @@ public:
     const uint32_t GetTimeout() const;
 
 private:
-    static void CloseLocalPort(const long* port);
-
     const std::string m_Ip;
     const AmsNetId m_NetId;
     const uint16_t m_TaskPort;
     const uint16_t m_SymbolPort;
-    std::unique_ptr<long, decltype(& CloseLocalPort)> m_LocalPort;
+    std::shared_ptr<long> m_LocalPort;
 };
 
 struct AdsRoute {
