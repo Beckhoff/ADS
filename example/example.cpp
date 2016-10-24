@@ -47,10 +47,13 @@ void runAdsClientExample(std::ostream& out)
 
         // Read device info
         AdsDevice device {route};
-        auto version = device.GetVersion();
-        out << "Read device info from device " << device.GetName() << ". Version is " <<
+        const auto version = device.m_Info.version;
+        out << "Read device info from device " << device.m_Info.name << ". Version is " <<
         (uint32_t)version.version << "." << (uint32_t)version.revision << "." <<
         (uint32_t)version.build << "\n";
+
+        const auto state = device.GetState();
+        out << "AdsState: " << std::dec << state.ads << " DeviceState: " << std::dec << state.device << '\n';
     } catch (const AdsException& ex) {
         auto errorCode = ex.getErrorCode();
         out << "Error: " << errorCode << "\n";

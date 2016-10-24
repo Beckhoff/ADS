@@ -2,46 +2,45 @@
 #include "AdsException.h"
 #include "AdsLib/AdsLib.h"
 
-AdsDevice::AdsDevice(const AdsRoute& route)
-    : m_Route(route)
+DeviceInfo AdsDevice::__ReadDeviceInfo(const AdsRoute& route)
 {
-    auto amsAddr = m_Route->GetSymbolsAmsAddr();
-    auto error = AdsSyncReadDeviceInfoReqEx(m_Route->GetLocalPort(),
+    DeviceInfo info;
+    auto amsAddr = route->GetSymbolsAmsAddr();
+    auto error = AdsSyncReadDeviceInfoReqEx(route->GetLocalPort(),
                                             &amsAddr,
-                                            &m_DeviceInfo.name[0],
-                                            &m_DeviceInfo.version);
+                                            &info.name[0],
+                                            &info.version);
 
     if (error) {
         throw AdsException(error);
     }
+    return info;
 }
 
-const std::string AdsDevice::GetName() const
-{
-    return m_DeviceInfo.name;
-}
+AdsDevice::AdsDevice(const AdsRoute& route)
+    : m_Route(route),
+    m_Info(__ReadDeviceInfo(route))
+{}
 
-const AdsVersion AdsDevice::GetVersion() const
+AdsDeviceState AdsDevice::GetState() const
 {
-    return m_DeviceInfo.version;
-}
-
-const AdsDeviceState AdsDevice::GetState()
-{
+    AdsDeviceState state;
     auto amsAddr = m_Route->GetSymbolsAmsAddr();
+    static_assert(sizeof(state.ads) == sizeof(uint16_t), "size missmatch");
+    static_assert(sizeof(state.device) == sizeof(uint16_t), "size missmatch");
     auto error = AdsSyncReadStateReqEx(m_Route->GetLocalPort(),
                                        &amsAddr,
-                                       (uint16_t*)&m_State.AdsState,
-                                       (uint16_t*)&m_State.DeviceState);
+                                       (uint16_t*)&state.ads,
+                                       (uint16_t*)&state.device);
 
     if (error) {
         throw AdsException(error);
     }
 
-    return m_State;
+    return state;
 }
 
-void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState)
+void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
 {
     auto amsAddr = m_Route->GetSymbolsAmsAddr();
     auto error = AdsSyncWriteControlReqEx(m_Route->GetLocalPort(),
@@ -53,7 +52,4 @@ void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState)
     if (error) {
         throw AdsException(error);
     }
-
-    m_State.AdsState = AdsState;
-    m_State.DeviceState = DeviceState;
 }

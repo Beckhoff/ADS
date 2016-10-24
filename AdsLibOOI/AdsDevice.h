@@ -1,23 +1,21 @@
 #pragma once
 
 #include "AdsRoute.h"
-#include <string>
 
 struct AdsDeviceState {
-    ADSSTATE AdsState;
-    ADSSTATE DeviceState;
+    ADSSTATE ads;
+    ADSSTATE device;
 };
 
 struct AdsDevice {
     AdsDevice(const AdsRoute& route);
 
-    const std::string GetName() const;
-    const AdsVersion GetVersion() const;
-    void SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState);
-    const AdsDeviceState GetState();
+    void SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const;
+    AdsDeviceState GetState() const;
+
+    const AdsRoute m_Route;
+    const DeviceInfo m_Info;
 
 private:
-    AdsRoute m_Route;
-    DeviceInfo m_DeviceInfo;
-    AdsDeviceState m_State;
+    static DeviceInfo __ReadDeviceInfo(const AdsRoute& route);
 };
