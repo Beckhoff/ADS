@@ -6,7 +6,6 @@
 class AdsRouteImpl {
 public:
     AdsRouteImpl(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort);
-    ~AdsRouteImpl();
 
     const AmsNetId GetAmsNetId() const;
     const AmsAddr GetTaskAmsAddr() const;

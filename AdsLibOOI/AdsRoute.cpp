@@ -30,11 +30,6 @@ const AmsAddr AdsRouteImpl::GetSymbolsAmsAddr() const
     return { m_NetId, m_SymbolPort };
 }
 
-AdsRouteImpl::~AdsRouteImpl()
-{
-    AdsDelRoute(m_NetId);
-}
-
 const long AdsRouteImpl::GetLocalPort() const
 {
     return *m_LocalPort;
@@ -58,8 +53,15 @@ const uint32_t AdsRouteImpl::GetTimeout() const
     return timeout;
 }
 
+static void DeleteRouteImpl(AdsRouteImpl* impl)
+{
+    AdsDelRoute(impl->GetAmsNetId());
+    delete impl;
+}
+
 AdsRoute::AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort)
-    : route(std::make_shared<AdsRouteImpl>(ipV4, netId, taskPort, symbolPort)) {}
+    : route(new AdsRouteImpl(ipV4, netId, taskPort, symbolPort), DeleteRouteImpl)
+{}
 
 const AdsRouteImpl* AdsRoute::operator->() const
 {
