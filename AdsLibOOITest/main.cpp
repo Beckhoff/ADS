@@ -225,7 +225,7 @@ struct TestAds : test_base<TestAds> {
                 fructose_loop_assert(i, outBuffer == buffer);
                 outBuffer = ~outBuffer;
             }
-            buffer = 0x0;
+            buffer = 0x0; /* restore default value */
         }
 
         // provide out of range port
@@ -292,68 +292,63 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteReqEx(const std::string&)
     {
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            fructose_assert(0 != route->GetLocalPort());
 
-        print(server, out);
+            print(route->GetSymbolsAmsAddr(), out);
 
-        uint32_t bytesRead;
-        uint32_t buffer;
-        uint32_t outBuffer = 0xDEADBEEF;
-        for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-            fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
-            fructose_loop_assert(i, 0 == AdsSyncReadReqEx2(port,
-                                                           &server,
-                                                           0x4020,
-                                                           0,
-                                                           sizeof(buffer),
-                                                           &buffer,
-                                                           &bytesRead));
-            fructose_loop_assert(i, sizeof(buffer) == bytesRead);
-            fructose_loop_assert(i, outBuffer == buffer);
-            outBuffer = ~outBuffer;
+            uint32_t outBuffer = 0xDEADBEEF;
+            AdsVariable<uint32_t> buffer {route, 0x4020, 0};
+            for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+                buffer = outBuffer;
+                fructose_loop_assert(i, outBuffer == buffer);
+                outBuffer = ~outBuffer;
+            }
+            buffer = 0x0; /* restore default value */
         }
 
         // provide out of range port
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN ==
-                        AdsSyncWriteReqEx(0, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR ==
-                        AdsSyncWriteReqEx(port, nullptr, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE ==
-                        AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, 0x4020, 0};
+            buffer = 0;
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide nullptr to writeBuffer
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), nullptr));
+        /* not possible with OOI */
 
         // provide 0 length writeBuffer
-        outBuffer = 0xDEADBEEF;
-        buffer = 0;
-        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
-        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, 0, &buffer));
-        fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-        fructose_assert(outBuffer == buffer);
+        /* not possible with OOI */
+
+        // provide invalid symbolName
+        try {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {route, "xxx"};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == ex.getErrorCode());
+        }
 
         // provide invalid indexGroup
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == AdsSyncWriteReqEx(port,
-                                                                      &server,
-                                                                      0,
-                                                                      0,
-                                                                      sizeof(outBuffer),
-                                                                      &outBuffer));
-
-        // provide invalid indexOffset
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncWriteReqEx(port, &server, 0x4025, 0x10000, sizeof(outBuffer), &outBuffer));
-
-        const uint32_t defaultValue = 0;
-        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(defaultValue), &defaultValue));
-        fructose_assert(0 == AdsPortCloseEx(port));
+        try {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {route, 0, 0};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
     }
 
     void testAdsWriteControlReqEx(const std::string&)
@@ -656,8 +651,8 @@ int main()
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
     adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
-#if 0
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
+#if 0
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
