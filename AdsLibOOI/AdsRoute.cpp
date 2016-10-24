@@ -9,28 +9,23 @@ static void CloseLocalPort(const long* port)
 }
 
 AdsRouteImpl::AdsRouteImpl(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort)
-    : m_Ip(ipV4), m_NetId(netId), m_TaskPort(taskPort), m_SymbolPort(symbolPort), m_LocalPort(
+    : m_NetId(netId), m_TaskPort(taskPort), m_SymbolPort(symbolPort), m_LocalPort(
         new long { AdsPortOpenEx() }, CloseLocalPort)
 {
     AdsAddRoute(netId, ipV4.c_str());
 }
 
-const AmsNetId AdsRouteImpl::GetAmsNetId() const
-{
-    return m_NetId;
-}
-
-const AmsAddr AdsRouteImpl::GetTaskAmsAddr() const
+AmsAddr AdsRouteImpl::GetTaskAmsAddr() const
 {
     return { m_NetId, m_TaskPort };
 }
 
-const AmsAddr AdsRouteImpl::GetSymbolsAmsAddr() const
+AmsAddr AdsRouteImpl::GetSymbolsAmsAddr() const
 {
     return { m_NetId, m_SymbolPort };
 }
 
-const long AdsRouteImpl::GetLocalPort() const
+long AdsRouteImpl::GetLocalPort() const
 {
     return *m_LocalPort;
 }
@@ -43,7 +38,7 @@ void AdsRouteImpl::SetTimeout(const uint32_t timeout) const
     }
 }
 
-const uint32_t AdsRouteImpl::GetTimeout() const
+uint32_t AdsRouteImpl::GetTimeout() const
 {
     uint32_t timeout = 0;
     auto error = AdsSyncGetTimeoutEx(GetLocalPort(), &timeout);
@@ -55,7 +50,7 @@ const uint32_t AdsRouteImpl::GetTimeout() const
 
 static void DeleteRouteImpl(AdsRouteImpl* impl)
 {
-    AdsDelRoute(impl->GetAmsNetId());
+    AdsDelRoute(impl->m_NetId);
     delete impl;
 }
 

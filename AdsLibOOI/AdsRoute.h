@@ -3,20 +3,17 @@
 #include <memory>
 #include <string>
 
-class AdsRouteImpl {
-public:
+struct AdsRouteImpl {
     AdsRouteImpl(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort);
 
-    const AmsNetId GetAmsNetId() const;
-    const AmsAddr GetTaskAmsAddr() const;
-    const AmsAddr GetSymbolsAmsAddr() const;
-    const long GetLocalPort() const;
+    AmsAddr GetTaskAmsAddr() const;
+    AmsAddr GetSymbolsAmsAddr() const;
+    long GetLocalPort() const;
     void SetTimeout(const uint32_t timeout) const;
-    const uint32_t GetTimeout() const;
+    uint32_t GetTimeout() const;
 
-private:
-    const std::string m_Ip;
     const AmsNetId m_NetId;
+private:
     const uint16_t m_TaskPort;
     const uint16_t m_SymbolPort;
     std::shared_ptr<long> m_LocalPort;
