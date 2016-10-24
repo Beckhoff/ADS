@@ -24,9 +24,9 @@ void AdsNotificationCallbacks::RemoveCallback(uint32_t handle)
     }
 }
 
-void AdsNotificationCallbacks::OnCallback(const AmsAddr*               pAddr,
+void AdsNotificationCallbacks::OnCallback(const AmsAddr*               /*pAddr*/,
                                           const AdsNotificationHeader* pNotification,
-                                          uint32_t                     hUser)
+                                          uint32_t /*hUser*/)
 {
     std::lock_guard<std::mutex> lock(Mutex);
     auto callbacks = GetCallbacks();
