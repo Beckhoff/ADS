@@ -83,9 +83,8 @@ copy $(TARGETPATH)  ..\example\</Command>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <CustomBuildStep>
-      <Command>copy AdsLib.h ..\example\
-copy AdsDef.h ..\example\
-copy $(TARGETPATH)  ..\example\</Command>
+      <Command>
+      </Command>
       <Outputs>../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
       <Inputs>AdsLib.h;AdsDef</Inputs>
     </CustomBuildStep>

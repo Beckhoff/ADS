@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AdsException.h"
-#include "..\AdsLib.h"
+#include "AdsLib/AdsLib.h"
 #include <functional>
 #include <memory>
 
