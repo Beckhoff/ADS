@@ -3,8 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-class AdsException : public std::exception {
-public:
+struct AdsException : std::exception {
     AdsException(const long adsErrorCode) :
         m_AdsErrorCode(adsErrorCode),
         m_Message("Ads operation failed with error code " + std::to_string(adsErrorCode) + ".")
