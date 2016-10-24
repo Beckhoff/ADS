@@ -211,129 +211,83 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsReadWriteReqEx2(const std::string&)
     {
-        char handleName[] = "MAIN.byByte";
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        static const char handleName[] = "MAIN.byByte";
+        {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            fructose_assert(0 != route->GetLocalPort());
 
-        uint32_t hHandle;
-        uint32_t bytesRead;
-        fructose_assert(0 ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
-        fructose_assert(sizeof(hHandle) == bytesRead);
-        hHandle = hHandle;
+            print(route->GetSymbolsAmsAddr(), out);
 
-        uint32_t buffer;
-        uint32_t outBuffer = 0xDEADBEEF;
-        for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-            fructose_loop_assert(i, 0 == AdsSyncWriteReqEx(port,
-                                                           &server,
-                                                           0xF005,
-                                                           hHandle,
-                                                           sizeof(outBuffer),
-                                                           &outBuffer));
-            fructose_loop_assert(i,
-                                 0 ==
-                                 AdsSyncReadReqEx2(port, &server, 0xF005, hHandle, sizeof(buffer), &buffer,
-                                                   &bytesRead));
-            fructose_loop_assert(i, sizeof(buffer) == bytesRead);
-            fructose_loop_assert(i, outBuffer == buffer);
-            outBuffer = ~outBuffer;
+            uint32_t outBuffer = 0xDEADBEEF;
+            AdsVariable<uint32_t> buffer {route, handleName};
+            for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+                buffer = outBuffer;
+                fructose_loop_assert(i, outBuffer == buffer);
+                outBuffer = ~outBuffer;
+            }
+            buffer = 0x0;
         }
-        hHandle = hHandle;
-        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
 
         // provide out of range port
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN ==
-                        AdsSyncReadWriteReqEx2(0, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
-        fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR ==
-                        AdsSyncReadWriteReqEx2(port, nullptr, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
-        fructose_assert(0xDEADBEEF == bytesRead); // BUG? TcAdsDll doesn't reset bytesRead!
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        bytesRead = 0xDEADBEEF;
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE ==
-                        AdsSyncReadWriteReqEx2(port, &unknown, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, handleName};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide nullptr to bytesRead
-        buffer = 0xDEADBEEF;
-        fructose_assert(0 ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               handleName,
-                                               nullptr));
-        fructose_assert(0xDEADBEEF != buffer);
+        /* not possible with OOI */
 
         // provide nullptr to readBuffer
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), nullptr, sizeof(handleName),
-                                               handleName,
-                                               nullptr));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), nullptr, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
+        /* not possible with OOI */
 
         // provide 0 length readBuffer
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_DEVICE_INVALIDSIZE ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, 0, &buffer, sizeof(handleName), handleName,
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
+        /* not possible with OOI */
 
         // provide nullptr to writeBuffer
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               nullptr,
-                                               nullptr));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               nullptr,
-                                               &bytesRead));
+        /* not possible with OOI */
 
         // provide 0 length writeBuffer
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 0, handleName,
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
+        /* not possible with OOI */
 
-        // provide invalid writeBuffer
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 3, "xxx",
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
+        // provide invalid symbolName
+        try {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {route, "xxx"};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == ex.getErrorCode());
+        }
 
         // provide invalid indexGroup
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0, 0, sizeof(buffer), &buffer, sizeof(handleName),
-                                               handleName,
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
+        try {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {route, 0, 0};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
 
         // provide invalid indexOffset
-        bytesRead = 0xDEADBEEF;
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0x4025, 0x10000, sizeof(buffer), &buffer,
-                                               sizeof(handleName), handleName,
-                                               &bytesRead));
-        fructose_assert(0 == bytesRead);
-        fructose_assert(0 == AdsPortCloseEx(port));
+        try {
+            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsVariable<uint32_t> buffer {route, 0x4025, 0x10000};
+            fructose_assert(0 == buffer);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
     }
 
     void testAdsWriteReqEx(const std::string&)
@@ -701,8 +655,8 @@ int main()
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
     adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
-#if 0
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
+#if 0
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
