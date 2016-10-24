@@ -71,12 +71,11 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsReadReqEx2(const std::string&)
     {
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        fructose_assert(0 != route->GetLocalPort());
+
+        print(route->GetSymbolsAmsAddr(), out);
         {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            fructose_assert(0 != route->GetLocalPort());
-
-            print(route->GetSymbolsAmsAddr(), out);
-
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
                 fructose_loop_assert(i, 0 == buffer);
@@ -110,7 +109,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexGroup
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -120,7 +118,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexOffset
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, 0x4025, 0x10000};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -212,12 +209,11 @@ struct TestAds : test_base<TestAds> {
     void testAdsReadWriteReqEx2(const std::string&)
     {
         static const char handleName[] = "MAIN.byByte";
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        fructose_assert(0 != route->GetLocalPort());
+
+        print(route->GetSymbolsAmsAddr(), out);
         {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            fructose_assert(0 != route->GetLocalPort());
-
-            print(route->GetSymbolsAmsAddr(), out);
-
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, handleName};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -261,7 +257,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid symbolName
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, "xxx"};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -271,7 +266,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexGroup
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -281,7 +275,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexOffset
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, 0x4025, 0x10000};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -292,12 +285,11 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteReqEx(const std::string&)
     {
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        fructose_assert(0 != route->GetLocalPort());
+
+        print(route->GetSymbolsAmsAddr(), out);
         {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            fructose_assert(0 != route->GetLocalPort());
-
-            print(route->GetSymbolsAmsAddr(), out);
-
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -332,7 +324,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid symbolName
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, "xxx"};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -342,7 +333,6 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexGroup
         try {
-            AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
