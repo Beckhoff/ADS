@@ -353,53 +353,56 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteControlReqEx(const std::string&)
     {
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        fructose_assert(0 != route->GetLocalPort());
 
-        uint16_t adsState;
-        uint16_t devState;
+        AdsDevice device {route};
         for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-            fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_STOP, 0, 0, nullptr));
-            fructose_loop_assert(i, 0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
-            fructose_loop_assert(i, ADSSTATE_STOP == adsState);
-            fructose_loop_assert(i, 0 == devState);
-            fructose_loop_assert(i, 0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_RUN, 0, 0, nullptr));
-            fructose_loop_assert(i, 0 == AdsSyncReadStateReqEx(port, &server, &adsState, &devState));
-            fructose_loop_assert(i, ADSSTATE_RUN == adsState);
-            fructose_loop_assert(i, 0 == devState);
+            device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
+            auto state = device.GetState();
+            fructose_loop_assert(i, ADSSTATE_STOP == state.ads);
+            fructose_loop_assert(i, ADSSTATE_INVALID == state.device);
+            device.SetState(ADSSTATE_RUN, ADSSTATE_INVALID);
+            state = device.GetState();
+            fructose_loop_assert(i, ADSSTATE_RUN == state.ads);
+            fructose_loop_assert(i, ADSSTATE_INVALID == state.device);
         }
 
         // provide out of range port
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN ==
-                        AdsSyncWriteControlReqEx(0, &server, ADSSTATE_STOP, 0, 0, nullptr));
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR ==
-                        AdsSyncWriteControlReqEx(port, nullptr, ADSSTATE_STOP, 0, 0, nullptr));
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncWriteControlReqEx(port,
-                                                                            &unknown,
-                                                                            ADSSTATE_STOP,
-                                                                            0,
-                                                                            0,
-                                                                            nullptr));
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsDevice device {unknownAmsAddrRoute};
+            device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide invalid adsState
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncWriteControlReqEx(port, &server, ADSSTATE_INVALID, 0, 0, nullptr));
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncWriteControlReqEx(port, &server, ADSSTATE_MAXSTATES, 0, 0, nullptr));
+        try {
+            device.SetState(ADSSTATE_INVALID, ADSSTATE_INVALID);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
+        try {
+            device.SetState(ADSSTATE_MAXSTATES, ADSSTATE_INVALID);
+            fructose_assert(false);
+        } catch (AdsException ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
 
         // provide invalid devState
         // TODO find correct parameters for this test
 
         // provide trash buffer
-        uint8_t buffer[10240] {};
-        fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_STOP, 0, sizeof(buffer), buffer));
-        fructose_assert(0 == AdsSyncWriteControlReqEx(port, &server, ADSSTATE_RUN, 0, sizeof(buffer), buffer));
-        fructose_assert(0 == AdsPortCloseEx(port));
+        /* not possible with OOI */
     }
 
     void testAdsNotification(const std::string&)
@@ -652,8 +655,8 @@ int main()
     adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
-#if 0
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
+#if 0
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 #endif
