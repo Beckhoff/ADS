@@ -8,8 +8,7 @@ struct AdsDeviceState {
     ADSSTATE DeviceState;
 };
 
-class AdsDevice {
-public:
+struct AdsDevice {
     AdsDevice(const AdsRoute& route);
 
     const std::string GetName() const;
