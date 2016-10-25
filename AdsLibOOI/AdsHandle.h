@@ -69,6 +69,10 @@ public:
         : m_Handle{GetHandle(address, port, symbolName)}
     {}
 
+    AdsHandle(AdsHandle&& ref)
+        : m_Handle{std::move(ref.m_Handle)}
+    {}
+
     operator uint32_t() const
     {
         return *m_Handle;

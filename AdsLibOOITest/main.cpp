@@ -4,8 +4,10 @@
 #include "AdsLibOOI/AdsNotification.h"
 #include "AdsLib/AdsDef.h"
 
+#include <chrono>
 #include <iostream>
 #include <iomanip>
+#include <thread>
 
 #include <fructose/fructose.h>
 using namespace fructose;
@@ -453,9 +455,22 @@ struct TestAds : test_base<TestAds> {
         // normal test
         {
             g_NumNotifications = 0;
-            std::vector<AdsNotification::Handle> notifications;
+            std::vector<AdsNotification> notifications;
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
                 notifications.emplace_back(AdsNotification::Register(route, 0x4020, 4, attrib, &NotifyCallback));
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
+                notifications.pop_back();
+            }
+            fructose_assert(g_NumNotifications > 0);
+        }
+        {
+            static const char handleName[] = "MAIN.byByte";
+            g_NumNotifications = 0;
+            std::vector<AdsNotification> notifications;
+            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
+                notifications.emplace_back(AdsNotification::Register(route, handleName, attrib, &NotifyCallback));
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
