@@ -1,6 +1,8 @@
 
 #include "AdsLibOOI/AdsLibOOI.h"
 #include "AdsLibOOI/AdsDevice.h"
+#include "AdsLibOOI/AdsNotification.h"
+#include "AdsLib/AdsDef.h"
 
 #include <iostream>
 #include <iomanip>
@@ -16,12 +18,13 @@ static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
     ++g_NumNotifications;
-#if 0
+#if 1
+    auto pData = reinterpret_cast<const uint8_t*>(pNotification + 1);
     std::cout << std::setfill('0') <<
         "hUser 0x" << std::hex << std::setw(4) << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
-        " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
+        " value: 0x" << std::hex << (int)pData[0] << '\n';
 #endif
 }
 
@@ -94,7 +97,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, 0x4020, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -112,7 +115,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
 
@@ -121,7 +124,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, 0x4025, 0x10000};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
     }
@@ -154,7 +157,7 @@ struct TestAds : test_base<TestAds> {
             AdsDevice device {unknownAmsAddrRoute};
             fructose_assert(0 == device.m_Info.version.version);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -181,7 +184,7 @@ struct TestAds : test_base<TestAds> {
             const auto state = device.GetState();
             fructose_assert(0 == state.device);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_TARGET_PORT == ex.getErrorCode());
         }
 
@@ -198,7 +201,7 @@ struct TestAds : test_base<TestAds> {
             const auto state = device.GetState();
             fructose_assert(0 == state.device);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -236,7 +239,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, handleName};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -260,7 +263,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, "xxx"};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == ex.getErrorCode());
         }
 
@@ -269,7 +272,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
 
@@ -278,7 +281,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, 0x4025, 0x10000};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
     }
@@ -312,7 +315,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, 0x4020, 0};
             buffer = 0;
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -327,7 +330,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, "xxx"};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND == ex.getErrorCode());
         }
 
@@ -336,7 +339,7 @@ struct TestAds : test_base<TestAds> {
             AdsVariable<uint32_t> buffer {route, 0, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
     }
@@ -370,7 +373,7 @@ struct TestAds : test_base<TestAds> {
             AdsDevice device {unknownAmsAddrRoute};
             device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
         }
 
@@ -378,13 +381,13 @@ struct TestAds : test_base<TestAds> {
         try {
             device.SetState(ADSSTATE_INVALID, ADSSTATE_INVALID);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
         try {
             device.SetState(ADSSTATE_MAXSTATES, ADSSTATE_INVALID);
             fructose_assert(false);
-        } catch (AdsException ex) {
+        } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
 
@@ -397,70 +400,69 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsNotification(const std::string&)
     {
-        const long port = AdsPortOpenEx();
-
-        fructose_assert(0 != port);
-
+        static const uint32_t NOTIFY_CYCLE_100NS = 1000000;
         static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
         static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
-        uint32_t notification[MAX_NOTIFICATIONS_PER_PORT];
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
-        uint32_t hUser = 0xDEADBEEF;
+        AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {NOTIFY_CYCLE_100NS}};
+
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        fructose_assert(0 != route->GetLocalPort());
 
         // provide out of range port
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN ==
-                        AdsSyncAddDeviceNotificationReqEx(0, &server, 0x4020, 0, &attrib, &NotifyCallback, hUser,
-                                                          &notification[0]));
+        /* not possible with OOI */
 
         // provide nullptr to AmsAddr
-        fructose_assert(ADSERR_CLIENT_NOAMSADDR ==
-                        AdsSyncAddDeviceNotificationReqEx(port, nullptr, 0x4020, 0, &attrib, &NotifyCallback, hUser,
-                                                          &notification[0]));
+        /* not possible with OOI */
 
         // provide unknown AmsAddr
-        AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(GLOBALERR_MISSING_ROUTE ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser,
-                                                          &notification[0]));
+        try {
+            AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsNotification buffer {unknownAmsAddrRoute, 0x4020, 4, attrib, &NotifyCallback};
+            fructose_assert(false);
+        } catch (const AdsException& ex) {
+            fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
+        }
 
         // provide invalid indexGroup
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &server, 0, 0, &attrib, &NotifyCallback, hUser,
-                                                          &notification[0]));
+        try {
+            AdsNotification buffer {route, 0, 0, attrib, &NotifyCallback};
+            fructose_assert(false);
+        } catch (const AdsException& ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
 
         // provide invalid indexOffset
-        fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4025, 0x10000, &attrib, &NotifyCallback,
-                                                          hUser,
-                                                          &notification[0]));
+        try {
+            AdsNotification buffer {route, 0x4025, 0x10000, attrib, &NotifyCallback};
+            fructose_assert(false);
+        } catch (const AdsException& ex) {
+            fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
+        }
 
         // provide nullptr to attrib/callback/hNotification
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, nullptr, &NotifyCallback, hUser,
-                                                          &notification[0]));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, nullptr, hUser,
-                                                          &notification[0]));
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
-                        AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback, hUser,
-                                                          nullptr));
+        try {
+            AdsNotification buffer {route, 0x4025, 0x10000, attrib, nullptr};
+            fructose_assert(false);
+        } catch (const AdsException& ex) {
+            fructose_assert(ADSERR_CLIENT_INVALIDPARM == ex.getErrorCode());
+        }
 
         // delete nonexisting notification
-        fructose_assert(ADSERR_CLIENT_REMOVEHASH == AdsSyncDelDeviceNotificationReqEx(port, &server, 0xDEADBEEF));
+        /* not possible with OOI */
 
         // normal test
-        for (hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT; ++hUser) {
-            fructose_loop_assert(hUser,
-                                 0 ==
-                                 AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback,
-                                                                   hUser,
-                                                                   &notification[hUser]));
+        {
+            g_NumNotifications = 0;
+            std::vector<AdsNotification> notifications;
+            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
+                //notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
+                //notifications.pop_back();
+            }
+            fructose_assert(g_NumNotifications > 0);
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        for (hUser = 0; hUser < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++hUser) {
-            fructose_loop_assert(hUser, 0 == AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
-        }
-        fructose_assert(0 == AdsPortCloseEx(port));
     }
 
     void testAdsTimeout(const std::string&)
@@ -646,8 +648,8 @@ int main()
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
-#if 0
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
+#if 0
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
 #endif
     adsTest.run();

@@ -5,13 +5,12 @@
 #include "AdsNotificationCallbacks.h"
 #include <cstring>
 
-class AdsNotification {
-protected:
+struct AdsNotification {
     AdsNotification(const AdsRoute&              route,
                     const uint32_t               indexGroup,
                     const uint32_t               indexOffset,
                     const AdsNotificationAttrib& NotificationAttributes,
-                    std::function<void()>        callback);
+                    PAdsNotificationFuncEx       callback);
 
 private:
     // Functor that is called once a NotificationHandle is not needed any longer
@@ -31,7 +30,6 @@ private:
                         *handle
                         );
                 }
-                AdsNotificationCallbacks::RemoveCallback(*handle);
                 delete handle;
             }
 
@@ -53,13 +51,13 @@ private:
                                                     uint32_t                     indexGroup,
                                                     uint32_t                     indexOffset,
                                                     const AdsNotificationAttrib& notificationAttributes,
-                                                    std::function<void()>        callback);
+                                                    PAdsNotificationFuncEx       callback);
 
     const AdsRoute m_Route;                             // Route to target machine
     const AdsNotificationHandleGuard m_Handle;          // Guarded Notification handle
     const std::function<void()> m_Callback;             // The callback which is called when a notification event is received
 };
-
+#if 0
 template<typename T>
 class AdsCyclicNotification : public AdsNotification {
 public:
@@ -101,7 +99,7 @@ private:
         return notificationAttributes;
     }
 };
-
+#endif
 /*
     Doesn't work. Connection to host is closed as soon as the device goes back to config-mode.
 
