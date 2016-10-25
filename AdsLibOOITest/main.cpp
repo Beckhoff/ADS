@@ -482,27 +482,19 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsTimeout(const std::string&)
     {
-        const long port = AdsPortOpenEx();
-        uint32_t timeout;
+        AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
 
-        fructose_assert(0 != port);
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncGetTimeoutEx(55555, &timeout));
-        fructose_assert(0 == AdsSyncGetTimeoutEx(port, &timeout));
-        fructose_assert(5000 == timeout);
-        fructose_assert(0 == AdsSyncSetTimeoutEx(port, 1000));
-        fructose_assert(0 == AdsSyncGetTimeoutEx(port, &timeout));
-        fructose_assert(1000 == timeout);
-        fructose_assert(0 == AdsSyncSetTimeoutEx(port, 5000));
+        fructose_assert(0 != route->GetLocalPort());
 
-        timeout = 0;
+        fructose_assert(5000 == route.GetTimeout());
+        route.SetTimeout(1000);
+        fructose_assert(1000 == route.GetTimeout());
+
         // provide out of range port
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncGetTimeoutEx(0, &timeout));
-        fructose_assert(ADSERR_CLIENT_PORTNOTOPEN == AdsSyncSetTimeoutEx(0, 2000));
-        fructose_assert(0 == timeout);
+        /* not possible with OOI */
 
         // provide nullptr to timeout
-        fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncGetTimeoutEx(port, nullptr));
-        fructose_assert(0 == AdsPortCloseEx(port));
+        /* not possible with OOI */
     }
 };
 
@@ -664,9 +656,7 @@ int main()
     adsTest.add_test("testAdsWriteReqEx", &TestAds::testAdsWriteReqEx);
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
-#if 0
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-#endif
     adsTest.run();
 
     TestAdsPerformance performance(errorstream);
