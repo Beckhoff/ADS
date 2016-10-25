@@ -18,7 +18,7 @@ static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
     ++g_NumNotifications;
-#if 1
+#if 0
     auto pData = reinterpret_cast<const uint8_t*>(pNotification + 1);
     std::cout << std::setfill('0') <<
         "hUser 0x" << std::hex << std::setw(4) << hUser <<
@@ -417,7 +417,7 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         try {
             AdsRoute unknownAmsAddrRoute {"192.168.0.232", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            AdsNotification buffer {unknownAmsAddrRoute, 0x4020, 4, attrib, &NotifyCallback};
+            auto buffer = AdsNotification::Register(unknownAmsAddrRoute, 0x4020, 4, attrib, &NotifyCallback);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
@@ -425,7 +425,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexGroup
         try {
-            AdsNotification buffer {route, 0, 0, attrib, &NotifyCallback};
+            auto buffer = AdsNotification::Register(route, 0, 0, attrib, &NotifyCallback);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
@@ -433,7 +433,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexOffset
         try {
-            AdsNotification buffer {route, 0x4025, 0x10000, attrib, &NotifyCallback};
+            auto buffer = AdsNotification::Register(route, 0x4025, 0x10000, attrib, &NotifyCallback);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
@@ -441,7 +441,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide nullptr to attrib/callback/hNotification
         try {
-            AdsNotification buffer {route, 0x4025, 0x10000, attrib, nullptr};
+            auto buffer = AdsNotification::Register(route, 0x4025, 0x10000, attrib, nullptr);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_CLIENT_INVALIDPARM == ex.getErrorCode());
@@ -453,13 +453,13 @@ struct TestAds : test_base<TestAds> {
         // normal test
         {
             g_NumNotifications = 0;
-            std::vector<AdsNotification> notifications;
+            std::vector<AdsNotification::Handle> notifications;
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
-                //notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback);
+                notifications.emplace_back(AdsNotification::Register(route, 0x4020, 4, attrib, &NotifyCallback));
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
-                //notifications.pop_back();
+                notifications.pop_back();
             }
             fructose_assert(g_NumNotifications > 0);
         }

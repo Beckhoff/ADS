@@ -5,58 +5,18 @@
 #include "AdsNotificationCallbacks.h"
 #include <cstring>
 
-struct AdsNotification {
-    AdsNotification(const AdsRoute&              route,
-                    const uint32_t               indexGroup,
-                    const uint32_t               indexOffset,
-                    const AdsNotificationAttrib& NotificationAttributes,
-                    PAdsNotificationFuncEx       callback);
+namespace AdsNotification
+{
+// Type for guarded handles
+using Handle = std::shared_ptr<uint32_t>;
 
-private:
-    // Functor that is called once a NotificationHandle is not needed any longer
-    struct NotificationDeleter {
-        NotificationDeleter(const AmsAddr __address = AmsAddr {}, long __port = 0) : address(__address),
-                                                                                     port(__port)
-        {}
-
-        void operator()(uint32_t* handle)
-        {
-            uint32_t error = 0;
-            if (handle && *handle) {
-                if (port) {
-                    error = AdsSyncDelDeviceNotificationReqEx(
-                        port,
-                        &address,
-                        *handle
-                        );
-                }
-                delete handle;
-            }
-
-            if (error) {
-                throw AdsException(error);
-            }
-        }
-
-private:
-        const AmsAddr address;
-        const long port;
-    };
-
-    // Type for guarded handles
-    using AdsNotificationHandleGuard = std::unique_ptr<uint32_t, NotificationDeleter>;
-
-    // Sends the AddDeviceNotification command to the target machine
-    AdsNotificationHandleGuard RegisterNotification(const AdsRoute&              route,
-                                                    uint32_t                     indexGroup,
-                                                    uint32_t                     indexOffset,
-                                                    const AdsNotificationAttrib& notificationAttributes,
-                                                    PAdsNotificationFuncEx       callback);
-
-    const AdsRoute m_Route;                             // Route to target machine
-    const AdsNotificationHandleGuard m_Handle;          // Guarded Notification handle
-    const std::function<void()> m_Callback;             // The callback which is called when a notification event is received
-};
+// Sends the AddDeviceNotification command to the target machine
+Handle Register(const AdsRoute&              route,
+                uint32_t                     indexGroup,
+                uint32_t                     indexOffset,
+                const AdsNotificationAttrib& notificationAttributes,
+                PAdsNotificationFuncEx       callback);
+}
 #if 0
 template<typename T>
 class AdsCyclicNotification : public AdsNotification {
