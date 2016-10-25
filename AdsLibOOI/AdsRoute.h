@@ -1,7 +1,6 @@
 #pragma once
 #include "AdsLib/AdsDef.h"
 #include <memory>
-#include <string>
 
 struct AdsRouteImpl {
     AdsRouteImpl(const std::string& ipV4, AmsNetId netId, uint16_t taskPort, uint16_t symbolPort);
