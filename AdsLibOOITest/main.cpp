@@ -483,7 +483,6 @@ struct TestAds : test_base<TestAds> {
     void testAdsTimeout(const std::string&)
     {
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-
         fructose_assert(0 != route->GetLocalPort());
 
         fructose_assert(5000 == route.GetTimeout());
@@ -551,38 +550,32 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
-        const auto notification = std::unique_ptr<uint32_t[]>(new uint32_t[numNotifications]);
+        const AdsRoute route("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
         AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
-        uint32_t hUser = 0xDEADBEEF;
+        std::vector<AdsNotification> notifications;
 
         runEndurance = true;
+        g_NumNotifications = 0;
         std::thread threads[1];
         for (auto& t : threads) {
             t = std::thread(&TestAdsPerformance::Read, this, 1024);
         }
 
         const auto start = std::chrono::high_resolution_clock::now();
-        for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_assert_eq(0,
-                               AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback,
-                                                                 hUser,
-                                                                 &notification[hUser]));
+        for (size_t i = 0; i < numNotifications; ++i) {
+            notifications.emplace_back(AdsNotification::Register(route, 0x4020, 4, attrib, &NotifyCallback));
         }
 
         std::cout << "Hit ENTER to stop endurance test\n";
         std::cin.ignore();
         runEndurance = false;
 
-        for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_assert_eq(0, AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
-        }
-        const auto end = std::chrono::high_resolution_clock::now();
-        const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-
         for (auto& t : threads) {
             t.join();
         }
-        out << testname << ' ' << 1000 * g_NumNotifications / tmms << " notifications/s (" << g_NumNotifications <<
+        const auto end = std::chrono::high_resolution_clock::now();
+        const auto tmms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        out << testname << ' ' << 1000ULL * g_NumNotifications / tmms << " notifications/s (" << g_NumNotifications <<
             '/' << tmms << ")\n";
     }
 
@@ -601,21 +594,15 @@ private:
 
     void Read(const size_t numLoops)
     {
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        const AdsRoute route("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+        fructose_assert(0 != route->GetLocalPort());
 
-        uint32_t bytesRead;
-        uint32_t buffer;
+        AdsVariable<uint32_t> buffer {route, 0x4020, 0};
         do {
             for (size_t i = 0; i < numLoops; ++i) {
-                fructose_loop_assert(i,
-                                     0 ==
-                                     AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
-                fructose_loop_assert(i, sizeof(buffer) == bytesRead);
                 fructose_loop_assert(i, 0 == buffer);
             }
         } while (runEndurance);
-        fructose_assert(0 == AdsPortCloseEx(port));
     }
 };
 
@@ -641,8 +628,8 @@ int main()
 
     TestAdsPerformance performance(errorstream);
     performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-//    performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
-//	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
+    performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+    performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
     performance.run();
 
     std::cout << "Hit ENTER to continue\n";
