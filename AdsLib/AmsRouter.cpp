@@ -34,6 +34,14 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
     std::lock_guard<std::recursive_mutex> lock(mutex);
 
     const auto oldConnection = GetConnection(ams);
+    if (oldConnection && !(ip == oldConnection->destIp)) {
+        /**
+           There is already a route for this AmsNetId, but with
+           a different IP. The old route has to be deleted, first!
+         */
+        return ROUTERERR_PORTALREADYINUSE;
+    }
+
     auto conn = connections.find(ip);
     if (conn == connections.end()) {
         const auto isFirst = connections.empty();
@@ -44,8 +52,8 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
         }
     }
 
+    conn->second->refCount++;
     mapping[ams] = conn->second.get();
-    DeleteIfLastConnection(oldConnection);
     return !conn->second->ownIp;
 }
 
@@ -55,9 +63,11 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
 
     auto route = mapping.find(ams);
     if (route != mapping.end()) {
-        const AmsConnection* conn = route->second;
-        mapping.erase(route);
-        DeleteIfLastConnection(conn);
+        AmsConnection* conn = route->second;
+        if (0 == --conn->refCount) {
+            mapping.erase(route);
+            DeleteIfLastConnection(conn);
+        }
     }
 }
 

@@ -105,9 +105,11 @@ struct AmsConnection : AmsProxy {
     }
 
 private:
+    friend struct AmsRouter;
     Router& router;
     TcpSocket socket;
     std::thread receiver;
+    std::atomic<size_t> refCount;
     std::atomic<uint32_t> invokeId;
     std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 

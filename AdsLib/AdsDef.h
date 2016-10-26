@@ -162,6 +162,7 @@
 // Router Return codes
 #define ERR_ROUTER                          0x0500
 
+#define ROUTERERR_PORTALREADYINUSE          (0x06 + ERR_ROUTER) /**< The desired port number is already assigned */
 #define ROUTERERR_NOTREGISTERED             (0x07 + ERR_ROUTER) /**< Port not registered */
 #define ROUTERERR_NOMOREQUEUES              (0x08 + ERR_ROUTER) /**< The maximum number of Ports reached */
 
