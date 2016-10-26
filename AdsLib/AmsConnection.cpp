@@ -68,6 +68,7 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListGet(const V
 AmsConnection::AmsConnection(Router& __router, IpV4 __destIp)
     : router(__router),
     socket(__destIp, ADS_TCP_SERVER_PORT),
+    refCount(0),
     invokeId(0),
     destIp(__destIp),
     ownIp(socket.Connect())

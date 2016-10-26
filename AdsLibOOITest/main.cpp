@@ -505,17 +505,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
     TestAdsPerformance(std::ostream& outstream)
         : out(outstream),
         runEndurance(false)
-    {
-        AdsAddRoute(serverNetId, "192.168.0.232");
-    }
-#ifdef WIN32
-    ~TestAdsPerformance()
-    {
-        // WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
-        //             of the static AdsRouter object and hangs in receive.join()
-        AdsDelRoute(serverNetId);
-    }
-#endif
+    {}
 
     void testLargeFrames(const std::string&)
     {
@@ -599,24 +589,14 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 private:
     void Notifications(size_t numNotifications)
     {
-        const long port = AdsPortOpenEx();
-        fructose_assert(0 != port);
+        const AdsRoute route("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+        AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {1000000}};
+        std::vector<AdsNotification> notifications;
 
-        const auto notification = std::unique_ptr<uint32_t[]>(new uint32_t[numNotifications]);
-        AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
-        uint32_t hUser = 0xDEADBEEF;
-
-        for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_assert_eq(0,
-                               AdsSyncAddDeviceNotificationReqEx(port, &server, 0x4020, 4, &attrib, &NotifyCallback,
-                                                                 hUser,
-                                                                 &notification[hUser]));
+        for (size_t i = 0; i < numNotifications; ++i) {
+            notifications.emplace_back(AdsNotification::Register(route, 0x4020, 4, attrib, &NotifyCallback));
         }
         std::this_thread::sleep_for(std::chrono::seconds(5));
-        for (hUser = 0; hUser < numNotifications; ++hUser) {
-            fructose_assert_eq(0, AdsSyncDelDeviceNotificationReqEx(port, &server, notification[hUser]));
-        }
-        fructose_assert(0 == AdsPortCloseEx(port));
     }
 
     void Read(const size_t numLoops)
@@ -661,9 +641,9 @@ int main()
 
     TestAdsPerformance performance(errorstream);
     performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
-    performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
+//    performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 //	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
-    //performance.run();
+    performance.run();
 
     std::cout << "Hit ENTER to continue\n";
     std::cin.ignore();
