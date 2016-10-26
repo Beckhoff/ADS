@@ -95,7 +95,11 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
-        // existent Ams with new Ip -> close old connection
+        // existent Ams with new Ip -> close old connection manually, now
+        fructose_assert(ROUTERERR_PORTALREADYINUSE == testee.AddRoute(netId_1, ip_remote));
+        fructose_assert(testee.GetConnection(netId_1));
+        fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
+        testee.DelRoute(netId_1);
         fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
