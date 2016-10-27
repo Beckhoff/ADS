@@ -8,15 +8,15 @@ struct AdsVariable {
     AdsVariable(const AdsRoute route, const std::string& symbolName)
         : m_Route(route),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(route.GetSymbolsAmsAddr(), route.GetLocalPort(), symbolName),
-        m_AmsAddr(route.GetSymbolsAmsAddr())
+        m_Handle(route.m_SymbolPort, route.GetLocalPort(), symbolName),
+        m_AmsAddr(route.m_SymbolPort)
     {}
 
     AdsVariable(const AdsRoute route, const uint32_t group, const uint32_t offset)
         : m_Route(route),
         m_IndexGroup(group),
         m_Handle(offset),
-        m_AmsAddr(route.GetTaskAmsAddr())
+        m_AmsAddr(route.m_TaskPort)
     {}
 
     operator T() const

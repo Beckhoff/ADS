@@ -4,8 +4,7 @@ static void HandleDeleter(const AdsRoute& route, uint32_t* handle)
 {
     uint32_t error = 0;
     if (handle && *handle) {
-        auto amsAddr = route.GetSymbolsAmsAddr();
-        error = AdsSyncDelDeviceNotificationReqEx(route.GetLocalPort(), &amsAddr, *handle);
+        error = AdsSyncDelDeviceNotificationReqEx(route.GetLocalPort(), &route.m_SymbolPort, *handle);
 
         delete handle;
     }
@@ -21,11 +20,10 @@ std::shared_ptr<uint32_t> GetNotificationHandle(const AdsRoute&              rou
                                                 const AdsNotificationAttrib& notificationAttributes,
                                                 PAdsNotificationFuncEx       callback)
 {
-    auto amsAddr = route.GetSymbolsAmsAddr();
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(
         route.GetLocalPort(),
-        &amsAddr,
+        &route.m_SymbolPort,
         indexGroup,
         indexOffset,
         &notificationAttributes,
@@ -43,7 +41,7 @@ AdsNotification AdsNotification::Register(const AdsRoute&              route,
                                           const AdsNotificationAttrib& notificationAttributes,
                                           PAdsNotificationFuncEx       callback)
 {
-    AdsHandle symbolHandle {route.GetSymbolsAmsAddr(), route.GetLocalPort(), symbolName};
+    AdsHandle symbolHandle {route.m_SymbolPort, route.GetLocalPort(), symbolName};
 
     uint32_t hSymbol = symbolHandle;
     return {GetNotificationHandle(route, ADSIGRP_SYM_VALBYHND, hSymbol, notificationAttributes, callback),
