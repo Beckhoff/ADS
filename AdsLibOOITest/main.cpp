@@ -556,7 +556,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 
         runEndurance = true;
         g_NumNotifications = 0;
-        std::thread threads[1];
+        std::thread threads[96];
         for (auto& t : threads) {
             t = std::thread(&TestAdsPerformance::Read, this, 1024);
         }
@@ -606,8 +606,13 @@ private:
     }
 };
 
+const AdsRoute staticRoute("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+AdsVariable<uint32_t> staticBuffer {staticRoute, "MAIN.byByte"};
+static const uint32_t staticRead = staticBuffer;
+
 int main()
 {
+    const uint32_t dynamicRead = staticBuffer;
 #if 0
     std::ostream nowhere(0);
     std::ostream& errorstream = nowhere;
