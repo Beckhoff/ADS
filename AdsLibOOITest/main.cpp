@@ -70,16 +70,16 @@ struct TestAds : test_base<TestAds> {
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             routes.emplace_back("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
-            fructose_loop_assert(i, 0 != routes.back()->GetLocalPort());
+            fructose_loop_assert(i, 0 != routes.back().GetLocalPort());
         }
     }
 
     void testAdsReadReqEx2(const std::string&)
     {
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
-        print(route->GetSymbolsAmsAddr(), out);
+        print(route.GetSymbolsAmsAddr(), out);
         {
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -136,7 +136,7 @@ struct TestAds : test_base<TestAds> {
         static const char NAME[] = "Plc30 App";
         {
             AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            fructose_assert(0 != route->GetLocalPort());
+            fructose_assert(0 != route.GetLocalPort());
 
             AdsDevice device {route};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -171,7 +171,7 @@ struct TestAds : test_base<TestAds> {
     {
         {
             AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-            fructose_assert(0 != route->GetLocalPort());
+            fructose_assert(0 != route.GetLocalPort());
 
             AdsDevice device {route};
             const auto state = device.GetState();
@@ -215,9 +215,9 @@ struct TestAds : test_base<TestAds> {
     {
         static const char handleName[] = "MAIN.byByte";
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
-        print(route->GetSymbolsAmsAddr(), out);
+        print(route.GetSymbolsAmsAddr(), out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, handleName};
@@ -291,9 +291,9 @@ struct TestAds : test_base<TestAds> {
     void testAdsWriteReqEx(const std::string&)
     {
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
-        print(route->GetSymbolsAmsAddr(), out);
+        print(route.GetSymbolsAmsAddr(), out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
@@ -349,7 +349,7 @@ struct TestAds : test_base<TestAds> {
     void testAdsWriteControlReqEx(const std::string&)
     {
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
         AdsDevice device {route};
         for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -408,7 +408,7 @@ struct TestAds : test_base<TestAds> {
         AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {NOTIFY_CYCLE_100NS}};
 
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
         // provide out of range port
         /* not possible with OOI */
@@ -483,7 +483,7 @@ struct TestAds : test_base<TestAds> {
     void testAdsTimeout(const std::string&)
     {
         AdsRoute route {"192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
         fructose_assert(5000 == route.GetTimeout());
         route.SetTimeout(1000);
@@ -595,7 +595,7 @@ private:
     void Read(const size_t numLoops)
     {
         const AdsRoute route("192.168.0.232", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
-        fructose_assert(0 != route->GetLocalPort());
+        fructose_assert(0 != route.GetLocalPort());
 
         AdsVariable<uint32_t> buffer {route, 0x4020, 0};
         do {

@@ -8,15 +8,15 @@ struct AdsVariable {
     AdsVariable(const AdsRoute route, const std::string& symbolName)
         : m_Route(route),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(route->GetSymbolsAmsAddr(), route->GetLocalPort(), symbolName),
-        m_AmsAddr(route->GetSymbolsAmsAddr())
+        m_Handle(route.GetSymbolsAmsAddr(), route.GetLocalPort(), symbolName),
+        m_AmsAddr(route.GetSymbolsAmsAddr())
     {}
 
     AdsVariable(const AdsRoute route, const uint32_t group, const uint32_t offset)
         : m_Route(route),
         m_IndexGroup(group),
         m_Handle(offset),
-        m_AmsAddr(route->GetTaskAmsAddr())
+        m_AmsAddr(route.GetTaskAmsAddr())
     {}
 
     operator T() const
@@ -48,7 +48,7 @@ struct AdsVariable {
     void Read(const size_t size, void* data) const
     {
         uint32_t bytesRead = 0;
-        auto error = AdsSyncReadReqEx2(m_Route->GetLocalPort(),
+        auto error = AdsSyncReadReqEx2(m_Route.GetLocalPort(),
                                        &m_AmsAddr,
                                        m_IndexGroup,
                                        m_Handle,
@@ -63,7 +63,7 @@ struct AdsVariable {
 
     void Write(const size_t size, const void* data) const
     {
-        auto error = AdsSyncWriteReqEx(m_Route->GetLocalPort(),
+        auto error = AdsSyncWriteReqEx(m_Route.GetLocalPort(),
                                        &m_AmsAddr,
                                        m_IndexGroup,
                                        m_Handle,
