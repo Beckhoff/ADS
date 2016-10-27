@@ -21,9 +21,6 @@
     <ClCompile Include="AdsNotification.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdsNotificationCallbacks.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AdsRoute.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,9 +39,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdsNotification.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AdsNotificationCallbacks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdsRoute.h">

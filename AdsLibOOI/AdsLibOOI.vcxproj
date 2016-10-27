@@ -114,7 +114,6 @@
   <ItemGroup>
     <ClCompile Include="AdsDevice.cpp" />
     <ClCompile Include="AdsNotification.cpp" />
-    <ClCompile Include="AdsNotificationCallbacks.cpp" />
     <ClCompile Include="AdsRoute.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -123,7 +122,6 @@
     <ClInclude Include="AdsHandle.h" />
     <ClInclude Include="AdsLibOOI.h" />
     <ClInclude Include="AdsNotification.h" />
-    <ClInclude Include="AdsNotificationCallbacks.h" />
     <ClInclude Include="AdsRoute.h" />
     <ClInclude Include="AdsVariable.h" />
   </ItemGroup>
