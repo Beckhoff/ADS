@@ -7,16 +7,16 @@ template<typename T>
 struct AdsVariable {
     AdsVariable(const AdsRoute route, const std::string& symbolName)
         : m_Route(route),
+        m_AmsAddr(route.m_SymbolPort),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(route.m_SymbolPort, route.GetLocalPort(), symbolName),
-        m_AmsAddr(route.m_SymbolPort)
+        m_Handle(route.m_SymbolPort, route.GetLocalPort(), symbolName)
     {}
 
     AdsVariable(const AdsRoute route, const uint32_t group, const uint32_t offset)
         : m_Route(route),
+        m_AmsAddr(route.m_TaskPort),
         m_IndexGroup(group),
-        m_Handle(offset),
-        m_AmsAddr(route.m_TaskPort)
+        m_Handle(offset)
     {}
 
     operator T() const

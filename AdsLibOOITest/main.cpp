@@ -612,13 +612,13 @@ static const uint32_t staticRead = staticBuffer;
 
 int main()
 {
-    const uint32_t dynamicRead = staticBuffer;
 #if 0
     std::ostream nowhere(0);
     std::ostream& errorstream = nowhere;
 #else
     std::ostream& errorstream = std::cout;
 #endif
+    errorstream << "Testing global static AdsVariable: " << staticBuffer << '\n';
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
