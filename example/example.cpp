@@ -7,7 +7,6 @@ void runAdsClientExample(std::ostream& out)
 {
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
     static const char remoteIpV4[] = "192.168.0.232";
-    static const AmsAddr remoteNetAddress { remoteNetId, 851 };
 
     out << __FUNCTION__ << "():\n";
 

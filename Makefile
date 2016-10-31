@@ -5,7 +5,7 @@ VPATH += AdsLibOOI
 LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
 OOI_LIB_NAME = AdsLibOOI-$(OS_NAME).a
-INSTALL_DIR=example
+INSTALL_DIR=example/ADS
 CXX :=$(CROSS_COMPILE)$(CXX)
 CFLAGS += -std=c++11
 CFLAGS += -pedantic
@@ -41,11 +41,18 @@ test: AdsLibTest.bin
 testOOI: AdsLibOOITest.bin
 	./$<
 
-install: $(LIB_NAME) $(OOI_LIB_NAME) AdsLib.h AdsDef.h
-	cp --recursive $? $(INSTALL_DIR)/
+install_lib: $(LIB_NAME) AdsLib.h AdsDef.h
+	mkdir -p $(INSTALL_DIR)/AdsLib
+	cp $? $(INSTALL_DIR)/AdsLib
+
+install_ooi: $(OOI_LIB_NAME) AdsLibOOI/*.h
+	mkdir -p $(INSTALL_DIR)/AdsLibOOI
+	cp $? $(INSTALL_DIR)/AdsLibOOI
+
+install: install_lib install_ooi
 
 clean:
-	rm -f *.a *.o *.bin AdsLib*Test/*.o
+	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(INSTALL_DIR)
 
 uncrustify:
 	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
