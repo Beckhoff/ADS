@@ -38,11 +38,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
     <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -60,13 +56,6 @@
     <Lib>
       <AdditionalDependencies>WS2_32.lib</AdditionalDependencies>
     </Lib>
-    <CustomBuildStep>
-      <Command>copy AdsLib.h ..\example\
-copy AdsDef.h ..\example\
-copy $(TARGETPATH)  ..\example\</Command>
-      <Inputs>AdsLib.h;AdsDef</Inputs>
-      <Outputs>../../TwinSAFE_App/AdsLib/AdsDef.h;../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -82,13 +71,6 @@ copy $(TARGETPATH)  ..\example\</Command>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <CustomBuildStep>
-      <Command>copy AdsLib.h ..\example\
-copy AdsDef.h ..\example\
-copy $(TARGETPATH)  ..\example\</Command>
-      <Outputs>../../TwinSAFE_App/AdsLib/AdsLib.h</Outputs>
-      <Inputs>AdsLib.h;AdsDef</Inputs>
-    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AmsConnection.h" />
