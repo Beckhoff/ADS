@@ -69,13 +69,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../;</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,7 +119,6 @@
   <ItemGroup>
     <ClCompile Include="AdsDevice.cpp" />
     <ClCompile Include="AdsNotification.cpp" />
-    <ClCompile Include="AdsNotificationCallbacks.cpp" />
     <ClCompile Include="AdsRoute.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -126,7 +127,6 @@
     <ClInclude Include="AdsHandle.h" />
     <ClInclude Include="AdsLibOOI.h" />
     <ClInclude Include="AdsNotification.h" />
-    <ClInclude Include="AdsNotificationCallbacks.h" />
     <ClInclude Include="AdsRoute.h" />
     <ClInclude Include="AdsVariable.h" />
   </ItemGroup>
