@@ -50,6 +50,7 @@ void AmsPort::Close()
         it->second->Erase(it->first, tmms);
         it = notifications.erase(it);
     }
+    tmms = DEFAULT_TIMEOUT;
     port = 0;
 }
 

@@ -87,7 +87,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("192.168.0.232");
+        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // test new Ams with new Ip
@@ -116,7 +116,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("192.168.0.232");
+        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // add + remove -> null
@@ -154,7 +154,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
 private:
     void Run(AmsRouter& testee, uint8_t id)
     {
-        static const IpV4 ip {"192.168.0.232"};
+        static const IpV4 ip("ads-server");
         for (uint8_t i = 0; i < 255; ++i) {
             AmsNetId netId {192, 168, 0, i, 0, id};
             fructose_assert_eq(0, testee.AddRoute(netId, ip));
@@ -181,18 +181,18 @@ struct TestIpV4 : test_base<TestIpV4> {
     void testComparsion(const std::string&)
     {
         static const IpV4 testee {"192.168.0.1"};
+        static const IpV4 localhost {"localhost"};
         static const IpV4 lower {"192.167.0.1"};
         static const IpV4 higher {"193.0.0.0"};
-        static const IpV4 tooLong {"192.168.0.1."};
         static const IpV4 tooShort {"192.168.0."};
         static const IpV4 tooHigh {"0.0.0.257"};
         static const IpV4 tooLow {"-1.0.0.254"};
         static const IpV4 invalid {"192.d.0.254"};
 
         fructose_assert_eq(0xC0A80001, testee.value);
+        fructose_assert_eq(0x7F000001U, localhost.value);
         fructose_assert_eq(0xC0A70001, lower.value);
         fructose_assert_eq(0xC1000000, higher.value);
-        fructose_assert_eq(0xFFFFFFFF, tooLong.value);
         fructose_assert_eq(0xFFFFFFFF, tooShort.value);
         fructose_assert_eq(0xFFFFFFFF, tooHigh.value);
         fructose_assert_eq(0xFFFFFFFF, tooLow.value);
@@ -257,7 +257,7 @@ struct TestAds : test_base<TestAds> {
     TestAds(std::ostream& outstream)
         : out(outstream)
     {
-        AdsAddRoute(serverNetId, "192.168.0.232");
+        AdsAddRoute(serverNetId, "ads-server");
     }
 #ifdef WIN32
     ~TestAds()
@@ -769,7 +769,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         : out(outstream),
         runEndurance(false)
     {
-        AdsAddRoute(serverNetId, "192.168.0.232");
+        AdsAddRoute(serverNetId, "ads-server");
     }
 #ifdef WIN32
     ~TestAdsPerformance()

@@ -6,10 +6,31 @@ LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
 OOI_LIB_NAME = AdsLibOOI-$(OS_NAME).a
 INSTALL_DIR=example/ADS
+OBJ_DIR = obj
 CXX :=$(CROSS_COMPILE)$(CXX)
-CFLAGS += -std=c++11
-CFLAGS += -pedantic
-CFLAGS += -Wall
+CXXFLAGS += -std=c++11
+CXXFLAGS += -pedantic
+CXXFLAGS += -Wall
+CPPFLAGS += -I AdsLib/
+CPPFLAGS += -I ../
+CPPFLAGS += -I ./
+
+SRC_FILES = AdsDef.cpp
+SRC_FILES += AdsLib.cpp
+SRC_FILES += AmsConnection.cpp
+SRC_FILES += AmsPort.cpp
+SRC_FILES += AmsRouter.cpp
+SRC_FILES += Log.cpp
+SRC_FILES += NotificationDispatcher.cpp
+SRC_FILES += Sockets.cpp
+SRC_FILES += Frame.cpp
+OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
+
+OOI_SRC_FILES = $(SRC_FILES)
+OOI_SRC_FILES += AdsDevice.cpp
+OOI_SRC_FILES += AdsNotification.cpp
+OOI_SRC_FILES += AdsRoute.cpp
+OOI_OBJ_FILES = $(OOI_SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
 ifeq ($(OS_NAME),Darwin)
 	LIBS += -lc++
@@ -19,21 +40,26 @@ ifeq ($(OS_NAME),win32)
 	LIBS += -lws2_32
 endif
 
+all: $(LIB_NAME)
 
-.cpp.o:
-	$(CXX) -c $(CFLAGS) $< -o $@ -I AdsLib/ -I ../ -I ./
+$(OBJ_DIR):
+	mkdir -p $@
 
-$(LIB_NAME): AdsDef.o AdsLib.o AmsConnection.o AmsPort.o AmsRouter.o Log.o NotificationDispatcher.o Sockets.o Frame.o
+$(OOI_OBJ_FILES): | $(OBJ_DIR)
+$(OOI_OBJ_FILES): $(OBJ_DIR)/%.o: %.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(LIB_NAME): $(OBJ_FILES)
 	$(AR) rvs $@ $?
 
-$(OOI_LIB_NAME): AdsDevice.o AdsNotification.o AdsRoute.o
+$(OOI_LIB_NAME): $(OOI_OBJ_FILES)
 	$(AR) rvs $@ $?
 
-AdsLibTest.bin: AdsLibTest/main.o $(LIB_NAME)
-	$(CXX) $^ $(LIBS) -o $@
+AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
+	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
 
-AdsLibOOITest.bin: AdsLibOOITest/main.o $(OOI_LIB_NAME) $(LIB_NAME)
-	$(CXX) $^ $(LIBS) -o $@
+AdsLibOOITest.bin: AdsLibOOITest/main.cpp $(OOI_LIB_NAME) $(LIB_NAME)
+	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
 
 test: AdsLibTest.bin
 	./$<
@@ -52,7 +78,7 @@ install_ooi: $(OOI_LIB_NAME) AdsLibOOI/*.h
 install: install_lib install_ooi
 
 clean:
-	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(INSTALL_DIR)
+	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(INSTALL_DIR) $(OBJ_DIR)/*.o
 
 uncrustify:
 	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
