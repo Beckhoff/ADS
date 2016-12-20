@@ -175,7 +175,7 @@ void readStateExample(std::ostream& out, long port, const AmsAddr& server)
 void runExample(std::ostream& out)
 {
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
-    static const char remoteIpV4[] = "192.168.0.232";
+    static const char remoteIpV4[] = "ads-server";
 
     // add local route to your EtherCAT Master
     if (AdsAddRoute(remoteNetId, remoteIpV4)) {

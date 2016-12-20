@@ -25,12 +25,38 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstring>
 #include <exception>
 #include <sstream>
 #include <system_error>
 
+static const struct addrinfo addrinfo = []() {
+                                            struct addrinfo a;
+                                            memset(&a, 0, sizeof(a));
+                                            a.ai_family = AF_INET;
+                                            a.ai_socktype = SOCK_STREAM;
+                                            a.ai_protocol = IPPROTO_TCP;
+                                            return a;
+                                        } ();
+
+uint32_t getIpv4(const std::string& addr)
+{
+    struct addrinfo* res;
+
+    InitSocketLibrary();
+    const auto status = getaddrinfo(addr.c_str(), nullptr, &addrinfo, &res);
+    if (status) {
+        return 0xffffffff;
+    }
+
+    const auto value = ((struct sockaddr_in*)res->ai_addr)->sin_addr.s_addr;
+    freeaddrinfo(res);
+    WSACleanup();
+    return ntohl(value);
+}
+
 IpV4::IpV4(const std::string& addr)
-    : value(ntohl(inet_addr(addr.c_str())))
+    : value(getIpv4(addr))
 {}
 
 IpV4::IpV4(uint32_t __val)

@@ -29,6 +29,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <netdb.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -50,6 +51,7 @@ inline int InitSocketLibrary(void)
 #else // defined(_WIN32) && !defined(__CYGWIN__)
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #include <winsock2.h>
+#include <ws2tcpip.h>
 inline int InitSocketLibrary(void)
 {
     WSADATA wsaData;
