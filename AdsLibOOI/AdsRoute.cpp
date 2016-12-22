@@ -29,6 +29,30 @@ AdsRoute::AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port)
     m_LocalPort(new long { AdsPortOpenEx() }, CloseLocalPort)
 {}
 
+AdsHandle AdsRoute::GetHandle(const uint32_t offset) const
+{
+    return {new uint32_t {offset}, HandleDeleter {}};
+}
+
+AdsHandle AdsRoute::GetHandle(const std::string& symbolName) const
+{
+    uint32_t handle = 0;
+    uint32_t bytesRead = 0;
+    uint32_t error = ReadWriteReqEx2(
+        ADSIGRP_SYM_HNDBYNAME, 0,
+        sizeof(handle), &handle,
+        symbolName.size(),
+        symbolName.c_str(),
+        &bytesRead
+        );
+
+    if (error || (sizeof(handle) != bytesRead)) {
+        throw AdsException(error);
+    }
+
+    return AdsHandle {new uint32_t {handle}, SymbolHandleDeleter {*this}};
+}
+
 long AdsRoute::GetLocalPort() const
 {
     return *m_LocalPort;
@@ -54,7 +78,7 @@ uint32_t AdsRoute::GetTimeout() const
 
 long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const
 {
-    return AdsSyncReadReqEx2(GetLocalPort(), &m_Port, group, offset, length, buffer, &bytesRead);
+    return AdsSyncReadReqEx2(*m_LocalPort, &m_Port, group, offset, length, buffer, &bytesRead);
 }
 
 long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,

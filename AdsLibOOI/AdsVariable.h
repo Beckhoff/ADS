@@ -1,19 +1,19 @@
 #pragma once
 
-#include "AdsHandle.h"
+#include "AdsRoute.h"
 
 template<typename T>
 struct AdsVariable {
     AdsVariable(const AdsRoute& route, const std::string& symbolName)
         : m_Route(route),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(route, symbolName)
+        m_Handle(route.GetHandle(symbolName))
     {}
 
     AdsVariable(const AdsRoute& route, const uint32_t group, const uint32_t offset)
         : m_Route(route),
         m_IndexGroup(group),
-        m_Handle(offset)
+        m_Handle(std::move(route.GetHandle(offset)))
     {}
 
     operator T() const
@@ -46,7 +46,7 @@ struct AdsVariable {
     {
         uint32_t bytesRead = 0;
         auto error = m_Route.ReadReqEx2(m_IndexGroup,
-                                        m_Handle,
+                                        *m_Handle,
                                         size,
                                         data,
                                         bytesRead);
@@ -58,7 +58,7 @@ struct AdsVariable {
 
     void Write(const size_t size, const void* data) const
     {
-        auto error = m_Route.WriteReqEx(m_IndexGroup, m_Handle, size, data);
+        auto error = m_Route.WriteReqEx(m_IndexGroup, *m_Handle, size, data);
         if (error) {
             throw AdsException(error);
         }

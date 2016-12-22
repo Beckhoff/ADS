@@ -1,4 +1,5 @@
 #include "AdsNotification.h"
+#include "AdsLib/AdsLib.h"
 
 struct NotificationHandleDeleter : public SymbolHandleDeleter {
     NotificationHandleDeleter(const AdsRoute& route)
@@ -19,11 +20,11 @@ struct NotificationHandleDeleter : public SymbolHandleDeleter {
     }
 };
 
-AdsHandleGuard GetNotificationHandle(const AdsRoute&              route,
-                                     uint32_t                     indexGroup,
-                                     uint32_t                     indexOffset,
-                                     const AdsNotificationAttrib& notificationAttributes,
-                                     PAdsNotificationFuncEx       callback)
+AdsHandle GetNotificationHandle(const AdsRoute&              route,
+                                uint32_t                     indexGroup,
+                                uint32_t                     indexOffset,
+                                const AdsNotificationAttrib& notificationAttributes,
+                                PAdsNotificationFuncEx       callback)
 {
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(
@@ -43,8 +44,8 @@ AdsNotification::AdsNotification(const AdsRoute&              route,
                                  const std::string&           symbolName,
                                  const AdsNotificationAttrib& notificationAttributes,
                                  PAdsNotificationFuncEx       callback)
-    : m_Symbol(route, symbolName),
-    m_Notification(GetNotificationHandle(route, ADSIGRP_SYM_VALBYHND, m_Symbol, notificationAttributes, callback))
+    : m_Symbol(route.GetHandle(symbolName)),
+    m_Notification(GetNotificationHandle(route, ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes, callback))
 {}
 
 AdsNotification::AdsNotification(const AdsRoute&              route,
@@ -52,6 +53,6 @@ AdsNotification::AdsNotification(const AdsRoute&              route,
                                  uint32_t                     indexOffset,
                                  const AdsNotificationAttrib& notificationAttributes,
                                  PAdsNotificationFuncEx       callback)
-    : m_Symbol{indexOffset},
+    : m_Symbol{route.GetHandle(indexOffset)},
     m_Notification(GetNotificationHandle(route, indexGroup, indexOffset, notificationAttributes, callback))
 {}

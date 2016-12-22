@@ -2,7 +2,7 @@
 #include "AdsLibOOI/AdsLibOOI.h"
 #include "AdsLibOOI/AdsDevice.h"
 #include "AdsLibOOI/AdsNotification.h"
-#include "AdsLib/AdsDef.h"
+#include "AdsLib/AdsLib.h"
 
 #include <chrono>
 #include <iostream>

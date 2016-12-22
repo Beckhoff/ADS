@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AdsHandle.h"
 #include "AdsRoute.h"
 
 struct AdsNotification {
@@ -16,7 +15,7 @@ struct AdsNotification {
                     PAdsNotificationFuncEx       callback);
 private:
     AdsHandle m_Symbol;
-    AdsRoute::AdsHandleGuard m_Notification;
+    AdsHandle m_Notification;
 };
 
 /*

@@ -1,40 +1,13 @@
 #pragma once
 #include "AdsException.h"
+#include "AdsHandle.h"
 #include "AdsLib/AdsDef.h"
-#include <memory>
 
 struct AdsRoute {
-    struct HandleDeleter {
-        virtual void operator()(uint32_t* handle)
-        {
-            delete handle;
-        }
-    };
-    using AdsHandleGuard = std::unique_ptr<uint32_t, HandleDeleter>;
-
-    struct SymbolHandleDeleter : public HandleDeleter {
-        SymbolHandleDeleter(const AdsRoute& route)
-            : m_Route(route)
-        {}
-
-        virtual void operator()(uint32_t* handle)
-        {
-            uint32_t error = m_Route.WriteReqEx(
-                ADSIGRP_SYM_RELEASEHND, 0,
-                sizeof(*handle), handle
-                );
-            delete handle;
-
-            if (error) {
-                throw AdsException(error);
-            }
-        }
-
-protected:
-        const AdsRoute& m_Route;
-    };
-
     AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port);
+
+    AdsHandle GetHandle(uint32_t offset) const;
+    AdsHandle GetHandle(const std::string& symbolName) const;
 
     long GetLocalPort() const;
     void SetTimeout(const uint32_t timeout) const;
