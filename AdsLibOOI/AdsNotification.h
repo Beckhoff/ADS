@@ -4,24 +4,19 @@
 #include "AdsRoute.h"
 
 struct AdsNotification {
-    static AdsNotification Register(const AdsRoute&              route,
-                                    const std::string&           symbolName,
-                                    const AdsNotificationAttrib& notificationAttributes,
-                                    PAdsNotificationFuncEx       callback);
+    AdsNotification(const AdsRoute&              route,
+                    const std::string&           symbolName,
+                    const AdsNotificationAttrib& notificationAttributes,
+                    PAdsNotificationFuncEx       callback);
 
-    static AdsNotification Register(const AdsRoute&              route,
-                                    uint32_t                     indexGroup,
-                                    uint32_t                     indexOffset,
-                                    const AdsNotificationAttrib& notificationAttributes,
-                                    PAdsNotificationFuncEx       callback);
+    AdsNotification(const AdsRoute&              route,
+                    uint32_t                     indexGroup,
+                    uint32_t                     indexOffset,
+                    const AdsNotificationAttrib& notificationAttributes,
+                    PAdsNotificationFuncEx       callback);
 private:
-    AdsNotification(std::shared_ptr<uint32_t> hNotify, AdsHandle hSymbol)
-        : m_Notification(hNotify),
-        m_Symbol(std::move(hSymbol))
-    {}
-
-    std::shared_ptr<uint32_t> m_Notification;
     AdsHandle m_Symbol;
+    AdsHandleGuard m_Notification;
 };
 
 /*

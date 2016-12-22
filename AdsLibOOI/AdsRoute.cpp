@@ -57,6 +57,23 @@ long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void
     return AdsSyncReadReqEx2(GetLocalPort(), &m_Port, group, offset, length, buffer, &bytesRead);
 }
 
+long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
+                               uint32_t    indexOffset,
+                               uint32_t    readLength,
+                               void*       readData,
+                               uint32_t    writeLength,
+                               const void* writeData,
+                               uint32_t*   bytesRead) const
+{
+    return AdsSyncReadWriteReqEx2(GetLocalPort(),
+                                  &m_Port,
+                                  indexGroup, indexOffset,
+                                  readLength, readData,
+                                  writeLength, writeData,
+                                  bytesRead
+                                  );
+}
+
 long AdsRoute::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
 {
     return AdsSyncWriteReqEx(GetLocalPort(), &m_Port, group, offset, length, buffer);

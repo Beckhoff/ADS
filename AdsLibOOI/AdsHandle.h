@@ -1,26 +1,30 @@
 #pragma once
 
 #include "AdsException.h"
+#include "AdsRoute.h"
 #include "AdsLib/AdsLib.h"
 #include <functional>
 #include <memory>
 
 struct HandleDeleter {
-    HandleDeleter(const AmsAddr __address = AmsAddr {}, long __port = 0) : address(__address),
-                                                                           port(__port)
+    virtual void operator()(uint32_t* handle)
+    {
+        delete handle;
+    }
+};
+using AdsHandleGuard = std::unique_ptr<uint32_t, HandleDeleter>;
+
+struct SymbolHandleDeleter : public HandleDeleter {
+    SymbolHandleDeleter(const AdsRoute& route)
+        : m_Route(route)
     {}
 
-    void operator()(uint32_t* handle)
+    virtual void operator()(uint32_t* handle)
     {
-        uint32_t error = 0;
-        if (port) {
-            error = AdsSyncWriteReqEx(
-                port,
-                &address,
-                ADSIGRP_SYM_RELEASEHND, 0,
-                sizeof(*handle), handle
-                );
-        }
+        uint32_t error = m_Route.WriteReqEx(
+            ADSIGRP_SYM_RELEASEHND, 0,
+            sizeof(*handle), handle
+            );
         delete handle;
 
         if (error) {
@@ -28,22 +32,17 @@ struct HandleDeleter {
         }
     }
 
-private:
-    const AmsAddr address;
-    const long port;
+protected:
+    const AdsRoute& m_Route;
 };
 
 class AdsHandle {
-    using AdsHandleGuard = std::unique_ptr<uint32_t, HandleDeleter>;
-
-    static AdsHandleGuard GetHandle(const AmsAddr address, long port,
+    static AdsHandleGuard GetHandle(const AdsRoute&    route,
                                     const std::string& symbolName)
     {
         uint32_t handle = 0;
         uint32_t bytesRead = 0;
-        uint32_t error = AdsSyncReadWriteReqEx2(
-            port,
-            &address,
+        uint32_t error = route.ReadWriteReqEx2(
             ADSIGRP_SYM_HNDBYNAME, 0,
             sizeof(handle), &handle,
             symbolName.size(),
@@ -55,7 +54,7 @@ class AdsHandle {
             throw AdsException(error);
         }
 
-        return AdsHandleGuard {new uint32_t {handle}, HandleDeleter {address, port}};
+        return AdsHandleGuard {new uint32_t {handle}, SymbolHandleDeleter {route}};
     }
 
     AdsHandleGuard m_Handle;
@@ -64,9 +63,8 @@ public:
         : m_Handle{new uint32_t {offset}, HandleDeleter {}}
     {}
 
-    AdsHandle(const AmsAddr address, long port,
-              const std::string& symbolName)
-        : m_Handle{GetHandle(address, port, symbolName)}
+    AdsHandle(const AdsRoute& route, const std::string& symbolName)
+        : m_Handle{GetHandle(route, symbolName)}
     {}
 
     AdsHandle(AdsHandle&& ref)

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AdsRoute.h"
 #include "AdsHandle.h"
 
 template<typename T>
@@ -8,7 +7,7 @@ struct AdsVariable {
     AdsVariable(const AdsRoute& route, const std::string& symbolName)
         : m_Route(route),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
-        m_Handle(route.m_Port, route.GetLocalPort(), symbolName)
+        m_Handle(route, symbolName)
     {}
 
     AdsVariable(const AdsRoute& route, const uint32_t group, const uint32_t offset)

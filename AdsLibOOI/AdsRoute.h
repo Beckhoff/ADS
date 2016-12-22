@@ -13,6 +13,13 @@ struct AdsRoute {
     const AmsAddr m_Port;
 
     long ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const;
+    long ReadWriteReqEx2(uint32_t    indexGroup,
+                         uint32_t    indexOffset,
+                         uint32_t    readLength,
+                         void*       readData,
+                         uint32_t    writeLength,
+                         const void* writeData,
+                         uint32_t*   bytesRead) const;
     long WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const;
 private:
     std::shared_ptr<long> m_LocalPort;
