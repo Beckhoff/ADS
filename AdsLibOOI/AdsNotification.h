@@ -16,7 +16,7 @@ struct AdsNotification {
                     PAdsNotificationFuncEx       callback);
 private:
     AdsHandle m_Symbol;
-    AdsHandleGuard m_Notification;
+    AdsRoute::AdsHandleGuard m_Notification;
 };
 
 /*
