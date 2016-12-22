@@ -51,3 +51,13 @@ uint32_t AdsRoute::GetTimeout() const
     }
     return timeout;
 }
+
+long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const
+{
+    return AdsSyncReadReqEx2(GetLocalPort(), &m_Port, group, offset, length, buffer, &bytesRead);
+}
+
+long AdsRoute::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
+{
+    return AdsSyncWriteReqEx(GetLocalPort(), &m_Port, group, offset, length, buffer);
+}

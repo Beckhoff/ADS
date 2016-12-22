@@ -5,16 +5,14 @@
 
 template<typename T>
 struct AdsVariable {
-    AdsVariable(const AdsRoute route, const std::string& symbolName)
+    AdsVariable(const AdsRoute& route, const std::string& symbolName)
         : m_Route(route),
-        m_AmsAddr(route.m_Port),
         m_IndexGroup(ADSIGRP_SYM_VALBYHND),
         m_Handle(route.m_Port, route.GetLocalPort(), symbolName)
     {}
 
-    AdsVariable(const AdsRoute route, const uint32_t group, const uint32_t offset)
+    AdsVariable(const AdsRoute& route, const uint32_t group, const uint32_t offset)
         : m_Route(route),
-        m_AmsAddr(route.m_Port),
         m_IndexGroup(group),
         m_Handle(offset)
     {}
@@ -48,13 +46,11 @@ struct AdsVariable {
     void Read(const size_t size, void* data) const
     {
         uint32_t bytesRead = 0;
-        auto error = AdsSyncReadReqEx2(m_Route.GetLocalPort(),
-                                       &m_AmsAddr,
-                                       m_IndexGroup,
-                                       m_Handle,
-                                       size,
-                                       data,
-                                       &bytesRead);
+        auto error = m_Route.ReadReqEx2(m_IndexGroup,
+                                        m_Handle,
+                                        size,
+                                        data,
+                                        bytesRead);
 
         if (error || (size != bytesRead)) {
             throw AdsException(error);
@@ -63,36 +59,13 @@ struct AdsVariable {
 
     void Write(const size_t size, const void* data) const
     {
-        auto error = AdsSyncWriteReqEx(m_Route.GetLocalPort(),
-                                       &m_AmsAddr,
-                                       m_IndexGroup,
-                                       m_Handle,
-                                       size,
-                                       data);
-
+        auto error = m_Route.WriteReqEx(m_IndexGroup, m_Handle, size, data);
         if (error) {
             throw AdsException(error);
         }
     }
-
-    const AdsRoute GetRoute() const
-    {
-        return m_Route;
-    }
-
-    const long GetHandle() const
-    {
-        return m_Handle;
-    }
-
-    const uint32_t GetIndexGroup() const
-    {
-        return m_IndexGroup;
-    }
-
 private:
-    const AdsRoute m_Route;
-    const AmsAddr m_AmsAddr;
+    const AdsRoute& m_Route;
     const uint32_t m_IndexGroup;
     const AdsHandle m_Handle;
 };

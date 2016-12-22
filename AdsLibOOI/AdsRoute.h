@@ -11,6 +11,9 @@ struct AdsRoute {
 
     const std::shared_ptr<const AmsNetId> m_NetId;
     const AmsAddr m_Port;
+
+    long ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const;
+    long WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const;
 private:
     std::shared_ptr<long> m_LocalPort;
 };
