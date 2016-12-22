@@ -69,17 +69,17 @@ struct TestAds : test_base<TestAds> {
         std::vector<AdsRoute> routes;
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
-            routes.emplace_back("ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+            routes.emplace_back("ads-server", serverNetId, AMSPORT_R0_PLC_TC3);
             fructose_loop_assert(i, 0 != routes.back().GetLocalPort());
         }
     }
 
     void testAdsReadReqEx2(const std::string&)
     {
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_SymbolPort, out);
+        print(route.m_Port, out);
         {
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -95,7 +95,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, 0x4020, 0};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -135,7 +135,7 @@ struct TestAds : test_base<TestAds> {
     {
         static const char NAME[] = "Plc30 App";
         {
-            AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
             fructose_assert(0 != route.GetLocalPort());
 
             AdsDevice device {route};
@@ -155,7 +155,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsDevice device {unknownAmsAddrRoute};
             fructose_assert(0 == device.m_Info.version.version);
             fructose_assert(false);
@@ -170,7 +170,7 @@ struct TestAds : test_base<TestAds> {
     void testAdsReadStateReqEx(const std::string&)
     {
         {
-            AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
             fructose_assert(0 != route.GetLocalPort());
 
             AdsDevice device {route};
@@ -181,7 +181,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide bad server port
         try {
-            AdsRoute badAmsAddrRoute {"ads-server", serverNetId, 1000, 1000};
+            AdsRoute badAmsAddrRoute {"ads-server", serverNetId, 1000};
             AdsDevice device {badAmsAddrRoute};
             const auto state = device.GetState();
             fructose_assert(0 == state.device);
@@ -198,7 +198,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsDevice device {unknownAmsAddrRoute};
             const auto state = device.GetState();
             fructose_assert(0 == state.device);
@@ -214,10 +214,10 @@ struct TestAds : test_base<TestAds> {
     void testAdsReadWriteReqEx2(const std::string&)
     {
         static const char handleName[] = "MAIN.byByte";
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_SymbolPort, out);
+        print(route.m_Port, out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, handleName};
@@ -237,7 +237,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, handleName};
             fructose_assert(0 == buffer);
             fructose_assert(false);
@@ -290,10 +290,10 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteReqEx(const std::string&)
     {
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_SymbolPort, out);
+        print(route.m_Port, out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
@@ -313,7 +313,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsVariable<uint32_t> buffer {unknownAmsAddrRoute, 0x4020, 0};
             buffer = 0;
             fructose_assert(false);
@@ -348,7 +348,7 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsWriteControlReqEx(const std::string&)
     {
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
         AdsDevice device {route};
@@ -371,7 +371,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             AdsDevice device {unknownAmsAddrRoute};
             device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
             fructose_assert(false);
@@ -407,7 +407,7 @@ struct TestAds : test_base<TestAds> {
         static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
         AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {NOTIFY_CYCLE_100NS}};
 
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
         // provide out of range port
@@ -418,7 +418,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         try {
-            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+            AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
             auto buffer = AdsNotification::Register(unknownAmsAddrRoute, 0x4020, 4, attrib, &NotifyCallback);
             fructose_assert(false);
         } catch (const AdsException& ex) {
@@ -482,7 +482,7 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsTimeout(const std::string&)
     {
-        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3};
+        AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
         fructose_assert(5000 == route.GetTimeout());
@@ -550,7 +550,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
-        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3);
         AdsNotificationAttrib attrib = { 1, ADSTRANS_SERVERCYCLE, 0, {1000000} };
         std::vector<AdsNotification> notifications;
 
@@ -582,7 +582,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 private:
     void Notifications(size_t numNotifications)
     {
-        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3);
         AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {1000000}};
         std::vector<AdsNotification> notifications;
 
@@ -594,7 +594,7 @@ private:
 
     void Read(const size_t numLoops)
     {
-        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+        const AdsRoute route("ads-server", serverNetId, AMSPORT_R0_PLC_TC3);
         fructose_assert(0 != route.GetLocalPort());
 
         AdsVariable<uint32_t> buffer {route, 0x4020, 0};
@@ -606,7 +606,7 @@ private:
     }
 };
 
-const AdsRoute staticRoute("ads-server", serverNetId, AMSPORT_R0_PLC_TC3, AMSPORT_R0_PLC_TC3);
+const AdsRoute staticRoute("ads-server", serverNetId, AMSPORT_R0_PLC_TC3);
 AdsVariable<uint32_t> staticBuffer {staticRoute, "MAIN.byByte"};
 static const uint32_t staticRead = staticBuffer;
 
