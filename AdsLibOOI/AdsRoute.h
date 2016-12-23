@@ -6,8 +6,23 @@
 struct AdsRoute {
     AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port);
 
+    /**
+     * Create a dummy handle used by AdsVariable for access by indexGroup/Offset.
+     */
     AdsHandle GetHandle(uint32_t offset) const;
+
+    /**
+     * Create a handle for access by symbol name.
+     */
     AdsHandle GetHandle(const std::string& symbolName) const;
+
+    /**
+     * Create a notification handle.
+     */
+    AdsHandle GetHandle(uint32_t                     indexGroup,
+                        uint32_t                     indexOffset,
+                        const AdsNotificationAttrib& notificationAttributes,
+                        PAdsNotificationFuncEx       callback) const;
 
     long GetLocalPort() const;
     void SetTimeout(const uint32_t timeout) const;

@@ -53,6 +53,25 @@ AdsHandle AdsRoute::GetHandle(const std::string& symbolName) const
     return AdsHandle {new uint32_t {handle}, SymbolHandleDeleter {*this}};
 }
 
+AdsHandle AdsRoute::GetHandle(uint32_t                     indexGroup,
+                              uint32_t                     indexOffset,
+                              const AdsNotificationAttrib& notificationAttributes,
+                              PAdsNotificationFuncEx       callback) const
+{
+    uint32_t handle = 0;
+    auto error = AdsSyncAddDeviceNotificationReqEx(
+        *m_LocalPort, &m_Addr,
+        indexGroup, indexOffset,
+        &notificationAttributes,
+        callback,
+        indexOffset,
+        &handle);
+    if (error || !handle) {
+        throw AdsException(error);
+    }
+    return {new uint32_t {handle}, NotificationHandleDeleter {*this}};
+}
+
 long AdsRoute::GetLocalPort() const
 {
     return *m_LocalPort;
