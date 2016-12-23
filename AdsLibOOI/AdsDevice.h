@@ -13,7 +13,7 @@ struct AdsDevice {
     void SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const;
     AdsDeviceState GetState() const;
 
-    const AdsRoute m_Route;
+    const AdsRoute& m_Route;
     const DeviceInfo m_Info;
 
 private:
