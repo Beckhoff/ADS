@@ -49,7 +49,7 @@ struct AdsVariable {
                                         *m_Handle,
                                         size,
                                         data,
-                                        bytesRead);
+                                        &bytesRead);
 
         if (error || (size != bytesRead)) {
             throw AdsException(error);

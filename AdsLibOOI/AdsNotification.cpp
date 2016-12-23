@@ -10,7 +10,7 @@ struct NotificationHandleDeleter : public SymbolHandleDeleter {
     {
         uint32_t error = 0;
         if (handle && *handle) {
-            error = AdsSyncDelDeviceNotificationReqEx(m_Route.GetLocalPort(), &m_Route.m_Port, *handle);
+            error = AdsSyncDelDeviceNotificationReqEx(m_Route.GetLocalPort(), &m_Route.m_Addr, *handle);
         }
         delete handle;
 
@@ -28,7 +28,7 @@ AdsHandle GetNotificationHandle(const AdsRoute&              route,
 {
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(
-        route.GetLocalPort(), &route.m_Port,
+        route.GetLocalPort(), &route.m_Addr,
         indexGroup, indexOffset,
         &notificationAttributes,
         callback,

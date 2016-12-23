@@ -14,9 +14,9 @@ struct AdsRoute {
     uint32_t GetTimeout() const;
 
     const std::shared_ptr<const AmsNetId> m_NetId;
-    const AmsAddr m_Port;
+    const AmsAddr m_Addr;
 
-    long ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const;
+    long ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const;
     long ReadWriteReqEx2(uint32_t    indexGroup,
                          uint32_t    indexOffset,
                          uint32_t    readLength,

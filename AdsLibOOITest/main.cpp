@@ -79,7 +79,7 @@ struct TestAds : test_base<TestAds> {
         AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_Port, out);
+        print(route.m_Addr, out);
         {
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
@@ -217,7 +217,7 @@ struct TestAds : test_base<TestAds> {
         AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_Port, out);
+        print(route.m_Addr, out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, handleName};
@@ -293,7 +293,7 @@ struct TestAds : test_base<TestAds> {
         AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        print(route.m_Port, out);
+        print(route.m_Addr, out);
         {
             uint32_t outBuffer = 0xDEADBEEF;
             AdsVariable<uint32_t> buffer {route, 0x4020, 0};

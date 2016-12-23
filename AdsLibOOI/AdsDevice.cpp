@@ -6,7 +6,7 @@ DeviceInfo AdsDevice::__ReadDeviceInfo(const AdsRoute& route)
 {
     DeviceInfo info;
     auto error = AdsSyncReadDeviceInfoReqEx(route.GetLocalPort(),
-                                            &route.m_Port,
+                                            &route.m_Addr,
                                             &info.name[0],
                                             &info.version);
 
@@ -27,7 +27,7 @@ AdsDeviceState AdsDevice::GetState() const
     static_assert(sizeof(state.ads) == sizeof(uint16_t), "size missmatch");
     static_assert(sizeof(state.device) == sizeof(uint16_t), "size missmatch");
     auto error = AdsSyncReadStateReqEx(m_Route.GetLocalPort(),
-                                       &m_Route.m_Port,
+                                       &m_Route.m_Addr,
                                        (uint16_t*)&state.ads,
                                        (uint16_t*)&state.device);
 
@@ -41,7 +41,7 @@ AdsDeviceState AdsDevice::GetState() const
 void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
 {
     auto error = AdsSyncWriteControlReqEx(m_Route.GetLocalPort(),
-                                          &m_Route.m_Port,
+                                          &m_Route.m_Addr,
                                           AdsState,
                                           DeviceState,
                                           0, nullptr); // No additional data

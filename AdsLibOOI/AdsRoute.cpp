@@ -25,7 +25,7 @@ static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 
 AdsRoute::AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port)
     : m_NetId(AddRoute(netId, ipV4.c_str()), DeleteRoute),
-    m_Port({netId, port}),
+    m_Addr({netId, port}),
     m_LocalPort(new long { AdsPortOpenEx() }, CloseLocalPort)
 {}
 
@@ -76,9 +76,9 @@ uint32_t AdsRoute::GetTimeout() const
     return timeout;
 }
 
-long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t& bytesRead) const
+long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const
 {
-    return AdsSyncReadReqEx2(*m_LocalPort, &m_Port, group, offset, length, buffer, &bytesRead);
+    return AdsSyncReadReqEx2(*m_LocalPort, &m_Addr, group, offset, length, buffer, bytesRead);
 }
 
 long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
@@ -90,7 +90,7 @@ long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
                                uint32_t*   bytesRead) const
 {
     return AdsSyncReadWriteReqEx2(GetLocalPort(),
-                                  &m_Port,
+                                  &m_Addr,
                                   indexGroup, indexOffset,
                                   readLength, readData,
                                   writeLength, writeData,
@@ -100,5 +100,5 @@ long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
 
 long AdsRoute::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
 {
-    return AdsSyncWriteReqEx(GetLocalPort(), &m_Port, group, offset, length, buffer);
+    return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, length, buffer);
 }
