@@ -91,7 +91,7 @@ void notificationByNameExample(std::ostream& out, long port, const AmsAddr& serv
     uint32_t handle;
 
     out << __FUNCTION__ << "():\n";
-    handle = getHandleByNameExample(out, port, server, "MAIN.byByte");
+    handle = getHandleByNameExample(out, port, server, "MAIN.byByte[4]");
 
     const long addStatus = AdsSyncAddDeviceNotificationReqEx(port,
                                                              &server,
@@ -140,7 +140,7 @@ void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
     uint32_t handle;
 
     out << __FUNCTION__ << "():\n";
-    handle = getHandleByNameExample(out, port, server, "MAIN.byByte");
+    handle = getHandleByNameExample(out, port, server, "MAIN.byByte[4]");
 
     for (size_t i = 0; i < 8; ++i) {
         const long status = AdsSyncReadReqEx2(port,
