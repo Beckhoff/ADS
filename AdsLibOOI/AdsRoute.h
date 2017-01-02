@@ -35,6 +35,8 @@ using AdsHandle = AdsResource<uint32_t>;
 struct AdsRoute {
     AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port);
 
+    DeviceInfo GetDeviceInfo() const;
+
     /** Get handle to access AdsVariable by indexGroup/Offset */
     AdsHandle GetHandle(uint32_t offset) const;
 

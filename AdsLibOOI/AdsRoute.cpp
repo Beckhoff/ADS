@@ -30,6 +30,20 @@ long AdsRoute::DeleteSymbolHandle(uint32_t handle) const
     return WriteReqEx(ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
 }
 
+DeviceInfo AdsRoute::GetDeviceInfo() const
+{
+    DeviceInfo info;
+    auto error = AdsSyncReadDeviceInfoReqEx(GetLocalPort(),
+                                            &m_Addr,
+                                            &info.name[0],
+                                            &info.version);
+
+    if (error) {
+        throw AdsException(error);
+    }
+    return info;
+}
+
 AdsHandle AdsRoute::GetHandle(const uint32_t offset) const
 {
     return {new uint32_t {offset}, {[](uint32_t){ return 0; }}};

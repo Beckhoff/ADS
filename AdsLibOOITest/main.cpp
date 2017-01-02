@@ -1,6 +1,6 @@
 
 #include "AdsLibOOI/AdsLibOOI.h"
-#include "AdsLibOOI/AdsDevice.h"
+#include "AdsLibOOI/AdsRoute.h"
 #include "AdsLibOOI/AdsNotification.h"
 #include "AdsLib/AdsLib.h"
 
@@ -138,12 +138,12 @@ struct TestAds : test_base<TestAds> {
             AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
             fructose_assert(0 != route.GetLocalPort());
 
-            AdsDevice device {route};
+            DeviceInfo info = route.GetDeviceInfo();
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-                fructose_loop_assert(i, 3 == device.m_Info.version.version);
-                fructose_loop_assert(i, 1 == device.m_Info.version.revision);
-                fructose_loop_assert(i, 1202 == device.m_Info.version.build);
-                fructose_loop_assert(i, 0 == strncmp(device.m_Info.name, NAME, sizeof(NAME)));
+                fructose_loop_assert(i, 3 == info.version.version);
+                fructose_loop_assert(i, 1 == info.version.revision);
+                fructose_loop_assert(i, 1202 == info.version.build);
+                fructose_loop_assert(i, 0 == strncmp(info.name, NAME, sizeof(NAME)));
             }
         }
 
@@ -156,8 +156,8 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         try {
             AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
-            AdsDevice device {unknownAmsAddrRoute};
-            fructose_assert(0 == device.m_Info.version.version);
+            DeviceInfo info = unknownAmsAddrRoute.GetDeviceInfo();
+            fructose_assert(0 == info.version.version);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
