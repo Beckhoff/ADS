@@ -1,7 +1,8 @@
 #pragma once
 #include "AdsException.h"
-#include "AdsHandle.h"
 #include "AdsLib/AdsDef.h"
+#include <cstdint>
+#include <memory>
 
 template<class T>
 struct ResourceDeleter {
@@ -19,6 +20,8 @@ private:
 };
 template<typename T>
 using AdsResource = std::unique_ptr<T, ResourceDeleter<T> >;
+
+using AdsHandle = AdsResource<uint32_t>;
 
 struct AdsRoute {
     AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port);
@@ -53,4 +56,6 @@ struct AdsRoute {
     const AmsAddr m_Addr;
 private:
     AdsResource<const long> m_LocalPort;
+    void DeleteNotificationHandle(uint32_t handle) const;
+    void DeleteSymbolHandle(uint32_t handle) const;
 };
