@@ -2,25 +2,17 @@
 #include "AdsException.h"
 #include "AdsLib/AdsLib.h"
 
-void AdsRoute::DeleteSymbolHandle(uint32_t handle) const
+long AdsRoute::DeleteSymbolHandle(uint32_t handle) const
 {
-    uint32_t error = WriteReqEx(ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
-
-    if (error) {
-        throw AdsException(error);
-    }
+    return WriteReqEx(ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
 }
 
-void AdsRoute::DeleteNotificationHandle(uint32_t handle) const
+long AdsRoute::DeleteNotificationHandle(uint32_t handle) const
 {
-    uint32_t error = 0;
     if (handle) {
-        error = AdsSyncDelDeviceNotificationReqEx(GetLocalPort(), &m_Addr, handle);
+        return AdsSyncDelDeviceNotificationReqEx(GetLocalPort(), &m_Addr, handle);
     }
-
-    if (error) {
-        throw AdsException(error);
-    }
+    return 0;
 }
 
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
@@ -33,14 +25,14 @@ static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 }
 
 AdsRoute::AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port)
-    : m_NetId(AddRoute(netId, ipV4.c_str()), {AdsDelRoute}),
+    : m_NetId(AddRoute(netId, ipV4.c_str()), {[](AmsNetId ams){AdsDelRoute(ams); return 0; }}),
     m_Addr({netId, port}),
     m_LocalPort(new long { AdsPortOpenEx() }, {AdsPortCloseEx})
 {}
 
 AdsHandle AdsRoute::GetHandle(const uint32_t offset) const
 {
-    return {new uint32_t {offset}, {[](uint32_t){ return; }}};
+    return {new uint32_t {offset}, {[](uint32_t){ return 0; }}};
 }
 
 AdsHandle AdsRoute::GetHandle(const std::string& symbolName) const

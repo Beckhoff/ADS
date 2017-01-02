@@ -6,17 +6,21 @@
 
 template<class T>
 struct ResourceDeleter {
-    ResourceDeleter(const std::function<void(T)> func)
+    ResourceDeleter(const std::function<long(T)> func)
         : FreeResource(func)
     {}
 
     void operator()(T* resource)
     {
-        FreeResource(*resource);
+        const long error = FreeResource(*resource);
         delete resource;
+
+        if (error) {
+            throw AdsException(error);
+        }
     }
 private:
-    const std::function<void(T)> FreeResource;
+    const std::function<long(T)> FreeResource;
 };
 template<typename T>
 using AdsResource = std::unique_ptr<T, ResourceDeleter<T> >;
@@ -56,6 +60,6 @@ struct AdsRoute {
     const AmsAddr m_Addr;
 private:
     AdsResource<const long> m_LocalPort;
-    void DeleteNotificationHandle(uint32_t handle) const;
-    void DeleteSymbolHandle(uint32_t handle) const;
+    long DeleteNotificationHandle(uint32_t handle) const;
+    long DeleteSymbolHandle(uint32_t handle) const;
 };
