@@ -4,6 +4,11 @@
 #include <cstdint>
 #include <memory>
 
+struct AdsDeviceState {
+    ADSSTATE ads;
+    ADSSTATE device;
+};
+
 template<class T>
 struct ResourceDeleter {
     ResourceDeleter(const std::function<long(T)> func)
@@ -43,8 +48,12 @@ struct AdsRoute {
                         PAdsNotificationFuncEx       callback) const;
 
     long GetLocalPort() const;
-    void SetTimeout(const uint32_t timeout) const;
+
+    AdsDeviceState GetState() const;
+    void SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const;
+
     uint32_t GetTimeout() const;
+    void SetTimeout(const uint32_t timeout) const;
 
     long ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const;
     long ReadWriteReqEx2(uint32_t    indexGroup,

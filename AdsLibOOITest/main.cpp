@@ -173,8 +173,7 @@ struct TestAds : test_base<TestAds> {
             AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
             fructose_assert(0 != route.GetLocalPort());
 
-            AdsDevice device {route};
-            const auto state = device.GetState();
+            const auto state = route.GetState();
             fructose_assert(ADSSTATE_RUN == state.ads);
             fructose_assert(0 == state.device);
         }
@@ -182,8 +181,7 @@ struct TestAds : test_base<TestAds> {
         // provide bad server port
         try {
             AdsRoute badAmsAddrRoute {"ads-server", serverNetId, 1000};
-            AdsDevice device {badAmsAddrRoute};
-            const auto state = device.GetState();
+            const auto state = badAmsAddrRoute.GetState();
             fructose_assert(0 == state.device);
             fructose_assert(false);
         } catch (const AdsException& ex) {
@@ -199,8 +197,7 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         try {
             AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
-            AdsDevice device {unknownAmsAddrRoute};
-            const auto state = device.GetState();
+            const auto state = unknownAmsAddrRoute.GetState();
             fructose_assert(0 == state.device);
             fructose_assert(false);
         } catch (const AdsException& ex) {
@@ -351,14 +348,13 @@ struct TestAds : test_base<TestAds> {
         AdsRoute route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
         fructose_assert(0 != route.GetLocalPort());
 
-        AdsDevice device {route};
         for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
-            device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
-            auto state = device.GetState();
+            route.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
+            auto state = route.GetState();
             fructose_loop_assert(i, ADSSTATE_STOP == state.ads);
             fructose_loop_assert(i, ADSSTATE_INVALID == state.device);
-            device.SetState(ADSSTATE_RUN, ADSSTATE_INVALID);
-            state = device.GetState();
+            route.SetState(ADSSTATE_RUN, ADSSTATE_INVALID);
+            state = route.GetState();
             fructose_loop_assert(i, ADSSTATE_RUN == state.ads);
             fructose_loop_assert(i, ADSSTATE_INVALID == state.device);
         }
@@ -372,8 +368,7 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         try {
             AdsRoute unknownAmsAddrRoute {"ads-server", {1, 2, 3, 4, 5, 6}, AMSPORT_R0_PLC_TC3};
-            AdsDevice device {unknownAmsAddrRoute};
-            device.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
+            unknownAmsAddrRoute.SetState(ADSSTATE_STOP, ADSSTATE_INVALID);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(GLOBALERR_MISSING_ROUTE == ex.getErrorCode());
@@ -381,13 +376,13 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid adsState
         try {
-            device.SetState(ADSSTATE_INVALID, ADSSTATE_INVALID);
+            route.SetState(ADSSTATE_INVALID, ADSSTATE_INVALID);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());
         }
         try {
-            device.SetState(ADSSTATE_MAXSTATES, ADSSTATE_INVALID);
+            route.SetState(ADSSTATE_MAXSTATES, ADSSTATE_INVALID);
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.getErrorCode());

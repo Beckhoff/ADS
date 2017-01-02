@@ -78,6 +78,36 @@ long AdsRoute::GetLocalPort() const
     return *m_LocalPort;
 }
 
+AdsDeviceState AdsRoute::GetState() const
+{
+    AdsDeviceState state;
+    static_assert(sizeof(state.ads) == sizeof(uint16_t), "size missmatch");
+    static_assert(sizeof(state.device) == sizeof(uint16_t), "size missmatch");
+    auto error = AdsSyncReadStateReqEx(GetLocalPort(),
+                                       &m_Addr,
+                                       (uint16_t*)&state.ads,
+                                       (uint16_t*)&state.device);
+
+    if (error) {
+        throw AdsException(error);
+    }
+
+    return state;
+}
+
+void AdsRoute::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
+{
+    auto error = AdsSyncWriteControlReqEx(GetLocalPort(),
+                                          &m_Addr,
+                                          AdsState,
+                                          DeviceState,
+                                          0, nullptr); // No additional data
+
+    if (error) {
+        throw AdsException(error);
+    }
+}
+
 void AdsRoute::SetTimeout(const uint32_t timeout) const
 {
     const auto error = AdsSyncSetTimeoutEx(GetLocalPort(), timeout);
