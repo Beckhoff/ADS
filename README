@@ -6,9 +6,9 @@ Currently (2017-01-05) tested with:
 ===================================
 Ubuntu 16.04 LTS x86_64 | gcc 5.4.1
 OSX 10.11               | clang 703.0.31
-Win7 64-bit             | gcc 4.9.3 + cygwin64
-Win7 64-bit             | gcc 4.9.3 + cygwin32
-Win7 64-bit             | MS Visual C++ 2013 (untended)
+Win7 64-bit             | gcc 5.4.0 + cygwin64
+Win7 64-bit             | gcc 5.4.0 + cygwin32
+Win7 64-bit             | MS Visual C++ 2015 (untended)
 
 
 compile & usage
