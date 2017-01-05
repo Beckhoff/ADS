@@ -1,5 +1,5 @@
 #include "AdsLibOOI/AdsLibOOI.h"
-#include "AdsLibOOI/AdsDevice.h"
+#include "AdsLibOOI/AdsRoute.h"
 #include <array>
 #include <iostream>
 
@@ -11,7 +11,7 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsRoute route {remoteIpV4, remoteNetId, 851, 851};
+        AdsRoute route {remoteIpV4, remoteNetId, 851};
 
         // Write and read values
         uint8_t valueToWrite = 0x99;
@@ -45,13 +45,13 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)readArrayIndex[3] << "\n";
 
         // Read device info
-        AdsDevice device {route};
-        const auto version = device.m_Info.version;
-        out << "Read device info from device " << device.m_Info.name << ". Version is " <<
+        const auto deviceInfo = route.GetDeviceInfo();
+        const auto version = deviceInfo.version;
+        out << "Read device info from device " << deviceInfo.name << ". Version is " <<
         (uint32_t)version.version << "." << (uint32_t)version.revision << "." <<
         (uint32_t)version.build << "\n";
 
-        const auto state = device.GetState();
+        const auto state = route.GetState();
         out << "AdsState: " << std::dec << state.ads << " DeviceState: " << std::dec << state.device << '\n';
     } catch (const AdsException& ex) {
         auto errorCode = ex.getErrorCode();
