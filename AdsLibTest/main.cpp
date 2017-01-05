@@ -274,13 +274,15 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsPortOpenEx(const std::string&)
     {
-        static const size_t NUM_TEST_PORTS = 2;
+        static const size_t NUM_TEST_PORTS = Router::NUM_PORTS_MAX - 1;
         long port[NUM_TEST_PORTS];
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             port[i] = testPortOpen(out);
             fructose_loop_assert(i, 0 != port[i]);
         }
+        // there should be no more ports available at ADS router
+        fructose_assert(0 == testPortOpen(out));
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             if (port[i]) {
