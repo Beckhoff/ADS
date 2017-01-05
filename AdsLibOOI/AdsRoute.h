@@ -2,6 +2,7 @@
 #include "AdsException.h"
 #include "AdsLib/AdsDef.h"
 #include <cstdint>
+#include <functional>
 #include <memory>
 
 struct AdsDeviceState {
