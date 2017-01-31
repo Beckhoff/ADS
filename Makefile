@@ -10,7 +10,7 @@ CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
 CPPFLAGS += -I AdsLib/
-CPPFLAGS += -I ../
+CPPFLAGS += -I tools/
 
 SRC_FILES = AdsDef.cpp
 SRC_FILES += AdsLib.cpp
