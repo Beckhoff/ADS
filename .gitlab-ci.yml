@@ -1,0 +1,26 @@
+image: ubuntu
+stages:
+  - build
+
+cache:
+  paths:
+  - apt-cache/
+
+
+gcc-build:
+  stage: build
+  script:
+    - apt-get -o dir::cache::archives="apt-cache" update && apt-get -o dir::cache::archives="apt-cache" install -y build-essential
+    - make
+  artifacts:
+    paths:
+    - AdsLib-Linux.a
+
+clang-build:
+  stage: build
+  script:
+    - apt-get -o dir::cache::archives="apt-cache" update && apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang
+    - make CXX=/usr/bin/clang++
+  artifacts:
+    paths:
+    - AdsLib-Linux.a
