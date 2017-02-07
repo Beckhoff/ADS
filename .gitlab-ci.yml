@@ -1,26 +1,38 @@
-image: ubuntu
 stages:
-  - build
+  - gcc
+  - clang
 
 cache:
   paths:
   - apt-cache/
 
 
-gcc-build:
-  stage: build
+gcc:
+  stage: gcc
   script:
-    - apt-get -o dir::cache::archives="apt-cache" update && apt-get -o dir::cache::archives="apt-cache" install -y build-essential
+    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential wget
+    - tools/10_get_fructose.sh
     - make
+    - make test
+    - make install
+    - cd example
+    - make
+    - make test
   artifacts:
     paths:
     - AdsLib-Linux.a
 
-clang-build:
-  stage: build
+clang:
+  stage: clang
   script:
-    - apt-get -o dir::cache::archives="apt-cache" update && apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang
+    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang wget
+    - tools/10_get_fructose.sh
     - make CXX=/usr/bin/clang++
+    - make CXX=/usr/bin/clang++ test
+    - make install
+    - cd example
+    - make CXX=/usr/bin/clang++
+    - make CXX=/usr/bin/clang++ test
   artifacts:
     paths:
     - AdsLib-Linux.a
