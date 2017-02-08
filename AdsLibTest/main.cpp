@@ -274,7 +274,7 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsPortOpenEx(const std::string&)
     {
-        static const size_t NUM_TEST_PORTS = Router::NUM_PORTS_MAX - 1;
+        static const size_t NUM_TEST_PORTS = Router::NUM_PORTS_MAX;
         long port[NUM_TEST_PORTS];
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
