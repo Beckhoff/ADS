@@ -10,14 +10,16 @@ cache:
 gcc:
   stage: gcc
   script:
-    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential wget
+    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential nmap wget
     - tools/10_get_fructose.sh
+    - ncat -l 48898 --keep-open & export ncat_pid=$!
     - make
     - make test
     - make install
     - cd example
     - make
     - make test
+    - kill ${ncat_pid}
   artifacts:
     paths:
     - AdsLib-Linux.a
@@ -25,14 +27,16 @@ gcc:
 clang:
   stage: clang
   script:
-    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang wget
+    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang nmap wget
     - tools/10_get_fructose.sh
+    - ncat -l 48898 --keep-open & export ncat_pid=$!
     - make CXX=/usr/bin/clang++
     - make CXX=/usr/bin/clang++ test
     - make install
     - cd example
     - make CXX=/usr/bin/clang++
     - make CXX=/usr/bin/clang++ test
+    - kill ${ncat_pid}
   artifacts:
     paths:
     - AdsLib-Linux.a
