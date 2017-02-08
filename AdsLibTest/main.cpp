@@ -903,6 +903,7 @@ private:
 
 int main()
 {
+    int failedTests = 0;
 #if 0
     std::ostream nowhere(0);
     std::ostream& errorstream = nowhere;
@@ -912,22 +913,22 @@ int main()
 #if 1
     TestAmsAddr amsAddrTest(errorstream);
     amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
-    amsAddrTest.run();
+    failedTests += amsAddrTest.run();
 
     TestAmsRouter routerTest(errorstream);
     routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
     routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
 //    routerTest.add_test("testConcurrentRoutes", &TestAmsRouter::testConcurrentRoutes);
-    routerTest.run();
+    failedTests += routerTest.run();
 
     TestIpV4 ipv4Test(errorstream);
     ipv4Test.add_test("testComparsion", &TestIpV4::testComparsion);
-    ipv4Test.run();
+    failedTests += ipv4Test.run();
 
     TestRingBuffer ringBufferTest(errorstream);
     ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
     ringBufferTest.add_test("testWriteChunk", &TestRingBuffer::testWriteChunk);
-    ringBufferTest.run();
+    failedTests += ringBufferTest.run();
 #endif
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
@@ -939,14 +940,15 @@ int main()
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-    adsTest.run();
+    failedTests += adsTest.run();
 
     TestAdsPerformance performance(errorstream);
     performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
     performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 //	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
-    performance.run();
+    failedTests += performance.run();
 
     std::cout << "Hit ENTER to continue\n";
     std::cin.ignore();
+    return failedTests;
 }
