@@ -1,42 +1,49 @@
 stages:
-  - gcc
-  - clang
+  - build
+  - test
 
 cache:
   paths:
   - apt-cache/
 
-
-gcc:
-  stage: gcc
+.build-template: &build-template
+  stage: build
+  tags:
+    - docker
+  image: lbs1:5500/beckhoff/docker-mxe
   script:
-    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential nmap wget
     - tools/10_get_fructose.sh
-    - ncat -l 48898 --keep-open & export ncat_pid=$!
-    - make
-    - make test
-    - make install
+    - make CXX=$compiler OS_NAME=$os_name
+    - make CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
+    - make OS_NAME=$os_name install
     - cd example
-    - make
-    - make test
-    - kill ${ncat_pid}
+    - make CXX=$compiler OS_NAME=$os_name
+    - make CXX=$compiler OS_NAME=$os_name example.bin
   artifacts:
     paths:
-    - AdsLib-Linux.a
+    - AdsLib-$os_name.a
+    - AdsLibTest.bin
+    - example/example.bin
 
-clang:
-  stage: clang
+test:
+  tags:
+    - kvm
+  stage: test
+  before_script:
+    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y nmap
   script:
-    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y build-essential clang nmap wget
-    - tools/10_get_fructose.sh
-    - ncat -l 48898 --keep-open & export ncat_pid=$!
-    - make CXX=/usr/bin/clang++
-    - make CXX=/usr/bin/clang++ test
-    - make install
-    - cd example
-    - make CXX=/usr/bin/clang++
-    - make CXX=/usr/bin/clang++ test
-    - kill ${ncat_pid}
-  artifacts:
-    paths:
-    - AdsLib-Linux.a
+    - ./tools/90_run_tests.sh
+  dependencies:
+    - build:gcc
+
+build:gcc:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: Linux
+
+build:clang:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: Linux
