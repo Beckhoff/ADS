@@ -188,19 +188,15 @@ struct TestIpV4 : test_base<TestIpV4> {
         static const IpV4 localhost {"localhost"};
         static const IpV4 lower {"192.167.0.1"};
         static const IpV4 higher {"193.0.0.0"};
-        static const IpV4 tooShort {"192.168.0."};
-        static const IpV4 tooHigh {"0.0.0.257"};
-        static const IpV4 tooLow {"-1.0.0.254"};
-        static const IpV4 invalid {"192.d.0.254"};
 
         fructose_assert_eq(0xC0A80001, testee.value);
         fructose_assert_eq(0x7F000001U, localhost.value);
         fructose_assert_eq(0xC0A70001, lower.value);
         fructose_assert_eq(0xC1000000, higher.value);
-        fructose_assert_eq(0xFFFFFFFF, tooShort.value);
-        fructose_assert_eq(0xFFFFFFFF, tooHigh.value);
-        fructose_assert_eq(0xFFFFFFFF, tooLow.value);
-        fructose_assert_eq(0xFFFFFFFF, invalid.value);
+        fructose_assert_exception(IpV4 {"192.168.0."}, std::runtime_error);     // too short
+        fructose_assert_exception(IpV4 {"0.0.0.257"}, std::runtime_error);      // too high
+        fructose_assert_exception(IpV4 {"-1.0.0.254"}, std::runtime_error);     // too low
+        fructose_assert_exception(IpV4 {"192.d.0.254"}, std::runtime_error);    // invalid
         fructose_assert(lower < testee);
         fructose_assert(testee < higher);
     }

@@ -48,6 +48,8 @@ long AdsAddRoute(const AmsNetId ams, const char* ip)
         return GetRouter().AddRoute(ams, IpV4(ip));
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
+    } catch (const std::runtime_error&) {
+        return GLOBALERR_TARGET_PORT;
     }
 }
 
