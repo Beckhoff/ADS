@@ -47,3 +47,9 @@ build:clang:
   variables:
     compiler: /usr/bin/clang++
     os_name: Linux
+
+build:mxe:
+  <<: *build-template
+  variables:
+    compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
+    os_name: win32
