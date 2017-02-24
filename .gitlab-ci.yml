@@ -27,6 +27,31 @@ cache:
     - AdsLibTest.bin
     - example/example.bin
 
+build:clang:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: Linux
+
+build:gcc:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: Linux
+
+build:gcc-i386:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: Linux
+    ci_cxx_flags: -m32
+
+build:mxe:
+  <<: *build-template
+  variables:
+    compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
+    os_name: win32
+
 .test-template: &test-template
   tags:
     - kvm
@@ -55,28 +80,3 @@ test:gcc-i386:
   stage: test:gcc-i386
   dependencies:
     - build:gcc-i386
-
-build:gcc:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/g++
-    os_name: Linux
-
-build:gcc-i386:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/g++
-    os_name: Linux
-    ci_cxx_flags: -m32
-
-build:clang:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/clang++
-    os_name: Linux
-
-build:mxe:
-  <<: *build-template
-  variables:
-    compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
-    os_name: win32
