@@ -46,6 +46,13 @@ build:gcc:
     compiler: /usr/bin/g++
     os_name: Linux
 
+build:gcc-i386:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: Linux
+    ci_cxx_flags: -m32
+
 build:clang:
   <<: *build-template
   variables:

@@ -4,6 +4,7 @@ LIB_NAME = AdsLib-$(OS_NAME).a
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
+CXXFLAGS += $(ci_cxx_flags)
 
 ifeq ($(OS_NAME),win32)
         LIBS += -lws2_32
