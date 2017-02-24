@@ -1,6 +1,7 @@
 stages:
   - build
   - test:gcc
+  - test:gcc-i386
 
 cache:
   paths:
@@ -30,7 +31,9 @@ cache:
     - kvm
     - x86_64
   before_script:
-    - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y nmap
+    - sudo dpkg --add-architecture i386
+    - sudo apt-get -o dir::cache::archives="apt-cache" update
+    - sudo apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 nmap
   script:
     - ./tools/90_run_tests.sh
 
@@ -39,6 +42,12 @@ test:gcc:
   stage: test:gcc
   dependencies:
     - build:gcc
+
+test:gcc-i386:
+  <<: *test-template
+  stage: test:gcc-i386
+  dependencies:
+    - build:gcc-i386
 
 build:gcc:
   <<: *build-template
