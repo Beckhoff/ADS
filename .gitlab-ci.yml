@@ -43,7 +43,7 @@ build:gcc-i386:
   <<: *build-template
   variables:
     compiler: /usr/bin/g++
-    os_name: Linux
+    os_name: i386
     ci_cxx_flags: -m32
 
 build:mxe:
