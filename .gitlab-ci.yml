@@ -1,6 +1,6 @@
 stages:
   - build
-  - test
+  - test:gcc
 
 cache:
   paths:
@@ -25,14 +25,18 @@ cache:
     - AdsLibTest.bin
     - example/example.bin
 
-test:
+.test-template: &test-template
   tags:
     - kvm
-  stage: test
+    - x86_64
   before_script:
     - sudo apt-get -o dir::cache::archives="apt-cache" update && sudo apt-get -o dir::cache::archives="apt-cache" install -y nmap
   script:
     - ./tools/90_run_tests.sh
+
+test:gcc:
+  <<: *test-template
+  stage: test:gcc
   dependencies:
     - build:gcc
 
