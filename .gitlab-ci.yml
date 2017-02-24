@@ -1,5 +1,6 @@
 stages:
   - build
+  - test:clang
   - test:gcc
   - test:gcc-i386
 
@@ -36,6 +37,12 @@ cache:
     - sudo apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 nmap
   script:
     - ./tools/90_run_tests.sh
+
+test:clang:
+  <<: *test-template
+  stage: test:clang
+  dependencies:
+    - build:clang
 
 test:gcc:
   <<: *test-template
