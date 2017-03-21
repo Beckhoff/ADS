@@ -44,10 +44,10 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 
     auto conn = connections.find(ip);
     if (conn == connections.end()) {
-        const auto isFirst = connections.empty();
         conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
 
-        if (isFirst) {
+        /** in case no local AmsNetId was set previously, we derive one */
+        if (!localAddr) {
             localAddr = AmsNetId {conn->second->ownIp};
         }
     }
@@ -118,6 +118,12 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
         return 0;
     }
     return ADSERR_CLIENT_PORTNOTOPEN;
+}
+
+void AmsRouter::SetLocalAddress(AmsNetId netId)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    localAddr = netId;
 }
 
 long AmsRouter::GetTimeout(uint16_t port, uint32_t& timeout)

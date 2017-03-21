@@ -65,6 +65,12 @@ long AdsPortOpenEx();
 long AdsGetLocalAddressEx(long port, AmsAddr* pAddr);
 
 /**
+ * Change local NetId
+ * @param[in] ams local AmsNetId
+ */
+void AdsSetLocalAddress(AmsNetId ams);
+
+/**
  * Reads data synchronously from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
  * @param[in] pAddr Structure with NetId and port number of the ADS server.

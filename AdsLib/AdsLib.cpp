@@ -75,6 +75,11 @@ long AdsGetLocalAddressEx(long port, AmsAddr* pAddr)
     return GetRouter().GetLocalAddress((uint16_t)port, pAddr);
 }
 
+void AdsSetLocalAddress(const AmsNetId ams)
+{
+    GetRouter().SetLocalAddress(ams);
+}
+
 long AdsSyncReadReqEx2(long           port,
                        const AmsAddr* pAddr,
                        uint32_t       indexGroup,

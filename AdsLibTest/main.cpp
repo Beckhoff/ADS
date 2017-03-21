@@ -142,6 +142,23 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(testee.GetConnection(netId_2));
     }
 
+    void testAmsRouterSetLocalAddress(const std::string&)
+    {
+        const AmsNetId newNetId {1, 2, 3, 4, 5, 6};
+        AmsRouter testee;
+        AmsAddr changed;
+        AmsAddr empty;
+
+        const auto port = testee.OpenPort();
+        fructose_assert(0 == testee.GetLocalAddress(port, &empty));
+        fructose_assert(!empty.netId);
+
+        testee.SetLocalAddress(newNetId);
+        fructose_assert(0 == testee.GetLocalAddress(port, &changed));
+        fructose_assert(0 == memcmp(&newNetId, &changed.netId, sizeof(newNetId)));
+        fructose_assert(port == changed.port);
+    }
+
     void testConcurrentRoutes(const std::string&)
     {
         std::thread threads[256];
@@ -915,6 +932,7 @@ int main()
     routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
     routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
 //    routerTest.add_test("testConcurrentRoutes", &TestAmsRouter::testConcurrentRoutes);
+    routerTest.add_test("testAmsRouterSetLocalAddress", &TestAmsRouter::testAmsRouterSetLocalAddress);
     failedTests += routerTest.run();
 
     TestIpV4 ipv4Test(errorstream);
