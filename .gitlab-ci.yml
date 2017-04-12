@@ -33,6 +33,14 @@ build:clang:
     compiler: /usr/bin/clang++
     os_name: Linux
 
+build:clang_macOS:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: macOS
+  tags:
+    - macOS
+
 build:gcc:
   <<: *build-template
   variables:
