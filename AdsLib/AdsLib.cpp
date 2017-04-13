@@ -302,7 +302,7 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
             pAttrib->nMaxDelay,
             pAttrib->nCycleTime
         });
-        Notification notify { pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port };
+        auto notify = std::make_shared<Notification>(pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port);
         return GetRouter().AddNotification(
             request,
             pNotification,

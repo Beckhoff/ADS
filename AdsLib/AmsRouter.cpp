@@ -167,7 +167,7 @@ std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator AmsRouter::__GetConnec
     return connections.end();
 }
 
-long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, Notification& notify)
+long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, std::shared_ptr<Notification> notify)
 {
     if (request.bytesRead) {
         *request.bytesRead = 0;

@@ -38,7 +38,7 @@ struct NotificationDispatcher {
     NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn);
     ~NotificationDispatcher();
     bool operator<(const NotificationDispatcher& ref) const;
-    void Emplace(uint32_t hNotify, Notification& notification);
+    void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
     inline void Notify() { sem.Post(); }
     void Run();
@@ -46,11 +46,13 @@ struct NotificationDispatcher {
     const VirtualConnection conn;
     RingBuffer ring;
 private:
-    std::map<uint32_t, Notification> notifications;
+    std::map<uint32_t, std::shared_ptr<Notification> > notifications;
     std::recursive_mutex mutex;
     AmsProxy& proxy;
     Semaphore sem;
     std::thread thread;
+
+    std::shared_ptr<Notification> Find(uint32_t hNotify);
 };
 
 #endif /* #ifndef _NOTIFICATION_DISPATCHER_H_ */

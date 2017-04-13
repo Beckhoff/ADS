@@ -82,10 +82,10 @@ AmsConnection::~AmsConnection()
     receiver.join();
 }
 
-NotifyMapping AmsConnection::CreateNotifyMapping(uint32_t hNotify, Notification& notification)
+NotifyMapping AmsConnection::CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification)
 {
-    const auto dispatcher = DispatcherListAdd(notification.connection);
-    notification.hNotify(hNotify);
+    const auto dispatcher = DispatcherListAdd(notification->connection);
+    notification->hNotify(hNotify);
     dispatcher->Emplace(hNotify, notification);
     return NotifyMapping {hNotify, dispatcher};
 }
