@@ -3,6 +3,7 @@ stages:
   - test:clang
   - test:gcc
   - test:gcc-i386
+  - test:clang-macOS
 
 cache:
   paths:
@@ -33,7 +34,7 @@ build:clang:
     compiler: /usr/bin/clang++
     os_name: Linux
 
-build:clang_macOS:
+build:clang-macOS:
   <<: *build-template
   variables:
     compiler: /usr/bin/clang++
@@ -88,3 +89,12 @@ test:gcc-i386:
   stage: test:gcc-i386
   dependencies:
     - build:gcc-i386
+
+test:clang-macOS:
+  stage: test:clang-macOS
+  dependencies:
+    - build:clang-macOS
+  tags:
+    - macOS
+  script:
+    - ./tools/90_run_tests.sh
