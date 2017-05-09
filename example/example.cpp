@@ -1,4 +1,4 @@
-
+#include "AdsClient/AdsClient.h"
 #include "AdsLib.h"
 
 #include <iostream>
@@ -209,7 +209,52 @@ void runExample(std::ostream& out)
 #endif
 }
 
+void runAdsClientExample(std::ostream& out)
+{
+    static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
+    static const char remoteIpV4[] = "192.168.0.232";
+    static const AmsAddr remoteNetAddress { remoteNetId, 851 };
+
+    out << __FUNCTION__ << "():\n";
+
+    try {
+        AdsClient adsClient;
+
+        // Add routes
+        adsClient.AddRoute(remoteNetId, remoteIpV4);
+
+        // Write and read values
+        uint8_t valueToWrite = 0x99;
+        adsClient.Write<uint8_t>(remoteNetAddress, "MAIN.byByte[0]", valueToWrite);
+        auto readValue = adsClient.Read<uint8_t>(remoteNetAddress, "MAIN.byByte");
+        out << "Wrote " << (uint32_t)valueToWrite << " to MAIN.byByte and read " << (uint32_t)readValue << " back\n";
+
+        // Write and read arrays
+        std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
+        adsClient.WriteArray<uint8_t, arrayToWrite.size()>(remoteNetAddress, "MAIN.byByte", &arrayToWrite[0]);
+        auto readArray = adsClient.ReadArray<uint8_t, arrayToWrite.size()>(remoteNetAddress, "MAIN.byByte");
+        out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
+        (uint32_t)arrayToWrite[3] << "\n";
+        out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
+        (uint32_t)readArray[3] << "\n";
+
+        // Read device info
+        auto deviceInfo = adsClient.ReadDeviceInfo(remoteNetAddress);
+        out << "Read device info from device " << deviceInfo.name << ". Version is " <<
+        (uint32_t)deviceInfo.version.version << "." << (uint32_t)deviceInfo.version.revision << "." <<
+        (uint32_t)deviceInfo.version.build << "\n";
+
+        // Delete routes
+        adsClient.DeleteRoute(remoteNetId);
+    } catch (const AdsException& ex) {
+        auto errorCode = ex.getErrorCode();
+        out << "Error: " << errorCode << "\n";
+        out << "AdsException message: " << ex.what() << "\n";
+    }
+}
+
 int main()
 {
     runExample(std::cout);
+    runAdsClientExample(std::cout);
 }
