@@ -87,7 +87,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("192.168.0.232");
+        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // test new Ams with new Ip
@@ -95,7 +95,11 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
-        // existent Ams with new Ip -> close old connection
+        // existent Ams with new Ip -> close old connection manually, now
+        fructose_assert(ROUTERERR_PORTALREADYINUSE == testee.AddRoute(netId_1, ip_remote));
+        fructose_assert(testee.GetConnection(netId_1));
+        fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
+        testee.DelRoute(netId_1);
         fructose_assert(0 == testee.AddRoute(netId_1, ip_remote));
         fructose_assert(testee.GetConnection(netId_1));
         fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
@@ -116,7 +120,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("192.168.0.232");
+        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // add + remove -> null
@@ -154,7 +158,7 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
 private:
     void Run(AmsRouter& testee, uint8_t id)
     {
-        static const IpV4 ip {"192.168.0.232"};
+        static const IpV4 ip("ads-server");
         for (uint8_t i = 0; i < 255; ++i) {
             AmsNetId netId {192, 168, 0, i, 0, id};
             fructose_assert_eq(0, testee.AddRoute(netId, ip));
@@ -181,18 +185,18 @@ struct TestIpV4 : test_base<TestIpV4> {
     void testComparsion(const std::string&)
     {
         static const IpV4 testee {"192.168.0.1"};
+        static const IpV4 localhost {"localhost"};
         static const IpV4 lower {"192.167.0.1"};
         static const IpV4 higher {"193.0.0.0"};
-        static const IpV4 tooLong {"192.168.0.1."};
         static const IpV4 tooShort {"192.168.0."};
         static const IpV4 tooHigh {"0.0.0.257"};
         static const IpV4 tooLow {"-1.0.0.254"};
         static const IpV4 invalid {"192.d.0.254"};
 
         fructose_assert_eq(0xC0A80001, testee.value);
+        fructose_assert_eq(0x7F000001U, localhost.value);
         fructose_assert_eq(0xC0A70001, lower.value);
         fructose_assert_eq(0xC1000000, higher.value);
-        fructose_assert_eq(0xFFFFFFFF, tooLong.value);
         fructose_assert_eq(0xFFFFFFFF, tooShort.value);
         fructose_assert_eq(0xFFFFFFFF, tooHigh.value);
         fructose_assert_eq(0xFFFFFFFF, tooLow.value);
@@ -257,7 +261,7 @@ struct TestAds : test_base<TestAds> {
     TestAds(std::ostream& outstream)
         : out(outstream)
     {
-        AdsAddRoute(serverNetId, "192.168.0.232");
+        AdsAddRoute(serverNetId, "ads-server");
     }
 #ifdef WIN32
     ~TestAds()
@@ -324,7 +328,8 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         bytesRead = 0xDEADBEEF;
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
+                        AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
         fructose_assert(0 == bytesRead);
 
         // provide nullptr to bytesRead
@@ -384,7 +389,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
 
         // provide nullptr to devName/version
         fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, nullptr, &version));
@@ -414,7 +419,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
 
         // provide nullptr to adsState/devState
         fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, nullptr, &devState));
@@ -476,7 +481,7 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         bytesRead = 0xDEADBEEF;
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 ==
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
                         AdsSyncReadWriteReqEx2(port, &unknown, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
                                                handleName,
                                                &bytesRead));
@@ -583,7 +588,8 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
+                        AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
 
         // provide nullptr to writeBuffer
         fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
@@ -642,7 +648,12 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncWriteControlReqEx(port, &unknown, ADSSTATE_STOP, 0, 0, nullptr));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncWriteControlReqEx(port,
+                                                                            &unknown,
+                                                                            ADSSTATE_STOP,
+                                                                            0,
+                                                                            0,
+                                                                            nullptr));
 
         // provide invalid adsState
         fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
@@ -684,7 +695,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 ==
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
                         AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser,
                                                           &notification[0]));
 
@@ -762,7 +773,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         : out(outstream),
         runEndurance(false)
     {
-        AdsAddRoute(serverNetId, "192.168.0.232");
+        AdsAddRoute(serverNetId, "ads-server");
     }
 #ifdef WIN32
     ~TestAdsPerformance()

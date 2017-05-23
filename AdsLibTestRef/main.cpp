@@ -120,7 +120,8 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         bytesRead = 0xDEADBEEF;
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
+                        AdsSyncReadReqEx2(port, &unknown, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead));
         fructose_assert(0 == bytesRead);
 
         // provide nullptr to bytesRead
@@ -180,7 +181,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadDeviceInfoReqEx(port, &unknown, devName, &version));
 
         // provide nullptr to devName/version
         fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadDeviceInfoReqEx(port, &server, nullptr, &version));
@@ -210,7 +211,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncReadStateReqEx(port, &unknown, &adsState, &devState));
 
         // provide nullptr to adsState/devState
         fructose_assert(ADSERR_CLIENT_INVALIDPARM == AdsSyncReadStateReqEx(port, &server, nullptr, &devState));
@@ -270,7 +271,7 @@ struct TestAds : test_base<TestAds> {
         // provide unknown AmsAddr
         bytesRead = 0xDEADBEEF;
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 ==
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
                         AdsSyncReadWriteReqEx2(port, &unknown, 0xF003, 0, sizeof(buffer), &buffer, sizeof(handleName),
                                                handleName,
                                                &bytesRead));
@@ -377,7 +378,8 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
+                        AdsSyncWriteReqEx(port, &unknown, 0x4020, 0, sizeof(outBuffer), &outBuffer));
 
         // provide nullptr to writeBuffer
         fructose_assert(ADSERR_CLIENT_INVALIDPARM ==
@@ -436,7 +438,12 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 == AdsSyncWriteControlReqEx(port, &unknown, ADSSTATE_STOP, 0, 0, nullptr));
+        fructose_assert(GLOBALERR_MISSING_ROUTE == AdsSyncWriteControlReqEx(port,
+                                                                            &unknown,
+                                                                            ADSSTATE_STOP,
+                                                                            0,
+                                                                            0,
+                                                                            nullptr));
 
         // provide invalid adsState
         fructose_assert(ADSERR_DEVICE_SRVNOTSUPP ==
@@ -478,7 +485,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide unknown AmsAddr
         AmsAddr unknown { { 1, 2, 3, 4, 5, 6 }, AMSPORT_R0_PLC_TC3 };
-        fructose_assert(0x7 ==
+        fructose_assert(GLOBALERR_MISSING_ROUTE ==
                         AdsSyncAddDeviceNotificationReqEx(port, &unknown, 0x4020, 0, &attrib, &NotifyCallback, hUser,
                                                           &notification[0]));
 
