@@ -1,5 +1,5 @@
 #include "AdsLibOOI/AdsLibOOI.h"
-#include "AdsLibOOI/AdsRoute.h"
+#include "AdsLibOOI/AdsDevice.h"
 #include <array>
 #include <iostream>
 
@@ -11,7 +11,7 @@ void runAdsClientExample(std::ostream& out)
     out << __FUNCTION__ << "():\n";
 
     try {
-        AdsRoute route {remoteIpV4, remoteNetId, 851};
+        AdsDevice route {remoteIpV4, remoteNetId, 851};
 
         // Write and read values
         uint8_t valueToWrite = 0x99;

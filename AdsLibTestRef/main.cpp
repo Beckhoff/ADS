@@ -1,7 +1,12 @@
 
 #include <Windows.h>
 #include <TcAdsDef.h>
+#ifndef GLOBALERR_TARGET_PORT
 #define GLOBALERR_TARGET_PORT 0x06
+#endif
+#ifndef GLOBALERR_MISSING_ROUTE
+#define GLOBALERR_MISSING_ROUTE 0x07
+#endif
 #include <TcAdsAPI.h>
 #include <cstdint>
 #include <chrono>

@@ -18,18 +18,12 @@
     <ClCompile Include="AdsNotification.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdsRoute.cpp">
+    <ClCompile Include="AdsDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AdsDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AdsException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AdsHandle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdsLibOOI.h">
@@ -38,10 +32,10 @@
     <ClInclude Include="AdsNotification.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdsRoute.h">
+    <ClInclude Include="AdsVariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdsVariable.h">
+    <ClInclude Include="AdsDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "AdsRoute.h"
+#include "AdsDevice.h"
 #include "AdsException.h"
 #include "AdsLib/AdsLib.h"
 
@@ -11,13 +11,13 @@ static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
     return new AmsNetId {ams};
 }
 
-AdsRoute::AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port)
+AdsDevice::AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port)
     : m_NetId(AddRoute(netId, ipV4.c_str()), {[](AmsNetId ams){AdsDelRoute(ams); return 0; }}),
     m_Addr({netId, port}),
     m_LocalPort(new long { AdsPortOpenEx() }, {AdsPortCloseEx})
 {}
 
-long AdsRoute::DeleteNotificationHandle(uint32_t handle) const
+long AdsDevice::DeleteNotificationHandle(uint32_t handle) const
 {
     if (handle) {
         return AdsSyncDelDeviceNotificationReqEx(GetLocalPort(), &m_Addr, handle);
@@ -25,12 +25,12 @@ long AdsRoute::DeleteNotificationHandle(uint32_t handle) const
     return 0;
 }
 
-long AdsRoute::DeleteSymbolHandle(uint32_t handle) const
+long AdsDevice::DeleteSymbolHandle(uint32_t handle) const
 {
     return WriteReqEx(ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
 }
 
-DeviceInfo AdsRoute::GetDeviceInfo() const
+DeviceInfo AdsDevice::GetDeviceInfo() const
 {
     DeviceInfo info;
     auto error = AdsSyncReadDeviceInfoReqEx(GetLocalPort(),
@@ -44,12 +44,12 @@ DeviceInfo AdsRoute::GetDeviceInfo() const
     return info;
 }
 
-AdsHandle AdsRoute::GetHandle(const uint32_t offset) const
+AdsHandle AdsDevice::GetHandle(const uint32_t offset) const
 {
     return {new uint32_t {offset}, {[](uint32_t){ return 0; }}};
 }
 
-AdsHandle AdsRoute::GetHandle(const std::string& symbolName) const
+AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
 {
     uint32_t handle = 0;
     uint32_t bytesRead = 0;
@@ -65,13 +65,13 @@ AdsHandle AdsRoute::GetHandle(const std::string& symbolName) const
         throw AdsException(error);
     }
 
-    return {new uint32_t {handle}, {std::bind(&AdsRoute::DeleteSymbolHandle, this, std::placeholders::_1)}};
+    return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteSymbolHandle, this, std::placeholders::_1)}};
 }
 
-AdsHandle AdsRoute::GetHandle(uint32_t                     indexGroup,
-                              uint32_t                     indexOffset,
-                              const AdsNotificationAttrib& notificationAttributes,
-                              PAdsNotificationFuncEx       callback) const
+AdsHandle AdsDevice::GetHandle(uint32_t                     indexGroup,
+                               uint32_t                     indexOffset,
+                               const AdsNotificationAttrib& notificationAttributes,
+                               PAdsNotificationFuncEx       callback) const
 {
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(
@@ -84,15 +84,15 @@ AdsHandle AdsRoute::GetHandle(uint32_t                     indexGroup,
     if (error || !handle) {
         throw AdsException(error);
     }
-    return {new uint32_t {handle}, {std::bind(&AdsRoute::DeleteNotificationHandle, this, std::placeholders::_1)}};
+    return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteNotificationHandle, this, std::placeholders::_1)}};
 }
 
-long AdsRoute::GetLocalPort() const
+long AdsDevice::GetLocalPort() const
 {
     return *m_LocalPort;
 }
 
-AdsDeviceState AdsRoute::GetState() const
+AdsDeviceState AdsDevice::GetState() const
 {
     AdsDeviceState state;
     static_assert(sizeof(state.ads) == sizeof(uint16_t), "size missmatch");
@@ -109,7 +109,7 @@ AdsDeviceState AdsRoute::GetState() const
     return state;
 }
 
-void AdsRoute::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
+void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
 {
     auto error = AdsSyncWriteControlReqEx(GetLocalPort(),
                                           &m_Addr,
@@ -122,7 +122,7 @@ void AdsRoute::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) con
     }
 }
 
-void AdsRoute::SetTimeout(const uint32_t timeout) const
+void AdsDevice::SetTimeout(const uint32_t timeout) const
 {
     const auto error = AdsSyncSetTimeoutEx(GetLocalPort(), timeout);
     if (error) {
@@ -130,7 +130,7 @@ void AdsRoute::SetTimeout(const uint32_t timeout) const
     }
 }
 
-uint32_t AdsRoute::GetTimeout() const
+uint32_t AdsDevice::GetTimeout() const
 {
     uint32_t timeout = 0;
     const auto error = AdsSyncGetTimeoutEx(GetLocalPort(), &timeout);
@@ -140,18 +140,18 @@ uint32_t AdsRoute::GetTimeout() const
     return timeout;
 }
 
-long AdsRoute::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const
+long AdsDevice::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const
 {
     return AdsSyncReadReqEx2(*m_LocalPort, &m_Addr, group, offset, length, buffer, bytesRead);
 }
 
-long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
-                               uint32_t    indexOffset,
-                               uint32_t    readLength,
-                               void*       readData,
-                               uint32_t    writeLength,
-                               const void* writeData,
-                               uint32_t*   bytesRead) const
+long AdsDevice::ReadWriteReqEx2(uint32_t    indexGroup,
+                                uint32_t    indexOffset,
+                                uint32_t    readLength,
+                                void*       readData,
+                                uint32_t    writeLength,
+                                const void* writeData,
+                                uint32_t*   bytesRead) const
 {
     return AdsSyncReadWriteReqEx2(GetLocalPort(),
                                   &m_Addr,
@@ -162,7 +162,7 @@ long AdsRoute::ReadWriteReqEx2(uint32_t    indexGroup,
                                   );
 }
 
-long AdsRoute::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
+long AdsDevice::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
 {
     return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, length, buffer);
 }

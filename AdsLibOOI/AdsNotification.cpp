@@ -1,7 +1,7 @@
 #include "AdsNotification.h"
 #include "AdsLib/AdsLib.h"
 
-AdsNotification::AdsNotification(const AdsRoute&              route,
+AdsNotification::AdsNotification(const AdsDevice&             route,
                                  const std::string&           symbolName,
                                  const AdsNotificationAttrib& notificationAttributes,
                                  PAdsNotificationFuncEx       callback)
@@ -9,7 +9,7 @@ AdsNotification::AdsNotification(const AdsRoute&              route,
     m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes, callback))
 {}
 
-AdsNotification::AdsNotification(const AdsRoute&              route,
+AdsNotification::AdsNotification(const AdsDevice&             route,
                                  uint32_t                     indexGroup,
                                  uint32_t                     indexOffset,
                                  const AdsNotificationAttrib& notificationAttributes,

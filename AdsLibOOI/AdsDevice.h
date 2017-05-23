@@ -33,8 +33,8 @@ using AdsResource = std::unique_ptr<T, ResourceDeleter<T> >;
 
 using AdsHandle = AdsResource<uint32_t>;
 
-struct AdsRoute {
-    AdsRoute(const std::string& ipV4, AmsNetId netId, uint16_t port);
+struct AdsDevice {
+    AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port);
 
     DeviceInfo GetDeviceInfo() const;
 
