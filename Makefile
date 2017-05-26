@@ -40,7 +40,7 @@ ifeq ($(OS_NAME),win32)
 	LIBS += -lws2_32
 endif
 
-all: $(LIB_NAME)
+all: $(LIB_NAME) $(OOI_LIB_NAME)
 
 $(OBJ_DIR):
 	mkdir -p $@
