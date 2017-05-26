@@ -52,7 +52,8 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)version.build << "\n";
 
         const auto state = route.GetState();
-        out << "AdsState: " << std::dec << state.ads << " DeviceState: " << std::dec << state.device << '\n';
+        out << "AdsState: " << std::dec << (uint16_t)state.ads << " DeviceState: " << std::dec <<
+        (uint16_t)state.device << '\n';
     } catch (const AdsException& ex) {
         auto errorCode = ex.getErrorCode();
         out << "Error: " << errorCode << "\n";
