@@ -23,6 +23,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibOOI", "AdsLibOOI\AdsL
 		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB} = {F94F5A05-3A40-4F66-AEBD-68A4A55579DB}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AdsLibOOITest", "AdsLibOOITest\AdsLibOOITest.vcxproj", "{EBEEF2CC-F227-4785-8030-08ED2FF06AFC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F94F5A05-3A40-4F66-AEBD-68A4A55579DB} = {F94F5A05-3A40-4F66-AEBD-68A4A55579DB}
+		{4377C26C-9B6E-41A0-B2AE-53456DB9A707} = {4377C26C-9B6E-41A0-B2AE-53456DB9A707}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -49,6 +55,10 @@ Global
 		{4377C26C-9B6E-41A0-B2AE-53456DB9A707}.Debug|Win32.Build.0 = Debug|Win32
 		{4377C26C-9B6E-41A0-B2AE-53456DB9A707}.Release|Win32.ActiveCfg = Release|Win32
 		{4377C26C-9B6E-41A0-B2AE-53456DB9A707}.Release|Win32.Build.0 = Release|Win32
+		{EBEEF2CC-F227-4785-8030-08ED2FF06AFC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EBEEF2CC-F227-4785-8030-08ED2FF06AFC}.Debug|Win32.Build.0 = Debug|Win32
+		{EBEEF2CC-F227-4785-8030-08ED2FF06AFC}.Release|Win32.ActiveCfg = Release|Win32
+		{EBEEF2CC-F227-4785-8030-08ED2FF06AFC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

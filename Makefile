@@ -59,7 +59,13 @@ $(OOI_LIB_NAME): $(OOI_OBJ_FILES)
 AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
 	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
 
+AdsLibOOITest.bin: AdsLibOOITest/main.cpp $(OOI_LIB_NAME) $(LIB_NAME)
+	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
+
 test: AdsLibTest.bin
+	./$<
+
+testOOI: AdsLibOOITest.bin
 	./$<
 
 clean:

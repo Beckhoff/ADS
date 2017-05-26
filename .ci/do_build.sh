@@ -12,6 +12,7 @@ export CXX=${CXX-g++}
 
 ${make_cmd} -C "${script_path}/../"
 ${make_cmd} -C "${script_path}/../" AdsLibTest.bin
+${make_cmd} -C "${script_path}/../" AdsLibOOITest.bin
 ${make_cmd} -C "${script_path}/../example/"
 
 # collect build artifacts into a single folder to make azdevops easier...

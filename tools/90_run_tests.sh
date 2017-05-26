@@ -15,4 +15,5 @@ ncat_pid=$!
 # wait for fake ads server to accept connections
 while ! ncat --send-only localhost 48898; do sleep 1; done
 ./AdsLibTest.bin
+./AdsLibOOITest.bin
 ./example/example.bin
