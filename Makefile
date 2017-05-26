@@ -13,6 +13,7 @@ CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
 CXXFLAGS += $(ci_cxx_flags)
 CPPFLAGS += -I AdsLib/
+CPPFLAGS += -I ./
 CPPFLAGS += -I tools/
 
 SRC_FILES = AdsDef.cpp
@@ -28,7 +29,7 @@ OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
 OOI_SRC_FILES = $(SRC_FILES)
 OOI_SRC_FILES += AdsNotification.cpp
-OOI_SRC_FILES += AdsRoute.cpp
+OOI_SRC_FILES += AdsDevice.cpp
 OOI_OBJ_FILES = $(OOI_SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
 ifeq ($(OS_NAME),Darwin)
