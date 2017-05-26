@@ -1,10 +1,10 @@
 OS_NAME ?=$(shell uname)
 LIBS = -lpthread
-LIB_NAME = AdsLib-$(OS_NAME).a
-OOI_LIB_NAME = AdsLibOOI-$(OS_NAME).a
+LIB_NAME = ADS/AdsLibOOI/AdsLibOOI-$(OS_NAME).a
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
+CXXFLAGS += -IADS/
 CXXFLAGS += $(ci_cxx_flags)
 
 ifeq ($(OS_NAME),win32)
