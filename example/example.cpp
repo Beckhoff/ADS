@@ -36,11 +36,11 @@ void runAdsClientExample(std::ostream& out)
         (uint32_t)readArray[3] << "\n";
 
         // Write and read arrays by index group/offset
+        static const std::array<uint8_t, 4> arrayOfZeros = { 0, 0, 0, 0 };
         AdsVariable<std::array<uint8_t, 4> > arrayVarIndex {route, 0x4020, 0};
-        arrayVarIndex = arrayToWrite;
+        arrayVarIndex = arrayOfZeros;
         std::array<uint8_t, 4> readArrayIndex = arrayVarIndex;
-        out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
-        (uint32_t)arrayToWrite[3] << "\n";
+        out << "Wrote array with zeroes\n";
         out << "Read back array with first value " << (uint32_t)readArrayIndex[0] << " and last value " <<
         (uint32_t)readArrayIndex[3] << "\n";
 
