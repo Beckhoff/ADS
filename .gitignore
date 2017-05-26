@@ -218,3 +218,5 @@ FakesAssemblies/
 *.o
 *.a
 *.bak
+*.opendb
+AdsLib.VC.db

@@ -118,15 +118,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AdsNotification.cpp" />
-    <ClCompile Include="AdsRoute.cpp" />
+    <ClCompile Include="AdsDevice.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AdsDevice.h" />
     <ClInclude Include="AdsException.h" />
-    <ClInclude Include="AdsHandle.h" />
     <ClInclude Include="AdsLibOOI.h" />
     <ClInclude Include="AdsNotification.h" />
-    <ClInclude Include="AdsRoute.h" />
+    <ClInclude Include="AdsDevice.h" />
     <ClInclude Include="AdsVariable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

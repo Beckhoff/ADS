@@ -1,14 +1,14 @@
 #pragma once
 
-#include "AdsRoute.h"
+#include "AdsDevice.h"
 
 struct AdsNotification {
-    AdsNotification(const AdsRoute&              route,
+    AdsNotification(const AdsDevice&             route,
                     const std::string&           symbolName,
                     const AdsNotificationAttrib& notificationAttributes,
                     PAdsNotificationFuncEx       callback);
 
-    AdsNotification(const AdsRoute&              route,
+    AdsNotification(const AdsDevice&             route,
                     uint32_t                     indexGroup,
                     uint32_t                     indexOffset,
                     const AdsNotificationAttrib& notificationAttributes,
@@ -25,7 +25,7 @@ private:
    class AdsDeviceStatusChangedNotification : public AdsNotification
    {
    public:
-    AdsDeviceStatusChangedNotification(const AdsRoute& route, std::function<void()> callback)
+    AdsDeviceStatusChangedNotification(const AdsDevice& route, std::function<void()> callback)
         :AdsNotification(route, ADSIGRP_DEVICE_DATA, ADSIOFFS_DEVDATA_ADSSTATE, GetNotificationAttributes(), callback)
     {
     }
