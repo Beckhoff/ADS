@@ -18,12 +18,8 @@ struct ResourceDeleter {
 
     void operator()(T* resource)
     {
-        const long error = FreeResource(*resource);
+        FreeResource(*resource);
         delete resource;
-
-        if (error) {
-            throw AdsException(error);
-        }
     }
 private:
     const std::function<long(T)> FreeResource;
