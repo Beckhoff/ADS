@@ -1,13 +1,20 @@
+OS_NAME ?=$(shell uname)
+LIBS = -lpthread
+LIB_NAME = AdsLib-$(OS_NAME).a
+OOI_LIB_NAME = AdsLibOOI-$(OS_NAME).a
+CXXFLAGS += -std=c++11
+CXXFLAGS += -pedantic
+CXXFLAGS += -Wall
+CXXFLAGS += $(ci_cxx_flags)
 
-LIB_DIR = ADS
-LIB_NAME = $(LIB_DIR)/AdsLib/AdsLib-$(shell uname).a
-OOI_LIB_NAME = $(LIB_DIR)/AdsLibOOI/AdsLibOOI-$(shell uname).a
-
+ifeq ($(OS_NAME),win32)
+        LIBS += -lws2_32
+endif
 
 all: example.bin
 
-example.bin: example.cpp $(LIB_NAME) $(OOI_LIB_NAME)
-	$(CXX) $^ -I$(LIB_DIR) -std=c++11 -Wall -pedantic -lpthread -o $@
+example.bin: $(LIB_NAME) example.cpp
+	$(CXX) example.cpp $< $(LIBS) $(CXXFLAGS) -o $@
 	
 test: example.bin
 	./$<

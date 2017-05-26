@@ -48,6 +48,8 @@ long AdsAddRoute(const AmsNetId ams, const char* ip)
         return GetRouter().AddRoute(ams, IpV4(ip));
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
+    } catch (const std::runtime_error&) {
+        return GLOBALERR_TARGET_PORT;
     }
 }
 
@@ -71,6 +73,11 @@ long AdsGetLocalAddressEx(long port, AmsAddr* pAddr)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
     return GetRouter().GetLocalAddress((uint16_t)port, pAddr);
+}
+
+void AdsSetLocalAddress(const AmsNetId ams)
+{
+    GetRouter().SetLocalAddress(ams);
 }
 
 long AdsSyncReadReqEx2(long           port,
@@ -295,7 +302,7 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
             pAttrib->nMaxDelay,
             pAttrib->nCycleTime
         });
-        Notification notify { pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port };
+        auto notify = std::make_shared<Notification>(pFunc, hUser, pAttrib->cbLength, *pAddr, (uint16_t)port);
         return GetRouter().AddNotification(
             request,
             pNotification,

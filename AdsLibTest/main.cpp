@@ -142,6 +142,23 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         fructose_assert(testee.GetConnection(netId_2));
     }
 
+    void testAmsRouterSetLocalAddress(const std::string&)
+    {
+        const AmsNetId newNetId {1, 2, 3, 4, 5, 6};
+        AmsRouter testee;
+        AmsAddr changed;
+        AmsAddr empty;
+
+        const auto port = testee.OpenPort();
+        fructose_assert(0 == testee.GetLocalAddress(port, &empty));
+        fructose_assert(!empty.netId);
+
+        testee.SetLocalAddress(newNetId);
+        fructose_assert(0 == testee.GetLocalAddress(port, &changed));
+        fructose_assert(0 == memcmp(&newNetId, &changed.netId, sizeof(newNetId)));
+        fructose_assert(port == changed.port);
+    }
+
     void testConcurrentRoutes(const std::string&)
     {
         std::thread threads[256];
@@ -188,19 +205,15 @@ struct TestIpV4 : test_base<TestIpV4> {
         static const IpV4 localhost {"localhost"};
         static const IpV4 lower {"192.167.0.1"};
         static const IpV4 higher {"193.0.0.0"};
-        static const IpV4 tooShort {"192.168.0."};
-        static const IpV4 tooHigh {"0.0.0.257"};
-        static const IpV4 tooLow {"-1.0.0.254"};
-        static const IpV4 invalid {"192.d.0.254"};
 
         fructose_assert_eq(0xC0A80001, testee.value);
         fructose_assert_eq(0x7F000001U, localhost.value);
         fructose_assert_eq(0xC0A70001, lower.value);
         fructose_assert_eq(0xC1000000, higher.value);
-        fructose_assert_eq(0xFFFFFFFF, tooShort.value);
-        fructose_assert_eq(0xFFFFFFFF, tooHigh.value);
-        fructose_assert_eq(0xFFFFFFFF, tooLow.value);
-        fructose_assert_eq(0xFFFFFFFF, invalid.value);
+        fructose_assert_exception(IpV4 {"192.168.0."}, std::runtime_error);     // too short
+        fructose_assert_exception(IpV4 {"0.0.0.257"}, std::runtime_error);      // too high
+        fructose_assert_exception(IpV4 {"-1.0.0.254"}, std::runtime_error);     // too low
+        fructose_assert_exception(IpV4 {"192.d.0.254"}, std::runtime_error);    // invalid
         fructose_assert(lower < testee);
         fructose_assert(testee < higher);
     }
@@ -274,13 +287,15 @@ struct TestAds : test_base<TestAds> {
 
     void testAdsPortOpenEx(const std::string&)
     {
-        static const size_t NUM_TEST_PORTS = 2;
+        static const size_t NUM_TEST_PORTS = Router::NUM_PORTS_MAX;
         long port[NUM_TEST_PORTS];
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             port[i] = testPortOpen(out);
             fructose_loop_assert(i, 0 != port[i]);
         }
+        // there should be no more ports available at ADS router
+        fructose_assert(0 == testPortOpen(out));
 
         for (size_t i = 0; i < NUM_TEST_PORTS; ++i) {
             if (port[i]) {
@@ -908,6 +923,7 @@ private:
 
 int main()
 {
+    int failedTests = 0;
 #if 0
     std::ostream nowhere(0);
     std::ostream& errorstream = nowhere;
@@ -917,22 +933,23 @@ int main()
 #if 1
     TestAmsAddr amsAddrTest(errorstream);
     amsAddrTest.add_test("testAmsAddrCompare", &TestAmsAddr::testAmsAddrCompare);
-    amsAddrTest.run();
+    failedTests += amsAddrTest.run();
 
     TestAmsRouter routerTest(errorstream);
     routerTest.add_test("testAmsRouterAddRoute", &TestAmsRouter::testAmsRouterAddRoute);
     routerTest.add_test("testAmsRouterDelRoute", &TestAmsRouter::testAmsRouterDelRoute);
 //    routerTest.add_test("testConcurrentRoutes", &TestAmsRouter::testConcurrentRoutes);
-    routerTest.run();
+    routerTest.add_test("testAmsRouterSetLocalAddress", &TestAmsRouter::testAmsRouterSetLocalAddress);
+    failedTests += routerTest.run();
 
     TestIpV4 ipv4Test(errorstream);
     ipv4Test.add_test("testComparsion", &TestIpV4::testComparsion);
-    ipv4Test.run();
+    failedTests += ipv4Test.run();
 
     TestRingBuffer ringBufferTest(errorstream);
     ringBufferTest.add_test("testBytesFree", &TestRingBuffer::testBytesFree);
     ringBufferTest.add_test("testWriteChunk", &TestRingBuffer::testWriteChunk);
-    ringBufferTest.run();
+    failedTests += ringBufferTest.run();
 #endif
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
@@ -944,14 +961,15 @@ int main()
     adsTest.add_test("testAdsWriteControlReqEx", &TestAds::testAdsWriteControlReqEx);
     adsTest.add_test("testAdsNotification", &TestAds::testAdsNotification);
     adsTest.add_test("testAdsTimeout", &TestAds::testAdsTimeout);
-    adsTest.run();
+    failedTests += adsTest.run();
 
     TestAdsPerformance performance(errorstream);
     performance.add_test("testManyNotifications", &TestAdsPerformance::testManyNotifications);
     performance.add_test("testParallelReadAndWrite", &TestAdsPerformance::testParallelReadAndWrite);
 //	performance.add_test("testEndurance", &TestAdsPerformance::testEndurance);
-    performance.run();
+    failedTests += performance.run();
 
     std::cout << "Hit ENTER to continue\n";
     std::cin.ignore();
+    return failedTests;
 }

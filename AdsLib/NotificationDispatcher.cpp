@@ -41,7 +41,7 @@ bool NotificationDispatcher::operator<(const NotificationDispatcher& ref) const
     return conn.second < ref.conn.second;
 }
 
-void NotificationDispatcher::Emplace(uint32_t hNotify, Notification& notification)
+void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
     notifications.emplace(hNotify, notification);
@@ -53,6 +53,16 @@ long NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
     std::lock_guard<std::recursive_mutex> lock(mutex);
     notifications.erase(hNotify);
     return status;
+}
+
+std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    auto it = notifications.find(hNotify);
+    if (it != notifications.end()) {
+        return it->second;
+    }
+    return {};
 }
 
 void NotificationDispatcher::Run()
@@ -67,16 +77,14 @@ void NotificationDispatcher::Run()
             for (uint32_t sample = 0; sample < numSamples; ++sample) {
                 const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
                 const auto size = ring.ReadFromLittleEndian<uint32_t>();
-                std::lock_guard<std::recursive_mutex> lock(mutex);
-                auto it = notifications.find(hNotify);
-                if (it != notifications.end()) {
-                    auto& notification = it->second;
-                    if (size != notification.Size()) {
-                        LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification.Size());
+                const auto notification = Find(hNotify);
+                if (notification) {
+                    if (size != notification->Size()) {
+                        LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification->Size());
                         ring.Read(size);
                         return;
                     }
-                    notification.Notify(timestamp, ring);
+                    notification->Notify(timestamp, ring);
                 } else {
                     ring.Read(size);
                 }

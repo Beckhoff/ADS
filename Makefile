@@ -11,9 +11,9 @@ CXX :=$(CROSS_COMPILE)$(CXX)
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
+CXXFLAGS += $(ci_cxx_flags)
 CPPFLAGS += -I AdsLib/
-CPPFLAGS += -I ../
-CPPFLAGS += -I ./
+CPPFLAGS += -I tools/
 
 SRC_FILES = AdsDef.cpp
 SRC_FILES += AdsLib.cpp

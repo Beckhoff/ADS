@@ -74,7 +74,7 @@ struct AmsConnection : AmsProxy {
     AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
     ~AmsConnection();
 
-    NotifyMapping CreateNotifyMapping(uint32_t hNotify, Notification& notification);
+    NotifyMapping CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
     template<class T> long AdsRequest(AmsRequest& request, uint32_t tmms)

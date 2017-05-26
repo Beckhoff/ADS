@@ -46,7 +46,7 @@ uint32_t getIpv4(const std::string& addr)
     InitSocketLibrary();
     const auto status = getaddrinfo(addr.c_str(), nullptr, &addrinfo, &res);
     if (status) {
-        return 0xffffffff;
+        throw std::runtime_error("Invalid IPv4 address or unknown hostname: " + addr);
     }
 
     const auto value = ((struct sockaddr_in*)res->ai_addr)->sin_addr.s_addr;

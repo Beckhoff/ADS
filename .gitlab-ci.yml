@@ -1,0 +1,100 @@
+stages:
+  - build
+  - test:clang
+  - test:gcc
+  - test:gcc-i386
+  - test:clang-macOS
+
+cache:
+  paths:
+  - apt-cache/
+
+.build-template: &build-template
+  stage: build
+  tags:
+    - docker
+  image: lbs1:5500/beckhoff/docker-mxe
+  script:
+    - tools/10_get_fructose.sh
+    - make CXX=$compiler OS_NAME=$os_name
+    - make CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
+    - make OS_NAME=$os_name install
+    - cd example
+    - make CXX=$compiler OS_NAME=$os_name
+    - make CXX=$compiler OS_NAME=$os_name example.bin
+  artifacts:
+    paths:
+    - AdsLib-$os_name.a
+    - AdsLibTest.bin
+    - example/example.bin
+
+build:clang:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: Linux
+
+build:clang-macOS:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: macOS
+  tags:
+    - macOS
+
+build:gcc:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: Linux
+
+build:gcc-i386:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/g++
+    os_name: i386
+    ci_cxx_flags: -m32
+
+build:mxe:
+  <<: *build-template
+  variables:
+    compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
+    os_name: win32
+
+.test-template: &test-template
+  tags:
+    - kvm
+    - x86_64
+  before_script:
+    - sudo dpkg --add-architecture i386
+    - sudo apt-get -o dir::cache::archives="apt-cache" update
+    - sudo apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 nmap
+  script:
+    - ./tools/90_run_tests.sh
+
+test:clang:
+  <<: *test-template
+  stage: test:clang
+  dependencies:
+    - build:clang
+
+test:gcc:
+  <<: *test-template
+  stage: test:gcc
+  dependencies:
+    - build:gcc
+
+test:gcc-i386:
+  <<: *test-template
+  stage: test:gcc-i386
+  dependencies:
+    - build:gcc-i386
+
+test:clang-macOS:
+  stage: test:clang-macOS
+  dependencies:
+    - build:clang-macOS
+  tags:
+    - macOS
+  script:
+    - ./tools/90_run_tests.sh
