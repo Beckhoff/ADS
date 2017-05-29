@@ -2,11 +2,14 @@
 #include "AdsLib.h"
 
 #include <iostream>
+#include <iomanip>
 
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
     const uint8_t* data = reinterpret_cast<const uint8_t*>(pNotification + 1);
-    std::cout << "hUser 0x" << std::hex << hUser <<
+    std::cout << std::setfill('0') <<
+        "NetId 0x" << pAddr->netId <<
+        "hUser 0x" << std::hex << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
         " value:";
