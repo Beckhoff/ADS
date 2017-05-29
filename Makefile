@@ -4,7 +4,6 @@ VPATH = AdsLib
 LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
 OBJ_DIR = obj
-INSTALL_DIR=example
 CXX :=$(CROSS_COMPILE)$(CXX)
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
@@ -49,9 +48,6 @@ AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
 
 test: AdsLibTest.bin
 	./$<
-
-install: $(LIB_NAME) AdsLib.h AdsDef.h
-	cp $? $(INSTALL_DIR)/
 
 clean:
 	rm -f *.a *.o *.bin AdsLibTest/*.o $(OBJ_DIR)/*.o

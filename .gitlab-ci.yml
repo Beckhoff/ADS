@@ -18,10 +18,8 @@ cache:
     - tools/10_get_fructose.sh
     - make CXX=$compiler OS_NAME=$os_name
     - make CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
-    - make OS_NAME=$os_name install
     - cd example
     - make CXX=$compiler OS_NAME=$os_name
-    - make CXX=$compiler OS_NAME=$os_name example.bin
   artifacts:
     paths:
     - AdsLib-$os_name.a
