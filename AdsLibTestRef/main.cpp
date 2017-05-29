@@ -23,17 +23,28 @@ static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
 static AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
 static AmsAddr serverBadPort {serverNetId, 1000};
 
+/** helper for our Notification callback, this one is not included in TcAdsDll, but AdsLib */
+std::ostream& operator<<(std::ostream& os, const AmsNetId& netId)
+{
+    return os << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' <<
+           (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
+}
+
 static size_t g_NumNotifications = 0;
 static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNotification, unsigned long hUser)
 {
-    ++g_NumNotifications;
 #if 0
-    std::cout << std::setfill('0') <<
+    static std::ostream& notificationOutput = std::cout;
+#else
+    static std::ostream notificationOutput(0);
+#endif
+    ++g_NumNotifications;
+    notificationOutput << std::setfill('0') <<
+        "NetId 0x" << pAddr->netId <<
         "hUser 0x" << std::hex << std::setw(4) << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
         " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
-#endif
 }
 
 void print(const AmsAddr& addr, std::ostream& out)

@@ -16,14 +16,19 @@ static const AmsAddr serverBadPort {serverNetId, 1000};
 static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
-    ++g_NumNotifications;
 #if 0
-    std::cout << std::setfill('0') <<
+    static std::ostream& notificationOutput = std::cout;
+#else
+    static std::ostream notificationOutput(0);
+#endif
+    ++g_NumNotifications;
+    auto pData = reinterpret_cast<const uint8_t*>(pNotification + 1);
+    notificationOutput << std::setfill('0') <<
+        "NetId 0x" << pAddr->netId <<
         "hUser 0x" << std::hex << std::setw(4) << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
-        " value: 0x" << std::hex << (int)pNotification->data[0] << '\n';
-#endif
+        " value: 0x" << std::hex << (int)pData[0] << '\n';
 }
 
 void print(const AmsAddr& addr, std::ostream& out)
