@@ -205,6 +205,9 @@ uint32_t TcpSocket::Connect() const
         LOG_ERROR("Read local tcp/ip address failed");
         return 0;
     }
+    LOG_INFO(" Connected to " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.' <<
+             ((addr & 0xff00) >> 8) << '.' << (addr & 0xff));
+
     return ntohl(source.sin_addr.s_addr);
 }
 
