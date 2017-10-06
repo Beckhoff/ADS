@@ -153,7 +153,7 @@ AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
 AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
 {
     uint32_t isFree = 0;
-    if (!queue[port - Router::PORT_BASE].invokeId.compare_exchange_weak(isFree, id)) {
+    if (!queue[port - Router::PORT_BASE].invokeId.compare_exchange_strong(isFree, id)) {
         LOG_WARN("Port: " << port << " already in use as " << isFree);
         return nullptr;
     }
