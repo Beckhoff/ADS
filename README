@@ -2,11 +2,11 @@ This library is intended to provide easy use as ADS client applications running 
 
 To build this library a recent compiler with C++11 support is required. 
 
-Currently (2017-01-05) tested with:
+Currently (2017-10-16) tested with:
 ===================================
-Ubuntu 16.04 LTS x86_64 | gcc 5.4.1
-OSX 10.11               | clang 703.0.31
-Win7 64-bit             | gcc 5.4.0 + cygwin64
+Ubuntu 16.04 LTS x86_64 | gcc 6.3.0
+OSX 10.12               | clang 802.0.42
+Win7 64-bit             | gcc 6.4.0 + cygwin64
 Win7 64-bit             | gcc 5.4.0 + cygwin32
 Win7 64-bit             | MS Visual C++ 2015 (untended)
 
@@ -21,12 +21,6 @@ cd ADS
 
 # build the library
 make
-
-# copy compiled lib and headers to your client application
-make install
-
-# by default this will copy library and headers into the example/ subdirectory
-# to change the target location adjust $(INSTALL_DIR) in the Makefile
 
 
 Prepare your target to run the example
