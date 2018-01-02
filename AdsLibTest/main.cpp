@@ -383,6 +383,30 @@ struct TestAds : test_base<TestAds> {
         fructose_assert(0 == AdsPortCloseEx(port));
     }
 
+    void testAdsReadReqEx2LargeBuffer(const std::string&)
+    {
+        char handleName[] = "MAIN.moreBytes";
+        const long port = AdsPortOpenEx();
+        fructose_assert(0 != port);
+
+        uint32_t hHandle;
+        uint32_t bytesRead;
+        fructose_assert(0 ==
+                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(hHandle), &hHandle, sizeof(handleName),
+                                               handleName,
+                                               &bytesRead));
+        fructose_assert(sizeof(hHandle) == bytesRead);
+        hHandle = qFromLittleEndian<uint32_t>((uint8_t*)&hHandle);
+
+        uint8_t buffer[8192];
+        fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0xF005, hHandle, sizeof(buffer), &buffer, &bytesRead));
+        fructose_assert(sizeof(buffer) == bytesRead);
+        hHandle = qToLittleEndian<uint32_t>(hHandle);
+        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
+
+        fructose_assert(0 == AdsPortCloseEx(port));
+    }
+
     void testAdsReadDeviceInfoReqEx(const std::string&)
     {
         static const char NAME[] = "Plc30 App";
@@ -959,6 +983,7 @@ int main()
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
+    adsTest.add_test("testAdsReadReqEx2LargeBuffer", &TestAds::testAdsReadReqEx2LargeBuffer);
     adsTest.add_test("testAdsReadDeviceInfoReqEx", &TestAds::testAdsReadDeviceInfoReqEx);
     adsTest.add_test("testAdsReadStateReqEx", &TestAds::testAdsReadStateReqEx);
     adsTest.add_test("testAdsReadWriteReqEx2", &TestAds::testAdsReadWriteReqEx2);
