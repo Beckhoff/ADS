@@ -65,7 +65,13 @@ struct Frame {
      */
     Frame& limit(size_t newSize);
 
-    Frame& reset();
+    /**
+     * @brief reset
+     * Prepare the frame to be reused as a response buffer
+     * @param newSize expected size of the response
+     * @return reference to self
+     */
+    Frame& reset(size_t newSize = 4096);
 
     /**
      * @brief data

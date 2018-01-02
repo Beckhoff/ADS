@@ -21,6 +21,7 @@
  */
 
 #include "Frame.h"
+#include "Log.h"
 
 #include <algorithm>
 #include <cstring>
@@ -66,8 +67,18 @@ Frame& Frame::limit(size_t newSize)
     return *this;
 }
 
-Frame& Frame::reset()
+Frame& Frame::reset(const size_t newSize)
 {
+    if (newSize > m_OriginalSize) {
+        try {
+            std::unique_ptr<uint8_t[]> tmp {new uint8_t[newSize]};
+            m_OriginalSize = newSize;
+            m_Data = std::move(tmp);
+        } catch (const std::bad_alloc&) {
+            LOG_WARN("Not enough memory to reset frame to " << std::dec << newSize << " bytes");
+        }
+    }
+
     m_Size = m_OriginalSize;
     m_Pos = m_Data.get() + m_Size;
     return *this;
