@@ -12,3 +12,6 @@ fi
 tar xf ${NAME}.tgz
 mv ${NAME}/fructose/include/fructose/ ${SCRIPT_PATH}/
 rm -rf ${NAME}/
+
+patch fructose/test_root.h 0001-fructose-test_root-split-use-size_t-for-start-end.patch
+patch fructose/test_root.h 0002-fructose-use-int-for-i-iterating-over-argc.patch
