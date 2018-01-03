@@ -186,11 +186,13 @@ void AmsConnection::ReceiveJunk(size_t bytesToRead) const
     Receive(buffer, bytesToRead);
 }
 
-Frame& AmsConnection::ReceiveFrame(Frame& frame, size_t bytesLeft) const
+Frame& AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft) const
 {
+    Frame& frame = response->frame;
     if (bytesLeft > frame.capacity()) {
         LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << frame.capacity());
         ReceiveJunk(bytesLeft);
+        response->errorCode = GLOBALERR_NO_MEMORY;
         return frame.clear();
     }
     Receive(frame.rawData(), bytesLeft);
@@ -267,7 +269,8 @@ void AmsConnection::Recv()
             continue;
         }
 
-        ReceiveFrame(response->frame, aoeHeader.length());
+        response->errorCode = aoeHeader.errorCode();
+        ReceiveFrame(response, aoeHeader.length());
 
         switch (aoeHeader.cmdId()) {
         case AoEHeader::READ_DEVICE_INFO:
@@ -285,7 +288,6 @@ void AmsConnection::Recv()
             response->frame.clear();
         }
 
-        response->errorCode = aoeHeader.errorCode();
         response->Notify();
     }
 }

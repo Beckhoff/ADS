@@ -118,7 +118,7 @@ private:
     std::atomic<uint32_t> invokeId;
     std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
-    Frame& ReceiveFrame(Frame& frame, size_t length) const;
+    Frame& ReceiveFrame(AmsResponse* response, size_t length) const;
     bool ReceiveNotification(const AoEHeader& header);
     void ReceiveJunk(size_t bytesToRead) const;
     void Receive(void* buffer, size_t bytesToRead) const;
