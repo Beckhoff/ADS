@@ -234,8 +234,6 @@ private:
     uint32_t leInvokeId;
 };
 
-using AoEWriteResponseHeader = uint32_t;
-
 struct AoEResponseHeader {
     AoEResponseHeader()
         : leResult(0)

@@ -235,7 +235,7 @@ long AdsSyncWriteReqEx(long           port,
             indexOffset,
             bufferLength
         });
-        return GetRouter().AdsRequest<AoEReadResponseHeader>(request);
+        return GetRouter().AdsRequest<AoEResponseHeader>(request);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }
