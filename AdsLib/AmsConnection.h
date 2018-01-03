@@ -87,6 +87,11 @@ struct AmsConnection : AmsProxy {
         AmsResponse* response = Write(request.frame, request.destAddr, srcAddr, request.cmdId);
         if (response) {
             if (response->Wait(tmms)) {
+                if (response->frame.size() < sizeof(T)) {
+                    const auto errorCode = response->errorCode;
+                    Release(response);
+                    return errorCode ? errorCode : ADSERR_CLIENT_SYNCRESINVALID;
+                }
                 const uint32_t bytesAvailable = std::min<uint32_t>(request.bufferLength,
                                                                    response->frame.size() - sizeof(T));
                 T header(response->frame.data());
