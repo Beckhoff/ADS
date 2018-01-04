@@ -8,8 +8,8 @@ static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pN
 {
     const uint8_t* data = reinterpret_cast<const uint8_t*>(pNotification + 1);
     std::cout << std::setfill('0') <<
-        "NetId 0x" << pAddr->netId <<
-        "hUser 0x" << std::hex << hUser <<
+        "NetId: " << pAddr->netId <<
+        " hUser 0x" << std::hex << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
         " value:";

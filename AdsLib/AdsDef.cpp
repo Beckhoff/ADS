@@ -37,7 +37,7 @@ bool operator<(const AmsAddr& lhs, const AmsAddr& rhs)
 
 std::ostream& operator<<(std::ostream& os, const AmsNetId& netId)
 {
-    return os << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' <<
+    return os << std::dec << (int)netId.b[0] << '.' << (int)netId.b[1] << '.' << (int)netId.b[2] << '.' <<
            (int)netId.b[3] << '.' << (int)netId.b[4] << '.' << (int)netId.b[5];
 }
 
