@@ -24,23 +24,31 @@
 #include "Log.h"
 
 AmsResponse::AmsResponse()
-    : frame(4096),
-    invokeId(0),
-    errorCode(0)
+    : request(nullptr),
+    errorCode(WAITING_FOR_RESPONSE)
 {}
 
-void AmsResponse::Notify()
+void AmsResponse::Notify(const uint32_t error)
 {
-    invokeId = 0;
+    std::unique_lock<std::mutex> lock(mutex);
+    errorCode = error;
     cv.notify_all();
 }
 
-bool AmsResponse::Wait(uint32_t timeout_ms)
+uint32_t AmsResponse::Wait()
 {
     std::unique_lock<std::mutex> lock(mutex);
-    return cv.wait_for(lock, std::chrono::milliseconds(timeout_ms), [&]() {
-        return !invokeId;
-    });
+
+    cv.wait_until(lock, request.load()->deadline, [&]() { return !invokeId.load(); });
+
+    if (invokeId.exchange(0)) {
+        /* invokeId wasn't consumed -> AmsConnection::recv() didn't got a valid response until now */
+        return ADSERR_CLIENT_SYNCTIMEOUT;
+    }
+
+    /* AmsConnection::recv() is currently processing a response and using the user supplied buffer, we need to wait until that finished */
+    cv.wait(lock, [&]() { return errorCode != WAITING_FOR_RESPONSE; });
+    return errorCode;
 }
 
 std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListAdd(const VirtualConnection& connection)
@@ -103,23 +111,29 @@ long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify,
     return AdsRequest<AoEResponseHeader>(request, tmms);
 }
 
-AmsResponse* AmsConnection::Write(Frame& request, const AmsAddr destAddr, const AmsAddr srcAddr, uint16_t cmdId)
+AmsResponse* AmsConnection::Write(AmsRequest& request, const AmsAddr srcAddr)
 {
-    AoEHeader aoeHeader { destAddr.netId, destAddr.port, srcAddr.netId, srcAddr.port, cmdId,
-                          static_cast<uint32_t>(request.size()), GetInvokeId() };
-    request.prepend<AoEHeader>(aoeHeader);
+    const AoEHeader aoeHeader {
+        request.destAddr.netId, request.destAddr.port,
+        srcAddr.netId, srcAddr.port,
+        request.cmdId,
+        static_cast<uint32_t>(request.frame.size()),
+        GetInvokeId()
+    };
+    request.frame.prepend<AoEHeader>(aoeHeader);
 
-    AmsTcpHeader header { static_cast<uint32_t>(request.size()) };
-    request.prepend<AmsTcpHeader>(header);
+    const AmsTcpHeader header { static_cast<uint32_t>(request.frame.size()) };
+    request.frame.prepend<AmsTcpHeader>(header);
 
-    auto response = Reserve(aoeHeader.invokeId(), srcAddr.port);
+    auto response = Reserve(&request, srcAddr.port);
 
     if (!response) {
         return nullptr;
     }
 
-    if (request.size() != socket.write(request)) {
-        Release(response);
+    response->invokeId.store(aoeHeader.invokeId());
+    if (request.frame.size() != socket.write(request.frame)) {
+        response->Release();
         return nullptr;
     }
     return response;
@@ -134,7 +148,7 @@ uint32_t AmsConnection::GetInvokeId()
     return result;
 }
 
-AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
+AmsResponse* AmsConnection::GetPending(const uint32_t id, const uint16_t port)
 {
     const uint16_t portIndex = port - Router::PORT_BASE;
     if (portIndex >= Router::NUM_PORTS_MAX) {
@@ -142,37 +156,50 @@ AmsResponse* AmsConnection::GetPending(uint32_t id, uint16_t port)
         return nullptr;
     }
 
-    const uint32_t currentId = queue[portIndex].invokeId;
-    if (currentId == id) {
+    auto currentId = id;
+    if (queue[portIndex].invokeId.compare_exchange_strong(currentId, 0)) {
         return &queue[portIndex];
     }
     LOG_WARN("InvokeId mismatch: waiting for 0x" << std::hex << currentId << " received 0x" << id);
     return nullptr;
 }
 
-AmsResponse* AmsConnection::Reserve(uint32_t id, uint16_t port)
+AmsResponse* AmsConnection::Reserve(AmsRequest* request, const uint16_t port)
 {
-    uint32_t isFree = 0;
-    if (!queue[port - Router::PORT_BASE].invokeId.compare_exchange_strong(isFree, id)) {
+    AmsRequest* isFree = nullptr;
+    if (!queue[port - Router::PORT_BASE].request.compare_exchange_strong(isFree, request)) {
         LOG_WARN("Port: " << port << " already in use as " << isFree);
         return nullptr;
     }
     return &queue[port - Router::PORT_BASE];
 }
 
-void AmsConnection::Release(AmsResponse* response)
+void AmsResponse::Release()
 {
-    response->invokeId = 0;
+    errorCode = WAITING_FOR_RESPONSE;
+    request.store(nullptr);
 }
 
-void AmsConnection::Receive(void* buffer, size_t bytesToRead) const
+void AmsConnection::Receive(void* buffer, size_t bytesToRead, timeval* timeout) const
 {
     auto pos = reinterpret_cast<uint8_t*>(buffer);
     while (bytesToRead) {
-        const size_t bytesRead = socket.read(pos, bytesToRead, nullptr);
+        const size_t bytesRead = socket.read(pos, bytesToRead, timeout);
         bytesToRead -= bytesRead;
         pos += bytesRead;
     }
+}
+
+void AmsConnection::Receive(void* buffer, size_t bytesToRead, const Timepoint& deadline) const
+{
+    const auto now = std::chrono::steady_clock::now();
+    const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(deadline - now).count();
+    if (usec <= 0) {
+        throw Socket::TimeoutEx("deadline reached already!!!");
+    }
+
+    timeval timeout {(long)(usec / 1000000), (int)(usec % 1000000)};
+    Receive(buffer, bytesToRead, &timeout);
 }
 
 void AmsConnection::ReceiveJunk(size_t bytesToRead) const
@@ -185,18 +212,34 @@ void AmsConnection::ReceiveJunk(size_t bytesToRead) const
     Receive(buffer, bytesToRead);
 }
 
-Frame& AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft) const
+template<class T>
+void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, uint32_t aoeError) const
 {
-    Frame& frame = response->frame.reset(bytesLeft);
+    AmsRequest* const request = response->request.load();
+    const auto responseId = response->invokeId.load();
+    T header;
 
-    if (bytesLeft > frame.capacity()) {
-        LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << frame.capacity());
+    if (bytesLeft > sizeof(header) + request->bufferLength) {
+        LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << sizeof(header) + request->bufferLength);
+        response->Notify(ADSERR_DEVICE_INVALIDSIZE);
         ReceiveJunk(bytesLeft);
-        response->errorCode = GLOBALERR_NO_MEMORY;
-        return frame.clear();
+        return;
     }
-    Receive(frame.rawData(), bytesLeft);
-    return frame.limit(bytesLeft);
+
+    try {
+        Receive(&header, sizeof(header), request->deadline);
+        bytesLeft -= sizeof(header);
+        Receive(request->buffer, bytesLeft, request->deadline);
+
+        if (request->bytesRead) {
+            *(request->bytesRead) = bytesLeft;
+        }
+        response->Notify(aoeError ? aoeError : header.result());
+    } catch (const Socket::TimeoutEx&) {
+        LOG_WARN("InvokeId of response: " << std::dec << responseId << " timed out");
+        response->Notify(ADSERR_CLIENT_SYNCTIMEOUT);
+        ReceiveJunk(bytesLeft);
+    }
 }
 
 bool AmsConnection::ReceiveNotification(const AoEHeader& header)
@@ -269,25 +312,25 @@ void AmsConnection::Recv()
             continue;
         }
 
-        response->errorCode = aoeHeader.errorCode();
-        ReceiveFrame(response, aoeHeader.length());
-
         switch (aoeHeader.cmdId()) {
         case AoEHeader::READ_DEVICE_INFO:
-        case AoEHeader::READ:
         case AoEHeader::WRITE:
         case AoEHeader::READ_STATE:
         case AoEHeader::WRITE_CONTROL:
         case AoEHeader::ADD_DEVICE_NOTIFICATION:
         case AoEHeader::DEL_DEVICE_NOTIFICATION:
+            ReceiveFrame<AoEResponseHeader>(response, aoeHeader.length(), aoeHeader.errorCode());
+            continue;
+
+        case AoEHeader::READ:
         case AoEHeader::READ_WRITE:
-            break;
+            ReceiveFrame<AoEReadResponseHeader>(response, aoeHeader.length(), aoeHeader.errorCode());
+            continue;
 
         default:
             LOG_WARN("Unkown AMS command id");
-            response->frame.clear();
+            response->Notify(ADSERR_CLIENT_SYNCRESINVALID);
+            ReceiveJunk(aoeHeader.length());
         }
-
-        response->Notify();
     }
 }

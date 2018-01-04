@@ -28,6 +28,10 @@
 #include "Router.h"
 
 #include <atomic>
+#include <chrono>
+
+using Timepoint = std::chrono::steady_clock::time_point;
+#define WAITING_FOR_RESPONSE ((uint32_t)0xFFFFFFFF)
 
 struct AmsRequest {
     Frame frame;
@@ -37,6 +41,7 @@ struct AmsRequest {
     uint32_t bufferLength;
     void* buffer;
     uint32_t* bytesRead;
+    Timepoint deadline;
 
     AmsRequest(const AmsAddr& ams,
                uint16_t       __port,
@@ -53,21 +58,29 @@ struct AmsRequest {
         buffer(__buffer),
         bytesRead(__bytesRead)
     {}
+
+    void SetDeadline(uint32_t tmms)
+    {
+        deadline = std::chrono::steady_clock::now();
+        deadline += std::chrono::milliseconds(tmms);
+    }
 };
 
 struct AmsResponse {
-    Frame frame;
+    std::atomic<AmsRequest*> request;
     std::atomic<uint32_t> invokeId;
-    uint32_t errorCode;
 
     AmsResponse();
-    void Notify();
+    void Notify(uint32_t error);
+    void Release();
 
-    // return true if notified before timeout
-    bool Wait(uint32_t timeout_ms);
+    // wait for response or timeout and return received errorCode or ADSERR_CLIENT_SYNCTIMEOUT
+    uint32_t Wait();
+
 private:
     std::mutex mutex;
     std::condition_variable cv;
+    uint32_t errorCode;
 };
 
 struct AmsConnection : AmsProxy {
@@ -84,27 +97,13 @@ struct AmsConnection : AmsProxy {
         if (status) {
             return status;
         }
-        AmsResponse* response = Write(request.frame, request.destAddr, srcAddr, request.cmdId);
+        request.SetDeadline(tmms);
+        AmsResponse* response = Write(request, srcAddr);
         if (response) {
-            if (response->Wait(tmms)) {
-                if (response->frame.size() < sizeof(T)) {
-                    const auto errorCode = response->errorCode;
-                    Release(response);
-                    return errorCode ? errorCode : ADSERR_CLIENT_SYNCRESINVALID;
-                }
-                const uint32_t bytesAvailable = std::min<uint32_t>(request.bufferLength,
-                                                                   response->frame.size() - sizeof(T));
-                T header(response->frame.data());
-                memcpy(request.buffer, response->frame.data() + sizeof(T), bytesAvailable);
-                if (request.bytesRead) {
-                    *request.bytesRead = bytesAvailable;
-                }
-                const auto errorCode = response->errorCode;
-                Release(response);
-                return errorCode ? errorCode : header.result();
-            }
-            Release(response);
-            return ADSERR_CLIENT_SYNCTIMEOUT;
+            const auto errorCode = response->Wait();
+
+            response->Release();
+            return errorCode;
         }
         return -1;
     }
@@ -118,18 +117,17 @@ private:
     std::atomic<uint32_t> invokeId;
     std::array<AmsResponse, Router::NUM_PORTS_MAX> queue;
 
-    Frame& ReceiveFrame(AmsResponse* response, size_t length) const;
+    template<class T> void ReceiveFrame(AmsResponse* response, size_t length, uint32_t aoeError) const;
     bool ReceiveNotification(const AoEHeader& header);
     void ReceiveJunk(size_t bytesToRead) const;
-    void Receive(void* buffer, size_t bytesToRead) const;
+    void Receive(void* buffer, size_t bytesToRead, timeval* timeout = nullptr) const;
+    void Receive(void* buffer, size_t bytesToRead, const Timepoint& deadline) const;
     template<class T> void Receive(T& buffer) const { Receive(&buffer, sizeof(T)); }
-    AmsResponse* Write(Frame& request, const AmsAddr dest, const AmsAddr srcAddr, uint16_t cmdId);
-
+    AmsResponse* Write(AmsRequest& request, const AmsAddr srcAddr);
     void Recv();
     void TryRecv();
     uint32_t GetInvokeId();
-    void Release(AmsResponse* response);
-    AmsResponse* Reserve(uint32_t id, uint16_t port);
+    AmsResponse* Reserve(AmsRequest* request, uint16_t port);
     AmsResponse* GetPending(uint32_t id, uint16_t port);
 
     std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > dispatcherList;

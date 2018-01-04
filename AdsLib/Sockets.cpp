@@ -142,7 +142,7 @@ bool Socket::Select(timeval* timeout) const
     const int state = NATIVE_SELECT(m_Socket + 1, &readSockets, nullptr, nullptr, timeout);
     if (0 == state) {
         LOG_ERROR("select() timeout");
-        return false;
+        throw TimeoutEx("select() timeout");
     }
 
     const auto lastError = WSAGetLastError();

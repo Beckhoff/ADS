@@ -25,6 +25,7 @@
 
 #include "Frame.h"
 #include "wrap_socket.h"
+#include <exception>
 #include <string>
 
 struct IpV4 {
@@ -40,6 +41,11 @@ struct Socket {
     size_t read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const;
     size_t write(const Frame& frame) const;
     void Shutdown();
+
+    struct TimeoutEx : std::runtime_error {
+        TimeoutEx(const char* _Message) : std::runtime_error(_Message)
+        {}
+    };
 
 protected:
     int m_WSAInitialized;
