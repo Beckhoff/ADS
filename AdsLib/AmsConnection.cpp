@@ -138,6 +138,24 @@ AmsResponse* AmsConnection::Write(AmsRequest& request, const AmsAddr srcAddr)
     return response;
 }
 
+long AmsConnection::AdsRequest(AmsRequest& request, const uint32_t timeout)
+{
+    AmsAddr srcAddr;
+    const auto status = router.GetLocalAddress(request.port, &srcAddr);
+    if (status) {
+        return status;
+    }
+    request.SetDeadline(timeout);
+    AmsResponse* response = Write(request, srcAddr);
+    if (response) {
+        const auto errorCode = response->Wait();
+
+        response->Release();
+        return errorCode;
+    }
+    return -1;
+}
+
 uint32_t AmsConnection::GetInvokeId()
 {
     uint32_t result;

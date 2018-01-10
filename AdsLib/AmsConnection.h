@@ -89,24 +89,7 @@ struct AmsConnection : AmsProxy {
 
     NotifyMapping CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
-
-    long AdsRequest(AmsRequest& request, const uint32_t tmms)
-    {
-        AmsAddr srcAddr;
-        const auto status = router.GetLocalAddress(request.port, &srcAddr);
-        if (status) {
-            return status;
-        }
-        request.SetDeadline(tmms);
-        AmsResponse* response = Write(request, srcAddr);
-        if (response) {
-            const auto errorCode = response->Wait();
-
-            response->Release();
-            return errorCode;
-        }
-        return -1;
-    }
+    long AdsRequest(AmsRequest& request, uint32_t timeout);
 
 private:
     friend struct AmsRouter;
