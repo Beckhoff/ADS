@@ -41,7 +41,7 @@ struct AmsRouter : Router {
     void DelRoute(const AmsNetId& ams);
     AmsConnection* GetConnection(const AmsNetId& pAddr);
 
-    template<class T> long AdsRequest(AmsRequest& request)
+    long AdsRequest(AmsRequest& request)
     {
         if (request.bytesRead) {
             *request.bytesRead = 0;
@@ -51,7 +51,7 @@ struct AmsRouter : Router {
         if (!ads) {
             return GLOBALERR_MISSING_ROUTE;
         }
-        return ads->AdsRequest<T>(request, ports[request.port - Router::PORT_BASE].tmms);
+        return ads->AdsRequest(request, ports[request.port - Router::PORT_BASE].tmms);
     }
 
 private:

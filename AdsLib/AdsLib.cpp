@@ -108,7 +108,7 @@ long AdsSyncReadReqEx2(long           port,
             indexOffset,
             bufferLength
         });
-        return GetRouter().AdsRequest<AoEReadResponseHeader>(request);
+        return GetRouter().AdsRequest(request);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }
@@ -131,7 +131,7 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
             sizeof(buffer),
             buffer
         };
-        const auto status = GetRouter().AdsRequest<AoEResponseHeader>(request);
+        const auto status = GetRouter().AdsRequest(request);
         if (!status) {
             version->version = buffer[0];
             version->revision = buffer[1];
@@ -160,7 +160,7 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
             sizeof(buffer),
             buffer
         };
-        const auto status = GetRouter().AdsRequest<AoEResponseHeader>(request);
+        const auto status = GetRouter().AdsRequest(request);
         if (!status) {
             *adsState = qFromLittleEndian<uint16_t>(buffer);
             *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
@@ -203,7 +203,7 @@ long AdsSyncReadWriteReqEx2(long           port,
             readLength,
             writeLength
         });
-        return GetRouter().AdsRequest<AoEReadResponseHeader>(request);
+        return GetRouter().AdsRequest(request);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }
@@ -235,7 +235,7 @@ long AdsSyncWriteReqEx(long           port,
             indexOffset,
             bufferLength
         });
-        return GetRouter().AdsRequest<AoEResponseHeader>(request);
+        return GetRouter().AdsRequest(request);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }
@@ -263,7 +263,7 @@ long AdsSyncWriteControlReqEx(long           port,
             devState,
             bufferLength
         });
-        return GetRouter().AdsRequest<AoEResponseHeader>(request);
+        return GetRouter().AdsRequest(request);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     }

@@ -107,8 +107,7 @@ long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify,
         sizeof(hNotify)
     };
     request.frame.prepend(qToLittleEndian(hNotify));
-
-    return AdsRequest<AoEResponseHeader>(request, tmms);
+    return AdsRequest(request, tmms);
 }
 
 AmsResponse* AmsConnection::Write(AmsRequest& request, const AmsAddr srcAddr)

@@ -90,7 +90,7 @@ struct AmsConnection : AmsProxy {
     NotifyMapping CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
 
-    template<class T> long AdsRequest(AmsRequest& request, uint32_t tmms)
+    long AdsRequest(AmsRequest& request, const uint32_t tmms)
     {
         AmsAddr srcAddr;
         const auto status = router.GetLocalAddress(request.port, &srcAddr);

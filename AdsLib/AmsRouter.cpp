@@ -179,7 +179,7 @@ long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, st
     }
 
     auto& port = ports[request.port - Router::PORT_BASE];
-    const long status = ads->AdsRequest<AoEResponseHeader>(request, port.tmms);
+    const long status = ads->AdsRequest(request, port.tmms);
     if (!status) {
         *pNotification = qFromLittleEndian<uint32_t>((uint8_t*)request.buffer);
         const auto notifyId = ads->CreateNotifyMapping(*pNotification, notify);
