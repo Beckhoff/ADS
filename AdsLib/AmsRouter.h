@@ -40,19 +40,7 @@ struct AmsRouter : Router {
     long AddRoute(AmsNetId ams, const IpV4& ip);
     void DelRoute(const AmsNetId& ams);
     AmsConnection* GetConnection(const AmsNetId& pAddr);
-
-    long AdsRequest(AmsRequest& request)
-    {
-        if (request.bytesRead) {
-            *request.bytesRead = 0;
-        }
-
-        auto ads = GetConnection(request.destAddr.netId);
-        if (!ads) {
-            return GLOBALERR_MISSING_ROUTE;
-        }
-        return ads->AdsRequest(request, ports[request.port - Router::PORT_BASE].tmms);
-    }
+    long AdsRequest(AmsRequest& request);
 
 private:
     AmsNetId localAddr;
@@ -62,7 +50,6 @@ private:
 
     std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator __GetConnection(const AmsNetId& pAddr);
     void DeleteIfLastConnection(const AmsConnection* conn);
-    void Recv();
 
     std::array<AmsPort, NUM_PORTS_MAX> ports;
 };

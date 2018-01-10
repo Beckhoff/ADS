@@ -167,6 +167,19 @@ std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator AmsRouter::__GetConnec
     return connections.end();
 }
 
+long AmsRouter::AdsRequest(AmsRequest& request)
+{
+    if (request.bytesRead) {
+        *request.bytesRead = 0;
+    }
+
+    auto ads = GetConnection(request.destAddr.netId);
+    if (!ads) {
+        return GLOBALERR_MISSING_ROUTE;
+    }
+    return ads->AdsRequest(request, ports[request.port - Router::PORT_BASE].tmms);
+}
+
 long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, std::shared_ptr<Notification> notify)
 {
     if (request.bytesRead) {
