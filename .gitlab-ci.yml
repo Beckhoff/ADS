@@ -13,7 +13,7 @@ cache:
   stage: build
   tags:
     - docker
-  image: lbs1:5500/beckhoff/docker-mxe
+  image: ${REGISTRY_HOST}/beckhoff/docker-mxe
   script:
     - tools/10_get_fructose.sh
     - make CXX=$compiler OS_NAME=$os_name
