@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # setup fake ads server and install cleanup trap
 ncat -l 48898 --keep-open &
