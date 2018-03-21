@@ -1,5 +1,6 @@
 stages:
   - build
+  - test:clang-fbsd
   - test:clang
   - test:gcc
   - test:gcc-i386
@@ -16,10 +17,10 @@ cache:
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe
   script:
     - tools/10_get_fructose.sh
-    - make CXX=$compiler OS_NAME=$os_name
-    - make CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
+    - $maker CXX=$compiler OS_NAME=$os_name
+    - $maker CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
     - cd example
-    - make CXX=$compiler OS_NAME=$os_name
+    - $maker CXX=$compiler OS_NAME=$os_name
   artifacts:
     paths:
     - AdsLib-$os_name.a
@@ -31,12 +32,23 @@ build:clang:
   variables:
     compiler: /usr/bin/clang++
     os_name: Linux
+    maker: make
+
+build:clang-fbsd:
+  <<: *build-template
+  variables:
+    compiler: /usr/bin/clang++
+    os_name: FreeBSD
+    maker: /usr/local/bin/gmake
+  tags:
+    - fbsd
 
 build:clang-macOS:
   <<: *build-template
   variables:
     compiler: /usr/bin/clang++
     os_name: macOS
+    maker: make
   tags:
     - macOS
 
@@ -45,12 +57,14 @@ build:gcc:
   variables:
     compiler: /usr/bin/g++
     os_name: Linux
+    maker: make
 
 build:gcc-i386:
   <<: *build-template
   variables:
     compiler: /usr/bin/g++
     os_name: i386
+    maker: make
     ci_cxx_flags: -m32
 
 build:mxe:
@@ -58,6 +72,7 @@ build:mxe:
   variables:
     compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
     os_name: win32
+    maker: make
 
 .test-template: &test-template
   tags:
@@ -87,6 +102,15 @@ test:gcc-i386:
   stage: test:gcc-i386
   dependencies:
     - build:gcc-i386
+
+test:clang-fbsd:
+  stage: test:clang-fbsd
+  dependencies:
+    - build:clang-fbsd
+  tags:
+    - fbsd
+  script:
+    - ./tools/90_run_tests.sh
 
 test:clang-macOS:
   stage: test:clang-macOS
