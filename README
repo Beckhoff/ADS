@@ -1,4 +1,4 @@
-This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. Linux, Mac OS...) to communicate with TwinCAT devices via TCP/IP.
+This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. FreeBSD, Linux, macOS, ...) to communicate with TwinCAT devices via TCP/IP.
 
 To build this library a recent compiler with C++11 support is required. 
 
@@ -45,7 +45,7 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 
 *Requires a TwinCAT restart.
 
-- set "remoteNetId" and "remoteIpV4" in "example/example.cpp" according to your own setup
+- set "remoteNetId" and "remoteIpV4" and enable AdsSetLocalAddress() in "example/example.cpp" according to your own setup
 
 # make sure you are in the correct directory
 cd example/

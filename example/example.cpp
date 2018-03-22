@@ -180,6 +180,9 @@ void runExample(std::ostream& out)
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
     static const char remoteIpV4[] = "ads-server";
 
+    // uncomment and adjust if automatic AmsNetId deduction is not working as expected
+    //AdsSetLocalAddress({192, 168, 0, 1, 1, 1});
+
     // add local route to your EtherCAT Master
     if (AdsAddRoute(remoteNetId, remoteIpV4)) {
         out << "Adding ADS route failed, did you specified valid addresses?\n";
