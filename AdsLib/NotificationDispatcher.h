@@ -32,6 +32,7 @@
 
 struct AmsProxy {
     virtual long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
+    virtual ~AmsProxy() {}
 };
 
 struct NotificationDispatcher {
