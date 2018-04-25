@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,7 @@
    SOFTWARE.
  */
 
-#ifndef _NOTIFICATION_DISPATCHER_H_
-#define _NOTIFICATION_DISPATCHER_H_
+#pragma once
 
 #include "AdsNotification.h"
 #include "AmsHeader.h"
@@ -32,7 +31,7 @@
 
 struct AmsProxy {
     virtual long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
-    virtual ~AmsProxy() {}
+    virtual ~AmsProxy() = default;
 };
 
 struct NotificationDispatcher {
@@ -41,7 +40,7 @@ struct NotificationDispatcher {
     bool operator<(const NotificationDispatcher& ref) const;
     void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
-    inline void Notify() { sem.Post(); }
+    void Notify();
     void Run();
 
     const VirtualConnection conn;
@@ -55,5 +54,3 @@ private:
 
     std::shared_ptr<Notification> Find(uint32_t hNotify);
 };
-
-#endif /* #ifndef _NOTIFICATION_DISPATCHER_H_ */

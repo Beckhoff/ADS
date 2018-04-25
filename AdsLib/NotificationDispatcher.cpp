@@ -65,6 +65,11 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
     return {};
 }
 
+void NotificationDispatcher::Notify()
+{
+    sem.Post();
+}
+
 void NotificationDispatcher::Run()
 {
     while (sem.Wait()) {
