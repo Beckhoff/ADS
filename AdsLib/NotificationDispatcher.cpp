@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,13 @@
 
 #include "NotificationDispatcher.h"
 #include "Log.h"
+#include <future>
 
 NotificationDispatcher::NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn)
     : conn(__conn),
     ring(4 * 1024 * 1024),
-    proxy(__proxy),
-    thread(&NotificationDispatcher::Run, this)
+    proxy(__proxy)
 {}
-
-NotificationDispatcher::~NotificationDispatcher()
-{
-    sem.Close();
-    thread.join();
-}
 
 bool NotificationDispatcher::operator<(const NotificationDispatcher& ref) const
 {
@@ -67,12 +61,14 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
 
 void NotificationDispatcher::Notify()
 {
-    sem.Post();
+    std::async(std::launch::async, &NotificationDispatcher::Run, this);
 }
 
 void NotificationDispatcher::Run()
 {
-    while (sem.Wait()) {
+    //add this onetime loop to make the diff nicer
+    for (bool run = true; run; run = false) {
+        std::unique_lock<std::mutex> lock(runLock);
         auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
         const auto length = ring.ReadFromLittleEndian<uint32_t>();
         (void)length;

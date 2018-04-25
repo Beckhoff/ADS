@@ -29,6 +29,8 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <thread>
 
 using Timepoint = std::chrono::steady_clock::time_point;
 #define WAITING_FOR_RESPONSE ((uint32_t)0xFFFFFFFF)

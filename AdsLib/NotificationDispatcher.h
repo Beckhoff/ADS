@@ -24,10 +24,9 @@
 
 #include "AdsNotification.h"
 #include "AmsHeader.h"
-#include "Semaphore.h"
 
 #include <map>
-#include <thread>
+#include <mutex>
 
 struct AmsProxy {
     virtual long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
@@ -36,7 +35,6 @@ struct AmsProxy {
 
 struct NotificationDispatcher {
     NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn);
-    ~NotificationDispatcher();
     bool operator<(const NotificationDispatcher& ref) const;
     void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
@@ -48,9 +46,8 @@ struct NotificationDispatcher {
 private:
     std::map<uint32_t, std::shared_ptr<Notification> > notifications;
     std::recursive_mutex mutex;
+    std::mutex runLock;
     AmsProxy& proxy;
-    Semaphore sem;
-    std::thread thread;
 
     std::shared_ptr<Notification> Find(uint32_t hNotify);
 };
