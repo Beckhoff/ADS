@@ -57,9 +57,6 @@
     <ClInclude Include="AmsPort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Semaphore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NotificationDispatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
