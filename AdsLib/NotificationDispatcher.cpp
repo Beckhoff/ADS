@@ -66,36 +66,33 @@ void NotificationDispatcher::Notify()
 
 void NotificationDispatcher::Run()
 {
-    //add this onetime loop to make the diff nicer
-    for (bool run = true; run; run = false) {
-        std::unique_lock<std::mutex> lock(runLock);
-        auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
-        const auto length = ring.ReadFromLittleEndian<uint32_t>();
-        (void)length;
-        const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
-        fullLength -= sizeof(length) + sizeof(numStamps);
-        for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
-            const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
-            const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
-            fullLength -= sizeof(timestamp) + sizeof(numSamples);
-            for (uint32_t sample = 0; sample < numSamples; ++sample) {
-                const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
-                const auto size = ring.ReadFromLittleEndian<uint32_t>();
-                fullLength -= sizeof(hNotify) + sizeof(size);
-                const auto notification = Find(hNotify);
-                if (notification) {
-                    if (size != notification->Size()) {
-                        LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification->Size());
-                        goto cleanup;
-                    }
-                    notification->Notify(timestamp, ring);
-                } else {
-                    ring.Read(size);
+    std::unique_lock<std::mutex> lock(runLock);
+    auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
+    const auto length = ring.ReadFromLittleEndian<uint32_t>();
+    (void)length;
+    const auto numStamps = ring.ReadFromLittleEndian<uint32_t>();
+    fullLength -= sizeof(length) + sizeof(numStamps);
+    for (uint32_t stamp = 0; stamp < numStamps; ++stamp) {
+        const auto timestamp = ring.ReadFromLittleEndian<uint64_t>();
+        const auto numSamples = ring.ReadFromLittleEndian<uint32_t>();
+        fullLength -= sizeof(timestamp) + sizeof(numSamples);
+        for (uint32_t sample = 0; sample < numSamples; ++sample) {
+            const auto hNotify = ring.ReadFromLittleEndian<uint32_t>();
+            const auto size = ring.ReadFromLittleEndian<uint32_t>();
+            fullLength -= sizeof(hNotify) + sizeof(size);
+            const auto notification = Find(hNotify);
+            if (notification) {
+                if (size != notification->Size()) {
+                    LOG_WARN("Notification sample size: " << size << " doesn't match: " << notification->Size());
+                    goto cleanup;
                 }
-                fullLength -= size;
+                notification->Notify(timestamp, ring);
+            } else {
+                ring.Read(size);
             }
+            fullLength -= size;
         }
-cleanup:
-        ring.Read(fullLength);
     }
+cleanup:
+    ring.Read(fullLength);
 }
