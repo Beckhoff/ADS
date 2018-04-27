@@ -35,7 +35,6 @@ struct AmsProxy {
 
 struct NotificationDispatcher {
     NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn);
-    bool operator<(const NotificationDispatcher& ref) const;
     void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
     void Notify();

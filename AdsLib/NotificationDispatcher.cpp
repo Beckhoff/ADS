@@ -30,11 +30,6 @@ NotificationDispatcher::NotificationDispatcher(AmsProxy& __proxy, VirtualConnect
     proxy(__proxy)
 {}
 
-bool NotificationDispatcher::operator<(const NotificationDispatcher& ref) const
-{
-    return conn.second < ref.conn.second;
-}
-
 void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
