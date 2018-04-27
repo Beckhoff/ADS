@@ -24,10 +24,9 @@
 #include "Log.h"
 #include <future>
 
-NotificationDispatcher::NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn)
-    : conn(__conn),
-    ring(4 * 1024 * 1024),
-    proxy(__proxy)
+NotificationDispatcher::NotificationDispatcher(DeleteNotificationCallback callback)
+    : deleteNotification(callback),
+    ring(4 * 1024 * 1024)
 {}
 
 void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification)
@@ -38,7 +37,7 @@ void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notificat
 
 long NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
-    const auto status = proxy.DeleteNotification(conn.second, hNotify, tmms, conn.first);
+    const auto status = deleteNotification(hNotify, tmms);
     std::lock_guard<std::recursive_mutex> lock(mutex);
     notifications.erase(hNotify);
     return status;

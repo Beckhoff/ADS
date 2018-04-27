@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ uint32_t AmsResponse::Wait()
     return errorCode;
 }
 
-std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListAdd(const VirtualConnection& connection)
+SharedDispatcher AmsConnection::DispatcherListAdd(const VirtualConnection& connection)
 {
     const auto dispatcher = DispatcherListGet(connection);
     if (dispatcher) {
@@ -59,10 +59,15 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListAdd(const V
     }
     std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
     return dispatcherList.emplace(connection,
-                                  std::make_shared<NotificationDispatcher>(*this, connection)).first->second;
+                                  std::make_shared<NotificationDispatcher>(std::bind(&AmsConnection::DeleteNotification,
+                                                                                     this,
+                                                                                     connection.second,
+                                                                                     std::placeholders::_1,
+                                                                                     std::placeholders::_2,
+                                                                                     connection.first))).first->second;
 }
 
-std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListGet(const VirtualConnection& connection)
+SharedDispatcher AmsConnection::DispatcherListGet(const VirtualConnection& connection)
 {
     std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
 
@@ -70,7 +75,7 @@ std::shared_ptr<NotificationDispatcher> AmsConnection::DispatcherListGet(const V
     if (it != dispatcherList.end()) {
         return it->second;
     }
-    return std::shared_ptr<NotificationDispatcher>();
+    return {};
 }
 
 AmsConnection::AmsConnection(Router& __router, IpV4 __destIp)
@@ -90,12 +95,12 @@ AmsConnection::~AmsConnection()
     receiver.join();
 }
 
-NotifyMapping AmsConnection::CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification)
+SharedDispatcher AmsConnection::CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification)
 {
-    const auto dispatcher = DispatcherListAdd(notification->connection);
+    auto dispatcher = DispatcherListAdd(notification->connection);
     notification->hNotify(hNotify);
     dispatcher->Emplace(hNotify, notification);
-    return NotifyMapping {hNotify, dispatcher};
+    return dispatcher;
 }
 
 long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port)

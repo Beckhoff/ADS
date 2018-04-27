@@ -28,25 +28,22 @@
 #include <map>
 #include <mutex>
 
-struct AmsProxy {
-    virtual long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port) = 0;
-    virtual ~AmsProxy() = default;
-};
+using DeleteNotificationCallback = std::function<long(uint32_t hNotify, uint32_t tmms)>;
 
 struct NotificationDispatcher {
-    NotificationDispatcher(AmsProxy& __proxy, VirtualConnection __conn);
+    NotificationDispatcher(DeleteNotificationCallback callback);
     void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
     void Notify();
     void Run();
 
-    const VirtualConnection conn;
+    const DeleteNotificationCallback deleteNotification;
     RingBuffer ring;
 private:
     std::map<uint32_t, std::shared_ptr<Notification> > notifications;
     std::recursive_mutex mutex;
     std::mutex runLock;
-    AmsProxy& proxy;
 
     std::shared_ptr<Notification> Find(uint32_t hNotify);
 };
+using SharedDispatcher = std::shared_ptr<NotificationDispatcher>;
