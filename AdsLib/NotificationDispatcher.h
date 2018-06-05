@@ -25,6 +25,7 @@
 #include "AdsNotification.h"
 #include "AmsHeader.h"
 
+#include <functional>
 #include <map>
 #include <mutex>
 
