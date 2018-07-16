@@ -27,6 +27,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <string>
+#include <functional>
 #else
 #include <stdint.h>
 #endif
@@ -389,8 +390,12 @@ struct AdsNotificationHeader {
  * @param[in] pNotification pointer to a AdsNotificationHeader structure
  * @param[in] hUser custom handle pass to AdsSyncAddDeviceNotificationReqEx() during registration
  */
-typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
-                                        uint32_t hUser);
+//typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
+//                                        uint32_t hUser);
+
+typedef std::function<void(const AmsAddr* pAddr,
+							const AdsNotificationHeader* pNotification,
+                            uint32_t hUser)> PAdsNotificationFuncEx;
 
 #pragma pack( pop )
 #endif  // __ADSDEF_H__
