@@ -33,7 +33,7 @@ using VirtualConnection = std::pair<uint16_t, AmsAddr>;
 struct Notification {
     const VirtualConnection connection;
 
-    Notification(PAdsNotificationFuncEx __func,
+    Notification(const PAdsNotificationFuncEx& __func,
                  uint32_t               __hUser,
                  uint32_t               length,
                  AmsAddr                __amsAddr,

@@ -274,7 +274,7 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
                                        uint32_t                     indexGroup,
                                        uint32_t                     indexOffset,
                                        const AdsNotificationAttrib* pAttrib,
-                                       PAdsNotificationFuncEx       pFunc,
+                                       const PAdsNotificationFuncEx& pFunc,
                                        uint32_t                     hUser,
                                        uint32_t*                    pNotification)
 {
