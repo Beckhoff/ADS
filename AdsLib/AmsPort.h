@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,9 @@
    SOFTWARE.
  */
 
-#ifndef _AMS_PORT_H_
-#define _AMS_PORT_H_
+#pragma once
 
 #include "NotificationDispatcher.h"
-
-#include <set>
-
-using NotifyMapping = std::pair<uint32_t, std::shared_ptr<NotificationDispatcher> >;
 
 struct AmsPort {
     AmsPort();
@@ -37,12 +32,12 @@ struct AmsPort {
     uint32_t tmms;
     uint16_t port;
 
-    void AddNotification(NotifyMapping mapping);
-    long DelNotification(const AmsAddr& ams, uint32_t hNotify);
+    void AddNotification(AmsAddr ams, uint32_t hNotify, SharedDispatcher dispatcher);
+    long DelNotification(AmsAddr ams, uint32_t hNotify);
 
 private:
+    using NotifyUUID = std::pair<const AmsAddr, const uint32_t>;
     static const uint32_t DEFAULT_TIMEOUT = 5000;
-    std::set<NotifyMapping> notifications;
+    std::map<NotifyUUID, SharedDispatcher> dispatcherList;
     std::mutex mutex;
 };
-#endif /* #ifndef _AMS_PORT_H_ */

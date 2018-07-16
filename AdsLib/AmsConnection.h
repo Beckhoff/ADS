@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,7 @@
    SOFTWARE.
  */
 
-#ifndef _AMSCONNECTION_H_
-#define _AMSCONNECTION_H_
+#pragma once
 
 #include "AmsPort.h"
 #include "Sockets.h"
@@ -29,6 +28,8 @@
 
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <thread>
 
 using Timepoint = std::chrono::steady_clock::time_point;
 #define WAITING_FOR_RESPONSE ((uint32_t)0xFFFFFFFF)
@@ -83,11 +84,11 @@ private:
     uint32_t errorCode;
 };
 
-struct AmsConnection : AmsProxy {
+struct AmsConnection {
     AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
     ~AmsConnection();
 
-    NotifyMapping CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
+    SharedDispatcher CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
     long AdsRequest(AmsRequest& request, uint32_t timeout);
 
@@ -113,14 +114,12 @@ private:
     AmsResponse* Reserve(AmsRequest* request, uint16_t port);
     AmsResponse* GetPending(uint32_t id, uint16_t port);
 
-    std::map<VirtualConnection, std::shared_ptr<NotificationDispatcher> > dispatcherList;
+    std::map<VirtualConnection, SharedDispatcher> dispatcherList;
     std::recursive_mutex dispatcherListMutex;
-    std::shared_ptr<NotificationDispatcher> DispatcherListAdd(const VirtualConnection& connection);
-    std::shared_ptr<NotificationDispatcher> DispatcherListGet(const VirtualConnection& connection);
+    SharedDispatcher DispatcherListAdd(const VirtualConnection& connection);
+    SharedDispatcher DispatcherListGet(const VirtualConnection& connection);
 
 public:
     const IpV4 destIp;
     const uint32_t ownIp;
 };
-
-#endif /* #ifndef _AMSCONNECTION_H_ */

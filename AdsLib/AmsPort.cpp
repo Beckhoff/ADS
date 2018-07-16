@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2018 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -35,36 +35,32 @@ AmsPort::AmsPort()
     port(0)
 {}
 
-void AmsPort::AddNotification(NotifyMapping mapping)
+void AmsPort::AddNotification(const AmsAddr ams, const uint32_t hNotify, SharedDispatcher dispatcher)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    notifications.insert(mapping);
+    dispatcherList.emplace(NotifyUUID {ams, hNotify}, dispatcher);
 }
 
 void AmsPort::Close()
 {
     std::lock_guard<std::mutex> lock(mutex);
 
-    auto it = std::begin(notifications);
-    while (it != std::end(notifications)) {
-        it->second->Erase(it->first, tmms);
-        it = notifications.erase(it);
+    for (auto& d: dispatcherList) {
+        d.second->Erase(d.first.second, tmms);
     }
+    dispatcherList.clear();
     tmms = DEFAULT_TIMEOUT;
     port = 0;
 }
 
-long AmsPort::DelNotification(const AmsAddr& ams, uint32_t hNotify)
+long AmsPort::DelNotification(const AmsAddr ams, uint32_t hNotify)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    for (auto it = notifications.begin(); it != notifications.end(); ++it) {
-        if (it->first == hNotify) {
-            if (std::ref(it->second->conn.second) == ams) {
-                const auto status = it->second->Erase(hNotify, tmms);
-                notifications.erase(it);
-                return status;
-            }
-        }
+    auto it = dispatcherList.find({ams, hNotify});
+    if (it != dispatcherList.end()) {
+        const auto status = it->second->Erase(hNotify, tmms);
+        dispatcherList.erase(it);
+        return status;
     }
     return ADSERR_CLIENT_REMOVEHASH;
 }

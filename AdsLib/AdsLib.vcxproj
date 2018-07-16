@@ -85,7 +85,6 @@
     <ClInclude Include="NotificationDispatcher.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Router.h" />
-    <ClInclude Include="Semaphore.h" />
     <ClInclude Include="Sockets.h" />
     <ClInclude Include="wrap_endian.h" />
     <ClInclude Include="wrap_socket.h" />
