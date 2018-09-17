@@ -117,7 +117,14 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
     if ((0 == bytesRead) || (lastError == CONNECTION_CLOSED) || (lastError == CONNECTION_ABORTED)) {
         throw std::runtime_error("connection closed by remote");
     } else {
+#if defined(__gnu_linux__) || defined(__APPLE__)
+        // print the errorcode as a string.
+        // Note: probably more platforms have strerror().
+        // They may be added by someone who can compile and test
+        LOG_ERROR("read frame failed with error: " << std::dec << strerror(lastError));
+#else    
         LOG_ERROR("read frame failed with error: " << std::dec << lastError);
+#endif
     }
     return 0;
 }
