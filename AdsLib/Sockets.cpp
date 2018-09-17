@@ -117,7 +117,7 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
     if ((0 == bytesRead) || (lastError == CONNECTION_CLOSED) || (lastError == CONNECTION_ABORTED)) {
         throw std::runtime_error("connection closed by remote");
     } else {
-        LOG_ERROR("read frame failed with error: " << std::dec << lastError);
+        LOG_ERROR("read frame failed with error: " << std::dec << strerror(lastError));
     }
     return 0;
 }
@@ -152,8 +152,8 @@ bool Socket::Select(timeval* timeout) const
 
     /* and check if socket was correct */
     if ((1 != state) || (!FD_ISSET(m_Socket, &readSockets))) {
-        LOG_ERROR(
-            "something strange happen while waiting for socket... with error: " << lastError << " state: " << state);
+        LOG_ERROR("something strange happen while waiting for socket in state: " <<
+                  state << " with error: " << strerror(lastError));
         return false;
     }
     return true;
