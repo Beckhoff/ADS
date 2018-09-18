@@ -77,6 +77,7 @@ build:mxe:
 .test-template: &test-template
   tags:
     - kvm
+    - rack
     - x86_64
   before_script:
     - sudo dpkg --add-architecture i386
@@ -109,6 +110,7 @@ test:clang-fbsd:
     - build:clang-fbsd
   tags:
     - fbsd
+    - rack
   script:
     - ./tools/90_run_tests.sh
 
@@ -118,5 +120,6 @@ test:clang-macOS:
     - build:clang-macOS
   tags:
     - macOS
+    - rack
   script:
     - ./tools/90_run_tests.sh
