@@ -1,3 +1,5 @@
+# Readme
+
 This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. FreeBSD, Linux, macOS, ...) to communicate with TwinCAT devices via TCP/IP.
 
 To build this library a recent compiler with C++11 support is required. 
@@ -14,13 +16,13 @@ Win7 64-bit             | MS Visual C++ 2015 (untended)
 
 compile & usage
 ===============
-# clone the repository
+## clone the repository
 git clone https://github.com/Beckhoff/ADS.git
 
-# change into root of the cloned repository
+## change into root of the cloned repository
 cd ADS
 
-# build the library
+## build the library
 make
 
 
@@ -47,13 +49,13 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 
 - set "remoteNetId" and "remoteIpV4" and enable AdsSetLocalAddress() in "example/example.cpp" according to your own setup
 
-# make sure you are in the correct directory
+## make sure you are in the correct directory
 cd example/
 
-# build
+## build
 make
 
-# and run the example
+## and run the example
 make test
 
 ---
