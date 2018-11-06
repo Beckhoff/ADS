@@ -11,5 +11,6 @@ if ! sha512sum -c ${NAME}.sha512; then
 fi
 
 tar xf ${FILENAME}
+rm -rf ${SCRIPT_PATH}/fructose
 mv ${NAME}/fructose/include/fructose/ ${SCRIPT_PATH}/
 rm -rf ${NAME}/
