@@ -20,8 +20,7 @@
    SOFTWARE.
  */
 
-#ifndef __ADSDEF_H__
-#define __ADSDEF_H__
+#pragma once
 
 #ifdef __cplusplus
 #include <cstdint>
@@ -392,5 +391,41 @@ struct AdsNotificationHeader {
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
 
+#define ADSSYMBOLFLAG_PERSISTENT    ((uint32_t)(1 << 0))
+#define ADSSYMBOLFLAG_BITVALUE      ((uint32_t)(1 << 1))
+#define ADSSYMBOLFLAG_REFERENCETO   ((uint32_t)(1 << 2))
+#define ADSSYMBOLFLAG_TYPEGUID      ((uint32_t)(1 << 3))
+#define ADSSYMBOLFLAG_TCCOMIFACEPTR ((uint32_t)(1 << 4))
+#define ADSSYMBOLFLAG_READONLY      ((uint32_t)(1 << 5))
+#define ADSSYMBOLFLAG_CONTEXTMASK   ((uint32_t)0xF00)
+
+/**
+ * @brief This structure describes the header of ADS symbol information
+ *
+ * Calling AdsSyncReadWriteReqEx2 with IndexGroup == ADSIGRP_SYM_INFOBYNAMEEX
+ * will return ADS symbol information in the provided readData buffer.
+ * The header of that information is structured as AdsSymbolEntry and can
+ * be followed by zero terminated strings for "symbol name", "type name"
+ * and a "comment"
+ */
+struct AdsSymbolEntry {
+    uint32_t entryLength; // length of complete symbol entry
+    uint32_t iGroup; // indexGroup of symbol: input, output etc.
+    uint32_t iOffs; // indexOffset of symbol
+    uint32_t size; // size of symbol ( in bytes, 0 = bit )
+    uint32_t dataType; // adsDataType of symbol
+    uint32_t flags; // see ADSSYMBOLFLAG_*
+    uint16_t nameLength; // length of symbol name (null terminating character not counted)
+    uint16_t typeLength; // length of type name (null terminating character not counted)
+    uint16_t commentLength; // length of comment (null terminating character not counted)
+};
+
+/**
+ * @brief This structure is used to provide ADS symbol information for ADS SUM commands
+ */
+struct AdsSymbolInfoByName {
+    uint32_t indexGroup;
+    uint32_t indexOffset;
+    uint32_t cbLength;
+};
 #pragma pack( pop )
-#endif  // __ADSDEF_H__
