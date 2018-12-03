@@ -33,7 +33,7 @@ uint32_t getHandleByNameExample(std::ostream& out, long port, const AmsAddr& ser
                                                      handleName.c_str(),
                                                      nullptr);
     if (handleStatus) {
-        out << "Create handle for '" << handleName << "' failed with: 0x" << std::hex << handleStatus << '\n';
+        out << "Create handle for '" << handleName << "' failed with: " << std::dec << handleStatus << '\n';
     }
     return handle;
 }
