@@ -46,6 +46,27 @@ void releaseHandleExample(std::ostream& out, long port, const AmsAddr& server, u
     }
 }
 
+uint32_t getSymbolSize(std::ostream& out, long port, const AmsAddr& server, const std::string handleName)
+{
+    AdsSymbolEntry symbolEntry;
+    uint32_t bytesRead;
+
+    const long status = AdsSyncReadWriteReqEx2(port,
+                                               &server,
+                                               ADSIGRP_SYM_INFOBYNAMEEX,
+                                               0,
+                                               sizeof(symbolEntry),
+                                               &symbolEntry,
+                                               handleName.size(),
+                                               handleName.c_str(),
+                                               &bytesRead);
+    if (status) {
+        throw std::runtime_error("Unable to determine symbol size, reading ADS symbol information failed with: " + std::to_string(
+                                     status));
+    }
+    return symbolEntry.size;
+}
+
 void notificationExample(std::ostream& out, long port, const AmsAddr& server)
 {
     const AdsNotificationAttrib attrib = {
@@ -138,26 +159,30 @@ void readExample(std::ostream& out, long port, const AmsAddr& server)
 
 void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
 {
+    static const char handleName[] = "MAIN.byByte[4]";
     uint32_t bytesRead;
-    uint32_t buffer;
-    uint32_t handle;
 
     out << __FUNCTION__ << "():\n";
-    handle = getHandleByNameExample(out, port, server, "MAIN.byByte[4]");
-
+    const uint32_t handle = getHandleByNameExample(out, port, server, handleName);
+    const uint32_t bufferSize = getSymbolSize(out, port, server, handleName);
+    const auto buffer = std::unique_ptr<uint8_t>(new uint8_t[bufferSize]);
     for (size_t i = 0; i < 8; ++i) {
         const long status = AdsSyncReadReqEx2(port,
                                               &server,
                                               ADSIGRP_SYM_VALBYHND,
                                               handle,
-                                              sizeof(buffer),
-                                              &buffer,
+                                              bufferSize,
+                                              buffer.get(),
                                               &bytesRead);
         if (status) {
             out << "ADS read failed with: " << std::dec << status << '\n';
             return;
         }
-        out << "ADS read " << std::dec << bytesRead << " bytes, value: 0x" << std::hex << buffer << '\n';
+        out << "ADS read " << std::dec << bytesRead << " bytes:" << std::hex;
+        for (size_t i = 0; i < bytesRead; ++i) {
+            out << ' ' << (int)buffer.get()[i];
+        }
+        out << '\n';
     }
     releaseHandleExample(out, port, server, handle);
 }
@@ -217,5 +242,9 @@ void runExample(std::ostream& out)
 
 int main()
 {
-    runExample(std::cout);
+    try {
+        runExample(std::cout);
+    } catch (const std::runtime_error& ex) {
+        std::cout << ex.what() << '\n';
+    }
 }
