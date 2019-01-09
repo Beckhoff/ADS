@@ -210,7 +210,7 @@ void runExample(std::ostream& out)
 
     // add local route to your EtherCAT Master
     if (AdsAddRoute(remoteNetId, remoteIpV4)) {
-        out << "Adding ADS route failed, did you specified valid addresses?\n";
+        out << "Adding ADS route failed, did you specify valid addresses?\n";
         return;
     }
 
