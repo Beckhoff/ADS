@@ -62,3 +62,7 @@ prepare-hooks:
 	chmod a+x .git/hooks/pre-commit
 
 .PHONY: clean uncrustify prepare-hooks
+
+## for EPICS
+install : all
+uninstall : clean
