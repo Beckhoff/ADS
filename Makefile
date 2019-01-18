@@ -7,8 +7,6 @@ LIBRARY_IOC = AdsLib
 
 ifeq ($(OS_CLASS),WIN32)
 USR_CPPFLAGS += -DDLL_EXPORT=__declspec(dllexport)
-else
-USR_CPPFLAGS += -DDLL_EXPORT=
 endif
 
 AdsLib_SRCS += AdsDef.cpp
