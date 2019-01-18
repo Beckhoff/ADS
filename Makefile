@@ -5,7 +5,11 @@ SRC_DIRS += $(TOP)/AdsLib $(TOP)/AdsLibTest
 
 LIBRARY_IOC = AdsLib
 
+ifeq ($(OS_CLASS),WIN32)
 USR_CPPFLAGS += -DDLL_EXPORT=__declspec(dllexport)
+else
+USR_CPPFLAGS += -DDLL_EXPORT=
+endif
 
 AdsLib_SRCS += AdsDef.cpp
 AdsLib_SRCS += AdsLib.cpp
@@ -19,13 +23,12 @@ AdsLib_SRCS += Frame.cpp
 
 AdsLib_SYS_LIBS_WIN32 += ws2_32
 
-ifneq ($(findstring Linux,$(EPICS_HOST_ARCH)),)
-PROD_IOC += AdsLibTest
-endif
+# Requires fructose test framework
+#PROD_IOC += AdsLibTest
 
-AdsLibTest_SRCS += main.cpp
-AdsLibTest_LIBS += AdsLib
-AdsLibTest_SYS_LIBS_WIN32 += ws2_32
+#AdsLibTest_SRCS += main.cpp
+#AdsLibTest_LIBS += AdsLib
+#AdsLibTest_SYS_LIBS_WIN32 += ws2_32
 
 include $(TOP)/configure/RULES
 
