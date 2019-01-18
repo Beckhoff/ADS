@@ -24,17 +24,15 @@
 #define _ADSLIB_H_
 
 #ifndef DLL_EXPORT
-#ifdef _WIN32
-#if _DLL
-#define DLL_EXPORT __declspec(dllimport)
-#else
-#define DLL_EXPORT extern
-#endif /* _DLL */
-#else
-#define DLL_EXPORT extern
-#endif /* _WIN32 */
-#else
-#define DLL_EXPORT extern
+#  ifdef _WIN32
+#    if _DLL
+#      define DLL_EXPORT __declspec(dllimport)
+#    else
+#      define DLL_EXPORT extern
+#    endif /* _DLL */
+#  else
+#    define DLL_EXPORT extern
+#  endif /* _WIN32 */
 #endif /* DLL_EXPORT */
 
 #include "AdsDef.h"
