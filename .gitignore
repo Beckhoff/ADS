@@ -220,3 +220,8 @@ FakesAssemblies/
 *.bak
 *.opendb
 AdsLib.VC.db
+
+# EPICS
+/bin/
+/lib/
+O.*/
