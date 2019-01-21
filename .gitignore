@@ -224,4 +224,5 @@ AdsLib.VC.db
 # EPICS
 /bin/
 /lib/
+/include/
 O.*/

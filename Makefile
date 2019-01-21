@@ -19,6 +19,8 @@ AdsLib_SRCS += NotificationDispatcher.cpp
 AdsLib_SRCS += Sockets.cpp
 AdsLib_SRCS += Frame.cpp
 
+INC += AdsDef.h AdsLib.h
+
 AdsLib_SYS_LIBS_WIN32 += ws2_32
 
 # Requires fructose test framework
