@@ -1,5 +1,9 @@
 
-OS_NAME ?=$(shell uname)
+ifeq ($(OS),Windows_NT)     # XP, 2000, 7, Vista, 10...
+    OS_NAME := win32
+else
+    OS_NAME ?= $(shell uname)
+endif
 VPATH = AdsLib
 LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
