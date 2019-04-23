@@ -1,8 +1,8 @@
 
-OS_NAME ?=$(shell uname)
+OS ?=$(shell uname)
 VPATH = AdsLib
 LIBS = -lpthread
-LIB_NAME = AdsLib-$(OS_NAME).a
+LIB_NAME = AdsLib-$(OS).a
 OBJ_DIR = obj
 CXX :=$(CROSS_COMPILE)$(CXX)
 CXXFLAGS += -std=c++11
@@ -24,11 +24,11 @@ SRC_FILES += Sockets.cpp
 SRC_FILES += Frame.cpp
 OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
-ifeq ($(OS_NAME),Darwin)
+ifeq ($(OS),Darwin)
 	LIBS += -lc++
 endif
 
-ifeq ($(OS_NAME),win32)
+ifeq ($(OS),win32)
 	LIBS += -lws2_32
 endif
 
