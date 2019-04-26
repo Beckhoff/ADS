@@ -1,13 +1,13 @@
-OS ?=$(shell uname)
+OS_NAME ?=$(shell uname)
 LIBS = -lpthread
-LIB_NAME = ../AdsLib-$(OS).a
+LIB_NAME = ../AdsLib-$(OS_NAME).a
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
 CXXFLAGS += -I../AdsLib/
 CXXFLAGS += $(ci_cxx_flags)
 
-ifeq ($(OS),win32)
+ifeq ($(OS_NAME),win32)
         LIBS += -lws2_32
 endif
 

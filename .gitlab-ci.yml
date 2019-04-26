@@ -17,10 +17,10 @@ cache:
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe
   script:
     - tools/10_get_fructose.sh
-    - $maker CXX=$compiler OS=$os_name
-    - $maker CXX=$compiler OS=$os_name AdsLibTest.bin
+    - $maker CXX=$compiler OS_NAME=$os_name
+    - $maker CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
     - cd example
-    - $maker CXX=$compiler OS=$os_name
+    - $maker CXX=$compiler OS_NAME=$os_name
   artifacts:
     paths:
     - AdsLib-$os_name.a
