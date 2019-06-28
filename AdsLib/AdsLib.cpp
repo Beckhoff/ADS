@@ -182,7 +182,7 @@ long AdsSyncReadWriteReqEx2(long           port,
                             uint32_t*      bytesRead)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
-    if (!readData || !writeData) {
+    if ((readLength && !readData) || (writeLength && !writeData)) {
         return ADSERR_CLIENT_INVALIDPARM;
     }
 
