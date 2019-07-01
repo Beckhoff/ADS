@@ -29,7 +29,7 @@
 #include <map>
 #include <mutex>
 
-using DeleteNotificationCallback = std::function<long(uint32_t hNotify, uint32_t tmms)>;
+using DeleteNotificationCallback = std::function<long (uint32_t hNotify, uint32_t tmms)>;
 
 struct NotificationDispatcher {
     NotificationDispatcher(DeleteNotificationCallback callback);
