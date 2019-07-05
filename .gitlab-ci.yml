@@ -47,7 +47,7 @@ build:clang-macOS:
   <<: *build-template
   variables:
     compiler: /usr/bin/clang++
-    os_name: macOS
+    os_name: Darwin
     maker: make
   tags:
     - macOS
