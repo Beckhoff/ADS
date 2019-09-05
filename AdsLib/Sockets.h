@@ -25,7 +25,7 @@
 
 #include "Frame.h"
 #include "wrap_socket.h"
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 struct IpV4 {
