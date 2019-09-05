@@ -8,6 +8,7 @@ CXX :=$(CROSS_COMPILE)$(CXX)
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
 CXXFLAGS += -Wall
+CXXFLAGS += -Wextra
 CXXFLAGS += -D_GNU_SOURCE
 CXXFLAGS += $(ci_cxx_flags)
 CPPFLAGS += -I AdsLib/
