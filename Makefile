@@ -3,6 +3,8 @@ include $(TOP)/configure/CONFIG
 
 SRC_DIRS += $(TOP)/AdsLib $(TOP)/AdsLibTest
 
+USR_CXXFLAGS_Linux += -std=c++11 -D_GNU_SOURCE -pedantic -Wall -Wextra
+
 LIBRARY_IOC = AdsLib
 
 ifeq ($(OS_CLASS),WIN32)
@@ -22,6 +24,7 @@ AdsLib_SRCS += Frame.cpp
 INC += AdsDef.h AdsLib.h
 
 AdsLib_SYS_LIBS_WIN32 += ws2_32
+AdsLib_SYS_LIBS_Linux += -lpthread
 
 # Requires fructose test framework
 #PROD_IOC += AdsLibTest

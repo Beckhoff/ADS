@@ -14,7 +14,7 @@ cache:
   stage: build
   tags:
     - docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-mxe
+  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:8187
   script:
     - tools/10_get_fructose.sh
     - $maker CXX=$compiler OS_NAME=$os_name
@@ -47,7 +47,7 @@ build:clang-macOS:
   <<: *build-template
   variables:
     compiler: /usr/bin/clang++
-    os_name: macOS
+    os_name: Darwin
     maker: make
   tags:
     - macOS
@@ -74,10 +74,11 @@ build:mxe:
     os_name: win32
     maker: make
 
-.test-template: &test-template
+.test-linux: &test-linux
   tags:
     - kvm
     - rack
+    - ubuntu1804
     - x86_64
   before_script:
     - sudo dpkg --add-architecture i386
@@ -87,19 +88,19 @@ build:mxe:
     - ./tools/90_run_tests.sh
 
 test:clang:
-  <<: *test-template
+  <<: *test-linux
   stage: test:clang
   dependencies:
     - build:clang
 
 test:gcc:
-  <<: *test-template
+  <<: *test-linux
   stage: test:gcc
   dependencies:
     - build:gcc
 
 test:gcc-i386:
-  <<: *test-template
+  <<: *test-linux
   stage: test:gcc-i386
   dependencies:
     - build:gcc-i386

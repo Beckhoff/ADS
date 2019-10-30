@@ -207,7 +207,7 @@ struct TestAds : test_base<TestAds> {
             fructose_loop_assert(i, 0 == AdsSyncReadDeviceInfoReqEx(port, &server, devName, &version));
             fructose_loop_assert(i, 3 == version.version);
             fructose_loop_assert(i, 1 == version.revision);
-            fructose_loop_assert(i, 1708 == version.build);
+            fructose_loop_assert(i, 1711 == version.build);
             fructose_loop_assert(i, 0 == strncmp(devName, NAME, sizeof(NAME)));
         }
 
