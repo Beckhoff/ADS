@@ -40,6 +40,7 @@
 #define LOG_ERROR(ARGS) LOG(3, ARGS)
 
 struct Logger {
+    static size_t logLevel;
     static void Log(size_t level, const std::string& msg);
 };
 
