@@ -24,7 +24,6 @@ AdsLib_SRCS += Frame.cpp
 INC += AdsDef.h AdsLib.h
 
 AdsLib_SYS_LIBS_WIN32 += ws2_32
-AdsLib_SYS_LIBS_Linux += -lpthread
 
 # Requires fructose test framework
 #PROD_IOC += AdsLibTest
