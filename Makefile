@@ -35,3 +35,4 @@ AdsLib_SYS_LIBS_WIN32 += ws2_32
 include $(TOP)/configure/RULES
 
 uninstall:
+distclean: realclean
