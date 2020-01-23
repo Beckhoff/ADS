@@ -57,4 +57,4 @@ make
 make test
 
 ---
-AMS/ADS Specification: http://infosys.beckhoff.de/content/1031/tc3_adscommon/html/tcadsamsspec_amstcppackage.htm
+ADS/AMS Specification: https://infosys.beckhoff.com/content/1033/tc3_ads_intro/index.html
