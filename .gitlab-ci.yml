@@ -16,7 +16,6 @@ cache:
     - docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:8187
   script:
-    - tools/10_get_fructose.sh
     - $maker CXX=$compiler OS_NAME=$os_name
     - $maker CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
     - cd example
