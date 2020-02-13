@@ -10,6 +10,21 @@ AdsFile::AdsFile(const AdsDevice& route, const std::string& filename, const uint
     m_Handle(route.OpenFile(filename, flags))
 {}
 
+void AdsFile::Delete(const AdsDevice& route, const std::string& filename, const uint32_t flags)
+{
+    auto error = route.ReadWriteReqEx2(SYSTEMSERVICE_FDELETE,
+                                       flags,
+                                       0,
+                                       nullptr,
+                                       filename.length(),
+                                       filename.c_str(),
+                                       nullptr);
+
+    if (error) {
+        throw AdsException(error);
+    }
+}
+
 void AdsFile::Read(const size_t size, void* data, uint32_t& bytesRead) const
 {
     auto error = m_Route.ReadWriteReqEx2(SYSTEMSERVICE_FREAD,
