@@ -16,6 +16,7 @@ Tc$(LIB_NAME): CPPFLAGS += -I/usr/local/include
 
 SRC_FILES += AdsDef.cpp
 SRC_FILES += AdsDevice.cpp
+SRC_FILES += AdsFile.cpp
 SRC_FILES += Log.cpp
 SRC_FILES += Sockets.cpp
 SRC_FILES += Frame.cpp
