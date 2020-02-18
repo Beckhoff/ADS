@@ -44,3 +44,16 @@ jobs:
     inputs:
       pathtoPublish: bin
       artifactName: bin
+- job: BuildOnWindows
+  timeoutInMinutes: 30
+  pool:
+    name: TcOs
+    demands:
+      - Agent.OS -equals WINDOWS_NT
+  steps:
+  - script: .ci/do_build.bat
+    displayName: 'Building Subprojects'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: bin
+      artifactName: bin
