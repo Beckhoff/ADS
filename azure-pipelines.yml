@@ -29,3 +29,18 @@ jobs:
     inputs:
       pathtoPublish: bin
       artifactName: bin
+- job: BuildWin32OnLinux
+  timeoutInMinutes: 30
+  pool:
+    name: TcOs
+    demands:
+      - Agent.OS -equals Linux
+      - docker
+  container: patrickbr-git.beckhoff.com:5500/beckhoff/docker-mxe:8187
+  steps:
+  - bash: CXX=/mxe/usr/bin/i686-w64-mingw32.static.posix-g++ OS_NAME=win32 .ci/do_build.sh
+    displayName: 'Building Subprojects'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: bin
+      artifactName: bin
