@@ -926,7 +926,7 @@ void test_root::test_assert_double_##comparison_function(double lhs, \
         snprintf(number1, sizeof(number1), "%21.15e", lhs); \
         snprintf(number2, sizeof(number2), "%21.15e", rhs); \
         std::cout \
-            << "Error: " << get_test_name() << " in "    \
+            << "Error: " << test_case_name << " in "    \
             << filename << "(" << line_number << "): " \
             << lhs_name << " " comparison_name " " << rhs_name \
             << " (" << number1 << " " comparison_name " " << number2 << ")" \
@@ -1058,7 +1058,7 @@ inline
 void test_root::test_assert_same_data(const void* lhs, const void* rhs,
                                       unsigned int data_length,
                                       const std::string& test_case_name,
-                                      const char *msg1, const char* msg2,
+                                      const char *, const char*,
                                       const char* filename, int line_number)
 {
     set_assertion_tested();
