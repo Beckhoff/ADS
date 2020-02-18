@@ -23,6 +23,7 @@ cache:
   artifacts:
     paths:
     - AdsLib-$os_name.a
+    - AdsLibOOI-$os_name.a
     - AdsLibTest.bin
     - example/example.bin
 
