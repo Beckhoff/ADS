@@ -163,17 +163,12 @@ static void readByNameExample(std::ostream& out, const AdsDevice& route)
     }
 }
 
-void readStateExample(std::ostream& out, long port, const AmsAddr& server)
+static void readStateExample(std::ostream& out, const AdsDevice& route)
 {
-    uint16_t adsState;
-    uint16_t devState;
+    const auto state = route.GetState();
 
-    const long status = AdsSyncReadStateReqEx(port, &server, &adsState, &devState);
-    if (status) {
-        out << "ADS read failed with: " << std::dec << status << '\n';
-        return;
-    }
-    out << "ADS state: " << std::dec << adsState << " devState: " << std::dec << devState << '\n';
+    out << "ADS state: " << std::dec << (uint16_t)state.ads << " devState: " << std::dec << (uint16_t)state.device <<
+    '\n';
 }
 
 void runExample(std::ostream& out)
@@ -203,7 +198,7 @@ void runExample(std::ostream& out)
     notificationByNameExample(out, port, remote);
     readExample(out, route);
     readByNameExample(out, route);
-    readStateExample(out, port, remote);
+    readStateExample(out, route);
 
     const long closeStatus = AdsPortCloseEx(port);
     if (closeStatus) {
