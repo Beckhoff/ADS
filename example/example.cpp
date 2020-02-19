@@ -1,6 +1,6 @@
 
 #include "AdsLib.h"
-#include "AdsDevice.h"
+#include "AdsNotificationOOI.h"
 #include "AdsVariable.h"
 
 #include <iostream>
@@ -69,7 +69,7 @@ uint32_t getSymbolSize(std::ostream& out, long port, const AmsAddr& server, cons
     return symbolEntry.size;
 }
 
-void notificationExample(std::ostream& out, long port, const AmsAddr& server)
+static void notificationExample(std::ostream& out, const AdsDevice& route)
 {
     const AdsNotificationAttrib attrib = {
         1,
@@ -77,30 +77,10 @@ void notificationExample(std::ostream& out, long port, const AmsAddr& server)
         0,
         {4000000}
     };
-    uint32_t hNotify;
-    uint32_t hUser = 0;
+    AdsNotification notification { route, 0x4020, 4, attrib, &NotifyCallback, 0xDEADBEEF };
 
-    const long addStatus = AdsSyncAddDeviceNotificationReqEx(port,
-                                                             &server,
-                                                             0x4020,
-                                                             4,
-                                                             &attrib,
-                                                             &NotifyCallback,
-                                                             hUser,
-                                                             &hNotify);
-    if (addStatus) {
-        out << "Add device notification failed with: " << std::dec << addStatus << '\n';
-        return;
-    }
-
-    std::cout << "Hit ENTER to stop notifications\n";
+    out << "Hit ENTER to stop notifications\n";
     std::cin.ignore();
-
-    const long delStatus = AdsSyncDelDeviceNotificationReqEx(port, &server, hNotify);
-    if (delStatus) {
-        out << "Delete device notification failed with: " << std::dec << delStatus;
-        return;
-    }
 }
 
 void notificationByNameExample(std::ostream& out, long port, const AmsAddr& server)
@@ -194,7 +174,7 @@ void runExample(std::ostream& out)
 
     const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
     AdsDevice route {remoteIpV4, remoteNetId, AMSPORT_R0_PLC_TC3};
-    notificationExample(out, port, remote);
+    notificationExample(out, route);
     notificationByNameExample(out, port, remote);
     readExample(out, route);
     readByNameExample(out, route);
