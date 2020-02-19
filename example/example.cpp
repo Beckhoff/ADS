@@ -71,6 +71,18 @@ static void readByNameExample(std::ostream& out, const AdsDevice& route)
     }
 }
 
+static void readWriteExample(std::ostream& out, const AdsDevice& route)
+{
+    AdsVariable<uint8_t> simpleVar {route, "MAIN.byByte[0]"};
+    AdsVariable<uint8_t> validation {route, "MAIN.byByte[0]"};
+
+    out << __FUNCTION__ << "():\n";
+    simpleVar = 0xA5;
+    out << "Wrote " << 0xA5 << " to MAIN.byByte and read " << (uint32_t)validation << " back\n";
+    simpleVar = 0x5A;
+    out << "Wrote " << (uint32_t)simpleVar << " to MAIN.byByte and read " << (uint32_t)validation << " back\n";
+}
+
 static void readStateExample(std::ostream& out, const AdsDevice& route)
 {
     const auto state = route.GetState();
@@ -92,6 +104,7 @@ static void runExample(std::ostream& out)
     notificationByNameExample(out, route);
     readExample(out, route);
     readByNameExample(out, route);
+    readWriteExample(out, route);
     readStateExample(out, route);
 }
 
