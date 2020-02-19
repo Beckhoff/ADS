@@ -83,7 +83,7 @@ static void notificationExample(std::ostream& out, const AdsDevice& route)
     std::cin.ignore();
 }
 
-void notificationByNameExample(std::ostream& out, long port, const AmsAddr& server)
+static void notificationByNameExample(std::ostream& out, const AdsDevice& route)
 {
     const AdsNotificationAttrib attrib = {
         1,
@@ -91,36 +91,12 @@ void notificationByNameExample(std::ostream& out, long port, const AmsAddr& serv
         0,
         {4000000}
     };
-    uint32_t hNotify;
-    uint32_t hUser = 0;
-
-    uint32_t handle;
 
     out << __FUNCTION__ << "():\n";
-    handle = getHandleByNameExample(out, port, server, "MAIN.byByte[4]");
+    AdsNotification notification { route, "MAIN.byByte[4]", attrib, &NotifyCallback, 0xBEEFDEAD };
 
-    const long addStatus = AdsSyncAddDeviceNotificationReqEx(port,
-                                                             &server,
-                                                             ADSIGRP_SYM_VALBYHND,
-                                                             handle,
-                                                             &attrib,
-                                                             &NotifyCallback,
-                                                             hUser,
-                                                             &hNotify);
-    if (addStatus) {
-        out << "Add device notification failed with: " << std::dec << addStatus << '\n';
-        return;
-    }
-
-    std::cout << "Hit ENTER to stop by name notifications\n";
+    out << "Hit ENTER to stop by name notifications\n";
     std::cin.ignore();
-
-    const long delStatus = AdsSyncDelDeviceNotificationReqEx(port, &server, hNotify);
-    if (delStatus) {
-        out << "Delete device notification failed with: " << std::dec << delStatus;
-        return;
-    }
-    releaseHandleExample(out, port, server, handle);
 }
 
 static void readExample(std::ostream& out, const AdsDevice& route)
@@ -175,7 +151,7 @@ void runExample(std::ostream& out)
     const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
     AdsDevice route {remoteIpV4, remoteNetId, AMSPORT_R0_PLC_TC3};
     notificationExample(out, route);
-    notificationByNameExample(out, port, remote);
+    notificationByNameExample(out, route);
     readExample(out, route);
     readByNameExample(out, route);
     readStateExample(out, route);
