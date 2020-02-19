@@ -12,6 +12,8 @@ using namespace fructose;
 static const AmsNetId serverNetId {192, 168, 0, 231, 1, 1};
 static const AmsAddr server {serverNetId, AMSPORT_R0_PLC_TC3};
 static const AmsAddr serverBadPort {serverNetId, 1000};
+static const char* const remote_name = "ads-server";
+static const IpV4 ip_remote(remote_name);
 
 static size_t g_NumNotifications = 0;
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
@@ -92,7 +94,6 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // test new Ams with new Ip
@@ -125,7 +126,6 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const IpV4 ip_local("127.0.0.1");
-        static const IpV4 ip_remote("ads-server");
         AmsRouter testee;
 
         // add + remove -> null
@@ -180,12 +180,11 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
 private:
     void Run(AmsRouter& testee, uint8_t id)
     {
-        static const IpV4 ip("ads-server");
         for (uint8_t i = 0; i < 255; ++i) {
             AmsNetId netId {192, 168, 0, i, 0, id};
-            fructose_assert_eq(0, testee.AddRoute(netId, ip));
+            fructose_assert_eq(0, testee.AddRoute(netId, ip_remote));
             fructose_assert(!!testee.GetConnection(netId));
-            fructose_assert(ip == testee.GetConnection(netId)->destIp);
+            fructose_assert(ip_remote == testee.GetConnection(netId)->destIp);
         }
 
         for (uint8_t i = 0; i < 255; ++i) {
@@ -279,7 +278,7 @@ struct TestAds : test_base<TestAds> {
     TestAds(std::ostream& outstream)
         : out(outstream)
     {
-        AdsAddRoute(serverNetId, "ads-server");
+        AdsAddRoute(serverNetId, remote_name);
     }
 #ifdef WIN32
     ~TestAds()
@@ -820,7 +819,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         : out(outstream),
         runEndurance(false)
     {
-        AdsAddRoute(serverNetId, "ads-server");
+        AdsAddRoute(serverNetId, remote_name);
     }
 #ifdef WIN32
     ~TestAdsPerformance()
