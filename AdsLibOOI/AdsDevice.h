@@ -45,7 +45,7 @@ struct AdsDevice {
                         uint32_t                     indexOffset,
                         const AdsNotificationAttrib& notificationAttributes,
                         PAdsNotificationFuncEx       callback,
-                        uint32_t hUser) const;
+                        uint32_t                     hUser) const;
 
     long GetLocalPort() const;
 

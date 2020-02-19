@@ -72,7 +72,7 @@ AdsHandle AdsDevice::GetHandle(const uint32_t               indexGroup,
                                const uint32_t               indexOffset,
                                const AdsNotificationAttrib& notificationAttributes,
                                PAdsNotificationFuncEx       callback,
-                               const uint32_t hUser) const
+                               const uint32_t               hUser) const
 {
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(

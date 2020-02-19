@@ -76,7 +76,7 @@ static void readStateExample(std::ostream& out, const AdsDevice& route)
     const auto state = route.GetState();
 
     out << "ADS state: " << std::dec << (uint16_t)state.ads << " devState: " << std::dec << (uint16_t)state.device <<
-    '\n';
+        '\n';
 }
 
 static void runExample(std::ostream& out)
