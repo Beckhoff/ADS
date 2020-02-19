@@ -319,6 +319,9 @@ struct TestAds : test_base<TestAds> {
 
         print(server, out);
 
+        const uint32_t outBuffer = 0;
+        fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0x4020, 0, sizeof(outBuffer), &outBuffer));
+
         uint32_t bytesRead;
         uint32_t buffer;
         for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
