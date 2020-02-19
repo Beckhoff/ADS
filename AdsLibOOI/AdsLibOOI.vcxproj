@@ -73,8 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdsException.h" />
-    <ClInclude Include="AdsLibOOI.h" />
-    <ClInclude Include="AdsNotification.h" />
+    <ClInclude Include="AdsNotificationOOI.h" />
     <ClInclude Include="AdsDevice.h" />
     <ClInclude Include="AdsVariable.h" />
   </ItemGroup>

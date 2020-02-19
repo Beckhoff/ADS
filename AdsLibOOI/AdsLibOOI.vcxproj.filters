@@ -26,10 +26,7 @@
     <ClInclude Include="AdsException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AdsLibOOI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AdsNotification.h">
+    <ClInclude Include="AdsNotificationOOI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AdsVariable.h">

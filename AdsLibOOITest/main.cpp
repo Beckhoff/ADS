@@ -1,7 +1,7 @@
 
-#include "AdsLibOOI.h"
+#include "AdsVariable.h"
 #include "AdsDevice.h"
-#include "AdsNotification.h"
+#include "AdsNotificationOOI.h"
 #include "AdsLib.h"
 
 #include <array>
@@ -389,7 +389,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexGroup
         try {
-            AdsNotification buffer {route, 0, 0, attrib, &NotifyCallback};
+            AdsNotification buffer {route, 0, 0, attrib, &NotifyCallback, 1};
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.errorCode);
@@ -397,7 +397,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide invalid indexOffset
         try {
-            AdsNotification buffer {route, 0x4025, 0x10000, attrib, &NotifyCallback};
+            AdsNotification buffer {route, 0x4025, 0x10000, attrib, &NotifyCallback, 2};
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_DEVICE_SRVNOTSUPP == ex.errorCode);
@@ -405,7 +405,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide nullptr to attrib/callback/hNotification
         try {
-            AdsNotification buffer {route, 0x4025, 0x10000, attrib, nullptr};
+            AdsNotification buffer {route, 0x4025, 0x10000, attrib, nullptr, 3};
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_CLIENT_INVALIDPARM == ex.errorCode);
@@ -419,7 +419,7 @@ struct TestAds : test_base<TestAds> {
             g_NumNotifications = 0;
             std::vector<AdsNotification> notifications;
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
-                notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback);
+                notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
@@ -432,7 +432,7 @@ struct TestAds : test_base<TestAds> {
             g_NumNotifications = 0;
             std::vector<AdsNotification> notifications;
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
-                notifications.emplace_back(route, handleName, attrib, &NotifyCallback);
+                notifications.emplace_back(route, handleName, attrib, &NotifyCallback, i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
@@ -525,7 +525,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 
         const auto start = std::chrono::high_resolution_clock::now();
         for (size_t i = 0; i < numNotifications; ++i) {
-            notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback);
+            notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
         }
 
         std::cout << "Hit ENTER to stop endurance test\n";
@@ -549,7 +549,7 @@ private:
         std::vector<AdsNotification> notifications;
 
         for (size_t i = 0; i < numNotifications; ++i) {
-            notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback);
+            notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
         }
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }

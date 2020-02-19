@@ -68,10 +68,11 @@ AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
     return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteSymbolHandle, this, std::placeholders::_1)}};
 }
 
-AdsHandle AdsDevice::GetHandle(uint32_t                     indexGroup,
-                               uint32_t                     indexOffset,
+AdsHandle AdsDevice::GetHandle(const uint32_t               indexGroup,
+                               const uint32_t               indexOffset,
                                const AdsNotificationAttrib& notificationAttributes,
-                               PAdsNotificationFuncEx       callback) const
+                               PAdsNotificationFuncEx       callback,
+                               const uint32_t hUser) const
 {
     uint32_t handle = 0;
     auto error = AdsSyncAddDeviceNotificationReqEx(
@@ -79,7 +80,7 @@ AdsHandle AdsDevice::GetHandle(uint32_t                     indexGroup,
         indexGroup, indexOffset,
         &notificationAttributes,
         callback,
-        indexOffset,
+        hUser,
         &handle);
     if (error || !handle) {
         throw AdsException(error);
