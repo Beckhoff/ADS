@@ -3,6 +3,7 @@
 #include "AdsNotificationOOI.h"
 #include "AdsVariable.h"
 
+#include <array>
 #include <iostream>
 #include <iomanip>
 
@@ -83,6 +84,18 @@ static void readWriteExample(std::ostream& out, const AdsDevice& route)
     out << "Wrote " << (uint32_t)simpleVar << " to MAIN.byByte and read " << (uint32_t)validation << " back\n";
 }
 
+static void readWriteArrayExample(std::ostream& out, const AdsDevice& route)
+{
+    static const std::array<uint8_t, 4> arrayToWrite = { 1, 2, 3, 4 };
+    AdsVariable<std::array<uint8_t, 4> > arrayVar {route, "MAIN.byByte"};
+    arrayVar = arrayToWrite;
+    std::array<uint8_t, 4> readArray = arrayVar;
+    out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
+    (uint32_t)arrayToWrite[3] << "\n";
+    out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
+    (uint32_t)readArray[3] << "\n";
+}
+
 static void readStateExample(std::ostream& out, const AdsDevice& route)
 {
     const auto state = route.GetState();
@@ -105,6 +118,7 @@ static void runExample(std::ostream& out)
     readExample(out, route);
     readByNameExample(out, route);
     readWriteExample(out, route);
+    readWriteArrayExample(out, route);
     readStateExample(out, route);
 }
 
