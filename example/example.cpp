@@ -1,5 +1,7 @@
 
 #include "AdsLib.h"
+#include "AdsDevice.h"
+#include "AdsVariable.h"
 
 #include <iostream>
 #include <iomanip>
@@ -141,19 +143,13 @@ void notificationByNameExample(std::ostream& out, long port, const AmsAddr& serv
     releaseHandleExample(out, port, server, handle);
 }
 
-void readExample(std::ostream& out, long port, const AmsAddr& server)
+static void readExample(std::ostream& out, const AdsDevice& route)
 {
-    uint32_t bytesRead;
-    uint32_t buffer;
+    AdsVariable<uint8_t> readVar {route, 0x4020, 0};
 
     out << __FUNCTION__ << "():\n";
     for (size_t i = 0; i < 8; ++i) {
-        const long status = AdsSyncReadReqEx2(port, &server, 0x4020, 0, sizeof(buffer), &buffer, &bytesRead);
-        if (status) {
-            out << "ADS read failed with: " << std::dec << status << '\n';
-            return;
-        }
-        out << "ADS read " << std::dec << bytesRead << " bytes, value: 0x" << std::hex << buffer << '\n';
+        out << "ADS read " << std::hex << (uint32_t)readVar << '\n';
     }
 }
 
@@ -222,9 +218,10 @@ void runExample(std::ostream& out)
     }
 
     const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
+    AdsDevice route {remoteIpV4, remoteNetId, AMSPORT_R0_PLC_TC3};
     notificationExample(out, port, remote);
     notificationByNameExample(out, port, remote);
-    readExample(out, port, remote);
+    readExample(out, route);
     readByNameExample(out, port, remote);
     readStateExample(out, port, remote);
 
