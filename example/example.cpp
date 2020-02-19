@@ -153,34 +153,14 @@ static void readExample(std::ostream& out, const AdsDevice& route)
     }
 }
 
-void readByNameExample(std::ostream& out, long port, const AmsAddr& server)
+static void readByNameExample(std::ostream& out, const AdsDevice& route)
 {
-    static const char handleName[] = "MAIN.byByte[4]";
-    uint32_t bytesRead;
+    AdsVariable<uint8_t> readVar {route, "MAIN.byByte[4]"};
 
     out << __FUNCTION__ << "():\n";
-    const uint32_t handle = getHandleByNameExample(out, port, server, handleName);
-    const uint32_t bufferSize = getSymbolSize(out, port, server, handleName);
-    const auto buffer = std::unique_ptr<uint8_t>(new uint8_t[bufferSize]);
     for (size_t i = 0; i < 8; ++i) {
-        const long status = AdsSyncReadReqEx2(port,
-                                              &server,
-                                              ADSIGRP_SYM_VALBYHND,
-                                              handle,
-                                              bufferSize,
-                                              buffer.get(),
-                                              &bytesRead);
-        if (status) {
-            out << "ADS read failed with: " << std::dec << status << '\n';
-            return;
-        }
-        out << "ADS read " << std::dec << bytesRead << " bytes:" << std::hex;
-        for (size_t i = 0; i < bytesRead; ++i) {
-            out << ' ' << (int)buffer.get()[i];
-        }
-        out << '\n';
+        out << "ADS read " << std::hex << (uint32_t)readVar << '\n';
     }
-    releaseHandleExample(out, port, server, handle);
 }
 
 void readStateExample(std::ostream& out, long port, const AmsAddr& server)
@@ -222,7 +202,7 @@ void runExample(std::ostream& out)
     notificationExample(out, port, remote);
     notificationByNameExample(out, port, remote);
     readExample(out, route);
-    readByNameExample(out, port, remote);
+    readByNameExample(out, route);
     readStateExample(out, port, remote);
 
     const long closeStatus = AdsPortCloseEx(port);
