@@ -21,54 +21,6 @@ static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pN
     std::cout << '\n';
 }
 
-uint32_t getHandleByNameExample(std::ostream& out, long port, const AmsAddr& server,
-                                const std::string handleName)
-{
-    uint32_t handle = 0;
-    const long handleStatus = AdsSyncReadWriteReqEx2(port,
-                                                     &server,
-                                                     ADSIGRP_SYM_HNDBYNAME,
-                                                     0,
-                                                     sizeof(handle),
-                                                     &handle,
-                                                     handleName.size(),
-                                                     handleName.c_str(),
-                                                     nullptr);
-    if (handleStatus) {
-        out << "Create handle for '" << handleName << "' failed with: " << std::dec << handleStatus << '\n';
-    }
-    return handle;
-}
-
-void releaseHandleExample(std::ostream& out, long port, const AmsAddr& server, uint32_t handle)
-{
-    const long releaseHandle = AdsSyncWriteReqEx(port, &server, ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
-    if (releaseHandle) {
-        out << "Release handle 0x" << std::hex << handle << "' failed with: 0x" << releaseHandle << '\n';
-    }
-}
-
-uint32_t getSymbolSize(std::ostream& out, long port, const AmsAddr& server, const std::string handleName)
-{
-    AdsSymbolEntry symbolEntry;
-    uint32_t bytesRead;
-
-    const long status = AdsSyncReadWriteReqEx2(port,
-                                               &server,
-                                               ADSIGRP_SYM_INFOBYNAMEEX,
-                                               0,
-                                               sizeof(symbolEntry),
-                                               &symbolEntry,
-                                               handleName.size(),
-                                               handleName.c_str(),
-                                               &bytesRead);
-    if (status) {
-        throw std::runtime_error("Unable to determine symbol size, reading ADS symbol information failed with: " + std::to_string(
-                                     status));
-    }
-    return symbolEntry.size;
-}
-
 static void notificationExample(std::ostream& out, const AdsDevice& route)
 {
     const AdsNotificationAttrib attrib = {
@@ -127,7 +79,7 @@ static void readStateExample(std::ostream& out, const AdsDevice& route)
     '\n';
 }
 
-void runExample(std::ostream& out)
+static void runExample(std::ostream& out)
 {
     static const AmsNetId remoteNetId { 192, 168, 0, 231, 1, 1 };
     static const char remoteIpV4[] = "ads-server";
@@ -135,37 +87,12 @@ void runExample(std::ostream& out)
     // uncomment and adjust if automatic AmsNetId deduction is not working as expected
     //AdsSetLocalAddress({192, 168, 0, 1, 1, 1});
 
-    // add local route to your EtherCAT Master
-    if (AdsAddRoute(remoteNetId, remoteIpV4)) {
-        out << "Adding ADS route failed, did you specify valid addresses?\n";
-        return;
-    }
-
-    // open a new ADS port
-    const long port = AdsPortOpenEx();
-    if (!port) {
-        out << "Open ADS port failed\n";
-        return;
-    }
-
-    const AmsAddr remote { remoteNetId, AMSPORT_R0_PLC_TC3 };
     AdsDevice route {remoteIpV4, remoteNetId, AMSPORT_R0_PLC_TC3};
     notificationExample(out, route);
     notificationByNameExample(out, route);
     readExample(out, route);
     readByNameExample(out, route);
     readStateExample(out, route);
-
-    const long closeStatus = AdsPortCloseEx(port);
-    if (closeStatus) {
-        out << "Close ADS port failed with: " << std::dec << closeStatus << '\n';
-    }
-
-#ifdef _WIN32
-    // WORKAROUND: On Win7 std::thread::join() called in destructors
-    //             of static objects might wait forever...
-    AdsDelRoute(remoteNetId);
-#endif
 }
 
 int main()
