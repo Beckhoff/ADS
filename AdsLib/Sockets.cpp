@@ -193,7 +193,7 @@ uint32_t TcpSocket::Connect() const
 
     if (::connect(m_Socket, reinterpret_cast<const sockaddr*>(&m_SockAddress), sizeof(m_SockAddress))) {
         LOG_ERROR("Connect TCP socket failed with: " << WSAGetLastError());
-        return 0;
+        throw std::runtime_error("Connect TCP socket failed with: " + WSAGetLastError());
     }
 
     struct sockaddr_in source;
@@ -201,7 +201,7 @@ uint32_t TcpSocket::Connect() const
 
     if (getsockname(m_Socket, reinterpret_cast<sockaddr*>(&source), &len)) {
         LOG_ERROR("Read local tcp/ip address failed");
-        return 0;
+        throw std::runtime_error("Read local tcp/ip address failed");
     }
     LOG_INFO("Connected to " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.' <<
              ((addr & 0xff00) >> 8) << '.' << (addr & 0xff));
