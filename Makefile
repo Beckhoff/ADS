@@ -1,6 +1,5 @@
 OS_NAME ?= $(shell uname)
 VPATH = AdsLib
-LIBS = -lpthread
 LIB_NAME = AdsLib-$(OS_NAME).a
 OBJ_DIR = obj
 CXX :=$(CROSS_COMPILE)$(CXX)
@@ -27,13 +26,11 @@ SRC_FILES += Frame.cpp
 
 OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
-ifeq ($(OS_NAME),Darwin)
-	LIBS += -lc++
-endif
 
-ifeq ($(OS_NAME),win32)
-	LIBS += -lws2_32
-endif
+LDFLAGS += -lpthread
+LDFLAGS_Darwin += -lc++
+LDFLAGS_win32 += -lws2_32
+LDFLAGS += $(LDFLAGS_$(OS_NAME))
 
 all: $(LIB_NAME)
 
@@ -48,10 +45,10 @@ $(LIB_NAME): $(OBJ_FILES)
 	$(AR) rvs $@ $?
 
 AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
-	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@
 
 AdsLibOOITest.bin: AdsLibOOITest/main.cpp $(LIB_NAME)
-	$(CXX) $^ $(LIBS) $(CPPFLAGS) $(CXXFLAGS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@
 
 test: AdsLibTest.bin
 	./$<

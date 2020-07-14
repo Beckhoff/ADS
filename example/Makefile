@@ -1,5 +1,4 @@
 OS_NAME ?=$(shell uname)
-LIBS = -lpthread
 LIB_NAME = ../AdsLib-$(OS_NAME).a
 CXXFLAGS += -std=c++11
 CXXFLAGS += -pedantic
@@ -8,18 +7,15 @@ CXXFLAGS += -Wextra
 CXXFLAGS += -I../AdsLib/
 CXXFLAGS += $(ci_cxx_flags)
 
-ifeq ($(OS_NAME),Darwin)
-	LIBS += -lc++
-endif
-
-ifeq ($(OS_NAME),win32)
-        LIBS += -lws2_32
-endif
+LDFLAGS += -lpthread
+LDFLAGS_Darwin += -lc++
+LDFLAGS_win32 += -lws2_32
+LDFLAGS += $(LDFLAGS_$(OS_NAME))
 
 all: example.bin
 
 example.bin: example.cpp $(LIB_NAME)
-	$(CXX) $^ $(LIBS) $(CXXFLAGS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(CXXFLAGS) -o $@
 	
 test: example.bin
 	./$<
