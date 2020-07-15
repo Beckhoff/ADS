@@ -12,19 +12,21 @@ CXXFLAGS += $(ci_cxx_flags)
 CPPFLAGS += -I AdsLib/
 CPPFLAGS += -I tools/
 
-SRC_FILES = AdsDef.cpp
+SRC_FILES += AdsDef.cpp
 SRC_FILES += AdsDevice.cpp
-SRC_FILES += AdsLib.cpp
-SRC_FILES += AmsConnection.cpp
-SRC_FILES += AmsNetId.cpp
-SRC_FILES += AmsPort.cpp
-SRC_FILES += AmsRouter.cpp
 SRC_FILES += Log.cpp
-SRC_FILES += NotificationDispatcher.cpp
 SRC_FILES += Sockets.cpp
 SRC_FILES += Frame.cpp
-
 OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
+
+# simple router implementation required for systems without TwinCAT
+ROUTER_FILES += standalone/AdsLib.cpp
+ROUTER_FILES += standalone/AmsConnection.cpp
+ROUTER_FILES += standalone/AmsNetId.cpp
+ROUTER_FILES += standalone/AmsPort.cpp
+ROUTER_FILES += standalone/AmsRouter.cpp
+ROUTER_FILES += standalone/NotificationDispatcher.cpp
+ROUTER_OBJ = $(ROUTER_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
 LDFLAGS += -lpthread
 LDFLAGS_Darwin += -lc++
@@ -34,14 +36,13 @@ LDFLAGS += $(LDFLAGS_$(OS_NAME))
 all: $(LIB_NAME)
 
 $(OBJ_DIR):
-	mkdir -p $@
+	mkdir -p $@/standalone
 
-$(OBJ_FILES): | $(OBJ_DIR)
-$(OBJ_FILES): $(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
-$(LIB_NAME): $(OBJ_FILES)
-	$(AR) rvs $@ $?
+$(LIB_NAME): $(OBJ_FILES) $(ROUTER_OBJ)
+	$(AR) rvs $@ $^
 
 AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
 	$(CXX) $^ $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@
@@ -56,10 +57,10 @@ testOOI: AdsLibOOITest.bin
 	./$<
 
 clean:
-	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(OBJ_DIR)/*.o
+	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(OBJ_DIR)
 
 uncrustify:
-	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp example/*.cpp
+	uncrustify --no-backup -c tools/uncrustify.cfg AdsLib*/*.h AdsLib*/*.cpp AdsLib*/**/*.cpp example/*.cpp
 
 prepare-hooks:
 	rm -f .git/hooks/pre-commit
