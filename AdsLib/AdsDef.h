@@ -284,22 +284,6 @@ struct AdsVersion {
     uint16_t build;
 };
 
-/**
- * @brief Maximum size for device name.
- */
-static const size_t DEVICE_NAME_LENGTH = 16;
-
-/**
- * @brief Device information containing device name and version.
- */
-struct DeviceInfo {
-    /** Device name */
-    char name[DEVICE_NAME_LENGTH];
-
-    /** Device version as defined above */
-    AdsVersion version;
-};
-
 enum ADSTRANSMODE {
     ADSTRANS_NOTRANS = 0,
     ADSTRANS_CLIENTCYCLE = 1,

@@ -5,6 +5,22 @@
 #include <functional>
 #include <memory>
 
+/**
+ * @brief Maximum size for device name.
+ */
+static const size_t DEVICE_NAME_LENGTH = 16;
+
+/**
+ * @brief Device information containing device name and version.
+ */
+struct DeviceInfo {
+    /** Device name */
+    char name[DEVICE_NAME_LENGTH];
+
+    /** Device version as defined above */
+    AdsVersion version;
+};
+
 struct AdsDeviceState {
     ADSSTATE ads;
     ADSSTATE device;
