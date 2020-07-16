@@ -193,7 +193,7 @@ uint32_t TcpSocket::Connect() const
 
     if (::connect(m_Socket, reinterpret_cast<const sockaddr*>(&m_SockAddress), sizeof(m_SockAddress))) {
         LOG_ERROR("Connect TCP socket failed with: " << WSAGetLastError());
-        throw std::runtime_error("Connect TCP socket failed with: " + WSAGetLastError());
+        throw std::runtime_error("Connect TCP socket failed with: " + std::to_string(WSAGetLastError()));
     }
 
     struct sockaddr_in source;
