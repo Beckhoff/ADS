@@ -16,6 +16,7 @@ SRC_FILES = AdsDef.cpp
 SRC_FILES += AdsDevice.cpp
 SRC_FILES += AdsLib.cpp
 SRC_FILES += AmsConnection.cpp
+SRC_FILES += AmsNetId.cpp
 SRC_FILES += AmsPort.cpp
 SRC_FILES += AmsRouter.cpp
 SRC_FILES += Log.cpp
@@ -24,7 +25,6 @@ SRC_FILES += Sockets.cpp
 SRC_FILES += Frame.cpp
 
 OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
-
 
 LDFLAGS += -lpthread
 LDFLAGS_Darwin += -lc++
