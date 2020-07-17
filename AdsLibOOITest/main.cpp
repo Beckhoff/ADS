@@ -403,7 +403,7 @@ struct TestAds : test_base<TestAds> {
 
         // provide nullptr to attrib/callback/hNotification
         try {
-            AdsNotification buffer {route, 0x4025, 0x10000, attrib, nullptr, 3};
+            AdsNotification buffer {route, 0x4025, 0x10000, attrib, (PAdsNotificationFuncEx)nullptr, 3};
             fructose_assert(false);
         } catch (const AdsException& ex) {
             fructose_assert(ADSERR_CLIENT_INVALIDPARM == ex.errorCode);

@@ -100,7 +100,6 @@
   <ItemGroup>
     <ClCompile Include="AdsDef.cpp" />
     <ClCompile Include="AdsDevice.cpp" />
-    <ClCompile Include="AdsNotification.cpp" />
     <ClCompile Include="AmsConnection.cpp" />
     <ClCompile Include="AdsLib.cpp" />
     <ClCompile Include="AmsPort.cpp" />

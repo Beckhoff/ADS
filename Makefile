@@ -15,7 +15,6 @@ CPPFLAGS += -I tools/
 SRC_FILES = AdsDef.cpp
 SRC_FILES += AdsDevice.cpp
 SRC_FILES += AdsLib.cpp
-SRC_FILES += AdsNotification.cpp
 SRC_FILES += AmsConnection.cpp
 SRC_FILES += AmsPort.cpp
 SRC_FILES += AmsRouter.cpp

@@ -101,9 +101,6 @@
     <ClCompile Include="AdsDef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AdsNotification.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AdsDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
