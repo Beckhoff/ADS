@@ -95,19 +95,22 @@ long AdsDevice::GetLocalPort() const
 
 AdsDeviceState AdsDevice::GetState() const
 {
-    AdsDeviceState state;
-    static_assert(sizeof(state.ads) == sizeof(uint16_t), "size missmatch");
-    static_assert(sizeof(state.device) == sizeof(uint16_t), "size missmatch");
+    uint16_t state[2];
     auto error = AdsSyncReadStateReqEx(GetLocalPort(),
                                        &m_Addr,
-                                       (uint16_t*)&state.ads,
-                                       (uint16_t*)&state.device);
+                                       &state[0],
+                                       &state[1]);
 
     if (error) {
         throw AdsException(error);
     }
 
-    return state;
+    for (auto i: state) {
+        if (i >= ADSSTATE::ADSSTATE_MAXSTATES) {
+            throw std::out_of_range("Unknown ADSSTATE(" + std::to_string(i) + ')');
+        }
+    }
+    return {static_cast<ADSSTATE>(state[0]), static_cast<ADSSTATE>(state[1])};
 }
 
 void AdsDevice::SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const
