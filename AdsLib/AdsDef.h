@@ -4,7 +4,11 @@
  */
 #pragma once
 
+#if defined(USE_TWINCAT_ROUTER)
+#include "TwinCAT/AdsDef.h"
+#else
 #include "standalone/AdsDef.h"
+#endif
 
 #include <iosfwd>
 bool operator<(const AmsNetId& lhs, const AmsNetId& rhs);

@@ -4,7 +4,11 @@
  */
 #pragma once
 
+#if defined(USE_TWINCAT_ROUTER)
+#include "TwinCAT/AdsLib.h"
+#else
 #include "standalone/AdsLib.h"
+#endif
 
 /**
  * Reads data synchronously from an ADS server.

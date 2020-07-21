@@ -11,6 +11,8 @@ CXXFLAGS += -D_GNU_SOURCE
 CXXFLAGS += $(ci_cxx_flags)
 CPPFLAGS += -I AdsLib/
 CPPFLAGS += -I tools/
+Tc$(LIB_NAME): CPPFLAGS += -DUSE_TWINCAT_ROUTER
+Tc$(LIB_NAME): CPPFLAGS += -I/usr/local/include
 
 SRC_FILES += AdsDef.cpp
 SRC_FILES += AdsDevice.cpp
@@ -28,6 +30,10 @@ ROUTER_FILES += standalone/AmsRouter.cpp
 ROUTER_FILES += standalone/NotificationDispatcher.cpp
 ROUTER_OBJ = $(ROUTER_FILES:%.cpp=$(OBJ_DIR)/%.o)
 
+# some extensions to use AdsLib objects with TwinCAT router
+TWINCAT_FILES += TwinCAT/AdsLib.cpp
+TWINCAT_OBJ = $(TWINCAT_FILES:%.cpp=$(OBJ_DIR)/%.o)
+
 LDFLAGS += -lpthread
 LDFLAGS_Darwin += -lc++
 LDFLAGS_win32 += -lws2_32
@@ -37,11 +43,15 @@ all: $(LIB_NAME)
 
 $(OBJ_DIR):
 	mkdir -p $@/standalone
+	mkdir -p $@/TwinCAT
 
 $(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(LIB_NAME): $(OBJ_FILES) $(ROUTER_OBJ)
+	$(AR) rvs $@ $^
+
+Tc$(LIB_NAME): $(OBJ_FILES) $(TWINCAT_OBJ)
 	$(AR) rvs $@ $^
 
 AdsLibTest.bin: AdsLibTest/main.cpp $(LIB_NAME)
