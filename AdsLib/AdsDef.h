@@ -249,7 +249,6 @@ struct AmsNetId {
     AmsNetId(uint32_t ipv4Addr = 0);
     AmsNetId(const std::string& addr);
     AmsNetId(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
-    bool operator<(const AmsNetId& rhs) const;
     operator bool() const;
 #endif
 };
@@ -266,6 +265,7 @@ struct AmsAddr {
 };
 
 #ifdef __cplusplus
+bool operator<(const AmsNetId& lhs, const AmsNetId& rhs);
 bool operator<(const AmsAddr& lhs, const AmsAddr& rhs);
 std::ostream& operator<<(std::ostream& os, const AmsNetId& netId);
 #endif /* #ifdef __cplusplus */
