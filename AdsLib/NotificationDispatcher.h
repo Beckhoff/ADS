@@ -24,15 +24,17 @@
 
 #include "AdsNotification.h"
 #include "AmsHeader.h"
+#include "Semaphore.h"
 
 #include <functional>
 #include <map>
-#include <mutex>
+#include <thread>
 
 using DeleteNotificationCallback = std::function<long (uint32_t hNotify, uint32_t tmms)>;
 
 struct NotificationDispatcher {
     NotificationDispatcher(DeleteNotificationCallback callback);
+    ~NotificationDispatcher();
     void Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification);
     long Erase(uint32_t hNotify, uint32_t tmms);
     void Notify();
@@ -43,7 +45,9 @@ struct NotificationDispatcher {
 private:
     std::map<uint32_t, std::shared_ptr<Notification> > notifications;
     std::recursive_mutex mutex;
-    std::mutex runLock;
+    Semaphore sem;
+    bool stopExecution;
+    std::thread thread;
 
     std::shared_ptr<Notification> Find(uint32_t hNotify);
 };

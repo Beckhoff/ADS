@@ -25,9 +25,18 @@
 #include <future>
 
 NotificationDispatcher::NotificationDispatcher(DeleteNotificationCallback callback)
-    : deleteNotification(callback),
-    ring(4 * 1024 * 1024)
+    : deleteNotification(callback)
+    , ring(4 * 1024 * 1024)
+    , stopExecution(false)
+    , thread(&NotificationDispatcher::Run, this)
 {}
+
+NotificationDispatcher::~NotificationDispatcher()
+{
+    stopExecution = true;
+    sem.release();
+    thread.join();
+}
 
 void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notification> notification)
 {
@@ -55,12 +64,16 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
 
 void NotificationDispatcher::Notify()
 {
-    std::async(std::launch::async, &NotificationDispatcher::Run, this);
+    sem.release();
 }
 
 void NotificationDispatcher::Run()
 {
-    std::unique_lock<std::mutex> lock(runLock);
+for(;;) {
+    sem.acquire();
+    if (stopExecution) {
+        return;
+    }
     auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
     const auto length = ring.ReadFromLittleEndian<uint32_t>();
     (void)length;
@@ -89,4 +102,5 @@ void NotificationDispatcher::Run()
     }
 cleanup:
     ring.Read(fullLength);
+}
 }
