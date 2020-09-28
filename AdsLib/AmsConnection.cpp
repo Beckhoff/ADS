@@ -242,7 +242,7 @@ void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, 
     T header;
 
     if (bytesLeft > sizeof(header) + request->bufferLength) {
-        LOG_WARN("Frame to long: " << std::dec << bytesLeft << '<' << sizeof(header) + request->bufferLength);
+        LOG_WARN("Frame too long: " << std::dec << bytesLeft << '>' << sizeof(header) + request->bufferLength);
         response->Notify(ADSERR_DEVICE_INVALIDSIZE);
         ReceiveJunk(bytesLeft);
         return;
