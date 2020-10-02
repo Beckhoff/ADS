@@ -26,6 +26,7 @@
 #include "AmsHeader.h"
 #include "Semaphore.h"
 
+#include <atomic>
 #include <functional>
 #include <map>
 #include <thread>
@@ -46,7 +47,7 @@ private:
     std::map<uint32_t, std::shared_ptr<Notification> > notifications;
     std::recursive_mutex mutex;
     Semaphore sem;
-    bool stopExecution;
+    std::atomic<bool> stopExecution;
     std::thread thread;
 
     std::shared_ptr<Notification> Find(uint32_t hNotify);
