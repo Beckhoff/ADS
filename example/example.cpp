@@ -11,7 +11,7 @@ static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pN
 {
     const uint8_t* data = reinterpret_cast<const uint8_t*>(pNotification + 1);
     std::cout << std::setfill('0') <<
-        "NetId: " << pAddr->netId <<
+        "NetId for user: " << pAddr->netId <<
         " hUser 0x" << std::hex << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
@@ -59,6 +59,7 @@ static void readExample(std::ostream& out, const AdsDevice& route)
     out << __FUNCTION__ << "():\n";
     for (size_t i = 0; i < 8; ++i) {
         out << "ADS read " << std::hex << (uint32_t)readVar << '\n';
+        std::cin.ignore();
     }
 }
 
