@@ -63,26 +63,25 @@ AmsNetId::AmsNetId(uint8_t id_0, uint8_t id_1, uint8_t id_2, uint8_t id_3, uint8
 
 AmsNetId::AmsNetId(const std::string& addr)
 {
-	assign(addr);
+    assign(addr);
 }
 
 AmsNetId::AmsNetId(const AmsNetId& rhs)
 {
-	assign(rhs);
+    assign(rhs);
 }
 
-
-bool AmsNetId::operator == (const AmsNetId& rhs) const
+bool AmsNetId::operator==(const AmsNetId& rhs) const
 {
-	return 0 == memcmp(b, rhs.b, sizeof(rhs.b));
+    return 0 == memcmp(b, rhs.b, sizeof(rhs.b));
 }
 
 bool AmsNetId::operator != (const AmsNetId& rhs) const
 {
-	return 0 != memcmp(b, rhs.b, sizeof(rhs.b));
+    return 0 != memcmp(b, rhs.b, sizeof(rhs.b));
 }
 
-bool AmsNetId::operator < (const AmsNetId& rhs) const
+bool AmsNetId::operator<(const AmsNetId& rhs) const
 {
     for (unsigned int i = 0; i < sizeof(rhs.b); ++i) {
         if (b[i] != rhs.b[i]) {
@@ -92,16 +91,16 @@ bool AmsNetId::operator < (const AmsNetId& rhs) const
     return false;
 }
 
-AmsNetId& AmsNetId::operator = (const std::string& addr)
+AmsNetId& AmsNetId::operator=(const std::string& addr)
 {
-	assign(addr);
-	return *this;
+    assign(addr);
+    return *this;
 }
 
-AmsNetId& AmsNetId::operator = (const AmsNetId& rhs)
+AmsNetId& AmsNetId::operator=(const AmsNetId& rhs)
 {
-	assign(rhs);
-	return *this;
+    assign(rhs);
+    return *this;
 }
 
 void AmsNetId::assign(const AmsNetId& rhs)
@@ -128,7 +127,7 @@ void AmsNetId::assign(const std::string& addr)
 
 bool AmsNetId::isValid() const
 {
-	static const AmsNetId empty {};
+    static const AmsNetId empty {};
     return 0 != memcmp(b, &empty.b, sizeof(b));
 }
 

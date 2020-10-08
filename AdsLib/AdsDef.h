@@ -245,6 +245,7 @@ struct AmsNetId {
     /** NetId, consisting of 6 digits. */
     uint8_t b[6];
 
+#ifdef __cplusplus
     void assign(const AmsNetId& rhs);
     void assign(const std::string& addr);
 
@@ -262,6 +263,7 @@ struct AmsNetId {
     AmsNetId(const std::string& addr);
     AmsNetId(const AmsNetId& rhs);
     AmsNetId(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
+#endif
 };
 
 
