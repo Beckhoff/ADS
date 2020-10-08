@@ -245,14 +245,25 @@ struct AmsNetId {
     /** NetId, consisting of 6 digits. */
     uint8_t b[6];
 
-#ifdef __cplusplus
+    void assign(const AmsNetId& rhs);
+    void assign(const std::string& addr);
+
+    bool operator==(const AmsNetId& rhs) const;
+    bool operator!=(const AmsNetId& rhs) const;
+    bool operator<(const AmsNetId& rhs) const;
+
+    AmsNetId& operator=(const AmsNetId& rhs);
+    AmsNetId& operator=(const std::string& addr);
+
+    bool isValid() const;
+    operator bool() const;
+
     AmsNetId(uint32_t ipv4Addr = 0);
     AmsNetId(const std::string& addr);
+    AmsNetId(const AmsNetId& rhs);
     AmsNetId(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
-    bool operator<(const AmsNetId& rhs) const;
-    operator bool() const;
-#endif
 };
+
 
 /**
  * @brief The complete address of an ADS device can be stored in this structure.

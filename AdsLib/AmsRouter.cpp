@@ -113,7 +113,7 @@ long AmsRouter::GetLocalAddress(uint16_t port, AmsAddr* pAddr)
     }
 
     if (ports[port - PORT_BASE].IsOpen()) {
-        memcpy(&pAddr->netId, &localAddr, sizeof(localAddr));
+        pAddr->netId = localAddr;
         pAddr->port = port;
         return 0;
     }

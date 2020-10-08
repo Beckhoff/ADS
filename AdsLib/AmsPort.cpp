@@ -26,7 +26,7 @@ namespace std
 {
 bool operator==(const AmsAddr& lhs, const AmsAddr& rhs)
 {
-    return 0 == memcmp(&lhs, &rhs, sizeof(lhs));
+    return lhs.netId == rhs.netId && lhs.port == rhs.port;
 }
 }
 
