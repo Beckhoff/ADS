@@ -29,7 +29,6 @@
 
 bool operator<(const AmsAddr& lhs, const AmsAddr& rhs)
 {
-    //// if (memcmp(&lhs.netId, &rhs.netId, sizeof(lhs.netId))) {
     if (lhs.netId != rhs.netId) {
         return lhs.netId < rhs.netId;
     }
