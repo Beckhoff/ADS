@@ -1,0 +1,9 @@
+v2:
+- a general refactoring to finally support the use of the TwinCAT router on
+  systems with TwinCAT available such as Windows and TC/BSD.
+- add wrapper for ADS file access
+- add provide standalone comparsion operator for AmsNetId objects
+- validate ADSSTATE values in AdsDevice
+- fix exception message in TcpSocket::Connect
+
+v1 and previous versions had no changelog :-(
