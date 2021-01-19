@@ -76,15 +76,16 @@ build:mxe:
     maker: make
 
 .test-linux: &test-linux
+  image: debian:buster-slim
   tags:
-    - kvm
+    - docker
+    - host_network
+    - lbs1
     - rack
-    - ubuntu1804
-    - x86_64
   before_script:
-    - sudo dpkg --add-architecture i386
-    - sudo apt-get -o dir::cache::archives="apt-cache" update
-    - sudo apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 nmap
+    - dpkg --add-architecture i386
+    - apt-get -o dir::cache::archives="apt-cache" update
+    - apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 ncat
   script:
     - ./tools/90_run_tests.sh
 
