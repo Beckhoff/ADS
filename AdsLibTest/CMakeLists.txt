@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(ads-test)
+
+set(SOURCES
+  main.cpp
+)
+
+add_executable(AdsLibTest.bin ${SOURCES})
+
+target_link_libraries(AdsLibTest.bin ads pthread)
+
+target_include_directories(AdsLibTest.bin
+  PRIVATE ${PROJECT_SOURCE_DIR}/../tools/
+)
+
+target_compile_features(AdsLibTest.bin PRIVATE
+  cxx_std_11
+)
+
+target_compile_options(AdsLibTest.bin PRIVATE
+  -pedantic
+  -Wall
+  -Wextra
+)
+
+target_compile_definitions(AdsLibTest.bin PRIVATE
+  _GNU_SOURCE
+)
