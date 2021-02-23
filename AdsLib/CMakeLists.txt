@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(SOURCES
-  AdsDef.cpp
   AdsDevice.cpp
-  AdsLib.cpp
-  AdsNotification.cpp
-  AmsConnection.cpp
-  AmsPort.cpp
-  AmsRouter.cpp
+  AdsDef.cpp
   Log.cpp
-  NotificationDispatcher.cpp
   Sockets.cpp
   Frame.cpp
 )
+
+add_subdirectory(standalone)
 
 add_library(ads ${SOURCES})
 
