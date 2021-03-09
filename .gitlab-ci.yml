@@ -10,6 +10,17 @@ cache:
   paths:
   - apt-cache/
 
+.build-meson: &build-meson
+  stage: build
+  script:
+    - meson setup build
+    - ninja -C build
+  artifacts:
+    paths:
+    - build/libAdsLib.a
+    - build/AdsLibTest.exe
+    - build/AdsLibOOITest.exe
+
 .build-template: &build-template
   stage: build
   tags:
@@ -74,6 +85,15 @@ build:mxe:
     compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
     os_name: win32
     maker: make
+
+build:win10:
+  <<: *build-meson
+  tags:
+    - MD_TWINCAT_XAE
+  before_script:
+    - C:\ProgramData\chocolatey\bin\choco install --no-progress -y meson ninja
+    - $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+
 
 .test-linux: &test-linux
   image: debian:buster-slim
