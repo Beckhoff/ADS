@@ -20,10 +20,18 @@ cache:
   artifacts:
     paths:
     - build/libAdsLib.a
+    - build/AdsLibTest
     - build/AdsLibTest.exe
+    - build/AdsLibOOITest
     - build/AdsLibOOITest.exe
     - example/build/example
     - example/build/example.exe
+
+.build-meson-docker: &build-meson-docker
+  <<: *build-meson
+  tags:
+    - docker
+  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:25861
 
 .build-template: &build-template
   stage: build
@@ -44,11 +52,9 @@ cache:
     - example/example.bin
 
 build:clang:
-  <<: *build-template
+  <<: *build-meson-docker
   variables:
-    compiler: /usr/bin/clang++
-    os_name: Linux
-    maker: make
+    CXX: clang++
 
 build:clang-fbsd:
   <<: *build-template
@@ -69,11 +75,7 @@ build:clang-macOS:
     - macOS
 
 build:gcc:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/g++
-    os_name: Linux
-    maker: make
+  <<: *build-meson-docker
 
 build:gcc-i386:
   <<: *build-template
