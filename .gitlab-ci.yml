@@ -13,9 +13,9 @@ cache:
 .build-meson: &build-meson
   stage: build
   script:
-    - meson setup build
+    - meson setup build ${BHF_CI_MESON_OPTIONS}
     - ninja -C build
-    - meson setup example/build example
+    - meson setup example/build example ${BHF_CI_MESON_OPTIONS}
     - ninja -C example/build
   artifacts:
     paths:
@@ -78,12 +78,9 @@ build:gcc:
   <<: *build-meson-docker
 
 build:gcc-i386:
-  <<: *build-template
+  <<: *build-meson-docker
   variables:
-    compiler: /usr/bin/g++
-    os_name: i386
-    maker: make
-    ci_cxx_flags: -m32
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
 
 build:mxe:
   <<: *build-template
