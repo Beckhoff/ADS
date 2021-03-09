@@ -83,11 +83,9 @@ build:gcc-i386:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
 
 build:mxe:
-  <<: *build-template
+  <<: *build-meson-docker
   variables:
-    compiler: /mxe/usr/bin/i686-w64-mingw32.static.posix-g++
-    os_name: win32
-    maker: make
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++11'
 
 build:win10:
   <<: *build-meson
