@@ -1,3 +1,4 @@
+$(warning ATTENTION make is deprecated and superseeded by meson)
 OS_NAME ?= $(shell uname)
 VPATH = AdsLib
 LIB_NAME = AdsLib-$(OS_NAME).a

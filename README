@@ -2,14 +2,18 @@ This library is intended to provide easy use as ADS client applications running 
 
 To build this library a recent compiler with C++11 support is required. 
 
-Currently (2018-03-22) tested with:
+Currently (2021-03-10) tested with:
 ===================================
-FreeBSD 11.1 amd64      | clang 4.0.0
-macOS 10.13.3           | clang 900.0.39.2
-Ubuntu 16.04 LTS x86_64 | gcc 6.3.0
-Win7 64-bit             | gcc 6.4.0 + cygwin64
-Win7 64-bit             | gcc 5.4.0 + cygwin32
-Win7 64-bit             | MS Visual C++ 2015 (untended)
+
+host (amd64)     | target| compiler
+-----------------|-------|-------------
+FreeBSD 13.0     | amd64 | clang 11.0.0
+macOS 11.2.3     | amd64 | clang 12.0.0
+Ubuntu 18.04 LTS | amd64 | clang 6.0.0
+Ubuntu 18.04 LTS | amd64 | gcc 7.5.0
+Ubuntu 18.04 LTS | i686  | gcc 7.5.0
+Ubuntu 18.04 LTS | win32 | gcc 5.5.0
+Windows 10       | win64 | gcc 8.3.0
 
 
 compile & usage
@@ -20,8 +24,11 @@ git clone https://github.com/Beckhoff/ADS.git
 # change into root of the cloned repository
 cd ADS
 
-# build the library
-make
+# configure meson to build the library into "build" dir
+meson build
+
+# let ninja build the library
+ninja -C build
 
 
 Prepare your target to run the example
@@ -47,14 +54,14 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 
 - set "remoteNetId" and "remoteIpV4" and enable AdsSetLocalAddress() in "example/example.cpp" according to your own setup
 
-# make sure you are in the correct directory
-cd example/
+# configure meson to build example into "build" dir
+meson example/build example
 
-# build
-make
+# let ninja build the example
+ninja -C example/build
 
 # and run the example
-make test
+./example/build/example
 
 ---
 ADS/AMS Specification: https://infosys.beckhoff.com/content/1033/tc3_ads_intro/index.html
