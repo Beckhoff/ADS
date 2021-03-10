@@ -14,6 +14,12 @@ ncat_pid=$!
 
 # wait for fake ads server to accept connections
 while ! ncat --send-only localhost 48898; do sleep 1; done
+
+# transitional hack to test meson or legacy build binaries
+ln -s build/AdsLibTest AdsLibTest.bin || true
+ln -s build/AdsLibOOITest AdsLibOOITest.bin || true
+ln -s build/example example/example.bin || true
+
 ./AdsLibTest.bin
 ./AdsLibOOITest.bin
 ./example/example.bin

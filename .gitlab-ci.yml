@@ -15,11 +15,15 @@ cache:
   script:
     - meson setup build
     - ninja -C build
+    - meson setup example/build example
+    - ninja -C example/build
   artifacts:
     paths:
     - build/libAdsLib.a
     - build/AdsLibTest.exe
     - build/AdsLibOOITest.exe
+    - example/build/example
+    - example/build/example.exe
 
 .build-template: &build-template
   stage: build
