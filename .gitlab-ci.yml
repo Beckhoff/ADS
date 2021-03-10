@@ -64,13 +64,11 @@ build:clang-fbsd:
     - doas pkg install -y meson
 
 build:clang-macOS:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/clang++
-    os_name: Darwin
-    maker: make
+  <<: *build-meson
   tags:
     - macOS
+  variables:
+    BHF_CI_MESON_OPTIONS: '-Dcpp_std=c++11'
 
 build:gcc:
   <<: *build-meson-docker
