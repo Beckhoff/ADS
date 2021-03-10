@@ -57,13 +57,11 @@ build:clang:
     CXX: clang++
 
 build:clang-fbsd:
-  <<: *build-template
-  variables:
-    compiler: /usr/bin/clang++
-    os_name: FreeBSD
-    maker: /usr/local/bin/gmake
+  <<: *build-meson
   tags:
-    - fbsd
+    - freebsd13_4_build_vm
+  before_script:
+    - doas pkg install -y meson
 
 build:clang-macOS:
   <<: *build-template
