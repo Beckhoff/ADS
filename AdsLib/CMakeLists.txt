@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.13)
-
 set(SOURCES
   AdsDevice.cpp
   AdsDef.cpp
@@ -17,3 +15,5 @@ set(SOURCES
 add_library(ads ${SOURCES})
 
 target_include_directories(ads PUBLIC .)
+
+target_link_libraries(ads PUBLIC Threads::Threads)
