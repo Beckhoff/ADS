@@ -1,0 +1,8 @@
+# Set this option to the path of TwinCATs TcAdsDll header files, if you want
+# to build TcAdsLib, which can be used on systems with TwinCAT router available
+# to use the native TwinCAT routing.
+# On Windows 10 the default path is:
+# 'c:\TwinCAT\AdsApi\TcAdsDll\Include'
+# On TC/BSD the default path is:
+# '/usr/local/include'
+option('tcadsdll_include', type: 'string', value: '')

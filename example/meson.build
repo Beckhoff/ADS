@@ -5,12 +5,33 @@ project('example', 'cpp',
   ]
 )
 
+cxx = meson.get_compiler('cpp')
+libs = [
+    cxx.find_library('ws2_32', required: false),
+    dependency('threads'),
+]
+
 example = executable('example',
   'example.cpp',
   include_directories: include_directories('../AdsLib'),
   dependencies: [
-    meson.get_compiler('cpp').find_library('AdsLib', dirs: meson.source_root() + '/../build/'),
-    meson.get_compiler('cpp').find_library('ws2_32', required: false),
-    dependency('threads'),
+    cxx.find_library('AdsLib', dirs: meson.source_root() + '/../build/'),
+    libs,
+  ]
+)
+
+if get_option('tcadsdll_lib') != ''
+  libs += cxx.find_library('TcAdsLib', dirs: meson.source_root() + '/../build/')
+  libs += cxx.find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'))
+else
+  libs = disabler()
+endif
+
+tcexample = executable('tcexample',
+  'example.cpp',
+  cpp_args: '-DUSE_TWINCAT_ROUTER',
+  include_directories: include_directories('../AdsLib', get_option('tcadsdll_include')),
+  dependencies: [
+    libs,
   ]
 )

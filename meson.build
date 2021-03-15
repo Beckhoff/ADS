@@ -51,3 +51,14 @@ adslibooitest = executable('AdsLibOOITest',
   dependencies: libs,
   link_with: adslib,
 )
+
+if get_option('tcadsdll_include') != ''
+  tcadslib = static_library('TcAdsLib',
+    [common_files, 'AdsLib/TwinCAT/AdsLib.cpp'],
+    cpp_args: '-DUSE_TWINCAT_ROUTER',
+    include_directories: [
+      get_option('tcadsdll_include'),
+      inc,
+    ],
+  )
+endif

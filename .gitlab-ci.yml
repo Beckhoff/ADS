@@ -20,12 +20,15 @@ cache:
   artifacts:
     paths:
     - build/libAdsLib.a
+    - build/libTcAdsLib.a
     - build/AdsLibTest
     - build/AdsLibTest.exe
     - build/AdsLibOOITest
     - build/AdsLibOOITest.exe
     - example/build/example
     - example/build/example.exe
+    - example/build/tcexample
+    - example/build/tcexample.exe
 
 .build-meson-docker: &build-meson-docker
   <<: *build-meson
@@ -44,6 +47,10 @@ build:clang-fbsd:
     - freebsd13_4_build_vm
   before_script:
     - doas pkg install -y meson
+    - curl https://tcbsd.beckhoff.com/\?dir\=TCBSD/12/stable/packages/All | grep -o 'href=".*ADS-Comm-Lib.*"' | head -1 | sed -e 's/"//g' -e 's|href=|https://tcbsd.beckhoff.com/|g' | xargs fetch
+    - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
+  variables:
+    BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
 
 build:clang-macOS:
   <<: *build-meson
