@@ -1,4 +1,19 @@
+#ifdef __FreeBSD__
+#define HAS_WINTYPES 1
+using BOOL = int;
+using BYTE = unsigned char;
+using CHAR = char;
+using USHORT = unsigned short;
+using LONG = long;
+using ULONG = unsigned long;
+using __int64 = unsigned long long;
+#define TCADSDLL_API
+#define TCADSDLL_EXPORT
+#define NULL nullptr
+#define AMSPORT_R0_PLC_TC3 851
+#else
 #include <Windows.h>
+#endif
 #include <TcAdsDef.h>
 #ifndef GLOBALERR_TARGET_PORT
 #define GLOBALERR_TARGET_PORT 0x06
