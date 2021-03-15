@@ -22,3 +22,11 @@
 #define ADSSRVID_DELDEVICENOTE              0x07
 #define ADSSRVID_DEVICENOTE                 0x08
 #define ADSSRVID_READWRITE                  0x09
+
+enum nSystemServiceIndexGroups : uint32_t {
+    SYSTEMSERVICE_FOPEN = 120,
+    SYSTEMSERVICE_FCLOSE = 121,
+    SYSTEMSERVICE_FREAD = 122,
+    SYSTEMSERVICE_FWRITE = 123,
+    SYSTEMSERVICE_FDELETE = 131,
+};
