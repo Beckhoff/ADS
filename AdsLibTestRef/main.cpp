@@ -1,4 +1,3 @@
-
 #include <Windows.h>
 #include <TcAdsDef.h>
 #ifndef GLOBALERR_TARGET_PORT
@@ -360,9 +359,10 @@ struct TestAds : test_base<TestAds> {
         fructose_assert(0 == bytesRead);
 
         // provide invalid writeBuffer
+        char invalidSymbol[] = "xxx";
         bytesRead = 0xDEADBEEF;
         fructose_assert(ADSERR_DEVICE_SYMBOLNOTFOUND ==
-                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 3, "xxx",
+                        AdsSyncReadWriteReqEx2(port, &server, 0xF003, 0, sizeof(buffer), &buffer, 3, invalidSymbol,
                                                &bytesRead));
         fructose_assert(0 == bytesRead);
 
