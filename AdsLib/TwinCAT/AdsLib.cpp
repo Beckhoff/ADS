@@ -18,7 +18,7 @@ void AdsSetLocalAddress(const AmsNetId)
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {
-    return AdsSyncDelDeviceNotificationReqEx((ads_i32)port, (AmsAddr*)pAddr, hNotification);
+    return AdsSyncDelDeviceNotificationReqEx((ads_i32)port, (AmsAddr*)pAddr, (ads_ui32)hNotification);
 }
 
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout)
@@ -46,11 +46,11 @@ long AdsSyncReadReqEx2(long           port,
 {
     return AdsSyncReadReqEx2((ads_i32)port,
                              (AmsAddr*)pAddr,
-                             indexGroup,
-                             indexOffset,
-                             bufferLength,
+                             (ads_ui32)indexGroup,
+                             (ads_ui32)indexOffset,
+                             (ads_ui32)bufferLength,
                              buffer,
-                             bytesRead);
+                             (ads_ui32*)bytesRead);
 }
 
 long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState)
@@ -70,13 +70,13 @@ long AdsSyncReadWriteReqEx2(long           port,
 {
     return AdsSyncReadWriteReqEx2((ads_i32)port,
                                   (AmsAddr*)pAddr,
-                                  indexGroup,
-                                  indexOffset,
-                                  readLength,
+                                  (ads_ui32)indexGroup,
+                                  (ads_ui32)indexOffset,
+                                  (ads_ui32)readLength,
                                   readData,
-                                  writeLength,
+                                  (ads_ui32)writeLength,
                                   (void*)writeData,
-                                  bytesRead);
+                                  (ads_ui32*)bytesRead);
 }
 
 long AdsSyncAddDeviceNotificationReqEx(long                         port,
@@ -90,12 +90,12 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
 {
     return AdsSyncAddDeviceNotificationReqEx((ads_i32)port,
                                              (AmsAddr*)pAddr,
-                                             indexGroup,
-                                             indexOffset,
+                                             (ads_ui32)indexGroup,
+                                             (ads_ui32)indexOffset,
                                              (AdsNotificationAttrib*)pAttrib,
                                              pFunc,
-                                             hUser,
-                                             pNotification);
+                                             (ads_ui32)hUser,
+                                             (ads_ui32*)pNotification);
 }
 
 long AdsSyncWriteControlReqEx(long           port,
@@ -107,9 +107,9 @@ long AdsSyncWriteControlReqEx(long           port,
 {
     return AdsSyncWriteControlReqEx((ads_i32)port,
                                     (AmsAddr*)pAddr,
-                                    adsState,
-                                    devState,
-                                    bufferLength,
+                                    (ads_ui16)adsState,
+                                    (ads_ui16)devState,
+                                    (ads_ui32)bufferLength,
                                     (void*)buffer);
 }
 
@@ -122,8 +122,8 @@ long AdsSyncWriteReqEx(long           port,
 {
     return AdsSyncWriteReqEx((ads_i32)port,
                              (AmsAddr*)pAddr,
-                             indexGroup,
-                             indexOffset,
-                             bufferLength,
+                             (ads_ui32)indexGroup,
+                             (ads_ui32)indexOffset,
+                             (ads_ui32)bufferLength,
                              (void*)buffer);
 }

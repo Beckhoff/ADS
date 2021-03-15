@@ -79,7 +79,7 @@ build:win10:
   before_script:
     - C:\ProgramData\chocolatey\bin\choco install --no-progress -y meson ninja
     - $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-
+    - $env:BHF_CI_MESON_OPTIONS = '-Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include', '-Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib'
 
 .test-linux: &test-linux
   image: debian:buster-slim

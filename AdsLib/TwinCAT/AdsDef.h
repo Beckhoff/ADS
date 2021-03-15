@@ -3,10 +3,19 @@
    Copyright (c) 2020 Beckhoff Automation GmbH & Co. KG
  */
 #pragma once
-
+#ifdef __FreeBSD__
 #define POSIX
 #define NULL nullptr
 #define AMSPORT_R0_PLC_TC3 851
+#else
+using BOOL = int;
+#define TCADSDLL_API __stdcall
+using ads_i32 = long;
+using ads_ui16 = unsigned short;
+using ads_ui32 = unsigned long;
+#define __int64 long long
+#endif
+#include <string>
 #include <stdint.h>
 #include <TcAdsDef.h>
 
