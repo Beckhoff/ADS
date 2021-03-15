@@ -33,24 +33,6 @@ cache:
     - docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:25861
 
-.build-template: &build-template
-  stage: build
-  tags:
-    - docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:8187
-  script:
-    - $maker CXX=$compiler OS_NAME=$os_name
-    - $maker CXX=$compiler OS_NAME=$os_name AdsLibTest.bin
-    - $maker CXX=$compiler OS_NAME=$os_name AdsLibOOITest.bin
-    - cd example
-    - $maker CXX=$compiler OS_NAME=$os_name
-  artifacts:
-    paths:
-    - AdsLib-$os_name.a
-    - AdsLibTest.bin
-    - AdsLibOOITest.bin
-    - example/example.bin
-
 build:clang:
   <<: *build-meson-docker
   variables:
