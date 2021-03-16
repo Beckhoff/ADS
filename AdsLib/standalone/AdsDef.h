@@ -22,12 +22,8 @@
 
 #pragma once
 
-#ifdef __cplusplus
 #include <cstdint>
 #include <string>
-#else
-#include <stdint.h>
-#endif
 
 #define ADS_TCP_SERVER_PORT 0xBF02
 
@@ -244,12 +240,10 @@ struct AmsNetId {
     /** NetId, consisting of 6 digits. */
     uint8_t b[6];
 
-#ifdef __cplusplus
     AmsNetId(uint32_t ipv4Addr = 0);
     AmsNetId(const std::string& addr);
     AmsNetId(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
     operator bool() const;
-#endif
 };
 
 /**
