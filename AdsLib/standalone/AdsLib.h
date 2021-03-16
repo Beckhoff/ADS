@@ -10,7 +10,7 @@
  * Add new ams route to target system
  * @param[in] ams address of the target system
  * @param[in] ip address of the target system
- * @return [ADS Return Code](http://infosys.beckhoff.de/content/1033/tc3_adsdll2/html/ads_returncodes.htm?id=17663)
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsAddRoute(AmsNetId ams, const char* ip);
 
@@ -25,7 +25,7 @@ void AdsDelRoute(AmsNetId ams);
  * closed. The port to be closed must previously have been opened via
  * an AdsPortOpenEx() call.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
- * @return [ADS Return Code](http://infosys.beckhoff.de/content/1033/tc3_adsdll2/html/ads_returncodes.htm?id=17663)
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsPortCloseEx(long port);
 
@@ -41,7 +41,7 @@ long AdsPortOpenEx();
  * Returns the local NetId and port number.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
  * @param[out] pAddr Pointer to the structure of type AmsAddr.
- * @return [ADS Return Code](http://infosys.beckhoff.de/content/1033/tc3_adsdll2/html/ads_returncodes.htm?id=17663)
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsGetLocalAddressEx(long port, AmsAddr* pAddr);
 
@@ -55,6 +55,6 @@ void AdsSetLocalAddress(AmsNetId ams);
  * Alters the timeout for the ADS functions. The standard value is 5000 ms.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
  * @param[in] timeout Timeout in ms.
- * @return [ADS Return Code](http://infosys.beckhoff.de/content/1033/tc3_adsdll2/html/ads_returncodes.htm?id=17663)
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsSyncSetTimeoutEx(long port, uint32_t timeout);
