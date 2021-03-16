@@ -1,3 +1,14 @@
+v3:
+- add meson build configuration for all platforms
+- drop Visual Studio solution/project files
+- run Linux tests from docker container instead of virtual machine
+- add virtual ~Router()
+- add SYSTEMSERVICE defines for ADS file access
+- add a simple github action to build on ubuntu
+- drop #ifdef __cplusplus
+- update links to Beckhoff Infosys
+- add CMakeLists for Linux build (community support)
+
 v2:
 - a general refactoring to finally support the use of the TwinCAT router on
   systems with TwinCAT available such as Windows and TC/BSD.
