@@ -1,10 +1,7 @@
 stages:
   - build
-  - test:clang-fbsd
-  - test:clang
-  - test:gcc
-  - test:gcc-i386
-  - test:clang-macOS
+  - test
+  - test-macos-clang
 
 cache:
   paths:
@@ -36,12 +33,12 @@ cache:
     - docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:25861
 
-build:clang:
+build-linux-clang:
   <<: *build-meson-docker
   variables:
     CXX: clang++
 
-build:clang-fbsd:
+build-fbsd-clang:
   <<: *build-meson
   tags:
     - freebsd13_4_build_vm
@@ -52,17 +49,17 @@ build:clang-fbsd:
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
 
-build:clang-macOS:
+build-macos-clang:
   <<: *build-meson
   tags:
     - macOS
   variables:
     BHF_CI_MESON_OPTIONS: '-Dcpp_std=c++11'
 
-build:gcc:
+build-linux-gcc:
   <<: *build-meson-docker
 
-build:gcc-i386:
+build-linux-gcc-i386:
   <<: *build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
@@ -82,51 +79,56 @@ build:win10:
     - $env:BHF_CI_MESON_OPTIONS = '-Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include', '-Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib'
 
 .test-linux: &test-linux
-  image: debian:buster-slim
+  stage: test
+  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:3.1
   tags:
-    - docker
-    - host_network
-    - lbs1
-    - rack
+    - docker_vm_runner
+    - few_vcpus
+  services:
+    - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
+      alias: ads-server
   before_script:
     - dpkg --add-architecture i386
-    - apt-get -o dir::cache::archives="apt-cache" update
-    - apt-get -o dir::cache::archives="apt-cache" install -y libc6:i386 libstdc++6:i386 ncat
+    - apt update -y && apt install -y ${BHF_CI_APT_EXTRA} ncat
   script:
+    - ./tools/80_ads_route.sh
     - ./tools/90_run_tests.sh
 
-test:clang:
+test-linux-clang:
   <<: *test-linux
-  stage: test:clang
-  dependencies:
-    - build:clang
+  needs: [
+    "build-linux-clang",
+  ]
 
-test:gcc:
+test-linux-gcc:
   <<: *test-linux
-  stage: test:gcc
-  dependencies:
-    - build:gcc
+  needs: [
+    "build-linux-gcc",
+  ]
 
-test:gcc-i386:
+test-linux-gcc-i386:
   <<: *test-linux
-  stage: test:gcc-i386
-  dependencies:
-    - build:gcc-i386
+  needs: [
+    "build-linux-gcc-i386",
+  ]
+  variables:
+    BHF_CI_APT_EXTRA: 'libc6:i386 libstdc++6:i386'
 
-test:clang-fbsd:
-  stage: test:clang-fbsd
-  dependencies:
-    - build:clang-fbsd
+test-fbsd-clang:
+  stage: test
+  needs: [
+    "build-fbsd-clang",
+  ]
   tags:
     - fbsd
     - rack
   script:
     - ./tools/90_run_tests.sh
 
-test:clang-macOS:
-  stage: test:clang-macOS
+test-macos-clang:
+  stage: test-macos-clang
   dependencies:
-    - build:clang-macOS
+    - build-macos-clang
   tags:
     - macOS
     - rack
