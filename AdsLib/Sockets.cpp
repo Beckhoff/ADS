@@ -117,7 +117,7 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
     if ((0 == bytesRead) || (lastError == CONNECTION_CLOSED) || (lastError == CONNECTION_ABORTED)) {
         throw std::runtime_error("connection closed by remote");
     } else {
-        LOG_ERROR("read frame failed with error: " << std::dec << strerror(lastError));
+        LOG_ERROR("read frame failed with error: " << std::dec << std::strerror(lastError));
     }
     return 0;
 }
@@ -153,7 +153,7 @@ bool Socket::Select(timeval* timeout) const
     /* and check if socket was correct */
     if ((1 != state) || (!FD_ISSET(m_Socket, &readSockets))) {
         LOG_ERROR("something strange happen while waiting for socket in state: " <<
-                  state << " with error: " << strerror(lastError));
+                  state << " with error: " << std::strerror(lastError));
         return false;
     }
     return true;
@@ -171,7 +171,7 @@ size_t Socket::write(const Frame& frame) const
     const int status = sendto(m_Socket, buffer, bufferLength, 0, m_DestAddr, m_DestAddrLen);
 
     if (SOCKET_ERROR == status) {
-        LOG_ERROR("write frame failed with error: " << WSAGetLastError());
+        LOG_ERROR("write frame failed with error: " << std::strerror(WSAGetLastError()));
         return 0;
     }
     return status;
@@ -192,8 +192,8 @@ uint32_t TcpSocket::Connect() const
     const uint32_t addr = ntohl(m_SockAddress.sin_addr.s_addr);
 
     if (::connect(m_Socket, reinterpret_cast<const sockaddr*>(&m_SockAddress), sizeof(m_SockAddress))) {
-        LOG_ERROR("Connect TCP socket failed with: " << WSAGetLastError());
-        throw std::runtime_error("Connect TCP socket failed with: " + std::to_string(WSAGetLastError()));
+        LOG_ERROR("Connect TCP socket failed with: " << std::strerror(WSAGetLastError()));
+        throw std::system_error(WSAGetLastError(), std::system_category());
     }
 
     struct sockaddr_in source;
