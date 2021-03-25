@@ -143,11 +143,12 @@ struct TestAds : test_base<TestAds> {
             AdsDevice route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
             fructose_assert(0 != route.GetLocalPort());
 
-            DeviceInfo info = route.GetDeviceInfo();
             for (int i = 0; i < NUM_TEST_LOOPS; ++i) {
+                const auto info = route.GetDeviceInfo();
+
                 fructose_loop_assert(i, 3 == info.version.version);
                 fructose_loop_assert(i, 1 == info.version.revision);
-                fructose_loop_assert(i, 1711 == info.version.build);
+                fructose_loop_assert(i, 1711 <= info.version.build);
                 fructose_loop_assert(i, 0 == strncmp(info.name, NAME, sizeof(NAME)));
             }
         }
