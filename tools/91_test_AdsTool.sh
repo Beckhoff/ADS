@@ -3,8 +3,42 @@
 # Copyright (C) 2021 Beckhoff Automation GmbH & Co. KG
 # Author: Patrick Bruenn <p.bruenn@beckhoff.com>
 
+cleanup() {
+	rm -f "${tmpfile-}"
+}
+
+as_hex() {
+	if command -v tac > /dev/null; then
+		local _tac_cmd='tac'
+	else
+		local _tac_cmd='tail -r'
+	fi
+	printf '0x'
+	xxd -p -c1 "${1}" | ${_tac_cmd} | xxd -p -r | hexdump -v -e '/1 "%02X"'
+}
+
 check() {
 	"${ads_tool}" "${netid}" "--gw=${remote}" "$@"
+}
+
+check_raw() {
+	local _test_string
+	_test_string="$(date +%F%T)"
+	readonly _test_string
+
+	# get symbol handle from PLC, written as binary to file
+	printf 'MAIN.moreBytes' | check raw --read=4 0xF003 0 > "${tmpfile}"
+
+	# use symbol handle from binary as index offset to write to variable by handle
+	printf '%s' "${_test_string}" | check raw 0xF005 "$(as_hex "${tmpfile}")"
+
+	# read back the written timestamp 0xF005 == 61445
+	local _response
+	_response="$(check raw --read=255 61445 "$(as_hex "${tmpfile}")")"
+	if ! test "${_test_string}" = "${_response}"; then
+		printf 'check_raw() mismatch:\n>%s<\n>%s<\n' "${_test_string}" "${_response}" >&2
+		return 1
+	fi
 }
 
 check_state() {
@@ -46,4 +80,11 @@ readonly ads_tool="${2-${script_path}/../build/adstool}"
 netid="$("${ads_tool}" "${remote}" netid)"
 readonly netid
 
+trap cleanup EXIT INT TERM
+tmpfile="$(mktemp)"
+readonly tmpfile
+
+# always check state first to have the PLC in RUN!
 check_state
+
+check_raw

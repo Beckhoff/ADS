@@ -10,6 +10,7 @@
 #include "ParameterList.h"
 #include <cstring>
 #include <iostream>
+#include <unistd.h>
 #include <vector>
 
 int usage(const char* const errorMessage = nullptr)
@@ -46,6 +47,30 @@ COMMANDS:
 	netid
 		Read the AmsNetId from a remote TwinCAT router
 		$ adstool 192.168.0.231 netid
+
+	raw [--read=<number_of_bytes>] <IndexGroup> <IndexOffset>
+		This command gives low level access to:
+		- AdsSyncReadReqEx2()
+		- AdsSyncReadWriteReqEx2()
+		- AdsSyncWriteReqEx()
+		Read/write binary data at every offset with every length. Data
+		to write is provided through stdin. Length of the data to write
+		is determined through the number of bytes provided. If --read
+		is not provided, the underlying method used will be pure write
+		request (AdsSyncWriteReqEx()). If no data is provided on stdin,
+		--read is mandatory and a pure read request (AdsSyncReadReqEx2())
+		is send. If both, data through stdin and --read, are available,
+		a readwrite request will be send (AdsSyncReadWriteReqEx2()).
+
+                Read 10 bytes from TC3 PLC index group 0x4040 offset 0x1 into a file:
+		$ adstool 5.24.37.144.1.1:851 raw --read=10 "0x4040" "0x1" > read.bin
+
+		Write data from file to TC3 PLC index group 0x4040 offset 0x1:
+		$ adstool 5.24.37.144.1.1 raw "0x4040" "0x1" < read.bin
+
+		Write data from write.bin to TC3 PLC index group 0xF003 offset 0x0
+		and read result into read.bin:
+		$ adstool 5.24.37.144.1.1 raw --read=4 "0xF003" "0x0" < write.bin > read.bin
 
 	state [<value>]
 		Read or write the ADS state of the device at AmsPort (default 10000).
@@ -91,6 +116,66 @@ int RunNetId(const IpV4 remote)
     bhf::ads::GetRemoteAddress(remote, netId);
     std::cout << netId << '\n';
     return 0;
+}
+
+int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    bhf::ParameterList params = {
+        {"--read"},
+    };
+    args.Parse(params);
+
+    const auto group = args.Pop<uint32_t>("IndexGroup is missing");
+    const auto offset = args.Pop<uint32_t>("IndexOffset is missing");
+    const auto readLen = params.Get<uint64_t>("--read");
+
+    LOG_ERROR("read: >" << readLen << "< group: >" << std::hex << group << "<offset:>" << offset << "<");
+
+    std::vector<uint8_t> readBuffer(readLen);
+    std::vector<uint8_t> writeBuffer;
+
+    if (!isatty(fileno(stdin))) {
+        char next_byte;
+        while (std::cin.read(&next_byte, 1)) {
+            writeBuffer.push_back(next_byte);
+        }
+    }
+
+    if (!readBuffer.size() && !writeBuffer.size()) {
+        LOG_ERROR("write- and read-size is zero!\n");
+        return -1;
+    }
+
+    auto device = AdsDevice { gw, netid, port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
+    long status = -1;
+    uint32_t bytesRead = 0;
+    if (!writeBuffer.size()) {
+        status = device.ReadReqEx2(group,
+                                   offset,
+                                   readBuffer.size(),
+                                   readBuffer.data(),
+                                   &bytesRead);
+    } else if (!readBuffer.size()) {
+        status = device.WriteReqEx(group,
+                                   offset,
+                                   writeBuffer.size(),
+                                   writeBuffer.data());
+    } else {
+        status = device.ReadWriteReqEx2(group,
+                                        offset,
+                                        readBuffer.size(),
+                                        readBuffer.data(),
+                                        writeBuffer.size(),
+                                        writeBuffer.data(),
+                                        &bytesRead);
+    }
+
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+        return status;
+    }
+    std::cout.write((const char*)readBuffer.data(), readBuffer.size());
+    return !std::cout.good();
 }
 
 int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -157,6 +242,7 @@ int ParseCommand(int argc, const char* argv[])
     }
 
     const auto commands = CommandMap {
+        {"raw", RunRaw},
         {"state", RunState},
     };
     const auto it = commands.find(cmd);
