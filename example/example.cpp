@@ -91,9 +91,9 @@ static void readWriteArrayExample(std::ostream& out, const AdsDevice& route)
     arrayVar = arrayToWrite;
     std::array<uint8_t, 4> readArray = arrayVar;
     out << "Wrote array with first value " << (uint32_t)arrayToWrite[0] << " and last value " <<
-    (uint32_t)arrayToWrite[3] << "\n";
+        (uint32_t)arrayToWrite[3] << "\n";
     out << "Read back array with first value " << (uint32_t)readArray[0] << " and last value " <<
-    (uint32_t)readArray[3] << "\n";
+        (uint32_t)readArray[3] << "\n";
 }
 
 static void readStateExample(std::ostream& out, const AdsDevice& route)

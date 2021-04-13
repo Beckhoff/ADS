@@ -1,12 +1,12 @@
 #ifdef __FreeBSD__
 #define HAS_WINTYPES 1
+using __int64 = unsigned long long;
 using BOOL = int;
 using BYTE = unsigned char;
 using CHAR = char;
-using USHORT = unsigned short;
 using LONG = long;
 using ULONG = unsigned long;
-using __int64 = unsigned long long;
+using USHORT = unsigned short;
 #define TCADSDLL_API
 #define TCADSDLL_EXPORT
 #define NULL nullptr
@@ -64,8 +64,8 @@ static void __stdcall NotifyCallback(AmsAddr* pAddr, AdsNotificationHeader* pNot
 void print(const AmsAddr& addr, std::ostream& out)
 {
     out << "AmsAddr: " << std::dec <<
-    (int)addr.netId.b[0] << '.' << (int)addr.netId.b[1] << '.' << (int)addr.netId.b[2] << '.' <<
-    (int)addr.netId.b[3] << '.' << (int)addr.netId.b[4] << '.' << (int)addr.netId.b[5] << ':' <<
+        (int)addr.netId.b[0] << '.' << (int)addr.netId.b[1] << '.' << (int)addr.netId.b[2] << '.' <<
+        (int)addr.netId.b[3] << '.' << (int)addr.netId.b[4] << '.' << (int)addr.netId.b[5] << ':' <<
         addr.port << '\n';
 }
 
