@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AdsDevice.h"
-#include "wrap_endian.h"
 
 typedef void (* PAdsNotificationFuncExConst)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                              uint32_t hUser);
@@ -14,7 +13,7 @@ struct AdsNotification {
                     PAdsNotificationFuncExConst  callback,
                     uint32_t                     hUser)
         : m_Symbol(route.GetHandle(symbolName)),
-        m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, qToLittleEndian<uint32_t>(*m_Symbol), notificationAttributes,
+        m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes,
                                        reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
     {}
 
@@ -24,7 +23,7 @@ struct AdsNotification {
                     PAdsNotificationFuncExLegacy callback,
                     uint32_t                     hUser)
         : m_Symbol(route.GetHandle(symbolName)),
-        m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, qToLittleEndian<uint32_t>(*m_Symbol), notificationAttributes,
+        m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes,
                                        reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
     {}
 
