@@ -6,6 +6,7 @@
 #include "AdsDevice.h"
 #include "AdsException.h"
 #include "AdsLib.h"
+#include "wrap_endian.h"
 
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 {
@@ -74,6 +75,8 @@ AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
     if (error || (sizeof(handle) != bytesRead)) {
         throw AdsException(error);
     }
+
+    handle = qToLittleEndian(handle);
 
     return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteSymbolHandle, this, std::placeholders::_1)}};
 }
