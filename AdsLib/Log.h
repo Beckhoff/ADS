@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@
 #define LOG_ERROR(ARGS) LOG(3, ARGS)
 
 struct Logger {
-    static size_t logLevel;
+    static constexpr size_t logLevel = 1;
     static void Log(size_t level, const std::string& msg);
 };
 

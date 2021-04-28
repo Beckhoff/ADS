@@ -47,8 +47,6 @@ static const char* CATEGORY[] = {
     "Error: "
 };
 
-size_t Logger::logLevel = 1;
-
 void Logger::Log(const size_t level, const std::string& msg)
 {
     if (level >= logLevel) {
