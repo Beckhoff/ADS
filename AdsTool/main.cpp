@@ -83,6 +83,51 @@ COMMANDS:
 
 		Set TwinCAT to CONFIG mode:
 		$ adstool 5.24.37.144.1.1 state 16
+
+	var [--type=<DATATYPE>] <variable name> [<value>]
+		Reads/Write from/to a given PLC variable.
+		If value is not set, a read operation will be executed. Otherwise 'value' will
+		be written to the variable.
+
+		On read, the content of a given PLC variable is written to stdout. Format of the
+		output depends on DATATYPE.
+
+		On write, <value> is written to the given PLC variable in an appropriate manner for
+		that datatype. For strings, <value> will be written as-is. For integers
+		value will be interpreted as decimal unless it starts with "0x". In that
+		case it will be interpreted as hex.
+	DATATYPE:
+		BOOL -> default output as decimal
+		BYTE -> default output as decimal
+		WORD -> default output as decimal
+		DWORD -> default output as decimal
+		LWORD -> default output as decimal
+		STRING -> default output as raw bytes
+		...
+	examples:
+		Read number as decimal:
+		$ adstool 5.24.37.144.1.1 var --type=DWORD "MAIN.nNum1"
+		10
+
+		Read string:
+		$ adstool 5.24.37.144.1.1 var --type=STRING "MAIN.sString1"
+		Hello World!
+
+		Write a number:
+		$ adstool 5.24.37.144.1.1 var --type=DWORD "MAIN.nNum1" "100"
+
+		Write a hexvalue:
+		$ adstool 5.24.37.144.1.1 var --type=DWORD "MAIN.nNum1" "0x64"
+
+		Write string:
+		$ adstool 5.24.37.144.1.1 var --type=STRING "MAIN.sString1" "Hello World!"
+		$ adstool 5.24.37.144.1.1 var --type=STRING "MAIN.sString1"
+		Hello World!
+
+		Use quotes to write special characters:
+		$ adstool 5.24.37.144.1.1 var "MAIN.sString1" "STRING" "\"Hello World\""
+		$ adstool 5.24.37.144.1.1 var "MAIN.sString1" "STRING"
+		"Hello World!"
 )";
     exit(1);
 }
@@ -206,6 +251,141 @@ int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, b
     return 0;
 }
 
+int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    bhf::ParameterList params = {
+        {"--type"},
+    };
+    args.Parse(params);
+
+    const auto name = args.Pop<std::string>("Variable name is missing");
+    const auto value = args.Pop<const char*>();
+    static const std::map<const std::string, size_t> typeMap = {
+        {"BOOL", 1},
+        {"BYTE", 1},
+        {"WORD", 2},
+        {"DWORD", 4},
+        {"LWORD", 8},
+        {"STRING", 255},
+    };
+    const auto type = params.Get<std::string>("--type");
+    const auto it = typeMap.find(type);
+    if (typeMap.end() == it) {
+        LOG_ERROR(__FUNCTION__ << "(): Unknown TwinCAT type '" << type << "'\n");
+        return -1;
+    }
+    const auto size = it->second;
+
+    auto device = AdsDevice { gw, netid, port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
+    const auto handle = device.GetHandle(name);
+
+    if (!value) {
+        std::vector<uint8_t> readBuffer(size);
+        uint32_t bytesRead = 0;
+        const auto status = device.ReadReqEx2(ADSIGRP_SYM_VALBYHND,
+                                              *handle,
+                                              readBuffer.size(),
+                                              readBuffer.data(),
+                                              &bytesRead);
+        if (ADSERR_NOERR != status) {
+            LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+            return status;
+        }
+
+        switch (bytesRead) {
+        case sizeof(uint8_t):
+            {
+                const auto value = *(reinterpret_cast<uint8_t*>(readBuffer.data()));
+                std::cout << std::dec << (int)value << '\n';
+                return !std::cout.good();
+            }
+
+        case sizeof(uint16_t):
+            {
+                const auto value = *(reinterpret_cast<uint16_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                return !std::cout.good();
+            }
+
+        case sizeof(uint32_t):
+            {
+                const auto value = *(reinterpret_cast<uint32_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                return !std::cout.good();
+            }
+
+        case sizeof(uint64_t):
+            {
+                const auto value = *(reinterpret_cast<uint64_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                return !std::cout.good();
+            }
+        }
+
+        std::cout.write((const char*)readBuffer.data(), bytesRead);
+        return !std::cout.good();
+    }
+
+    LOG_VERBOSE("name>" << name << "< value>" << value << "<\n");
+    LOG_VERBOSE("size>" << size << "< value>" << value << "<\n");
+
+    switch (size) {
+    case sizeof(uint8_t):
+        {
+            const auto writeBuffer = bhf::StringTo<uint8_t>(value);
+            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint32_t)writeBuffer << "<\n");
+            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                                  *handle,
+                                                  sizeof(writeBuffer),
+                                                  &writeBuffer);
+            return status;
+        }
+
+    case sizeof(uint16_t):
+        {
+            const auto writeBuffer = bhf::StringTo<uint16_t>(value);
+            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint16_t)writeBuffer << "<\n");
+            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                                  *handle,
+                                                  sizeof(writeBuffer),
+                                                  &writeBuffer);
+            return status;
+        }
+
+    case sizeof(uint32_t):
+        {
+            const auto writeBuffer = bhf::StringTo<uint32_t>(value);
+            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint32_t)writeBuffer << "<\n");
+            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                                  *handle,
+                                                  sizeof(writeBuffer),
+                                                  &writeBuffer);
+            return status;
+        }
+
+    case sizeof(uint64_t):
+        {
+            const auto writeBuffer = bhf::StringTo<uint32_t>(value);
+            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint64_t)writeBuffer << "<\n");
+            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                                  *handle,
+                                                  sizeof(writeBuffer),
+                                                  &writeBuffer);
+            return status;
+        }
+
+    default:
+        {
+            auto writeBuffer = std::vector<char>(size);
+            strncpy(writeBuffer.data(), value, writeBuffer.size());
+            return device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                     *handle,
+                                     writeBuffer.size(),
+                                     writeBuffer.data());
+        }
+    }
+}
+
 template<typename T>
 static T try_stoi(const char* str, const T defaultValue = 0)
 {
@@ -244,6 +424,7 @@ int ParseCommand(int argc, const char* argv[])
     const auto commands = CommandMap {
         {"raw", RunRaw},
         {"state", RunState},
+        {"var", RunVar},
     };
     const auto it = commands.find(cmd);
     if (it != commands.end()) {

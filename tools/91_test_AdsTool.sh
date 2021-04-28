@@ -66,6 +66,26 @@ check_state() {
 	done
 }
 
+check_var() {
+	check var --type=BOOL 'MAIN.bInitTest' '1'
+	check var --type=BOOL 'MAIN.bInitTest'
+	check var --type=BOOL 'MAIN.bInitTest' '0'
+	check var --type=DWORD 'MAIN.nTestCasesFailed' '10'
+	check var --type=DWORD 'MAIN.nTestCasesFailed'
+
+	local _test_string
+	_test_string="$(date +%F%T)"
+	readonly _test_string
+	check var --type=STRING 'MAIN.sLogPath' "${_test_string}"
+	local _response
+	_response="$(check var --type=STRING 'MAIN.sLogPath')"
+	if ! test "${_test_string}" = "${_response}"; then
+		printf 'check_var() string mismatch:\n>%s<\n>%s<\n' "${_test_string}" "${_response}" >&2
+		return 1
+	fi
+
+}
+
 set -e
 set -u
 
@@ -88,3 +108,4 @@ readonly tmpfile
 check_state
 
 check_raw
+check_var
