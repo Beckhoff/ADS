@@ -21,6 +21,25 @@ check() {
 	"${ads_tool}" "${netid}" "--gw=${remote}" "$@"
 }
 
+check_file() {
+	local _test_string
+	_test_string="$(date +%F%T)"
+	readonly _test_string
+
+	printf '%s\n' "${_test_string}" | check file write '%TC_INSTALLPATH%\test.txt'
+	printf '%s\n' "${_test_string}" | check file write --append '%TC_INSTALLPATH%\test.txt'
+	check file read '%TC_INSTALLPATH%\test.txt' > "${tmpfile}"
+	printf '%s\n' "${_test_string}" "${_test_string}" | diff - "${tmpfile}"
+	check file delete '%TC_INSTALLPATH%\test.txt'
+	local _exit_code=0
+	check file read '%TC_INSTALLPATH%\test.txt' || _exit_code=$?
+	# return code is truncated to one byte so 1804 == 0x70C becomes 0x0C == 12
+	if ! test 12 -eq "${_exit_code}"; then
+		printf 'check_file() delete mismatch:\n>%s<\n>%s<\n' "12" "${_exit_code}" >&2
+		return 1
+	fi
+}
+
 check_raw() {
 	local _test_string
 	_test_string="$(date +%F%T)"
@@ -107,5 +126,6 @@ readonly tmpfile
 # always check state first to have the PLC in RUN!
 check_state
 
+check_file
 check_raw
 check_var

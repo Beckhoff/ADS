@@ -5,6 +5,7 @@
  */
 
 #include "AdsDevice.h"
+#include "AdsFile.h"
 #include "AdsLib.h"
 #include "Log.h"
 #include "ParameterList.h"
@@ -43,6 +44,34 @@ COMMANDS:
 
 		Use 'guest' account to add a route with a selfdefined name
 		$ adstool 192.168.0.231 addroute --addr=192.168.0.1 --netid=192.168.0.1.1.1 --password=1 --username=guest --routename=Testroute
+
+	file read <path>
+		Dump content of the file from <path> to stdout
+	examples:
+		Make a local backup of explorer.exe:
+		$ adstool 5.24.37.144.1.1 file read 'C:\Windows\explorer.exe' > ./explorer.exe
+
+		Show content of a text file:
+		$ adstool 5.24.37.144.1.1 file read 'C:\Temp\hello world.txt'
+		Hello World!
+
+	file delete <path>
+		Delete a file from <path>.
+	examples:
+		Delete a file over ADS and check if it still exists
+		$ adstool 5.24.37.144.1.1 file delete 'C:\Temp\hello world.txt'
+		$ adstool 5.24.37.144.1.1 file read 'C:\Temp\hello world.txt'
+		$ echo \$?
+		1804
+
+	file write [--append] <path>
+		Read data from stdin write to the file at <path>.
+	examples:
+		Write text directly into a file:
+		$ printf 'Hello World!' | adstool 5.24.37.144.1.1 file write 'C:\Temp\hello world.txt'
+
+		Copy local file to remote:
+		$ adstool 5.24.37.144.1.1 file write 'C:\Windows\explorer.exe' < ./explorer.exe
 
 	netid
 		Read the AmsNetId from a remote TwinCAT router
@@ -153,6 +182,48 @@ int RunAddRoute(const IpV4 remote, bhf::Commandline& args)
                                     params.Get<std::string>("--username"),
                                     params.Get<std::string>("--password")
                                     );
+}
+
+int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    const auto command = args.Pop<std::string>("file command is missing");
+    const auto next = args.Pop<std::string>("path is missing");
+    auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
+
+    if (!command.compare("read")) {
+        const AdsFile adsFile { device, next,
+                                bhf::ads::SYSTEMSERVICE_OPENGENERIC | bhf::ads::FOPEN::READ | bhf::ads::FOPEN::BINARY |
+                                bhf::ads::FOPEN::ENSURE_DIR};
+        uint32_t bytesRead;
+        do {
+            char buf[1024];
+
+            adsFile.Read(sizeof(buf), buf, bytesRead);
+            std::cout.write(buf, bytesRead);
+        } while (bytesRead > 0);
+    } else if (!command.compare("write")) {
+        bool append = !next.compare("--append");
+        const auto flags = (append ? bhf::ads::FOPEN::APPEND : bhf::ads::FOPEN::WRITE) |
+                           bhf::ads::FOPEN::BINARY |
+                           bhf::ads::FOPEN::PLUS |
+                           bhf::ads::FOPEN::ENSURE_DIR
+        ;
+
+        const auto path = append ? args.Pop<std::string>("path is missing") : next;
+        const AdsFile adsFile { device, path, flags};
+        char buf[1024];
+        auto length = read(0, buf, sizeof(buf));
+        while (length > 0) {
+            adsFile.Write(length, buf);
+            length = read(0, buf, sizeof(buf));
+        }
+    } else if (!command.compare("delete")) {
+        AdsFile::Delete(device, next, bhf::ads::SYSTEMSERVICE_OPENGENERIC | bhf::ads::FOPEN::ENABLE_DIR);
+    } else {
+        LOG_ERROR(__FUNCTION__ << "(): Unknown file command '" << command << "'\n");
+        return -1;
+    }
+    return 0;
 }
 
 int RunNetId(const IpV4 remote)
@@ -422,6 +493,7 @@ int ParseCommand(int argc, const char* argv[])
     }
 
     const auto commands = CommandMap {
+        {"file", RunFile},
         {"raw", RunRaw},
         {"state", RunState},
         {"var", RunVar},
