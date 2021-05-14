@@ -60,6 +60,27 @@ check_raw() {
 	fi
 }
 
+rtime_max_latency() {
+	local _latencies=
+
+	if ! _latencies="$(check rtime read-latency)"; then
+		return 1
+	fi
+	printf '%s' "${_latencies}" | awk '{print $3}' | sort | tail -n1 | wc -l
+}
+
+check_rtime() {
+	local _old_latency
+	local _new_latency
+
+	_old_latency="$(rtime_max_latency)"
+	_new_latency="$(rtime_max_latency)"
+	if ! test "${_old_latency}" -le "${_new_latency}"; then
+		printf 'check_rtime() latency mismatch:\n%s > %s\n' "${_old_latency}" "${_new_latency}" >&2
+		return 1
+	fi
+}
+
 check_state() {
 	if ! check state; then
 		printf 'check_state() could not read anything\n' >&2
@@ -128,4 +149,5 @@ check_state
 
 check_file
 check_raw
+check_rtime
 check_var

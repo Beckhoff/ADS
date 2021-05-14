@@ -7,6 +7,7 @@
 #include "AdsDevice.h"
 #include "AdsFile.h"
 #include "AdsLib.h"
+#include "RTimeAccess.h"
 #include "Log.h"
 #include "ParameterList.h"
 #include <cstring>
@@ -100,6 +101,19 @@ COMMANDS:
 		Write data from write.bin to TC3 PLC index group 0xF003 offset 0x0
 		and read result into read.bin:
 		$ adstool 5.24.37.144.1.1 raw --read=4 "0xF003" "0x0" < write.bin > read.bin
+
+	rtime < read-latency | reset-latency >
+		Access rtime latency information
+	examples:
+		Read maximum rtime latency
+		$ adstool 5.24.37.144.1.1 rtime read-latency
+		6
+
+		Read maximum rtime latency and reset:
+		$ adstool 5.24.37.144.1.1 rtime reset-latency
+		6
+		$ adstool 5.24.37.144.1.1 rtime read-latency
+		1
 
 	state [<value>]
 		Read or write the ADS state of the device at AmsPort (default 10000).
@@ -232,6 +246,21 @@ int RunNetId(const IpV4 remote)
     bhf::ads::GetRemoteAddress(remote, netId);
     std::cout << netId << '\n';
     return 0;
+}
+
+int RunRTime(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    const auto command = args.Pop<std::string>("rtime command is missing");
+    auto device = bhf::ads::RTimeAccess{ gw, netid, port };
+
+    if (!command.compare("read-latency")) {
+        return device.ShowLatency(RTIME_READ_LATENCY);
+    } else if (!command.compare("reset-latency")) {
+        return device.ShowLatency(RTIME_RESET_LATENCY);
+    } else {
+        LOG_ERROR(__FUNCTION__ << "(): Unknown rtime command'" << command << "'\n");
+        return -1;
+    }
 }
 
 int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -495,6 +524,7 @@ int ParseCommand(int argc, const char* argv[])
     const auto commands = CommandMap {
         {"file", RunFile},
         {"raw", RunRaw},
+        {"rtime", RunRTime},
         {"state", RunState},
         {"var", RunVar},
     };
