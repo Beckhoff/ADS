@@ -40,6 +40,25 @@ check_file() {
 	fi
 }
 
+check_license() {
+	readonly EXPECTED_PLATFORMID="${EXPECTED_PLATFORMID-60}"
+	local _platformid
+
+	_platformid="$(check license platformid)"
+	if ! test "${EXPECTED_PLATFORMID}" -eq "${_platformid}"; then
+		printf 'check_license() platformid mismatch:\n>%s<\n>%s<\n' "${EXPECTED_PLATFORMID}" "${_platformid}" >&2
+		return 1
+	fi
+
+	readonly EXPECTED_SYSTEMID="${EXPECTED_SYSTEMID-"12313354-E6B5-7F39-D952-04E011223BCC"}"
+	local _systemid
+	_systemid="$(check license systemid)"
+	if ! test "${EXPECTED_SYSTEMID}" = "${_systemid}"; then
+		printf 'check_license() systemid mismatch:\n>%s<\n>%s<\n' "${EXPECTED_SYSTEMID}" "${_systemid}" >&2
+		return 1
+	fi
+}
+
 check_raw() {
 	local _test_string
 	_test_string="$(date +%F%T)"
@@ -148,6 +167,7 @@ readonly tmpfile
 check_state
 
 check_file
+check_license
 check_raw
 check_rtime
 check_var

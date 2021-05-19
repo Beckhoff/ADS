@@ -99,6 +99,9 @@ build:win10:
   services:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
+  variables:
+    EXPECTED_PLATFORMID: 92
+    EXPECTED_SYSTEMID: '95EEFDE0-0392-1452-275F-1BF9ACCB924E'
   script:
     - apt update -y && apt install -y xxd
     - ./tools/90_run_tests.sh
@@ -145,6 +148,8 @@ test-fbsd-clang:
     - freebsd13_4_build_vm
   variables:
     BHF_CI_NAT_IP: '172.17.62.71'
+    EXPECTED_PLATFORMID: 90
+    EXPECTED_SYSTEMID: 'E5898A06-9629-71CC-8474-DD555071C0EB'
   before_script:
     - echo "172.17.66.104 ads-server" | doas tee -a /etc/hosts
     - nc -z 172.17.66.104 48897
@@ -160,6 +165,9 @@ test-macos-clang:
   tags:
     - macOS
     - rack
+  variables:
+    EXPECTED_PLATFORMID: 90
+    EXPECTED_SYSTEMID: 'E5898A06-9629-71CC-8474-DD555071C0EB'
   before_script:
     - nc -z 172.17.66.104 48897
     - sleep 10

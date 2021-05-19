@@ -7,8 +7,9 @@
 #include "AdsDevice.h"
 #include "AdsFile.h"
 #include "AdsLib.h"
-#include "RTimeAccess.h"
+#include "LicenseAccess.h"
 #include "Log.h"
+#include "RTimeAccess.h"
 #include "ParameterList.h"
 #include <cstring>
 #include <iostream>
@@ -73,6 +74,17 @@ COMMANDS:
 
 		Copy local file to remote:
 		$ adstool 5.24.37.144.1.1 file write 'C:\Windows\explorer.exe' < ./explorer.exe
+
+	license < platformid | systemid >
+		Read license information from device.
+	examples:
+		Read platformid from device
+		$ adstool 5.24.37.144.1.1 license platformid
+		50
+
+		Read systemid from device
+		$ adstool 5.24.37.144.1.1 license systemid
+		95EEFDE0-0392-1452-275F-1BF9ACCB924E
 
 	netid
 		Read the AmsNetId from a remote TwinCAT router
@@ -238,6 +250,21 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
         return -1;
     }
     return 0;
+}
+
+int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    auto device = bhf::ads::LicenseAccess{ gw, netid, port };
+    const auto command = args.Pop<std::string>();
+
+    if (!command.compare("platformid")) {
+        return device.ShowPlatformId(std::cout);
+    } else if (!command.compare("systemid")) {
+        return device.ShowSystemId(std::cout);
+    } else {
+        LOG_ERROR(__FUNCTION__ << "(): Unknown license command '" << command << "'\n");
+        return -1;
+    }
 }
 
 int RunNetId(const IpV4 remote)
@@ -523,6 +550,7 @@ int ParseCommand(int argc, const char* argv[])
 
     const auto commands = CommandMap {
         {"file", RunFile},
+        {"license", RunLicense},
         {"raw", RunRaw},
         {"rtime", RunRTime},
         {"state", RunState},
