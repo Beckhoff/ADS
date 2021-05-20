@@ -59,6 +59,10 @@ check_license() {
 	fi
 }
 
+check_pciscan() {
+	check pciscan 0x15EC5000
+}
+
 check_raw() {
 	local _test_string
 	_test_string="$(date +%F%T)"
@@ -168,6 +172,7 @@ check_state
 
 check_file
 check_license
+check_pciscan
 check_raw
 check_rtime
 check_var

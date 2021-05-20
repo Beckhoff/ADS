@@ -12,6 +12,7 @@ common_files = files([
   'AdsLib/AdsFile.cpp',
   'AdsLib/LicenseAccess.cpp',
   'AdsLib/Log.cpp',
+  'AdsLib/RouterAccess.cpp',
   'AdsLib/RTimeAccess.cpp',
   'AdsLib/Sockets.cpp',
   'AdsLib/Frame.cpp',

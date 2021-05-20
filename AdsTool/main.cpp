@@ -9,10 +9,12 @@
 #include "AdsLib.h"
 #include "LicenseAccess.h"
 #include "Log.h"
+#include "RouterAccess.h"
 #include "RTimeAccess.h"
 #include "ParameterList.h"
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <unistd.h>
 #include <vector>
 
@@ -89,6 +91,15 @@ COMMANDS:
 	netid
 		Read the AmsNetId from a remote TwinCAT router
 		$ adstool 192.168.0.231 netid
+
+	pciscan <pci_id>
+		Show PCI devices with <pci_id>
+	examples:
+		List PCI CCAT devices:
+		$ adstool 5.24.37.144.1.1 pciscan 0x15EC5000
+		PCI devices found: 2
+		3:0 @ 0x4028629004
+		7:0 @ 0x4026531852
 
 	raw [--read=<number_of_bytes>] <IndexGroup> <IndexOffset>
 		This command gives low level access to:
@@ -273,6 +284,18 @@ int RunNetId(const IpV4 remote)
     bhf::ads::GetRemoteAddress(remote, netId);
     std::cout << netId << '\n';
     return 0;
+}
+
+int RunPCIScan(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    const auto device = bhf::ads::RouterAccess{ gw, netid, port };
+    auto pciId = args.Pop<uint64_t>("pciscan pci_id is missing");
+
+    /* allow subVendorId/SystemId to be omitted from cmd */
+    if (std::numeric_limits<uint32_t>::max() >= pciId) {
+        pciId <<= 32;
+    }
+    return device.PciScan(pciId, std::cout);
 }
 
 int RunRTime(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -551,6 +574,7 @@ int ParseCommand(int argc, const char* argv[])
     const auto commands = CommandMap {
         {"file", RunFile},
         {"license", RunLicense},
+        {"pciscan", RunPCIScan},
         {"raw", RunRaw},
         {"rtime", RunRTime},
         {"state", RunState},
