@@ -1,0 +1,2 @@
+# yes, we know local is not POSIX, but all shells we care support it anyway
+disable=SC2039
