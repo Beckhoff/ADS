@@ -1,0 +1,13 @@
+[binaries]
+c = '/usr/bin/mips-linux-gnu-gcc'
+cpp = '/usr/bin/mips-linux-gnu-g++'
+ar = '/usr/bin/mips-linux-gnu-ar'
+strip = '/usr/bin/mips-gnu-linux-strip'
+pkgconfig = '/usr/bin/pkg-config-32'
+llvm-config = '/usr/bin/llvm-config32'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'mips'
+cpu = 'mips'
+endian = 'big'

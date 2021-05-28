@@ -64,6 +64,13 @@ build-linux-gcc-i386:
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
 
+build-linux-gcc-mips:
+  <<: *build-meson-docker
+  variables:
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.mips'
+  before_script:
+    - apt update -y && apt install -y g++-mips-linux-gnu
+
 build:mxe:
   <<: *build-meson-docker
   variables:
