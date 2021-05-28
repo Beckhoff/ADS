@@ -6,6 +6,7 @@
 #pragma once
 #include "AdsException.h"
 #include "AdsDef.h"
+#include "wrap_endian.h"
 #include <cstdint>
 #include <functional>
 #include <memory>
