@@ -119,6 +119,17 @@ test-linux-gcc-i386:
     - dpkg --add-architecture i386
     - apt update -y && apt install -y libc6:i386 libstdc++6:i386
 
+test-linux-gcc-mips:
+  <<: *test-linux
+  needs: [
+    "build-linux-gcc-mips",
+  ]
+  variables:
+    QEMU_LD_PREFIX: '/usr/mips-linux-gnu'
+  before_script:
+    - apt update -y && apt install -y binfmt-support libstdc++-dev-mips-cross qemu-user-binfmt
+    - update-binfmts --enable qemu-mips
+
 test-fbsd-clang:
   stage: test
   needs: [
