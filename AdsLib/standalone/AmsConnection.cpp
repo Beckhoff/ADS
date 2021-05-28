@@ -241,6 +241,12 @@ void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, 
     const auto responseId = response->invokeId.load();
     T header;
 
+    if (aoeError) {
+        response->Notify(aoeError);
+        ReceiveJunk(bytesLeft);
+        return;
+    }
+
     if (bytesLeft > sizeof(header) + request->bufferLength) {
         LOG_WARN("Frame too long: " << std::dec << bytesLeft << '>' << sizeof(header) + request->bufferLength);
         response->Notify(ADSERR_DEVICE_INVALIDSIZE);
@@ -256,7 +262,7 @@ void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, 
         if (request->bytesRead) {
             *(request->bytesRead) = bytesLeft;
         }
-        response->Notify(aoeError ? aoeError : header.result());
+        response->Notify(header.result());
     } catch (const Socket::TimeoutEx&) {
         LOG_WARN("InvokeId of response: " << std::dec << responseId << " timed out");
         response->Notify(ADSERR_CLIENT_SYNCTIMEOUT);
