@@ -50,12 +50,6 @@ inline T qFromLittleEndian(const uint8_t* value)
     }
     return result;
 }
-
-template<class T>
-inline T qToBigEndian(const T value)
-{
-    return value;
-}
 #else
 template<class T>
 inline T qToLittleEndian(const T value)
@@ -67,11 +61,6 @@ template<class T>
 inline T qFromLittleEndian(const uint8_t* value)
 {
     return *reinterpret_cast<const T*>(value);
-}
-
-inline uint16_t qToBigEndian(const uint16_t value)
-{
-    return ((value & 0xff) << 8) | ((value & 0xff00) >> 8);
 }
 #endif
 #endif // QENDIAN_H
