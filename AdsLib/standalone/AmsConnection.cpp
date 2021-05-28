@@ -111,7 +111,7 @@ long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify,
         0, nullptr, nullptr,
         sizeof(hNotify)
     };
-    request.frame.prepend(qToLittleEndian(hNotify));
+    request.frame.prepend(htole(hNotify));
     return AdsRequest(request, tmms);
 }
 

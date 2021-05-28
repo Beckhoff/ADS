@@ -135,7 +135,7 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
         if (!status) {
             version->version = buffer[0];
             version->revision = buffer[1];
-            version->build = qFromLittleEndian<uint16_t>(buffer + offsetof(AdsVersion, build));
+            version->build = letoh<uint16_t>(buffer + offsetof(AdsVersion, build));
             memcpy(devName, buffer + sizeof(*version), NAME_LENGTH);
         }
         return status;
@@ -152,7 +152,7 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
     }
 
     try {
-        uint8_t buffer[sizeof(*adsState) + sizeof(*devState)];
+        uint16_t buffer[2];
         AmsRequest request {
             *pAddr,
             (uint16_t)port,
@@ -162,8 +162,8 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
         };
         const auto status = GetRouter().AdsRequest(request);
         if (!status) {
-            *adsState = qFromLittleEndian<uint16_t>(buffer);
-            *devState = qFromLittleEndian<uint16_t>(buffer + sizeof(*adsState));
+            *adsState = letoh(buffer[0]);
+            *devState = letoh(buffer[1]);
         }
         return status;
     } catch (const std::bad_alloc&) {

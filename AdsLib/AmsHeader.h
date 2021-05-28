@@ -41,14 +41,14 @@ struct AmsTcpHeader {
 
     AmsTcpHeader(const uint32_t numBytes = 0)
         : reserved(0),
-        leLength(qToLittleEndian<uint32_t>(numBytes))
+        leLength(htole(numBytes))
     {
         UNUSED(reserved);
     }
 
     uint32_t length() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
+        return letoh(leLength);
     }
 private:
     uint16_t reserved;
@@ -63,9 +63,9 @@ struct AoERequestHeader {
     {}
 
     AoERequestHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t dataLength)
-        : leGroup(qToLittleEndian<uint32_t>(indexGroup)),
-        leOffset(qToLittleEndian<uint32_t>(indexOffset)),
-        leLength(qToLittleEndian<uint32_t>(dataLength))
+        : leGroup(htole(indexGroup)),
+        leOffset(htole(indexOffset)),
+        leLength(htole(dataLength))
     {}
 
 private:
@@ -77,7 +77,7 @@ private:
 struct AoEReadWriteReqHeader : AoERequestHeader {
     AoEReadWriteReqHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, uint32_t writeLength)
         : AoERequestHeader(indexGroup, indexOffset, readLength),
-        leWriteLength(qToLittleEndian(writeLength))
+        leWriteLength(htole(writeLength))
     {}
 private:
     const uint32_t leWriteLength;
@@ -85,9 +85,9 @@ private:
 
 struct AdsWriteCtrlRequest {
     AdsWriteCtrlRequest(uint16_t ads, uint16_t dev, uint32_t dataLength)
-        : leAdsState(qToLittleEndian<uint16_t>(ads)),
-        leDevState(qToLittleEndian<uint16_t>(dev)),
-        leLength(qToLittleEndian<uint32_t>(dataLength))
+        : leAdsState(htole(ads)),
+        leDevState(htole(dev)),
+        leLength(htole(dataLength))
     {}
 
 private:
@@ -103,12 +103,12 @@ struct AdsAddDeviceNotificationRequest {
                                     uint32_t __mode,
                                     uint32_t __maxDelay,
                                     uint32_t __cycleTime)
-        : leGroup(qToLittleEndian<uint32_t>(__group)),
-        leOffset(qToLittleEndian<uint32_t>(__offset)),
-        leLength(qToLittleEndian<uint32_t>(__length)),
-        leMode(qToLittleEndian<uint32_t>(__mode)),
-        leMaxDelay(qToLittleEndian<uint32_t>(__maxDelay)),
-        leCycleTime(qToLittleEndian<uint32_t>(__cycleTime)),
+        : leGroup(htole(__group)),
+        leOffset(htole(__offset)),
+        leLength(htole(__length)),
+        leMode(htole(__mode)),
+        leMaxDelay(htole(__maxDelay)),
+        leCycleTime(htole(__cycleTime)),
         reserved()
     {
         UNUSED(reserved);
@@ -157,14 +157,14 @@ struct AoEHeader {
               uint32_t        __length,
               uint32_t        __invokeId)
         : targetNetId(__targetAddr),
-        leTargetPort(qToLittleEndian(__targetPort)),
+        leTargetPort(htole(__targetPort)),
         sourceNetId(__sourceAddr),
-        leSourcePort(qToLittleEndian(__sourcePort)),
-        leCmdId(qToLittleEndian(__cmdId)),
-        leStateFlags(qToLittleEndian(AMS_REQUEST)),
-        leLength(qToLittleEndian(__length)),
-        leErrorCode(qToLittleEndian<uint32_t>(0)),
-        leInvokeId(qToLittleEndian(__invokeId))
+        leSourcePort(htole(__sourcePort)),
+        leCmdId(htole(__cmdId)),
+        leStateFlags(htole(AMS_REQUEST)),
+        leLength(htole(__length)),
+        leErrorCode(0),
+        leInvokeId(htole(__invokeId))
     {}
 
     AoEHeader(const uint8_t* frame)
@@ -174,22 +174,22 @@ struct AoEHeader {
 
     uint16_t cmdId() const
     {
-        return qFromLittleEndian<uint16_t>((const uint8_t*)&leCmdId);
+        return letoh(leCmdId);
     }
 
     uint32_t errorCode() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leErrorCode);
+        return letoh(leErrorCode);
     }
 
     uint32_t invokeId() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leInvokeId);
+        return letoh(leInvokeId);
     }
 
     uint32_t length() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leLength);
+        return letoh(leLength);
     }
 
     AmsAddr sourceAms() const
@@ -204,12 +204,12 @@ struct AoEHeader {
 
     uint16_t sourcePort() const
     {
-        return qFromLittleEndian<uint16_t>((const uint8_t*)&leSourcePort);
+        return letoh(leSourcePort);
     }
 
     uint16_t stateFlags() const
     {
-        return qFromLittleEndian<uint16_t>((const uint8_t*)&leStateFlags);
+        return letoh(leStateFlags);
     }
 
     AmsNetId targetAddr() const
@@ -219,7 +219,7 @@ struct AoEHeader {
 
     uint16_t targetPort() const
     {
-        return qFromLittleEndian<uint16_t>((const uint8_t*)&leTargetPort);
+        return letoh(leTargetPort);
     }
 
 private:
@@ -246,7 +246,7 @@ struct AoEResponseHeader {
 
     uint32_t result() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leResult);
+        return letoh(leResult);
     }
 private:
     uint32_t leResult;
@@ -264,7 +264,7 @@ struct AoEReadResponseHeader : AoEResponseHeader {
 
     uint32_t readLength() const
     {
-        return qFromLittleEndian<uint32_t>((const uint8_t*)&leReadLength);
+        return letoh(leReadLength);
     }
 private:
     uint32_t leReadLength;

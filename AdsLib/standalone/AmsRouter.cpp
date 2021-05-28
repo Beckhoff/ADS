@@ -194,7 +194,7 @@ long AmsRouter::AddNotification(AmsRequest& request, uint32_t* pNotification, st
     auto& port = ports[request.port - Router::PORT_BASE];
     const long status = ads->AdsRequest(request, port.tmms);
     if (!status) {
-        *pNotification = qFromLittleEndian<uint32_t>((uint8_t*)request.buffer);
+        *pNotification = letoh<uint32_t>(request.buffer);
         auto dispatcher = ads->CreateNotifyMapping(*pNotification, notify);
         port.AddNotification(request.destAddr, *pNotification, dispatcher);
     }
