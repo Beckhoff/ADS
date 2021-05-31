@@ -9,11 +9,11 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # setup fake ads server and install cleanup trap
-ncat -l 48898 --keep-open &
+nc -l 48898 -k &
 ncat_pid=$!
 
 # wait for fake ads server to accept connections
-while ! ncat --send-only localhost 48898; do sleep 1; done
+while ! nc -z localhost 48898; do sleep 1; done
 
 # transitional hack to test meson or legacy build binaries
 ln -s build/AdsLibTest AdsLibTest.bin || true

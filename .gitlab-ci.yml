@@ -89,7 +89,7 @@ build:win10:
       alias: ads-server
   before_script:
     - dpkg --add-architecture i386
-    - apt update -y && apt install -y ${BHF_CI_APT_EXTRA} ncat
+    - apt update -y && apt install -y ${BHF_CI_APT_EXTRA}
   script:
     - ./tools/80_ads_route.sh
     - ./tools/90_run_tests.sh
