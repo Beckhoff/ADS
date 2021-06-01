@@ -87,9 +87,6 @@ build:win10:
   services:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
-  before_script:
-    - dpkg --add-architecture i386
-    - apt update -y && apt install -y ${BHF_CI_APT_EXTRA}
   script:
     - ./tools/80_ads_route.sh
     - ./tools/90_run_tests.sh
@@ -111,8 +108,9 @@ test-linux-gcc-i386:
   needs: [
     "build-linux-gcc-i386",
   ]
-  variables:
-    BHF_CI_APT_EXTRA: 'libc6:i386 libstdc++6:i386'
+  before_script:
+    - dpkg --add-architecture i386
+    - apt update -y && apt install -y libc6:i386 libstdc++6:i386
 
 test-fbsd-clang:
   stage: test
