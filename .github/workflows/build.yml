@@ -7,8 +7,6 @@ jobs:
       - name: install meson
         run: sudo apt update -y && sudo apt install -y meson
       - uses: actions/checkout@v2
-      - name: debug
-        run: pwd; ls -la
       - name: compile library
         run: meson build && ninja -C build
       - name: compile example
