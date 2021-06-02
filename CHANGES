@@ -1,3 +1,7 @@
+v4:
+- big endian support (tested with qemu-mips)
+- better error messages, e.g. "TARGET PORT NOT FOUND"
+
 v3:
 - add meson build configuration for all platforms
 - drop Visual Studio solution/project files
