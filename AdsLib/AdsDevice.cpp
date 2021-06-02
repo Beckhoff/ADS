@@ -75,7 +75,7 @@ AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
         throw AdsException(error);
     }
 
-    handle = letoh(handle);
+    handle = bhf::ads::letoh(handle);
     return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteSymbolHandle, this, std::placeholders::_1)}};
 }
 
@@ -96,7 +96,7 @@ AdsHandle AdsDevice::GetHandle(const uint32_t               indexGroup,
     if (error || !handle) {
         throw AdsException(error);
     }
-    handle = letoh(handle);
+    handle = bhf::ads::letoh(handle);
     return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteNotificationHandle, this, std::placeholders::_1)}};
 }
 
@@ -171,7 +171,7 @@ AdsHandle AdsDevice::OpenFile(const std::string& filename, const uint32_t flags)
     if (error) {
         throw AdsException(error);
     }
-    handle = letoh(handle);
+    handle = bhf::ads::letoh(handle);
     return {new uint32_t {handle}, {std::bind(&AdsDevice::CloseFile, this, std::placeholders::_1)}};
 }
 

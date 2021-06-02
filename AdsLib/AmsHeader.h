@@ -41,14 +41,14 @@ struct AmsTcpHeader {
 
     AmsTcpHeader(const uint32_t numBytes = 0)
         : reserved(0),
-        leLength(htole(numBytes))
+        leLength(bhf::ads::htole(numBytes))
     {
         UNUSED(reserved);
     }
 
     uint32_t length() const
     {
-        return letoh(leLength);
+        return bhf::ads::letoh(leLength);
     }
 private:
     uint16_t reserved;
@@ -63,9 +63,9 @@ struct AoERequestHeader {
     {}
 
     AoERequestHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t dataLength)
-        : leGroup(htole(indexGroup)),
-        leOffset(htole(indexOffset)),
-        leLength(htole(dataLength))
+        : leGroup(bhf::ads::htole(indexGroup)),
+        leOffset(bhf::ads::htole(indexOffset)),
+        leLength(bhf::ads::htole(dataLength))
     {}
 
 private:
@@ -77,7 +77,7 @@ private:
 struct AoEReadWriteReqHeader : AoERequestHeader {
     AoEReadWriteReqHeader(uint32_t indexGroup, uint32_t indexOffset, uint32_t readLength, uint32_t writeLength)
         : AoERequestHeader(indexGroup, indexOffset, readLength),
-        leWriteLength(htole(writeLength))
+        leWriteLength(bhf::ads::htole(writeLength))
     {}
 private:
     const uint32_t leWriteLength;
@@ -85,9 +85,9 @@ private:
 
 struct AdsWriteCtrlRequest {
     AdsWriteCtrlRequest(uint16_t ads, uint16_t dev, uint32_t dataLength)
-        : leAdsState(htole(ads)),
-        leDevState(htole(dev)),
-        leLength(htole(dataLength))
+        : leAdsState(bhf::ads::htole(ads)),
+        leDevState(bhf::ads::htole(dev)),
+        leLength(bhf::ads::htole(dataLength))
     {}
 
 private:
@@ -103,12 +103,12 @@ struct AdsAddDeviceNotificationRequest {
                                     uint32_t __mode,
                                     uint32_t __maxDelay,
                                     uint32_t __cycleTime)
-        : leGroup(htole(__group)),
-        leOffset(htole(__offset)),
-        leLength(htole(__length)),
-        leMode(htole(__mode)),
-        leMaxDelay(htole(__maxDelay)),
-        leCycleTime(htole(__cycleTime)),
+        : leGroup(bhf::ads::htole(__group)),
+        leOffset(bhf::ads::htole(__offset)),
+        leLength(bhf::ads::htole(__length)),
+        leMode(bhf::ads::htole(__mode)),
+        leMaxDelay(bhf::ads::htole(__maxDelay)),
+        leCycleTime(bhf::ads::htole(__cycleTime)),
         reserved()
     {
         UNUSED(reserved);
@@ -157,14 +157,14 @@ struct AoEHeader {
               uint32_t        __length,
               uint32_t        __invokeId)
         : targetNetId(__targetAddr),
-        leTargetPort(htole(__targetPort)),
+        leTargetPort(bhf::ads::htole(__targetPort)),
         sourceNetId(__sourceAddr),
-        leSourcePort(htole(__sourcePort)),
-        leCmdId(htole(__cmdId)),
-        leStateFlags(htole(AMS_REQUEST)),
-        leLength(htole(__length)),
+        leSourcePort(bhf::ads::htole(__sourcePort)),
+        leCmdId(bhf::ads::htole(__cmdId)),
+        leStateFlags(bhf::ads::htole(AMS_REQUEST)),
+        leLength(bhf::ads::htole(__length)),
         leErrorCode(0),
-        leInvokeId(htole(__invokeId))
+        leInvokeId(bhf::ads::htole(__invokeId))
     {}
 
     AoEHeader(const uint8_t* frame)
@@ -174,22 +174,22 @@ struct AoEHeader {
 
     uint16_t cmdId() const
     {
-        return letoh(leCmdId);
+        return bhf::ads::letoh(leCmdId);
     }
 
     uint32_t errorCode() const
     {
-        return letoh(leErrorCode);
+        return bhf::ads::letoh(leErrorCode);
     }
 
     uint32_t invokeId() const
     {
-        return letoh(leInvokeId);
+        return bhf::ads::letoh(leInvokeId);
     }
 
     uint32_t length() const
     {
-        return letoh(leLength);
+        return bhf::ads::letoh(leLength);
     }
 
     AmsAddr sourceAms() const
@@ -204,12 +204,12 @@ struct AoEHeader {
 
     uint16_t sourcePort() const
     {
-        return letoh(leSourcePort);
+        return bhf::ads::letoh(leSourcePort);
     }
 
     uint16_t stateFlags() const
     {
-        return letoh(leStateFlags);
+        return bhf::ads::letoh(leStateFlags);
     }
 
     AmsNetId targetAddr() const
@@ -219,7 +219,7 @@ struct AoEHeader {
 
     uint16_t targetPort() const
     {
-        return letoh(leTargetPort);
+        return bhf::ads::letoh(leTargetPort);
     }
 
 private:
@@ -246,7 +246,7 @@ struct AoEResponseHeader {
 
     uint32_t result() const
     {
-        return letoh(leResult);
+        return bhf::ads::letoh(leResult);
     }
 private:
     uint32_t leResult;
@@ -264,7 +264,7 @@ struct AoEReadResponseHeader : AoEResponseHeader {
 
     uint32_t readLength() const
     {
-        return letoh(leReadLength);
+        return bhf::ads::letoh(leReadLength);
     }
 private:
     uint32_t leReadLength;

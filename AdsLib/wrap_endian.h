@@ -5,6 +5,10 @@
 
 #pragma once
 
+namespace bhf
+{
+namespace ads
+{
 #if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
 template<class T>
 inline T letoh(const void* buffer)
@@ -34,4 +38,6 @@ template<class T>
 T htole(const T value)
 {
     return letoh(value);
+}
+}
 }

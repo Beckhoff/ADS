@@ -398,12 +398,12 @@ struct TestAds : test_base<TestAds> {
                                                handleName,
                                                &bytesRead));
         fructose_assert(sizeof(hHandle) == bytesRead);
-        hHandle = letoh(hHandle);
+        hHandle = bhf::ads::letoh(hHandle);
 
         uint8_t buffer[8192];
         fructose_assert(0 == AdsSyncReadReqEx2(port, &server, 0xF005, hHandle, sizeof(buffer), &buffer, &bytesRead));
         fructose_assert(sizeof(buffer) == bytesRead);
-        hHandle = htole(hHandle);
+        hHandle = bhf::ads::htole(hHandle);
         fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
 
         fructose_assert(0 == AdsPortCloseEx(port));
@@ -486,7 +486,7 @@ struct TestAds : test_base<TestAds> {
                                                handleName,
                                                &bytesRead));
         fructose_assert(sizeof(hHandle) == bytesRead);
-        hHandle = letoh(hHandle);
+        hHandle = bhf::ads::letoh(hHandle);
 
         uint32_t buffer;
         uint32_t outBuffer = 0xDEADBEEF;
@@ -505,7 +505,7 @@ struct TestAds : test_base<TestAds> {
             fructose_loop_assert(i, outBuffer == buffer);
             outBuffer = ~outBuffer;
         }
-        hHandle = htole(hHandle);
+        hHandle = bhf::ads::htole(hHandle);
         fructose_assert(0 == AdsSyncWriteReqEx(port, &server, 0xF006, 0, sizeof(hHandle), &hHandle));
 
         // provide out of range port
