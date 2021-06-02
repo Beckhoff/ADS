@@ -1,3 +1,7 @@
+v5:
+- put endian functions into bhf::ads namespace
+- decrease minimum CMake version to 3.10.2
+
 v4:
 - big endian support (tested with qemu-mips)
 - better error messages, e.g. "TARGET PORT NOT FOUND"
