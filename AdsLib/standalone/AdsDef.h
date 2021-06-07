@@ -417,10 +417,6 @@ struct AdsSymbolInfoByName {
 };
 #pragma pack( pop )
 
-enum nSystemServiceOpenFile : uint32_t {
-    SYSTEMSERVICE_OPENGENERIC = 1,
-};
-
 enum nSystemServiceIndexGroups : uint32_t {
     SYSTEMSERVICE_FOPEN = 120,
     SYSTEMSERVICE_FCLOSE = 121,
