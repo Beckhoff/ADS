@@ -14,7 +14,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -Wall
     -Wextra
   )
-  add_compile_definitions(_GNU_SOURCE)
+  add_definitions(-D_GNU_SOURCE)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # Compiler flags and definitions for Visual Studio come here
 endif()
