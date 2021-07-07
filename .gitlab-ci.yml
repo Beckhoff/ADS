@@ -31,7 +31,7 @@ cache:
   <<: *build-meson
   tags:
     - docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:25861
+  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:31109
 
 build-linux-clang:
   <<: *build-meson-docker
