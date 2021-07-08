@@ -85,7 +85,7 @@ build:win10:
     - $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
     - $env:BHF_CI_MESON_OPTIONS = '-Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include', '-Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib'
 
-.test-linux: &test-linux
+.test-linux:
   stage: test
   image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:3.1
   tags:
@@ -99,19 +99,19 @@ build:win10:
     - ./tools/90_run_tests.sh
 
 test-linux-clang:
-  <<: *test-linux
+  extends: .test-linux
   needs: [
     "build-linux-clang",
   ]
 
 test-linux-gcc:
-  <<: *test-linux
+  extends: .test-linux
   needs: [
     "build-linux-gcc",
   ]
 
 test-linux-gcc-i386:
-  <<: *test-linux
+  extends: .test-linux
   needs: [
     "build-linux-gcc-i386",
   ]
@@ -120,7 +120,7 @@ test-linux-gcc-i386:
     - apt update -y && apt install -y libc6:i386 libstdc++6:i386
 
 test-linux-gcc-mips:
-  <<: *test-linux
+  extends: .test-linux
   needs: [
     "build-linux-gcc-mips",
   ]
