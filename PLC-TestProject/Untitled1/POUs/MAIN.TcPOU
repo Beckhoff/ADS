@@ -1,11 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4020.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.5">
   <POU Name="MAIN" Id="{ac002873-776d-4096-82aa-e6da7e9c1d13}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	byByte		AT %MB0 : ARRAY [0..1027] OF BYTE;
 	i			: INT;
 	moreBytes	: ARRAY [0..8192] OF BYTE;
+	bInitTest: BOOL := FALSE;
+	bStartTest: BOOL := FALSE;
+	bTestBusy: BOOL := FALSE;
+	nTestState: DINT := 0;
+	nTestCasesFailed: DINT := 0;
+	sLogPath: T_MaxString := 'var/log';
 END_VAR
 ]]></Declaration>
     <Implementation>
