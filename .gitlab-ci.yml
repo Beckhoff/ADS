@@ -92,7 +92,7 @@ build:win10:
 
 .test-linux:
   stage: test
-  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:3.1
+  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:3.6
   tags:
     - docker_vm_runner
     - few_vcpus
@@ -100,6 +100,7 @@ build:win10:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
   script:
+    - apt update -y && apt install -y xxd
     - ./tools/90_run_tests.sh
 
 test-linux-clang:
@@ -140,6 +141,7 @@ test-fbsd-clang:
     "build-fbsd-clang",
   ]
   tags:
+    - adslib
     - freebsd13_4_build_vm
   variables:
     BHF_CI_NAT_IP: '172.17.62.71'
@@ -148,6 +150,7 @@ test-fbsd-clang:
     - nc -z 172.17.66.104 48897
     - sleep 10
   script:
+    - doas pkg install -y vim-console
     - ./tools/90_run_tests.sh
 
 test-macos-clang:
