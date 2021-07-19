@@ -41,6 +41,9 @@ Sample AMS route:
   AMS Net Id:     192.168.0.1.1.1 # Derived from the IP address of your ADS client
   Address:        192.168.0.1     # Use the IP which is connected to the TwinCAT target
   Transport Type: TCP/IP
+  Remote Route:   None / Server
+  Unidirectional: false
+  Secure ADS:     false
   
 Routes can be configured by several possibilities
 TwinCAT Engineering:  Go to the tree item SYSTEM/Routes and add a static route.
