@@ -1,30 +1,11 @@
+// SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
-
-   Permission is hereby granted, free of charge, to any person obtaining a copy
-   of this software and associated documentation files (the "Software"), to deal
-   in the Software without restriction, including without limitation the rights
-   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-   copies of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   SOFTWARE.
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
  */
 
-#ifndef FRAME_H
-#define FRAME_H
+#pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include "wrap_endian.h"
 #include <memory>
 
 struct Frame {
@@ -95,6 +76,15 @@ struct Frame {
     }
 
     /**
+     * remove sizeof(T) bytes from the beginning of the frame and return them
+     * interpreted as T in little endian byte order (result is in host order).
+     */
+    template<typename T> T pop_letoh()
+    {
+        return bhf::ads::letoh(pop<T>());
+    }
+
+    /**
      * @brief prepend
      * prepend <data> in front of the frame
      * @param data
@@ -148,5 +138,3 @@ private:
     size_t m_Size;
     size_t m_OriginalSize;
 };
-
-#endif // FRAME_H
