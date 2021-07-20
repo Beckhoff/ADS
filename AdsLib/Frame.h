@@ -80,6 +80,21 @@ struct Frame {
     const uint8_t* data() const;
 
     /**
+     * remove sizeof(T) bytes from the beginning of the frame and return them
+     * interpreted as T. If frame is to short to fit a T, we silently return
+     * a default initialized T.
+     */
+    template<typename T> T pop()
+    {
+        T value {};
+        if (sizeof(value) <= capacity()) {
+            value = *reinterpret_cast<T*>(m_Pos);
+        }
+        remove(sizeof(T));
+        return value;
+    }
+
+    /**
      * @brief prepend
      * prepend <data> in front of the frame
      * @param data
