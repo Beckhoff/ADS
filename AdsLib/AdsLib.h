@@ -10,6 +10,8 @@
 #include "standalone/AdsLib.h"
 #endif
 
+#include "Sockets.h"
+
 /**
  * Reads data synchronously from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
@@ -169,6 +171,23 @@ void DelLocalRoute(AmsNetId ams);
  * @param[in] ams local AmsNetId
  */
 void SetLocalAddress(AmsNetId ams);
+
+/**
+ * Add an ADS route to a remote TwinCAT system
+ * @param[in] remote hostname or ip address of the remote TwinCAT system
+ * @param[in] destNetId AmsNetId of the routes destination
+ * @param[in] destAddr hostname or ip address of the routes destination
+ * @param[in] routeName name of the new route
+ * @param[in] remoteUsername username on the remote TwinCAT system
+ * @param[in] remotePassword password for the user on the remote TwinCAT system
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long AddRemoteRoute(const IpV4         remote,
+                    AmsNetId           destNetId,
+                    const std::string& destAddr,
+                    const std::string& routeName,
+                    const std::string& remoteUsername,
+                    const std::string& remotePassword);
 }
 }
 

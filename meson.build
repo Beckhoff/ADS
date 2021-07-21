@@ -8,6 +8,7 @@ project('AdsLib', 'cpp',
 common_files = files([
   'AdsLib/AdsDef.cpp',
   'AdsLib/AdsDevice.cpp',
+  'AdsLib/AdsLib.cpp',
   'AdsLib/AdsFile.cpp',
   'AdsLib/Log.cpp',
   'AdsLib/Sockets.cpp',
