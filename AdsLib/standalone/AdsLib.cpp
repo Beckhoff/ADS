@@ -1,5 +1,5 @@
 /**
-   Copyright (c) 2015 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
 
    Permission is hereby granted, free of charge, to any person obtaining a copy
    of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,11 @@ static AmsRouter& GetRouter()
         } \
 } while (false)
 
-long AdsAddRoute(const AmsNetId ams, const char* ip)
+namespace bhf
+{
+namespace ads
+{
+long AddLocalRoute(const AmsNetId ams, const char* ip)
 {
     try {
         return GetRouter().AddRoute(ams, IpV4(ip));
@@ -53,9 +57,16 @@ long AdsAddRoute(const AmsNetId ams, const char* ip)
     }
 }
 
-void AdsDelRoute(const AmsNetId ams)
+void DelLocalRoute(const AmsNetId ams)
 {
     GetRouter().DelRoute(ams);
+}
+
+void SetLocalAddress(const AmsNetId ams)
+{
+    GetRouter().SetLocalAddress(ams);
+}
+}
 }
 
 long AdsPortCloseEx(long port)
@@ -73,11 +84,6 @@ long AdsGetLocalAddressEx(long port, AmsAddr* pAddr)
 {
     ASSERT_PORT_AND_AMSADDR(port, pAddr);
     return GetRouter().GetLocalAddress((uint16_t)port, pAddr);
-}
-
-void AdsSetLocalAddress(const AmsNetId ams)
-{
-    GetRouter().SetLocalAddress(ams);
 }
 
 long AdsSyncReadReqEx2(long           port,

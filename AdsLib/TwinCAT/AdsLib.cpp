@@ -1,20 +1,26 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2020 - 2021 Beckhoff Automation GmbH & Co. KG
  */
 
 #include "AdsLib.h"
 
-long AdsAddRoute(AmsNetId, const char*)
+namespace bhf
+{
+namespace ads
+{
+long AddLocalRoute(AmsNetId, const char*)
 {
     return 0;
 }
 
-void AdsDelRoute(AmsNetId)
+void DelLocalRoute(AmsNetId)
 {}
 
-void AdsSetLocalAddress(const AmsNetId)
+void SetLocalAddress(const AmsNetId)
 {}
+}
+}
 
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification)
 {

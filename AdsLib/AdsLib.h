@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2020 - 2021 Beckhoff Automation GmbH & Co. KG
  */
 #pragma once
 
@@ -145,3 +145,33 @@ long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout);
+
+namespace bhf
+{
+namespace ads
+{
+/**
+ * Add new ams route to target system
+ * @param[in] ams address of the target system
+ * @param[in] ip address of the target system
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long AddLocalRoute(AmsNetId ams, const char* ip);
+
+/**
+ * Delete ams route that had previously been added with AddLocalRoute().
+ * @param[in] ams address of the target system
+ */
+void DelLocalRoute(AmsNetId ams);
+
+/**
+ * Change local NetId
+ * @param[in] ams local AmsNetId
+ */
+void SetLocalAddress(AmsNetId ams);
+}
+}
+
+#define AdsAddRoute bhf::ads::AddLocalRoute
+#define AdsDelRoute bhf::ads::DelLocalRoute
+#define AdsSetLocalAddress bhf::ads::SetLocalAddress

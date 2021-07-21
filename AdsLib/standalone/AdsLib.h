@@ -1,24 +1,10 @@
 // SPDX-License-Identifier: MIT
 /** @file
-   Copyright (c) 2015 - 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
  */
 #pragma once
 
 #include "AdsDef.h"
-
-/**
- * Add new ams route to target system
- * @param[in] ams address of the target system
- * @param[in] ip address of the target system
- * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
- */
-long AdsAddRoute(AmsNetId ams, const char* ip);
-
-/**
- * Delete ams route that had previously been added with AdsAddRoute().
- * @param[in] ams address of the target system
- */
-void AdsDelRoute(AmsNetId ams);
 
 /**
  * The connection (communication port) to the message router is
@@ -44,12 +30,6 @@ long AdsPortOpenEx();
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsGetLocalAddressEx(long port, AmsAddr* pAddr);
-
-/**
- * Change local NetId
- * @param[in] ams local AmsNetId
- */
-void AdsSetLocalAddress(AmsNetId ams);
 
 /**
  * Alters the timeout for the ADS functions. The standard value is 5000 ms.
