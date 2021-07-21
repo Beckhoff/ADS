@@ -72,7 +72,7 @@ clean:
 	rm -rf *.a *.o *.bin AdsLib*Test/*.o $(OBJ_DIR)
 
 uncrustify:
-	find AdsLib* example -name *.h -or -name *.cpp | uncrustify --no-backup -c tools/uncrustify.cfg -F -
+	find Ads* example -name *.h -or -name *.cpp | uncrustify --no-backup -c tools/uncrustify.cfg -F -
 
 prepare-hooks:
 	rm -f .git/hooks/pre-commit

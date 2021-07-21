@@ -22,6 +22,10 @@ cache:
     - build/AdsLibTest.exe
     - build/AdsLibOOITest
     - build/AdsLibOOITest.exe
+    - build/adstool
+    - build/adstool.exe
+    - build/tcadstool
+    - build/tcadstool.exe
     - example/build/example
     - example/build/example.exe
     - example/build/tcexample

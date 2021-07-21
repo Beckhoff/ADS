@@ -53,6 +53,14 @@ adslibooitest = executable('AdsLibOOITest',
   link_with: adslib,
 )
 
+adstool = executable('adstool',
+  'AdsTool/main.cpp',
+  'AdsTool/ParameterList.cpp',
+  include_directories: inc,
+  dependencies: libs,
+  link_with: adslib,
+)
+
 if get_option('tcadsdll_include') != ''
   tcadslib = static_library('TcAdsLib',
     [common_files, 'AdsLib/TwinCAT/AdsLib.cpp'],
@@ -61,5 +69,20 @@ if get_option('tcadsdll_include') != ''
       get_option('tcadsdll_include'),
       inc,
     ],
+  )
+
+  tcadstool = executable('tcadstool',
+    'AdsTool/main.cpp',
+    'AdsTool/ParameterList.cpp',
+    cpp_args: '-DUSE_TWINCAT_ROUTER',
+    include_directories: [
+      get_option('tcadsdll_include'),
+      inc,
+    ],
+    dependencies: [
+      meson.get_compiler('cpp').find_library('libTcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
+      libs,
+    ],
+    link_with: tcadslib,
   )
 endif
