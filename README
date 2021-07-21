@@ -55,7 +55,7 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 
 *Requires a TwinCAT restart.
 
-- set "remoteNetId" and "remoteIpV4" and enable AdsSetLocalAddress() in "example/example.cpp" according to your own setup
+- set "remoteNetId" and "remoteIpV4" and enable bhf::ads::SetLocalAddress() in "example/example.cpp" according to your own setup
 
 # configure meson to build example into "build" dir
 meson example/build example

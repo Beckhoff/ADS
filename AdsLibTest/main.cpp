@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+/**
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
+ */
 
 #include <AdsLib.h>
 
@@ -278,14 +282,14 @@ struct TestAds : test_base<TestAds> {
     TestAds(std::ostream& outstream)
         : out(outstream)
     {
-        AdsAddRoute(serverNetId, remote_name);
+        bhf::ads::AddLocalRoute(serverNetId, remote_name);
     }
 #ifdef WIN32
     ~TestAds()
     {
         // WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
         //             of the static AdsRouter object and hangs in receive.join()
-        AdsDelRoute(serverNetId);
+        bhf::ads::DelLocalRoute(serverNetId);
     }
 #endif
 
@@ -819,14 +823,14 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         : out(outstream),
         runEndurance(false)
     {
-        AdsAddRoute(serverNetId, remote_name);
+        bhf::ads::AddLocalRoute(serverNetId, remote_name);
     }
 #ifdef WIN32
     ~TestAdsPerformance()
     {
         // WORKAROUND: On Win7-64 AdsConnection::~AdsConnection() is triggered by the destruction
         //             of the static AdsRouter object and hangs in receive.join()
-        AdsDelRoute(serverNetId);
+        bhf::ads::DelLocalRoute(serverNetId);
     }
 #endif
 

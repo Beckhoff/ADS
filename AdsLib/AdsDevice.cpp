@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2016 - 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2016 - 2021 Beckhoff Automation GmbH & Co. KG
  */
 
 #include "AdsDevice.h"
@@ -9,7 +9,7 @@
 
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 {
-    const auto error = AdsAddRoute(ams, ip);
+    const auto error = bhf::ads::AddLocalRoute(ams, ip);
     if (error) {
         throw AdsException(error);
     }
@@ -17,7 +17,7 @@ static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 }
 
 AdsDevice::AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port)
-    : m_NetId(AddRoute(netId, ipV4.c_str()), {[](AmsNetId ams){AdsDelRoute(ams); return 0; }}),
+    : m_NetId(AddRoute(netId, ipV4.c_str()), {[](AmsNetId ams){bhf::ads::DelLocalRoute(ams); return 0; }}),
     m_Addr({netId, port}),
     m_LocalPort(new long { AdsPortOpenEx() }, {AdsPortCloseEx})
 {}

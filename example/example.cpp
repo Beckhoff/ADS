@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+/**
+   Copyright (c) 2015 - 2021 Beckhoff Automation GmbH & Co. KG
+ */
 
 #include "AdsLib.h"
 #include "AdsNotificationOOI.h"
@@ -110,7 +114,7 @@ static void runExample(std::ostream& out)
     static const char remoteIpV4[] = "ads-server";
 
     // uncomment and adjust if automatic AmsNetId deduction is not working as expected
-    //AdsSetLocalAddress({192, 168, 0, 1, 1, 1});
+    //bhf::ads::SetLocalAddress({192, 168, 0, 1, 1, 1});
 
     AdsDevice route {remoteIpV4, remoteNetId, AMSPORT_R0_PLC_TC3};
     notificationExample(out, route);
