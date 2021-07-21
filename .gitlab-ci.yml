@@ -99,7 +99,6 @@ build:win10:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
   script:
-    - ./tools/80_ads_route.sh
     - ./tools/90_run_tests.sh
 
 test-linux-clang:
@@ -142,6 +141,8 @@ test-fbsd-clang:
   tags:
     - fbsd
     - rack
+  variables:
+    BHF_CI_NAT_IP: '192.168.220.1'
   script:
     - ./tools/90_run_tests.sh
 

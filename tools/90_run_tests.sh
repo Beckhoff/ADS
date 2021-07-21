@@ -8,6 +8,10 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+readonly script_path="$(cd "$(dirname "$0")" && pwd)"
+
+"${script_path}/80_ads_route.sh"
+
 # setup fake ads server and install cleanup trap
 nc -l 48898 -k &
 ncat_pid=$!
