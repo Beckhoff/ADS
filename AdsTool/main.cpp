@@ -4,7 +4,7 @@
     Author: Patrick Bruenn <p.bruenn@beckhoff.com>
  */
 
-#include "AdsException.h"
+#include "AdsDevice.h"
 #include "AdsLib.h"
 #include "Log.h"
 #include "ParameterList.h"
@@ -20,9 +20,13 @@ int usage(const char* const errorMessage = nullptr)
     std::cout <<
         R"(
 USAGE:
-	<target> <command> [CMD_OPTIONS...] [<command_parameter>...]
+	<target[:port]> [OPTIONS...] <command> [CMD_OPTIONS...] [<command_parameter>...]
 
-	target: hostname or IP address of your target
+	target: AmsNetId, hostname or IP address of your target
+	port: AmsPort if omitted the default is command specific
+
+OPTIONS:
+	--gw=<hostname> or IP address of your AmsNetId target (mandatory in standalone mode)
 
 COMMANDS:
 	addroute [CMD_OPTIONS...]
@@ -42,9 +46,24 @@ COMMANDS:
 	netid
 		Read the AmsNetId from a remote TwinCAT router
 		$ adstool 192.168.0.231 netid
+
+	state [<value>]
+		Read or write the ADS state of the device at AmsPort (default 10000).
+		ADS states are documented here:
+		https://infosys.beckhoff.com/index.php?content=../content/1031/tcadswcf/html/tcadswcf.tcadsservice.enumerations.adsstate.html
+	examples:
+		Check if TwinCAT is in RUN:
+		$ adstool 5.24.37.144.1.1 state
+		5
+
+		Set TwinCAT to CONFIG mode:
+		$ adstool 5.24.37.144.1.1 state 16
 )";
     exit(1);
 }
+
+typedef int (* CommandFunc)(const AmsNetId, const uint16_t, const std::string&, bhf::Commandline&);
+using CommandMap = std::map<const std::string, CommandFunc>;
 
 int RunAddRoute(const IpV4 remote, bhf::Commandline& args)
 {
@@ -74,6 +93,34 @@ int RunNetId(const IpV4 remote)
     return 0;
 }
 
+int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
+    const auto oldState = device.GetState();
+    const auto value = args.Pop<const char*>();
+    if (value) {
+        const auto requestedState = std::stoi(value);
+        if (requestedState >= ADSSTATE::ADSSTATE_MAXSTATES) {
+            LOG_ERROR(
+                "Requested state '" << std::dec << requestedState << "' exceeds max (" <<
+                    uint16_t(ADSSTATE::ADSSTATE_MAXSTATES) <<
+                    ")\n");
+            return ADSERR_CLIENT_INVALIDPARM;
+        }
+        try {
+            device.SetState(static_cast<ADSSTATE>(requestedState), oldState.device);
+        } catch (const AdsException& ex) {
+            // ignore AdsError 1861 after RUN/CONFIG mode change
+            if (ex.errorCode != 1861) {
+                throw;
+            }
+        }
+    } else {
+        std::cout << std::dec << (int)oldState.ads << '\n';
+    }
+    return 0;
+}
+
 template<typename T>
 static T try_stoi(const char* str, const T defaultValue = 0)
 {
@@ -97,11 +144,24 @@ int ParseCommand(int argc, const char* argv[])
     const auto port = try_stoi<uint16_t>(str + split);
     LOG_VERBOSE("NetId>" << netId << "< port>" << port << "<\n");
 
+    bhf::ParameterList global = {
+        {"--gw"},
+    };
+    args.Parse(global);
+
     const auto cmd = args.Pop<const char*>("Command is missing");
     if (!strcmp("addroute", cmd)) {
         return RunAddRoute(netId, args);
     } else if (!strcmp("netid", cmd)) {
         return RunNetId(netId);
+    }
+
+    const auto commands = CommandMap {
+        {"state", RunState},
+    };
+    const auto it = commands.find(cmd);
+    if (it != commands.end()) {
+        return it->second(make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args);
     }
     LOG_ERROR("Unknown command >" << cmd << "<\n");
     return usage();
