@@ -11,6 +11,7 @@ trap cleanup EXIT INT TERM
 readonly script_path="$(cd "$(dirname "$0")" && pwd)"
 
 "${script_path}/80_ads_route.sh"
+"${script_path}/91_test_AdsTool.sh"
 
 # setup fake ads server and install cleanup trap
 nc -l 48898 -k &
