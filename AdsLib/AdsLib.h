@@ -188,6 +188,15 @@ long AddRemoteRoute(const IpV4         remote,
                     const std::string& routeName,
                     const std::string& remoteUsername,
                     const std::string& remotePassword);
+
+/**
+ * Read AmsNetId of some TwinCAT remote host
+ * @param[in] remote hostname or ip address of the remote TwinCAT system
+ * @param[out] netId on success the AmsNetId of the remote TwinCAT system is written here
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long GetRemoteAddress(const IpV4 remote,
+                      AmsNetId&  netId);
 }
 }
 

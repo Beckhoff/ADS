@@ -42,6 +42,7 @@ enum UdpTag : uint16_t {
 };
 
 enum UdpServiceId : uint32_t {
+    SERVERINFO = 1,
     ADDROUTE = 6,
     RESPONSE = 0x80000000,
 };
@@ -144,6 +145,30 @@ long AddRemoteRoute(const IpV4         remote,
         return f.pop_letoh<uint32_t>();
     }
     return ADSERR_DEVICE_INVALIDDATA;
+}
+
+long GetRemoteAddress(const IpV4 remote, AmsNetId& netId)
+{
+    Frame f { 128 };
+
+    const uint32_t tagCount = 0;
+    f.prepend(htole(tagCount));
+
+    const auto myAddr = AmsAddr { {}, 0 };
+    f.prepend(&myAddr, sizeof(myAddr));
+
+    const auto status = SendRecv(remote, f, UdpServiceId::SERVERINFO);
+    if (status) {
+        return status;
+    }
+
+    // We expect at least the AmsAddr
+    if (sizeof(netId) > f.capacity()) {
+        LOG_ERROR(__FUNCTION__ << "(): frame too short to be AMS response '0x" << std::hex << f.capacity() << "'\n");
+        return ADSERR_DEVICE_INVALIDSIZE;
+    }
+    memcpy(&netId, f.data(), sizeof(netId));
+    return 0;
 }
 }
 }

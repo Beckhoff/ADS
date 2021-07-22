@@ -38,6 +38,10 @@ COMMANDS:
 
 		Use 'guest' account to add a route with a selfdefined name
 		$ adstool 192.168.0.231 addroute --addr=192.168.0.1 --netid=192.168.0.1.1.1 --password=1 --username=guest --routename=Testroute
+
+	netid
+		Read the AmsNetId from a remote TwinCAT router
+		$ adstool 192.168.0.231 netid
 )";
     exit(1);
 }
@@ -60,6 +64,14 @@ int RunAddRoute(const IpV4 remote, bhf::Commandline& args)
                                     params.Get<std::string>("--username"),
                                     params.Get<std::string>("--password")
                                     );
+}
+
+int RunNetId(const IpV4 remote)
+{
+    AmsNetId netId;
+    bhf::ads::GetRemoteAddress(remote, netId);
+    std::cout << netId << '\n';
+    return 0;
 }
 
 template<typename T>
@@ -88,6 +100,8 @@ int ParseCommand(int argc, const char* argv[])
     const auto cmd = args.Pop<const char*>("Command is missing");
     if (!strcmp("addroute", cmd)) {
         return RunAddRoute(netId, args);
+    } else if (!strcmp("netid", cmd)) {
+        return RunNetId(netId);
     }
     LOG_ERROR("Unknown command >" << cmd << "<\n");
     return usage();
