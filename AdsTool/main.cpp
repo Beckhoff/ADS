@@ -33,6 +33,7 @@ USAGE:
 
 OPTIONS:
 	--gw=<hostname> or IP address of your AmsNetId target (mandatory in standalone mode)
+	--localams=<netid> Specify your own AmsNetId (by default derived from local IP + ".1.1")
 
 COMMANDS:
 	addroute [CMD_OPTIONS...]
@@ -561,8 +562,13 @@ int ParseCommand(int argc, const char* argv[])
 
     bhf::ParameterList global = {
         {"--gw"},
+        {"--localams"},
     };
     args.Parse(global);
+    const auto localNetId = global.Get<std::string>("--localams");
+    if (!localNetId.empty()) {
+        bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
+    }
 
     const auto cmd = args.Pop<const char*>("Command is missing");
     if (!strcmp("addroute", cmd)) {
