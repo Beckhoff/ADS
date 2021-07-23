@@ -45,6 +45,7 @@ build-linux-clang:
 build-fbsd-clang:
   <<: *build-meson
   tags:
+    - adslib
     - freebsd13_4_build_vm
   before_script:
     - doas pkg install -y meson
@@ -139,10 +140,13 @@ test-fbsd-clang:
     "build-fbsd-clang",
   ]
   tags:
-    - fbsd
-    - rack
+    - freebsd13_4_build_vm
   variables:
-    BHF_CI_NAT_IP: '192.168.220.1'
+    BHF_CI_NAT_IP: '172.17.62.71'
+  before_script:
+    - echo "172.17.66.104 ads-server" | doas tee -a /etc/hosts
+    - nc -z 172.17.66.104 48897
+    - sleep 10
   script:
     - ./tools/90_run_tests.sh
 
@@ -153,5 +157,8 @@ test-macos-clang:
   tags:
     - macOS
     - rack
+  before_script:
+    - nc -z 172.17.66.104 48897
+    - sleep 10
   script:
     - ./tools/90_run_tests.sh
