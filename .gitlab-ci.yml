@@ -7,7 +7,7 @@ cache:
   paths:
   - apt-cache/
 
-.build-meson: &build-meson
+.build-meson:
   stage: build
   script:
     - meson setup build ${BHF_CI_MESON_OPTIONS}
@@ -31,19 +31,19 @@ cache:
     - example/build/tcexample
     - example/build/tcexample.exe
 
-.build-meson-docker: &build-meson-docker
-  <<: *build-meson
+.build-meson-docker:
+  extends: .build-meson
   tags:
     - docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:31109
 
 build-linux-clang:
-  <<: *build-meson-docker
+  extends: .build-meson-docker
   variables:
     CXX: clang++
 
 build-fbsd-clang:
-  <<: *build-meson
+  extends: .build-meson
   tags:
     - adslib
     - freebsd13_4_build_vm
@@ -55,34 +55,34 @@ build-fbsd-clang:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
 
 build-macos-clang:
-  <<: *build-meson
+  extends: .build-meson
   tags:
     - macOS
   variables:
     BHF_CI_MESON_OPTIONS: '-Dcpp_std=c++11'
 
 build-linux-gcc:
-  <<: *build-meson-docker
+  extends: .build-meson-docker
 
 build-linux-gcc-i386:
-  <<: *build-meson-docker
+  extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
 
 build-linux-gcc-mips:
-  <<: *build-meson-docker
+  extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.mips'
   before_script:
     - apt update -y && apt install -y g++-mips-linux-gnu
 
 build:mxe:
-  <<: *build-meson-docker
+  extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++11'
 
 build:win10:
-  <<: *build-meson
+  extends: .build-meson
   tags:
     - MD_TWINCAT_XAE
   before_script:
