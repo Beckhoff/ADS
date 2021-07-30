@@ -580,7 +580,7 @@ int main()
 #else
     std::ostream& errorstream = std::cout;
 #endif
-    errorstream << "Testing global static AdsVariable: " << staticBuffer << '\n';
+    errorstream << "Testing global static AdsVariable: " << staticRead << '\n';
     TestAds adsTest(errorstream);
     adsTest.add_test("testAdsPortOpenEx", &TestAds::testAdsPortOpenEx);
     adsTest.add_test("testAdsReadReqEx2", &TestAds::testAdsReadReqEx2);
