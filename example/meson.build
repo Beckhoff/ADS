@@ -8,6 +8,9 @@ project('example', 'cpp',
   ]
 )
 
+# some hardening options
+add_project_arguments('-D_FORTIFY_SOURCE=2', language: 'cpp')
+
 cxx = meson.get_compiler('cpp')
 libs = [
     cxx.find_library('ws2_32', required: false),

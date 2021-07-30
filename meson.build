@@ -8,6 +8,9 @@ project('AdsLib', 'cpp',
   ]
 )
 
+# some hardening options
+add_project_arguments('-D_FORTIFY_SOURCE=2', language: 'cpp')
+
 common_files = files([
   'AdsLib/AdsDef.cpp',
   'AdsLib/AdsDevice.cpp',
