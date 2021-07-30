@@ -1,8 +1,10 @@
 project('example', 'cpp',
   version : '0.1',
   default_options : [
+    'buildtype=release',
     'warning_level=3',
     'werror=true',
+    'b_pie=true',
   ]
 )
 
