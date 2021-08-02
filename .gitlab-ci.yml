@@ -15,21 +15,10 @@ cache:
     - meson setup example/build example ${BHF_CI_MESON_OPTIONS}
     - ninja -C example/build
   artifacts:
+    when: always
     paths:
-    - build/libAdsLib.a
-    - build/libTcAdsLib.a
-    - build/AdsLibTest
-    - build/AdsLibTest.exe
-    - build/AdsLibOOITest
-    - build/AdsLibOOITest.exe
-    - build/adstool
-    - build/adstool.exe
-    - build/tcadstool
-    - build/tcadstool.exe
-    - example/build/example
-    - example/build/example.exe
-    - example/build/tcexample
-    - example/build/tcexample.exe
+    - build/
+    - example/build/
 
 .build-meson-docker:
   extends: .build-meson

@@ -15,5 +15,5 @@ jobs:
         with:
           name: ubuntu
           path: |
-            build/libAdsLib.a
-            example/build/example
+            build/
+            example/build/
