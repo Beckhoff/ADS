@@ -4,6 +4,9 @@
 # github gh-pages / doxygen
 html/
 
+# Debian package generation
+debian-release/
+
 # TwinCAT 3 projects
 PLC-TestProject/NotificationTest.sln.~u
 PLC-TestProject/TrialLicense.tclrs

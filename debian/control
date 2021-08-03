@@ -1,0 +1,19 @@
+Source: adstool
+Section: net
+Priority: optional
+Maintainer: Patrick Bruenn <p.bruenn@beckhoff.com>
+Build-Depends: debhelper (>=11~), meson (>=0.49)
+Standards-Version: 4.1.4
+
+Package: adstool
+Architecture: amd64
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: command line tool to access TwinCAT systems via ADS
+ ADS offers many possibilities to access a TwinCAT systems. This tool
+ is intended to make use of that from the command line. The with the 'raw'
+ command it should be possible to issue any ADS read/write access from your
+ command line. Additionally some comfort functions are implemented such as:
+  - access PLC variables
+  - access files
+  - access TwinCAT state
