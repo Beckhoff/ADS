@@ -10,8 +10,8 @@ Architecture: amd64
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: command line tool to access TwinCAT systems via ADS
- ADS offers many possibilities to access a TwinCAT systems. This tool
- is intended to make use of that from the command line. The with the 'raw'
+ ADS offers many possibilities to access TwinCAT systems. This tool
+ is intended to make use of that from the command line. With the 'raw'
  command it should be possible to issue any ADS read/write access from your
  command line. Additionally some comfort functions are implemented such as:
   - access PLC variables
