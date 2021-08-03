@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - test-macos-clang
+  - release-push
 
 cache:
   paths:
@@ -162,3 +163,31 @@ test-macos-clang:
     - sleep 10
   script:
     - ./tools/90_run_tests.sh
+
+build-debian:
+  image: ${REGISTRY_HOST}/docker-registry/docker:debian-sphinx-0.8-master
+  stage: build
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends meson
+  script:
+    - bdpg build
+  artifacts:
+    expire_in: 1 week
+    when: always
+    paths:
+      - ./debian-release
+
+release-push:
+  image: ${REGISTRY_HOST}/docker-registry/docker:debian-bdpg-0.8-master
+  stage: release-push
+  dependencies:
+    - build-debian
+  only:
+    refs:
+      - master
+  script:
+    - mkdir -p "/root/.ssh"
+    - printf '%s\n' "Host *" > /root/.ssh/config
+    - printf '\t%s\n' "StrictHostKeyChecking no" "UserKnownHostsFile /dev/null" >> /root/.ssh/config
+    - .ci/publish_debian_package.sh
+  allow_failure: true
