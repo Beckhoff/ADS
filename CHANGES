@@ -1,3 +1,18 @@
+v6:
+- add adstool as an example and command line tool for automation
+-> read netids
+-> read TwinCAT states
+-> make AdsRead/WriteEx() functions accesible from command line with 'raw'
+-> access PLC variables
+-> access files
+-> access latency information from RTime
+- change scope of SYSTEMSERVICE_OPENGENERIC and put it into bhf::ads namespace
+- use namespaced versions of routing functions
+- add pop() and pop_letoh() to Frame
+- add bhf::ads::AddRemoteRoute()
+- simplify PLC sample code
+- build with warnings as error
+
 v5:
 - put endian functions into bhf::ads namespace
 - decrease minimum CMake version to 3.10.2
