@@ -18,6 +18,7 @@ cache:
   artifacts:
     when: always
     paths:
+    - AdsLib/**/*.h
     - build/
     - example/build/
 
