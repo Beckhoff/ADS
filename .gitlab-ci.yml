@@ -67,12 +67,12 @@ build-linux-gcc-mips:
   before_script:
     - apt update -y && apt install -y g++-mips-linux-gnu
 
-build:mxe:
+build-mxe:
   extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++11'
 
-build:win10:
+build-win10:
   extends: .build-meson
   tags:
     - MD_TWINCAT_XAE
