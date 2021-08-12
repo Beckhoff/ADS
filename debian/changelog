@@ -1,3 +1,9 @@
+adstool (0.0.6-2) buster; urgency=medium
+
+  * Version bump as we still had a bug in publish debian script
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Thu, 12 Aug 2021 15:11:11 +0200
+
 adstool (0.0.6-1) buster; urgency=medium
 
   * Version bump to force debian build and repo update
