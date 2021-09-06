@@ -11,9 +11,6 @@ $(MANPAGE): $(DOCFILES)
 build:
 	meson setup $@
 
-install: $(BINARY)
-	install --mode=755 -D $(BINARY) "$(DESTDIR)$(prefix)/bin/$(notdir $(BINARY))"
-
 install: $(BINARY) $(MANPAGE)
 	install --mode=755 -D $(BINARY) "$(DESTDIR)$(prefix)/bin/$(notdir $(BINARY))"
 	install --mode=755 -D $(MANPAGE) "$(DESTDIR)$(prefix)/share/man/man1/$(notdir $(MANPAGE))"
