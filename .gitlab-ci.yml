@@ -146,7 +146,7 @@ test-fbsd-clang:
     - nc -z 172.17.66.104 48897
     - sleep 10
   script:
-    - doas pkg install -y vim-console
+    - doas pkg install -y vim
     - ./tools/90_run_tests.sh
 
 test-macos-clang:
