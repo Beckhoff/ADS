@@ -59,5 +59,22 @@ bool LicenseAccess::ShowSystemId(std::ostream& os) const
     os << buf;
     return !os.good();
 }
+
+bool LicenseAccess::ShowVolumeNo(std::ostream& os) const
+{
+    uint32_t volumeNo;
+    uint32_t bytesRead = 0;
+    const auto status = device.ReadReqEx2(0x01010004,
+                                          0x5,
+                                          sizeof(volumeNo),
+                                          &volumeNo,
+                                          &bytesRead);
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+        return false;
+    }
+    os << bhf::ads::letoh(volumeNo) << '\n';
+    return !os.good();
+}
 }
 }

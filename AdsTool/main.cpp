@@ -78,7 +78,7 @@ COMMANDS:
 		Copy local file to remote:
 		$ adstool 5.24.37.144.1.1 file write 'C:\Windows\explorer.exe' < ./explorer.exe
 
-	license < platformid | systemid >
+	license < platformid | systemid | volumeno>
 		Read license information from device.
 	examples:
 		Read platformid from device
@@ -88,6 +88,11 @@ COMMANDS:
 		Read systemid from device
 		$ adstool 5.24.37.144.1.1 license systemid
 		95EEFDE0-0392-1452-275F-1BF9ACCB924E
+		50
+
+		Read volume licence number from device
+		$ adstool 5.24.37.144.1.1 license volumeno
+		123456
 
 	netid
 		Read the AmsNetId from a remote TwinCAT router
@@ -273,6 +278,8 @@ int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw,
         return device.ShowPlatformId(std::cout);
     } else if (!command.compare("systemid")) {
         return device.ShowSystemId(std::cout);
+    } else if (!command.compare("volumeno")) {
+        return device.ShowVolumeNo(std::cout);
     } else {
         LOG_ERROR(__FUNCTION__ << "(): Unknown license command '" << command << "'\n");
         return -1;

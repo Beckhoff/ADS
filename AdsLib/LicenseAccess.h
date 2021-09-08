@@ -15,6 +15,7 @@ struct LicenseAccess {
     LicenseAccess(const std::string& gw, AmsNetId netid, uint16_t port);
     bool ShowPlatformId(std::ostream& os) const;
     bool ShowSystemId(std::ostream& os) const;
+    bool ShowVolumeNo(std::ostream& os) const;
 private:
     AdsDevice device;
 };
