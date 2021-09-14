@@ -325,7 +325,7 @@ int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
     const auto offset = args.Pop<uint32_t>("IndexOffset is missing");
     const auto readLen = params.Get<uint64_t>("--read");
 
-    LOG_ERROR("read: >" << readLen << "< group: >" << std::hex << group << "<offset:>" << offset << "<");
+    LOG_VERBOSE("read: >" << readLen << "< group: >" << std::hex << group << "<offset:>" << offset << "<");
 
     std::vector<uint8_t> readBuffer(readLen);
     std::vector<uint8_t> writeBuffer;
