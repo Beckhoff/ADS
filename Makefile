@@ -15,6 +15,9 @@ install: $(BINARY) $(MANPAGE)
 	install --mode=755 -D $(BINARY) "$(DESTDIR)$(prefix)/bin/$(notdir $(BINARY))"
 	install --mode=755 -D $(MANPAGE) "$(DESTDIR)$(prefix)/share/man/man1/$(notdir $(MANPAGE))"
 
+uncrustify:
+	find Ads* example -name *.h -or -name *.cpp | uncrustify --no-backup -c tools/uncrustify.cfg -F -
+
 clean:
 	rm -rf build
 	rm -rf doc/build
