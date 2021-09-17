@@ -17,3 +17,11 @@ Description: command line tool to access TwinCAT systems via ADS
   - access PLC variables
   - access files
   - access TwinCAT state
+
+Package: libads-dev
+Architecture: amd64
+Multi-Arch: foreign
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: development files to use AdsLib
+ This library is intended to provide easy use as ADS client applications
+ running on Debian systems to communicate with TwinCAT devices via TCP/IP.
