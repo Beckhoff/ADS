@@ -1,3 +1,10 @@
+adstool (0.0.7-1) buster; urgency=medium
+
+  * adstool: add support to read volume license identifier
+    adstool: reduce verbosity
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Thu, 07 Oct 2021 12:56:57 +0200
+
 adstool (0.0.6-2) buster; urgency=medium
 
   * Version bump as we still had a bug in publish debian script
