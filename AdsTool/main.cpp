@@ -18,6 +18,12 @@
 #include <unistd.h>
 #include <vector>
 
+static int version()
+{
+    std::cout << "0.0.7-1\n";
+    return 0;
+}
+
 [[ noreturn ]] static void usage(const std::string& errorMessage = {})
 {
     /*
@@ -42,6 +48,7 @@ OPTIONS:
 		2 warn    | Don't show informational messages, just warnings and errors
 		3 error   | Don't care about warnigs, show errors only
 		4 silent  | Stay silent, don't log anything
+	--version Show version on stdout
 
 COMMANDS:
 	addroute [CMD_OPTIONS...]
@@ -572,6 +579,8 @@ int ParseCommand(int argc, const char* argv[])
     const auto str = args.Pop<const char*>("Target is missing");
     if (!strcmp("--help", str)) {
         usage();
+    } else if (!strcmp("--version", str)) {
+        return version();
     }
     const auto split = std::strcspn(str, ":");
     const auto netId = std::string {str, split};

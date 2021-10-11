@@ -149,6 +149,19 @@ check_var() {
 
 }
 
+check_version() {
+	local _debian_version
+	local _our_version
+
+	_our_version="$("${ads_tool}" --version)"
+	_debian_version="$(awk '{print $2; exit}' "${script_path}/../debian/changelog")"
+	if ! test "(${_our_version})" = "${_debian_version}"; then
+		printf 'ERROR version missmatch between tool(%s) and debian package(%s)\n' \
+			"${_our_version}" "${_debian_version}"
+		return 1
+	fi
+}
+
 set -e
 set -u
 
@@ -176,3 +189,4 @@ check_pciscan
 check_raw
 check_rtime
 check_var
+check_version
