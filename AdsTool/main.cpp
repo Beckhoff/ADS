@@ -610,8 +610,7 @@ int ParseCommand(int argc, const char* argv[])
     if (it != commands.end()) {
         return it->second(make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args);
     }
-    LOG_ERROR("Unknown command >" << cmd << "<\n");
-    usage();
+    usage(std::string {"Unknown command >"} + cmd + "<\n");
 }
 
 int main(int argc, const char* argv[])
