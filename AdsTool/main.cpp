@@ -20,19 +20,21 @@
 
 [[ noreturn ]] static void usage(const std::string& errorMessage = {})
 {
-    if (!errorMessage.empty()) {
-        LOG_ERROR(errorMessage);
-    }
-    std::cout <<
+    /*
+     * "--help" is the only case we are called with an empty errorMessage. That
+     * seems the only case we should really print to stdout instead of stderr.
+     */
+    errorMessage.empty() ? std::cout : std::cerr << errorMessage <<
         R"(
 USAGE:
-	<target[:port]> [OPTIONS...] <command> [CMD_OPTIONS...] [<command_parameter>...]
+	[<target[:port]>] [OPTIONS...] <command> [CMD_OPTIONS...] [<command_parameter>...]
 
 	target: AmsNetId, hostname or IP address of your target
 	port: AmsPort if omitted the default is command specific
 
 OPTIONS:
 	--gw=<hostname> or IP address of your AmsNetId target (mandatory in standalone mode)
+	--help Show this message on stdout
 	--localams=<netid> Specify your own AmsNetId (by default derived from local IP + ".1.1")
 	--log-level=<verbosity> Messages will be shown if their own level is equal or less to verbosity.
 		0 verbose | Show all messages, even if they are only useful to developers
@@ -207,7 +209,7 @@ COMMANDS:
 		$ adstool 5.24.37.144.1.1 var "MAIN.sString1" "STRING"
 		"Hello World!"
 )";
-    exit(1);
+    exit(!errorMessage.empty());
 }
 
 typedef int (* CommandFunc)(const AmsNetId, const uint16_t, const std::string&, bhf::Commandline&);
@@ -568,6 +570,9 @@ int ParseCommand(int argc, const char* argv[])
     // drop argv[0] program name
     args.Pop<const char*>();
     const auto str = args.Pop<const char*>("Target is missing");
+    if (!strcmp("--help", str)) {
+        usage();
+    }
     const auto split = std::strcspn(str, ":");
     const auto netId = std::string {str, split};
     const auto port = try_stoi<uint16_t>(str + split);
