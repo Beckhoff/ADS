@@ -67,25 +67,26 @@ struct ParameterList {
 };
 
 struct Commandline {
-    Commandline(std::function<int(const char*)> usage, int argc, const char* argv[]);
+    using UsageFunc = std::function<void (const std::string&)>;
+    Commandline(UsageFunc usage, int argc, const char* argv[]);
     template<typename T>
-    T Pop(const char* errorMessage = nullptr)
+    T Pop(const std::string& errorMessage = {})
     {
         if (argc) {
             --argc;
             return StringTo<T>(*(argv++));
         }
-        if (errorMessage) {
+        if (!errorMessage.empty()) {
             usage(errorMessage);
         }
         return T {};
     }
     ParameterList& Parse(ParameterList& params);
 private:
-    std::function<int(const char*)> usage;
+    UsageFunc usage;
     int argc;
     const char** argv;
 };
 template<>
-const char* Commandline::Pop(const char* errorMessage);
+const char* Commandline::Pop(const std::string& errorMessage);
 }

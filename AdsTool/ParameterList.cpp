@@ -60,7 +60,7 @@ int ParameterList::Parse(int argc, const char* argv[])
     return found;
 }
 
-Commandline::Commandline(std::function<int(const char*)> _usage, int _argc, const char* _argv[])
+Commandline::Commandline(UsageFunc _usage, int _argc, const char* _argv[])
     : usage(_usage)
     , argc(_argc)
     , argv(_argv)
@@ -75,13 +75,13 @@ ParameterList& Commandline::Parse(ParameterList& params)
 }
 
 template<>
-const char* Commandline::Pop(const char* errorMessage)
+const char* Commandline::Pop(const std::string& errorMessage)
 {
     if (argc) {
         --argc;
         return *(argv++);
     }
-    if (errorMessage) {
+    if (!errorMessage.empty()) {
         usage(errorMessage);
     }
     return nullptr;

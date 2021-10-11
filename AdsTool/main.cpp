@@ -18,9 +18,9 @@
 #include <unistd.h>
 #include <vector>
 
-int usage(const char* const errorMessage = nullptr)
+[[ noreturn ]] static void usage(const std::string& errorMessage = {})
 {
-    if (errorMessage) {
+    if (!errorMessage.empty()) {
         LOG_ERROR(errorMessage);
     }
     std::cout <<
@@ -611,7 +611,7 @@ int ParseCommand(int argc, const char* argv[])
         return it->second(make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args);
     }
     LOG_ERROR("Unknown command >" << cmd << "<\n");
-    return usage();
+    usage();
 }
 
 int main(int argc, const char* argv[])
