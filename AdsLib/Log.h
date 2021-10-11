@@ -23,6 +23,6 @@
 #define LOG_ERROR(ARGS) LOG(3, ARGS)
 
 struct Logger {
-    static constexpr size_t logLevel = 1;
+    static size_t logLevel;
     static void Log(size_t level, const std::string& msg);
 };

@@ -34,6 +34,12 @@ USAGE:
 OPTIONS:
 	--gw=<hostname> or IP address of your AmsNetId target (mandatory in standalone mode)
 	--localams=<netid> Specify your own AmsNetId (by default derived from local IP + ".1.1")
+	--log-level=<verbosity> Messages will be shown if their own level is equal or less to verbosity.
+		0 verbose | Show all messages, even if they are only useful to developers
+		1 info    | (DEFAULT) Show everything, but the verbose stuff
+		2 warn    | Don't show informational messages, just warnings and errors
+		3 error   | Don't care about warnigs, show errors only
+		4 silent  | Stay silent, don't log anything
 
 COMMANDS:
 	addroute [CMD_OPTIONS...]
@@ -570,11 +576,18 @@ int ParseCommand(int argc, const char* argv[])
     bhf::ParameterList global = {
         {"--gw"},
         {"--localams"},
+        {"--log-level"},
     };
     args.Parse(global);
     const auto localNetId = global.Get<std::string>("--localams");
     if (!localNetId.empty()) {
         bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
+    }
+
+    const auto logLevel = global.Get<size_t>("--log-level");
+    if (!localNetId.empty()) {
+        // highest loglevel is error==3, we allow 4 to disable all messages
+        Logger::logLevel = std::max(logLevel, (size_t)4);
     }
 
     const auto cmd = args.Pop<const char*>("Command is missing");
