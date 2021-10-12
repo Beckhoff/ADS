@@ -1,3 +1,14 @@
+v8:
+AdsTool: add support to show version with --version
+AdsTool: show usage on stderr instead of stdout
+AdsTool: add support to silence the error output(--log-level=<verbosity>)
+AdsTool: add support to read volume license identifier with adstool
+AdsTool: add manpage as documentation
+AdsTool: add support to create a Debian package
+
+v7:
+SKIPPED
+
 v6:
 - add adstool as an example and command line tool for automation
 -> read netids

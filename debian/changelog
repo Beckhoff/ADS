@@ -1,3 +1,12 @@
+adstool (0.0.8-1) buster; urgency=medium
+
+  * adstool: show usage() on stderr
+    adstool: support --help to show usage() on stdout
+    adstool: support --log-level to reduce or increase verbosity
+    adstool: support --version
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Tue, 12 Oct 2021 11:22:48 +0200
+
 adstool (0.0.7-1) buster; urgency=medium
 
   * adstool: add support to read volume license identifier
