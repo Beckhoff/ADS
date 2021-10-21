@@ -12,5 +12,5 @@ fi
 
 script_path="$(cd "$(dirname "${0}")" && pwd)"
 bdpg git-pre-push-check --package-dir="${script_path}/../" master
-bdpg push "${script_path}/../debian-release/adstool_"*.deb
-bdpg push "${script_path}/../debian-release/adstool-dbgsym_"*.deb
+bdpg push --distros=bullseye "${script_path}/../debian-release/adstool_"*.deb
+bdpg push --distros=bullseye "${script_path}/../debian-release/adstool-dbgsym_"*.deb

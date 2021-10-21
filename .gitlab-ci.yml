@@ -180,7 +180,7 @@ build-debian:
       - ./debian-release
 
 release-push:
-  image: ${REGISTRY_HOST}/docker-registry/docker:debian-bdpg-0.8-master
+  image: ${REGISTRY_HOST}/docker-registry/docker:debian-bdpg-1.0-master
   stage: release-push
   dependencies:
     - build-debian
