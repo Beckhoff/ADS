@@ -1,3 +1,9 @@
+adstool (0.0.9-1) bullseye; urgency=medium
+
+  * release to bullseye
+
+ -- Julian Heuking <J.Heuking@beckhoff.com>  Thu, 21 Oct 2021 12:03:24 +0200
+
 adstool (0.0.8-1) buster; urgency=medium
 
   * adstool: show usage() on stderr
