@@ -1,0 +1,11 @@
+We appreciate all contributions that help to make AdsLib better.
+
+Make sure your pull requests have the following properties:
+1. good code, Zachary Goldberg did a nice write up on this:
+   https://www.toptal.com/software/six-commandments-of-good-code
+
+2. good commit messages, Chris Beams explained this pretty well:
+   https://chris.beams.io/posts/git-commit/
+
+3. consistent coding style, simply run:
+   `make uncrustify`
