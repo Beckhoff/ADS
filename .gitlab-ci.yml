@@ -167,7 +167,7 @@ test-macos-clang:
     - ./tools/90_run_tests.sh
 
 build-debian:
-  image: ${REGISTRY_HOST}/docker-registry/docker:debian-sphinx-1.1-master
+  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: build
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends meson
@@ -180,7 +180,7 @@ build-debian:
       - ./debian-release
 
 release-push:
-  image: ${REGISTRY_HOST}/docker-registry/docker:debian-bdpg-1.1-master
+  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: release-push
   dependencies:
     - build-debian
