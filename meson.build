@@ -48,6 +48,11 @@ adslib = static_library('AdsLib',
   include_directories: inc,
 )
 
+adslib_dep = declare_dependency(
+  include_directories : inc,
+  link_with: adslib,
+)
+
 adslibtest = executable('AdsLibTest',
   'AdsLibTest/main.cpp',
   include_directories: inc,
