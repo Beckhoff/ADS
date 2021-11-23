@@ -1,3 +1,9 @@
+adstool (0.0.10-1) bullseye; urgency=medium
+
+  * libads-dev: new package to easily install AdsLib as build dependency
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Tue, 23 Nov 2021 11:31:06 +0100
+
 adstool (0.0.9-1) bullseye; urgency=medium
 
   * release to bullseye
