@@ -1,7 +1,6 @@
 stages:
   - build
   - test
-  - test-macos-clang
   - release-push
 
 cache:
@@ -45,13 +44,6 @@ build-fbsd-clang:
     - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
-
-build-macos-clang:
-  extends: .build-meson
-  tags:
-    - macOS
-  variables:
-    BHF_CI_MESON_OPTIONS: '-Dcpp_std=c++11'
 
 build-linux-gcc:
   extends: .build-meson-docker
@@ -148,22 +140,6 @@ test-fbsd-clang:
     - sleep 10
   script:
     - doas pkg install -y vim
-    - ./tools/90_run_tests.sh
-
-test-macos-clang:
-  stage: test-macos-clang
-  dependencies:
-    - build-macos-clang
-  tags:
-    - macOS
-    - rack
-  variables:
-    EXPECTED_PLATFORMID: 90
-    EXPECTED_SYSTEMID: 'E5898A06-9629-71CC-8474-DD555071C0EB'
-  before_script:
-    - nc -z 172.17.66.104 48897
-    - sleep 10
-  script:
     - ./tools/90_run_tests.sh
 
 build-debian:

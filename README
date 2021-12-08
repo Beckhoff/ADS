@@ -1,4 +1,4 @@
-This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. FreeBSD, Linux, macOS, ...) to communicate with TwinCAT devices via TCP/IP.
+This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. FreeBSD, Linux, ...) to communicate with TwinCAT devices via TCP/IP.
 
 To build this library a recent compiler with C++11 support is required. 
 
@@ -8,7 +8,6 @@ Currently (2021-03-10) tested with:
 host (amd64)     | target| compiler
 -----------------|-------|-------------
 FreeBSD 13.0     | amd64 | clang 11.0.0
-macOS 11.2.3     | amd64 | clang 12.0.0
 Ubuntu 18.04 LTS | amd64 | clang 6.0.0
 Ubuntu 18.04 LTS | amd64 | gcc 7.5.0
 Ubuntu 18.04 LTS | i686  | gcc 7.5.0
