@@ -35,8 +35,7 @@ build-linux-clang:
 build-fbsd-clang:
   extends: .build-meson
   tags:
-    - adslib
-    - freebsd13_4_build_vm
+    - tcbsd
   before_script:
     - doas pkg install -y meson
     # we dont limit grep --max-count=1, because curl would complain if grep closes the pipe
@@ -129,7 +128,7 @@ test-fbsd-clang:
   ]
   tags:
     - adslib
-    - freebsd13_4_build_vm
+    - tcbsd
   variables:
     BHF_CI_NAT_IP: '172.17.62.71'
     EXPECTED_PLATFORMID: 90
