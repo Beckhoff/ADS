@@ -4,6 +4,7 @@ set -e
 set -u
 
 cleanup() {
+	set +e
 	${ncat_pid+kill ${ncat_pid}}
 }
 trap cleanup EXIT INT TERM
