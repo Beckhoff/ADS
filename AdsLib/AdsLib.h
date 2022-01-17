@@ -12,6 +12,10 @@
 
 #include "Sockets.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Reads data synchronously from an ADS server.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
@@ -148,6 +152,27 @@ long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t
  */
 long AdsSyncGetTimeoutEx(long port, uint32_t* timeout);
 
+/** Plain C interface to bhf::ads::AddRemoteRoute */
+long AdsAddRemoteRoute(const char *remote,
+                    const char *destNetId,
+                    const char *destAddr,
+                    const char *routeName,
+                    const char *remoteUsername,
+                    const char *remotePassword);
+
+/** Plain C interface to bhf::ads::AddLocalRoute */
+long AdsAddRoute(const char *ams, const char* ip);
+
+/** Plain C interface to bhf::ads::SetLocalAddress */
+void AdsSetLocalAddress(const char *netId);
+
+/** Plain C interface to  bhf::ads::DelLocalRoute */
+void AdsDelRoute(const char *ams);
+
+#ifdef __cplusplus
+}
+#endif
+
 namespace bhf
 {
 namespace ads
@@ -199,7 +224,3 @@ long GetRemoteAddress(const IpV4 remote,
                       AmsNetId&  netId);
 }
 }
-
-#define AdsAddRoute bhf::ads::AddLocalRoute
-#define AdsDelRoute bhf::ads::DelLocalRoute
-#define AdsSetLocalAddress bhf::ads::SetLocalAddress

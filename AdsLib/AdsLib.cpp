@@ -3,6 +3,7 @@
    Copyright (c) 2021 Beckhoff Automation GmbH & Co. KG
  */
 
+#include "AdsDef.h"
 #include "AdsLib.h"
 #include "Log.h"
 #include "wrap_endian.h"
@@ -170,5 +171,39 @@ long GetRemoteAddress(const IpV4 remote, AmsNetId& netId)
     memcpy(&netId, f.data(), sizeof(netId));
     return 0;
 }
+}  // namespace ads
+}  // namespace bhf
+
+
+long AdsAddRemoteRoute(const char *remote,
+                    const char *destNetId,
+                    const char *destAddr,
+                    const char *routeName,
+                    const char *remoteUsername,
+                    const char *remotePassword
+)
+{
+    return bhf::ads::AddRemoteRoute(
+        IpV4(std::string(remote)),
+        make_AmsNetId(destNetId),
+        destAddr,
+        routeName,
+        remoteUsername,
+        remotePassword
+    );
 }
+
+long AdsAddRoute(const char *ams, const char *ip)
+{
+    return bhf::ads::AddLocalRoute(AmsNetId {ams}, ip);
+}
+
+void AdsSetLocalAddress(const char *netId)
+{
+    bhf::ads::SetLocalAddress(AmsNetId {netId});
+}
+
+void AdsDelRoute(const char *ams)
+{
+    bhf::ads::DelLocalRoute(AmsNetId {ams});
 }
