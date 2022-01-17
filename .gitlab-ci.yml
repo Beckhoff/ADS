@@ -119,7 +119,9 @@ test-linux-gcc-mips:
     QEMU_LD_PREFIX: '/usr/mips-linux-gnu'
   before_script:
     - apt update -y && apt install -y binfmt-support libstdc++-dev-mips-cross qemu-user-binfmt
+    # TODO remove as soon as we won't require privileged containers for TC anymore
     - update-binfmts --enable qemu-mips
+    - update-binfmts --disable qemu-mipsn32
 
 test-fbsd-clang:
   stage: test
