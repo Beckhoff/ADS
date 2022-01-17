@@ -1,9 +1,15 @@
 set(SOURCES
-  AdsDevice.cpp
   AdsDef.cpp
-  Log.cpp
-  Sockets.cpp
+  AdsDevice.cpp
+  AdsFile.cpp
+  AdsLib.cpp
   Frame.cpp
+  LicenseAccess.cpp
+  Log.cpp
+  RouterAccess.cpp
+  RTimeAccess.cpp
+  Sockets.cpp
+
   standalone/AdsLib.cpp
   standalone/AmsConnection.cpp
   standalone/AmsNetId.cpp
@@ -16,9 +22,8 @@ add_library(ads ${SOURCES})
 
 target_include_directories(ads PUBLIC .)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  target_link_libraries(ads PRIVATE wsock32 ws2_32)
+if(${WIN32} EQUAL 1)
+    target_link_libraries(ads PUBLIC ws2_32)
 endif()
-
 
 target_link_libraries(ads PUBLIC Threads::Threads)
