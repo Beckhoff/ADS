@@ -19,6 +19,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # Compiler flags and definitions for Visual Studio come here
 endif()
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
 add_subdirectory(AdsLib)
 add_subdirectory(AdsLibTest)
 add_subdirectory(example)
