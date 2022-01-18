@@ -6,6 +6,11 @@
 
 #include "AdsDef.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * The connection (communication port) to the message router is
  * closed. The port to be closed must previously have been opened via
@@ -38,3 +43,7 @@ long AdsGetLocalAddressEx(long port, AmsAddr* pAddr);
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AdsSyncSetTimeoutEx(long port, uint32_t timeout);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif

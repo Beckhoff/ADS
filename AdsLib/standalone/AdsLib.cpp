@@ -42,6 +42,7 @@ static AmsRouter& GetRouter()
         } \
 } while (false)
 
+
 namespace bhf
 {
 namespace ads
@@ -66,8 +67,12 @@ void SetLocalAddress(const AmsNetId ams)
 {
     GetRouter().SetLocalAddress(ams);
 }
-}
-}
+}  // namespace ads
+}  // namespace bhf
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 long AdsPortCloseEx(long port)
 {
@@ -338,3 +343,7 @@ long AdsSyncSetTimeoutEx(long port, uint32_t timeout)
     ASSERT_PORT(port);
     return GetRouter().SetTimeout((uint16_t)port, timeout);
 }
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif
