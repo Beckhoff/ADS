@@ -75,7 +75,7 @@ build-win10:
 
 .test-linux:
   stage: test
-  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:4.3
+  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:4.5
   tags:
     - docker_vm_runner
     - few_vcpus
