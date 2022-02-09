@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+/**
+   Copyright (c) 2017 - 2022 Beckhoff Automation GmbH & Co. KG
+ */
 
 #include "AdsVariable.h"
 #include "AdsDevice.h"

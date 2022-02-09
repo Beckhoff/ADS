@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+/**
+   Copyright (c) 2015 - 2022 Beckhoff Automation GmbH & Co. KG
+ */
+
 #ifdef __FreeBSD__
 #define HAS_WINTYPES 1
 using __int64 = unsigned long long;

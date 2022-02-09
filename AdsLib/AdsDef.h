@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2015 - 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2015 - 2022 Beckhoff Automation GmbH & Co. KG
  */
+
 #pragma once
 
 #if defined(USE_TWINCAT_ROUTER)

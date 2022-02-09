@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-    Copyright (C) 2021 Beckhoff Automation GmbH & Co. KG
+    Copyright (C) 2021 - 2022 Beckhoff Automation GmbH & Co. KG
     Author: Patrick Bruenn <p.bruenn@beckhoff.com>
  */
 

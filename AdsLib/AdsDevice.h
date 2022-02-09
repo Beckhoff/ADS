@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2016 - 2020 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) 2016 - 2022 Beckhoff Automation GmbH & Co. KG
  */
 
 #pragma once
+
 #include "AdsException.h"
 #include "AdsDef.h"
 #include "wrap_endian.h"
