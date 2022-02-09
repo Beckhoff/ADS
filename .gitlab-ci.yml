@@ -62,7 +62,7 @@ build-linux-gcc-mips:
 build-mxe:
   extends: .build-meson-docker
   variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++11 -Db_pie=false'
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++14 -Db_pie=false'
 
 build-win10:
   extends: .build-meson

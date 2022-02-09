@@ -20,6 +20,7 @@ struct AmsRouter : Router {
     long AddNotification(AmsRequest& request, uint32_t* pNotification, std::shared_ptr<Notification> notify);
     long DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification);
 
+    [[deprecated]]
     long AddRoute(AmsNetId ams, const IpV4& ip);
     long AddRoute(AmsNetId ams, const std::string& host);
     void DelRoute(const AmsNetId& ams);
