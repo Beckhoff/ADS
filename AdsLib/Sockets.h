@@ -44,6 +44,14 @@ protected:
 struct TcpSocket : Socket {
     TcpSocket(IpV4 ip, uint16_t port);
     uint32_t Connect() const;
+
+    /**
+     * Confirm if this TcpSocket is connected to one of the target addresses.
+     * @param[in] targetAddresses pointer to a previously allocated list of
+     *           "struct addrinfo" returned by getaddrinfo(3).
+     * @return true, this connection can be used to reach one of the targetAddresses.
+     */
+    bool IsConnectedTo(const struct addrinfo* targetAddresses) const;
 };
 
 struct UdpSocket : Socket {

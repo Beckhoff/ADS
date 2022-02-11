@@ -192,6 +192,20 @@ uint32_t TcpSocket::Connect() const
     return ntohl(source.sin_addr.s_addr);
 }
 
+bool TcpSocket::IsConnectedTo(const struct addrinfo* const targetAddresses) const
+{
+    for (auto rp = targetAddresses; rp; rp = rp->ai_next) {
+        if (m_SockAddress.sin_family == rp->ai_family) {
+            if (!memcmp(&m_SockAddress.sin_addr, &(((struct sockaddr_in*)(rp->ai_addr))->sin_addr),
+                        sizeof(m_SockAddress.sin_addr)))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 UdpSocket::UdpSocket(IpV4 ip, uint16_t port)
     : Socket(ip, port, SOCK_DGRAM)
 {}

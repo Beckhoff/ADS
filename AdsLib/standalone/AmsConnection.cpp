@@ -98,6 +98,11 @@ long AmsConnection::DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify,
     return AdsRequest(request, tmms);
 }
 
+bool AmsConnection::IsConnectedTo(const struct addrinfo* targetAddresses) const
+{
+    return socket.IsConnectedTo(targetAddresses);
+}
+
 AmsResponse* AmsConnection::Write(AmsRequest& request, const AmsAddr srcAddr)
 {
     const AoEHeader aoeHeader {

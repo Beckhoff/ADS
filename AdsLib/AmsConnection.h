@@ -75,6 +75,14 @@ struct AmsConnection {
     long DeleteNotification(const AmsAddr& amsAddr, uint32_t hNotify, uint32_t tmms, uint16_t port);
     long AdsRequest(AmsRequest& request, uint32_t timeout);
 
+    /**
+     * Confirm if this AmsConnection is connected to one of the target addresses.
+     * @param[in] targetAddresses pointer to a previously allocated list of
+     *           "struct addrinfo" returned by getaddrinfo(3).
+     * @return true, this connection can be used to reach one of the targetAddresses.
+     */
+    bool IsConnectedTo(const struct addrinfo* targetAddresses) const;
+
 private:
     friend struct AmsRouter;
     Router& router;
