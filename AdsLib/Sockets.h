@@ -10,6 +10,15 @@
 #include <stdexcept>
 #include <string>
 
+namespace bhf
+{
+namespace ads
+{
+using AddressList = std::unique_ptr<struct addrinfo, void (*)(struct addrinfo*)>;
+AddressList GetListOfAddresses(const std::string& host, const std::string& service = {});
+}
+}
+
 struct IpV4 {
     const uint32_t value;
     IpV4(const std::string& addr);

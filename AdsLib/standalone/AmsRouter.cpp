@@ -14,10 +14,28 @@ AmsRouter::AmsRouter(AmsNetId netId)
 
 long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex);
+    /**
+     * We keep this madness only for backwards compatibility, to give
+     * downstream projects time to migrate to the much saner interface.
+     */
+    struct in_addr addr;
+    static_assert(sizeof(addr) == sizeof(ip), "Oops sizeof(IpV4) doesn't match sizeof(in_addr)");
+    memcpy(&addr, &ip.value, sizeof(addr));
+    return AddRoute(ams, std::string(inet_ntoa(addr)));
+}
 
+long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
+{
+    /**
+        DNS lookups are pretty time consuming, we shouldn't do them
+        with a looked mutex! So instead we do the lookup first and
+        use the results, later.
+     */
+    auto hostAddresses = bhf::ads::GetListOfAddresses(host, "48898");
+
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     const auto oldConnection = GetConnection(ams);
-    if (oldConnection && !(ip == oldConnection->destIp)) {
+    if (oldConnection && !oldConnection->IsConnectedTo(hostAddresses.get())) {
         /**
            There is already a route for this AmsNetId, but with
            a different IP. The old route has to be deleted, first!
@@ -25,19 +43,25 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4& ip)
         return ROUTERERR_PORTALREADYINUSE;
     }
 
-    auto conn = connections.find(ip);
-    if (conn == connections.end()) {
-        conn = connections.emplace(ip, std::unique_ptr<AmsConnection>(new AmsConnection { *this, ip })).first;
-
-        /** in case no local AmsNetId was set previously, we derive one */
-        if (!localAddr) {
-            localAddr = AmsNetId {conn->second->ownIp};
+    for (const auto& conn : connections) {
+        if (conn->IsConnectedTo(hostAddresses.get())) {
+            conn->refCount++;
+            mapping[ams] = conn.get();
+            return 0;
         }
     }
 
-    conn->second->refCount++;
-    mapping[ams] = conn->second.get();
-    return !conn->second->ownIp;
+    auto conn = connections.emplace(std::unique_ptr<AmsConnection>(new AmsConnection { *this, host}));
+    if (conn.second) {
+        /** in case no local AmsNetId was set previously, we derive one */
+        if (!localAddr) {
+            localAddr = AmsNetId {conn.first->get()->ownIp};
+        }
+        conn.first->get()->refCount++;
+        mapping[ams] = conn.first->get();
+        return !conn.first->get()->ownIp;
+    }
+    return -1;
 }
 
 void AmsRouter::DelRoute(const AmsNetId& ams)
@@ -54,7 +78,7 @@ void AmsRouter::DelRoute(const AmsNetId& ams)
     }
 }
 
-void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)
+void AmsRouter::DeleteIfLastConnection(const AmsConnection* const conn)
 {
     if (conn) {
         for (const auto& r : mapping) {
@@ -62,7 +86,12 @@ void AmsRouter::DeleteIfLastConnection(const AmsConnection* conn)
                 return;
             }
         }
-        connections.erase(conn->destIp);
+        for (auto it = connections.begin(); it != connections.end(); ++it) {
+            if (conn == it->get()) {
+                connections.erase(it);
+                return;
+            }
+        }
     }
 }
 
@@ -134,20 +163,11 @@ long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 AmsConnection* AmsRouter::GetConnection(const AmsNetId& amsDest)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    const auto it = __GetConnection(amsDest);
-    if (it == connections.end()) {
-        return nullptr;
-    }
-    return it->second.get();
-}
-
-std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator AmsRouter::__GetConnection(const AmsNetId& amsDest)
-{
     const auto it = mapping.find(amsDest);
     if (it != mapping.end()) {
-        return connections.find(it->second->destIp);
+        return it->second;
     }
-    return connections.end();
+    return nullptr;
 }
 
 long AmsRouter::AdsRequest(AmsRequest& request)

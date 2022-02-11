@@ -32,7 +32,7 @@ namespace ads
 long AddLocalRoute(const AmsNetId ams, const char* ip)
 {
     try {
-        return GetRouter().AddRoute(ams, IpV4(ip));
+        return GetRouter().AddRoute(ams, ip);
     } catch (const std::bad_alloc&) {
         return GLOBALERR_NO_MEMORY;
     } catch (const std::runtime_error&) {

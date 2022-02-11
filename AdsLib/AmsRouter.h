@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AmsConnection.h"
+#include <unordered_set>
 
 struct AmsRouter : Router {
     AmsRouter(AmsNetId netId = AmsNetId {});
@@ -20,6 +21,7 @@ struct AmsRouter : Router {
     long DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hNotification);
 
     long AddRoute(AmsNetId ams, const IpV4& ip);
+    long AddRoute(AmsNetId ams, const std::string& host);
     void DelRoute(const AmsNetId& ams);
     AmsConnection* GetConnection(const AmsNetId& pAddr);
     long AdsRequest(AmsRequest& request);
@@ -27,10 +29,9 @@ struct AmsRouter : Router {
 private:
     AmsNetId localAddr;
     std::recursive_mutex mutex;
-    std::map<IpV4, std::unique_ptr<AmsConnection> > connections;
+    std::unordered_set<std::unique_ptr<AmsConnection> > connections;
     std::map<AmsNetId, AmsConnection*> mapping;
 
-    std::map<IpV4, std::unique_ptr<AmsConnection> >::iterator __GetConnection(const AmsNetId& pAddr);
     void DeleteIfLastConnection(const AmsConnection* conn);
 
     std::array<AmsPort, NUM_PORTS_MAX> ports;

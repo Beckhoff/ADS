@@ -13,6 +13,22 @@
 #include <sstream>
 #include <system_error>
 
+namespace bhf
+{
+namespace ads
+{
+AddressList GetListOfAddresses(const std::string& host, const std::string& service)
+{
+    struct addrinfo* results;
+
+    if (getaddrinfo(host.c_str(), service.c_str(), nullptr, &results)) {
+        throw std::runtime_error("Invalid or unknown host: " + host);
+    }
+    return AddressList { results, [](struct addrinfo* p) { freeaddrinfo(p); }};
+}
+}
+}
+
 static const struct addrinfo addrinfo = []() {
                                             struct addrinfo a;
                                             memset(&a, 0, sizeof(a));
