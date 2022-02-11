@@ -183,7 +183,7 @@ void SetLocalAddress(AmsNetId ams);
  * @param[in] remotePassword password for the user on the remote TwinCAT system
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AddRemoteRoute(const IpV4         remote,
+long AddRemoteRoute(const std::string& remote,
                     AmsNetId           destNetId,
                     const std::string& destAddr,
                     const std::string& routeName,
@@ -196,8 +196,8 @@ long AddRemoteRoute(const IpV4         remote,
  * @param[out] netId on success the AmsNetId of the remote TwinCAT system is written here
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long GetRemoteAddress(const IpV4 remote,
-                      AmsNetId&  netId);
+long GetRemoteAddress(const std::string& remote,
+                      AmsNetId&          netId);
 }
 }
 

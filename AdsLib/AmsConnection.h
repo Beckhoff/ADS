@@ -68,7 +68,7 @@ private:
 };
 
 struct AmsConnection {
-    AmsConnection(Router& __router, IpV4 destIp = IpV4 { "" });
+    AmsConnection(Router& __router, const struct addrinfo* destination = nullptr);
     ~AmsConnection();
 
     SharedDispatcher CreateNotifyMapping(uint32_t hNotify, std::shared_ptr<Notification> notification);
@@ -111,6 +111,5 @@ private:
     SharedDispatcher DispatcherListGet(const VirtualConnection& connection);
 
 public:
-    const IpV4 destIp;
     const uint32_t ownIp;
 };

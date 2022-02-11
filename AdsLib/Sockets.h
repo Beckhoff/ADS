@@ -41,17 +41,17 @@ struct Socket {
 protected:
     int m_WSAInitialized;
     SOCKET m_Socket;
-    sockaddr_in m_SockAddress;
+    sockaddr_storage m_SockAddress;
     const sockaddr* const m_DestAddr;
-    const size_t m_DestAddrLen;
+    size_t m_DestAddrLen;
 
-    Socket(IpV4 ip, uint16_t port, int type);
+    Socket(const struct addrinfo* host, int type);
     ~Socket();
     bool Select(timeval* timeout) const;
 };
 
 struct TcpSocket : Socket {
-    TcpSocket(IpV4 ip, uint16_t port);
+    TcpSocket(const struct addrinfo* host);
     uint32_t Connect() const;
 
     /**
@@ -64,5 +64,5 @@ struct TcpSocket : Socket {
 };
 
 struct UdpSocket : Socket {
-    UdpSocket(IpV4 ip, uint16_t port);
+    UdpSocket(const struct addrinfo* host);
 };

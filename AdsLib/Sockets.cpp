@@ -72,18 +72,31 @@ bool IpV4::operator==(const IpV4& ref) const
     return value == ref.value;
 }
 
-Socket::Socket(IpV4 ip, uint16_t port, int type)
+Socket::Socket(const struct addrinfo* const host, const int type)
     : m_WSAInitialized(!InitSocketLibrary()),
-    m_Socket(socket(AF_INET, type, 0)),
     m_DestAddr(SOCK_DGRAM == type ? reinterpret_cast<const struct sockaddr*>(&m_SockAddress) : nullptr),
-    m_DestAddrLen(m_DestAddr ? sizeof(m_SockAddress) : 0)
+    m_DestAddrLen(0)
 {
-    if (INVALID_SOCKET == m_Socket) {
-        throw std::system_error(WSAGetLastError(), std::system_category());
+    for (auto rp = host; rp; rp = rp->ai_next) {
+        m_Socket = socket(rp->ai_family, type, 0);
+        if (INVALID_SOCKET == m_Socket) {
+            continue;
+        }
+        if (SOCK_STREAM == type) {
+            if (::connect(m_Socket, rp->ai_addr, rp->ai_addrlen)) {
+                LOG_WARN("Socket(): connect failed");
+                closesocket(m_Socket);
+                m_Socket = INVALID_SOCKET;
+                continue;
+            }
+        } else { /*if (SOCK_DGRAM == type)*/
+            m_DestAddrLen = rp->ai_addrlen;
+        }
+        memcpy(&m_SockAddress, rp->ai_addr, std::min<size_t>(sizeof(m_SockAddress), rp->ai_addrlen));
+        return;
     }
-    m_SockAddress.sin_family = AF_INET;
-    m_SockAddress.sin_port = htons(port);
-    m_SockAddress.sin_addr.s_addr = htonl(ip.value);
+    LOG_ERROR("Unable to create socket");
+    throw std::system_error(WSAGetLastError(), std::system_category());
 }
 
 Socket::~Socket()
@@ -176,8 +189,8 @@ size_t Socket::write(const Frame& frame) const
     return status;
 }
 
-TcpSocket::TcpSocket(const IpV4 ip, const uint16_t port)
-    : Socket(ip, port, SOCK_STREAM)
+TcpSocket::TcpSocket(const struct addrinfo* const host)
+    : Socket(host, SOCK_STREAM)
 {
     // AdsDll.lib seems to use TCP_NODELAY, we use it to be compatible
     const int enable = 0;
@@ -188,33 +201,31 @@ TcpSocket::TcpSocket(const IpV4 ip, const uint16_t port)
 
 uint32_t TcpSocket::Connect() const
 {
-    const uint32_t addr = ntohl(m_SockAddress.sin_addr.s_addr);
-
-    if (::connect(m_Socket, reinterpret_cast<const sockaddr*>(&m_SockAddress), sizeof(m_SockAddress))) {
-        LOG_ERROR("Connect TCP socket failed with: " << std::strerror(WSAGetLastError()));
-        throw std::system_error(WSAGetLastError(), std::system_category());
-    }
-
-    struct sockaddr_in source;
+    struct sockaddr_storage source;
     socklen_t len = sizeof(source);
 
     if (getsockname(m_Socket, reinterpret_cast<sockaddr*>(&source), &len)) {
         LOG_ERROR("Read local tcp/ip address failed");
         throw std::runtime_error("Read local tcp/ip address failed");
     }
-    LOG_INFO("Connected to " << ((addr & 0xff000000) >> 24) << '.' << ((addr & 0xff0000) >> 16) << '.' <<
-             ((addr & 0xff00) >> 8) << '.' << (addr & 0xff));
 
-    return ntohl(source.sin_addr.s_addr);
+    switch (source.ss_family) {
+    case AF_INET:
+        return ntohl(reinterpret_cast<sockaddr_in*>(&source)->sin_addr.s_addr);
+
+    case AF_INET6:
+        return 0xffffffff;
+
+    default:
+        return 0;
+    }
 }
 
 bool TcpSocket::IsConnectedTo(const struct addrinfo* const targetAddresses) const
 {
     for (auto rp = targetAddresses; rp; rp = rp->ai_next) {
-        if (m_SockAddress.sin_family == rp->ai_family) {
-            if (!memcmp(&m_SockAddress.sin_addr, &(((struct sockaddr_in*)(rp->ai_addr))->sin_addr),
-                        sizeof(m_SockAddress.sin_addr)))
-            {
+        if (m_SockAddress.ss_family == rp->ai_family) {
+            if (!memcmp(&m_SockAddress, rp->ai_addr, std::min<size_t>(sizeof(m_SockAddress), rp->ai_addrlen))) {
                 return true;
             }
         }
@@ -222,6 +233,6 @@ bool TcpSocket::IsConnectedTo(const struct addrinfo* const targetAddresses) cons
     return false;
 }
 
-UdpSocket::UdpSocket(IpV4 ip, uint16_t port)
-    : Socket(ip, port, SOCK_DGRAM)
+UdpSocket::UdpSocket(const struct addrinfo* const host)
+    : Socket(host, SOCK_DGRAM)
 {}

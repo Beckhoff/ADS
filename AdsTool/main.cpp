@@ -222,7 +222,7 @@ COMMANDS:
 typedef int (* CommandFunc)(const AmsNetId, const uint16_t, const std::string&, bhf::Commandline&);
 using CommandMap = std::map<const std::string, CommandFunc>;
 
-int RunAddRoute(const IpV4 remote, bhf::Commandline& args)
+int RunAddRoute(const std::string& remote, bhf::Commandline& args)
 {
     bhf::ParameterList params = {
         {"--addr"},
@@ -301,7 +301,7 @@ int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw,
     }
 }
 
-int RunNetId(const IpV4 remote)
+int RunNetId(const std::string& remote)
 {
     AmsNetId netId;
     bhf::ads::GetRemoteAddress(remote, netId);

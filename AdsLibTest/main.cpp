@@ -98,32 +98,26 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const auto local_name = "127.0.0.1";
-        static const IpV4 ip_local(local_name);
         AmsRouter testee;
 
         // test new Ams with new Ip
         fructose_assert(0 == testee.AddRoute(netId_1, local_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
 
         // existent Ams with new Ip -> close old connection manually, now
         fructose_assert(ROUTERERR_PORTALREADYINUSE == testee.AddRoute(netId_1, remote_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_local == testee.GetConnection(netId_1)->destIp);
         testee.DelRoute(netId_1);
         fructose_assert(0 == testee.AddRoute(netId_1, remote_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
 
         // new Ams with existent Ip
         fructose_assert(0 == testee.AddRoute(netId_2, remote_name));
         fructose_assert(!!testee.GetConnection(netId_2));
-        fructose_assert(ip_remote == testee.GetConnection(netId_2)->destIp);
 
         // already exists
         fructose_assert(0 == testee.AddRoute(netId_1, remote_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
     }
 
     void testAmsRouterDelRoute(const std::string&)
@@ -131,23 +125,19 @@ struct TestAmsRouter : test_base<TestAmsRouter> {
         static const AmsNetId netId_1 { 192, 168, 0, 231, 1, 1 };
         static const AmsNetId netId_2 { 127, 0, 0, 1, 2, 1 };
         static const auto local_name = "127.0.0.1";
-        static const IpV4 ip_local(local_name);
         AmsRouter testee;
 
         // add + remove -> null
         fructose_assert(0 == testee.AddRoute(netId_1, remote_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
         testee.DelRoute(netId_1);
         fructose_assert(!testee.GetConnection(netId_1));
 
         // add_1, add_2, remove_1 -> null_1 valid_2
         fructose_assert(0 == testee.AddRoute(netId_1, remote_name));
         fructose_assert(!!testee.GetConnection(netId_1));
-        fructose_assert(ip_remote == testee.GetConnection(netId_1)->destIp);
         fructose_assert(0 == testee.AddRoute(netId_2, local_name));
         fructose_assert(!!testee.GetConnection(netId_2));
-        fructose_assert(ip_local == testee.GetConnection(netId_2)->destIp);
         testee.DelRoute(netId_1);
         fructose_assert(!testee.GetConnection(netId_1));
         fructose_assert(!!testee.GetConnection(netId_2));
@@ -190,7 +180,6 @@ private:
             AmsNetId netId {192, 168, 0, i, 0, id};
             fructose_assert_eq(0, testee.AddRoute(netId, remote_name));
             fructose_assert(!!testee.GetConnection(netId));
-            fructose_assert(ip_remote == testee.GetConnection(netId)->destIp);
         }
 
         for (uint8_t i = 0; i < 255; ++i) {

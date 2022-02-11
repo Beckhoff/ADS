@@ -61,12 +61,11 @@ SharedDispatcher AmsConnection::DispatcherListGet(const VirtualConnection& conne
     return {};
 }
 
-AmsConnection::AmsConnection(Router& __router, IpV4 __destIp)
+AmsConnection::AmsConnection(Router& __router, const struct addrinfo* const destination)
     : router(__router),
-    socket(__destIp, ADS_TCP_SERVER_PORT),
+    socket(destination),
     refCount(0),
     invokeId(0),
-    destIp(__destIp),
     ownIp(socket.Connect())
 {
     receiver = std::thread(&AmsConnection::TryRecv, this);

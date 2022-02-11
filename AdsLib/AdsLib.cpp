@@ -47,7 +47,7 @@ enum UdpServiceId : uint32_t {
     RESPONSE = 0x80000000,
 };
 
-static long SendRecv(const IpV4 remote, Frame& f, const uint32_t serviceId)
+static long SendRecv(const std::string& remote, Frame& f, const uint32_t serviceId)
 {
     f.prepend(htole(serviceId));
 
@@ -57,7 +57,8 @@ static long SendRecv(const IpV4 remote, Frame& f, const uint32_t serviceId)
     static const uint32_t UDP_COOKIE = 0x71146603;
     f.prepend(htole(UDP_COOKIE));
 
-    UdpSocket s{remote, 48899};
+    const auto addresses = GetListOfAddresses(remote, "48899");
+    UdpSocket s{addresses.get()};
     s.write(f);
     f.reset();
 
@@ -87,7 +88,7 @@ static long SendRecv(const IpV4 remote, Frame& f, const uint32_t serviceId)
     return 0;
 }
 
-long AddRemoteRoute(const IpV4         remote,
+long AddRemoteRoute(const std::string& remote,
                     AmsNetId           destNetId,
                     const std::string& destAddr,
                     const std::string& routeName,
@@ -147,7 +148,7 @@ long AddRemoteRoute(const IpV4         remote,
     return ADSERR_DEVICE_INVALIDDATA;
 }
 
-long GetRemoteAddress(const IpV4 remote, AmsNetId& netId)
+long GetRemoteAddress(const std::string& remote, AmsNetId& netId)
 {
     Frame f { 128 };
 

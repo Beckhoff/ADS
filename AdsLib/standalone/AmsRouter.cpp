@@ -51,7 +51,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
         }
     }
 
-    auto conn = connections.emplace(std::unique_ptr<AmsConnection>(new AmsConnection { *this, host}));
+    auto conn = connections.emplace(std::unique_ptr<AmsConnection>(new AmsConnection { *this, hostAddresses.get()}));
     if (conn.second) {
         /** in case no local AmsNetId was set previously, we derive one */
         if (!localAddr) {
