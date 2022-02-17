@@ -15,7 +15,11 @@ namespace bhf
 namespace ads
 {
 using AddressList = std::unique_ptr<struct addrinfo, void (*)(struct addrinfo*)>;
-AddressList GetListOfAddresses(const std::string& host, const std::string& service = {});
+/**
+ * Splits the provided host string into host and port. If no port was found
+ * in the host string, the provided default port is used.
+ */
+AddressList GetListOfAddresses(const std::string& hostPort, const std::string& defaultPort = {});
 }
 }
 

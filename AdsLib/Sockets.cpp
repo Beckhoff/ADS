@@ -17,10 +17,42 @@ namespace bhf
 {
 namespace ads
 {
-AddressList GetListOfAddresses(const std::string& host, const std::string& service)
+/**
+ * Splits the provided host string into host and port. If no port was found
+ * in the host string, port is returned untouched acting as a default value.
+ */
+static void ParseHostAndPort(std::string& host, std::string& port)
 {
-    struct addrinfo* results;
+	auto split = host.find_last_of(":");
 
+	if (host.find_first_of(":") != split) {
+		// more than one colon -> IPv6
+		const auto closingBracket = host.find_last_of("]");
+		if (closingBracket > split) {
+			// IPv6 without port
+			split = host.npos;
+		}
+	}
+	if (split != host.npos) {
+		port = host.substr(split + 1);
+		host.resize(split);
+	}
+	// remove brackets
+	if (*host.crbegin() == ']') {
+		host.pop_back();
+	}
+	if (*host.begin() == '[') {
+		host.erase(host.begin());
+	}
+}
+
+AddressList GetListOfAddresses(const std::string& hostPort, const std::string& defaultPort)
+{
+    auto host = std::string(hostPort);
+    auto service = std::string(defaultPort);
+    ParseHostAndPort(host, service);
+
+    struct addrinfo* results;
     if (getaddrinfo(host.c_str(), service.c_str(), nullptr, &results)) {
         throw std::runtime_error("Invalid or unknown host: " + host);
     }
