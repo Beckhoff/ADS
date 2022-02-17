@@ -86,7 +86,7 @@ build-win10:
     EXPECTED_PLATFORMID: 92
     EXPECTED_SYSTEMID: '95EEFDE0-0392-1452-275F-1BF9ACCB924E'
   script:
-    - apt update -y && apt install -y xxd
+    - apt update -y && apt install -y socat xxd
     - ./tools/90_run_tests.sh
 
 test-linux-clang:
