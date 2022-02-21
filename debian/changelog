@@ -1,3 +1,11 @@
+adstool (0.0.11-1) bullseye; urgency=medium
+
+  * AdsLib: add IPv6 support
+    AdsLib: support variable TCP port for ADS destination
+    AdsTool: fix broken --log-level option
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Mon, 21 Feb 2022 14:57:24 +0100
+
 adstool (0.0.10-1) bullseye; urgency=medium
 
   * libads-dev: new package to easily install AdsLib as build dependency
