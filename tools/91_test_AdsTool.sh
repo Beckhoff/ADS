@@ -59,6 +59,23 @@ check_license() {
 	fi
 }
 
+check_loglevel() {
+	local _hidden
+	_hidden="$("${ads_tool}" [] --log-level=4 netid 2>&1 | tee "${tmpfile}" | wc -l)"
+	if test "${_hidden}" -gt 0; then
+		printf 'check_loglevel(): failed.\n--log-level=4 should have disable all messages, but we saw:\n' >&2
+		cat "${tmpfile}"
+		return 1
+	fi
+
+	local _default
+	_default="$("${ads_tool}" [] netid 2>&1 | wc -l)"
+	if ! test "${_default}" -gt 0; then
+		printf 'check_loglevel() failed.\nBy default we should see an error message for our broken hostname\n' >&2
+		return 1
+	fi
+}
+
 check_pciscan() {
 	check pciscan 0x15EC5000
 }
@@ -179,6 +196,9 @@ readonly netid
 trap cleanup EXIT INT TERM
 tmpfile="$(mktemp)"
 readonly tmpfile
+
+# --log-level requires no PLC
+check_loglevel
 
 # always check state first to have the PLC in RUN!
 check_state

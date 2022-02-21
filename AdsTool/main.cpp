@@ -598,11 +598,9 @@ int ParseCommand(int argc, const char* argv[])
         bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
     }
 
-    const auto logLevel = global.Get<size_t>("--log-level");
-    if (!localNetId.empty()) {
-        // highest loglevel is error==3, we allow 4 to disable all messages
-        Logger::logLevel = std::max(logLevel, (size_t)4);
-    }
+    const auto logLevel = global.Get<size_t>("--log-level", 1);
+    // highest loglevel is error==3, we allow 4 to disable all messages
+    Logger::logLevel = std::min(logLevel, (size_t)4);
 
     const auto cmd = args.Pop<const char*>("Command is missing");
     if (!strcmp("addroute", cmd)) {
