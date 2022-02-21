@@ -27,9 +27,8 @@ struct ParameterOption {
 };
 
 template<typename T>
-T StringTo(const std::string& v)
+T StringTo(const std::string& v, T value = {})
 {
-    T value = 0;
     if (v.size()) {
         const auto asHex = (v.npos != v.rfind("0x", 0));
         std::stringstream converter;
@@ -39,9 +38,9 @@ T StringTo(const std::string& v)
     return value;
 }
 
-template<> std::string StringTo<>(const std::string& v);
-template<> bool StringTo<bool>(const std::string& v);
-template<> uint8_t StringTo<uint8_t>(const std::string& v);
+template<> std::string StringTo<>(const std::string& v, std::string value);
+template<> bool StringTo<bool>(const std::string& v, bool value);
+template<> uint8_t StringTo<uint8_t>(const std::string& v, uint8_t defaultValue);
 
 struct ParameterList {
     using MapType = std::map<std::string, ParameterOption>;
@@ -56,13 +55,13 @@ struct ParameterList {
     int Parse(int argc, const char* argv[]);
 
     template<typename T>
-    T Get(const std::string& key) const
+    T Get(const std::string& key, const T defaultValue = {}) const
     {
         auto it = map.find(key);
         if (it == map.end()) {
             throw std::runtime_error("invalid parameter " + key);
         }
-        return StringTo<T>(it->second.value);
+        return StringTo<T>(it->second.value, defaultValue);
     }
 };
 

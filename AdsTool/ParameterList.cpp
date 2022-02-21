@@ -12,21 +12,21 @@ namespace bhf
 #define ERR_INVALID_PARAMETER (-2)
 
 template<>
-std::string StringTo<std::string>(const std::string& v)
+std::string StringTo<std::string>(const std::string& v, const std::string)
 {
     return v;
 }
 
 template<>
-bool StringTo<bool>(const std::string& v)
+bool StringTo<bool>(const std::string& v, const bool)
 {
     return !v.compare("true");
 }
 
 template<>
-uint8_t StringTo<uint8_t>(const std::string& v)
+uint8_t StringTo<uint8_t>(const std::string& v, uint8_t defaultValue)
 {
-    return static_cast<uint8_t>(StringTo<uint32_t>(v));
+    return static_cast<uint8_t>(StringTo<uint32_t>(v), defaultValue);
 }
 
 int ParameterList::Parse(int argc, const char* argv[])
