@@ -516,7 +516,7 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
     case sizeof(uint16_t):
         {
-            const auto writeBuffer = bhf::StringTo<uint16_t>(value);
+            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint16_t>(value));
             LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint16_t)writeBuffer << "<\n");
             const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
                                                   *handle,
@@ -527,7 +527,7 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
     case sizeof(uint32_t):
         {
-            const auto writeBuffer = bhf::StringTo<uint32_t>(value);
+            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint32_t>(value));
             LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint32_t)writeBuffer << "<\n");
             const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
                                                   *handle,
@@ -538,7 +538,7 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
     case sizeof(uint64_t):
         {
-            const auto writeBuffer = bhf::StringTo<uint32_t>(value);
+            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint32_t>(value));
             LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint64_t)writeBuffer << "<\n");
             const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
                                                   *handle,
