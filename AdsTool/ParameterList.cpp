@@ -26,7 +26,7 @@ bool StringTo<bool>(const std::string& v, const bool)
 template<>
 uint8_t StringTo<uint8_t>(const std::string& v, uint8_t defaultValue)
 {
-    return static_cast<uint8_t>(StringTo<uint32_t>(v), defaultValue);
+    return static_cast<uint8_t>(StringTo<uint32_t>(v, defaultValue));
 }
 
 int ParameterList::Parse(int argc, const char* argv[])
