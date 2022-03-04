@@ -147,23 +147,37 @@ check_state() {
 }
 
 check_var() {
+	local _response
 	check var --type=BOOL 'MAIN.bInitTest' '1'
-	check var --type=BOOL 'MAIN.bInitTest'
+	_response="$(check var --type=BOOL 'MAIN.bInitTest')"
+	if ! test "${_response}" = '1'; then
+		printf 'check_var() BOOL mismatch:\n>%s<\n>%s<\n' "1" "${_response}" >&2
+		return 1
+	fi
+
 	check var --type=BOOL 'MAIN.bInitTest' '0'
+	_response="$(check var --type=BOOL 'MAIN.bInitTest')"
+	if ! test "${_response}" = '0'; then
+		printf 'check_var() BOOL mismatch:\n>%s<\n>%s<\n' "0" "${_response}" >&2
+		return 1
+	fi
+
 	check var --type=DWORD 'MAIN.nTestCasesFailed' '10'
-	check var --type=DWORD 'MAIN.nTestCasesFailed'
+	_response="$( check var --type=DWORD 'MAIN.nTestCasesFailed')"
+	if ! test "${_response}" = '10'; then
+		printf 'check_var() DWORD mismatch:\n>%s<\n>%s<\n' "10" "${_response}" >&2
+		return 1
+	fi
 
 	local _test_string
 	_test_string="$(date +%F%T)"
 	readonly _test_string
 	check var --type=STRING 'MAIN.sLogPath' "${_test_string}"
-	local _response
 	_response="$(check var --type=STRING 'MAIN.sLogPath')"
 	if ! test "${_test_string}" = "${_response}"; then
 		printf 'check_var() string mismatch:\n>%s<\n>%s<\n' "${_test_string}" "${_response}" >&2
 		return 1
 	fi
-
 }
 
 check_version() {
