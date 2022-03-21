@@ -1,6 +1,6 @@
-########
-adstool
-########
+#######################
+ads, adstool, tcadstool
+#######################
 Command line tool to access TwinCAT systems via ADS
 
 

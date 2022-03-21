@@ -74,5 +74,5 @@ pygments_style = None
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('adstool', 'adstool', 'adstool Documentation',[author], 1),
+    ('adstool', 'adstool', 'ads, adstool, tcadstool Documentation', [author], 1),
 ]
