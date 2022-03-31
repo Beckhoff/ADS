@@ -16,7 +16,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   )
   add_definitions(-D_GNU_SOURCE)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # Compiler flags and definitions for Visual Studio come here
+  add_compile_options("/wd4244") # argument - integer data loss conversion warnings 
+  add_compile_options("/wd4267") # initializing - integer data loss conversion warnings
+  add_compile_options("/wd4996") # unsecure stdc api warnings
 endif()
 
 if (WIN32)
@@ -29,7 +31,10 @@ endif()
 option(ADSLIB_ONLY "Build only the ADS library, not examples or tests" OFF)
 
 add_subdirectory(AdsLib)
-if(ADSLIB_ONLY STREQUAL "OFF")
+
+if(${ADSLIB_ONLY} STREQUAL "OFF")
+    message(NOTICE "ADS: Not building tests and examples")
+else()
     add_subdirectory(AdsLibTest)
     add_subdirectory(example)
 endif()
