@@ -250,7 +250,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
 
     if (!command.compare("read")) {
         const AdsFile adsFile { device, next,
-                                bhf::ads::SYSTEMSERVICE_OPENGENERIC | bhf::ads::FOPEN::READ | bhf::ads::FOPEN::BINARY |
+                                bhf::ads::FOPEN::READ | bhf::ads::FOPEN::BINARY |
                                 bhf::ads::FOPEN::ENSURE_DIR};
         uint32_t bytesRead;
         do {
@@ -276,7 +276,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
             length = read(0, buf, sizeof(buf));
         }
     } else if (!command.compare("delete")) {
-        AdsFile::Delete(device, next, bhf::ads::SYSTEMSERVICE_OPENGENERIC | bhf::ads::FOPEN::ENABLE_DIR);
+        AdsFile::Delete(device, next, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
     } else {
         LOG_ERROR(__FUNCTION__ << "(): Unknown file command '" << command << "'\n");
         return -1;
