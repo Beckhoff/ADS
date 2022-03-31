@@ -22,7 +22,7 @@ namespace bhf
 namespace ads
 {
 enum nSystemServiceOpenFile : uint32_t {
-    SYSTEMSERVICE_OPENGENERIC = 1,
+    SYSTEMSERVICE_OPENGENERIC /*[[deprecated]]*/ = 1,
 };
 }
 }
