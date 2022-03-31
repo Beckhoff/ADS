@@ -29,18 +29,18 @@ private:
 
 struct SearchPciSlotResNew {
     static constexpr size_t MAXBASEADDRESSES = 6;
-    const std::array<uint32_t, MAXBASEADDRESSES> leBaseAddresses;
-    const uint32_t leSize[MAXBASEADDRESSES];
-    const uint32_t leBusNumber;
-    const uint32_t leSlotNumber;
-    const uint16_t leBoardIrq;
-    const uint16_t lePciRegViaPorts;
+    std::array<uint32_t, MAXBASEADDRESSES> leBaseAddresses;
+    uint32_t leSize[MAXBASEADDRESSES];
+    uint32_t leBusNumber;
+    uint32_t leSlotNumber;
+    uint16_t leBoardIrq;
+    uint16_t lePciRegViaPorts;
 };
 
 struct SearchPciBusResNew {
     static constexpr size_t MAXSLOTRESPONSE = 64;
-    uint32_t leFound;
-    std::array<SearchPciSlotResNew, MAXSLOTRESPONSE> slot;
+    uint32_t leFound {};
+    std::array<SearchPciSlotResNew, MAXSLOTRESPONSE> slot {};
     uint32_t nFound() const
     {
         return bhf::ads::letoh(leFound);
@@ -63,7 +63,7 @@ bool RouterAccess::PciScan(const uint64_t pci_id, std::ostream& os) const
 #define ROUTERADSGRP_ACCESS_HARDWARE 0x00000005
 #define ROUTERADSOFFS_A_HW_SEARCHPCIBUS 0x00000003
 
-    SearchPciBusResNew res {};
+    SearchPciBusResNew res;
     uint32_t bytesRead;
 
     const auto req = SearchPciBusReq {pci_id};
@@ -82,7 +82,7 @@ bool RouterAccess::PciScan(const uint64_t pci_id, std::ostream& os) const
 
     if (res.slot.size() < res.nFound()) {
         LOG_WARN(__FUNCTION__
-                 << "(): data seems corrupt. Slot count 0x" << std::hex << res.nFound() << " exceedes maximum 0x" << res.slot.size() <<
+                 << "(): data seems corrupt. Slot count 0x" << std::hex << res.nFound() << " exceeds maximum 0x" << res.slot.size() <<
                  " -> truncating\n");
     }
 

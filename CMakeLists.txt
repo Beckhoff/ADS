@@ -19,8 +19,17 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # Compiler flags and definitions for Visual Studio come here
 endif()
 
-option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+if (WIN32)
+  # need __dllexport/_dllimport declarations on classes & free functions Windows, so default to static linking
+  option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+else()
+  option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+endif()
+
+option(ADSLIB_ONLY "Build only the ADS library, not examples or tests" OFF)
 
 add_subdirectory(AdsLib)
-add_subdirectory(AdsLibTest)
-add_subdirectory(example)
+if(ADSLIB_ONLY STREQUAL "OFF")
+    add_subdirectory(AdsLibTest)
+    add_subdirectory(example)
+endif()

@@ -38,7 +38,7 @@ struct Notification {
             data[i] = ring.ReadFromLittleEndian<uint8_t>();
         }
         header->nTimeStamp = timestamp;
-        callback(&connection.second, header, hUser);
+        callback(const_cast<AmsAddr*>(&connection.second), header, hUser);
     }
 
     uint32_t Size() const
