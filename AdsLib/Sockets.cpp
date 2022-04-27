@@ -23,27 +23,27 @@ namespace ads
  */
 static void ParseHostAndPort(std::string& host, std::string& port)
 {
-	auto split = host.find_last_of(":");
+    auto split = host.find_last_of(":");
 
-	if (host.find_first_of(":") != split) {
-		// more than one colon -> IPv6
-		const auto closingBracket = host.find_last_of("]");
-		if (closingBracket > split) {
-			// IPv6 without port
-			split = host.npos;
-		}
-	}
-	if (split != host.npos) {
-		port = host.substr(split + 1);
-		host.resize(split);
-	}
-	// remove brackets
-	if (*host.crbegin() == ']') {
-		host.pop_back();
-	}
-	if (*host.begin() == '[') {
-		host.erase(host.begin());
-	}
+    if (host.find_first_of(":") != split) {
+        // more than one colon -> IPv6
+        const auto closingBracket = host.find_last_of("]");
+        if (closingBracket > split) {
+            // IPv6 without port
+            split = host.npos;
+        }
+    }
+    if (split != host.npos) {
+        port = host.substr(split + 1);
+        host.resize(split);
+    }
+    // remove brackets
+    if (*host.crbegin() == ']') {
+        host.pop_back();
+    }
+    if (*host.begin() == '[') {
+        host.erase(host.begin());
+    }
 }
 
 AddressList GetListOfAddresses(const std::string& hostPort, const std::string& defaultPort)
