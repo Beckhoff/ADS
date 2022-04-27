@@ -15,6 +15,7 @@
 #include <cstring>
 #include <iostream>
 #include <limits>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -48,6 +49,7 @@ OPTIONS:
 		2 warn    | Don't show informational messages, just warnings and errors
 		3 error   | Don't care about warnigs, show errors only
 		4 silent  | Stay silent, don't log anything
+	--retry=<retries> Number of attemps to retry the entire command.
 	--version Show version on stdout
 
 COMMANDS:
@@ -586,6 +588,28 @@ try
     return -1;
 }
 
+template<typename T>
+int Run(T f, size_t retries)
+{
+    auto result = TryRun(f);
+
+    // success or no retry allowed
+    if (!result || !retries) {
+        return result;
+    }
+
+    while (retries-- > 0) {
+        LOG_WARN("Command failed, retrying...\n");
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        result = TryRun(f);
+        if (!result) {
+            return 0;
+        }
+    }
+    LOG_ERROR("Too many retries, giving up!\n");
+    return result;
+}
+
 int ParseCommand(int argc, const char* argv[])
 {
     auto args = bhf::Commandline {usage, argc, argv};
@@ -607,8 +631,11 @@ int ParseCommand(int argc, const char* argv[])
         {"--gw"},
         {"--localams"},
         {"--log-level"},
+        {"--retry"},
     };
     args.Parse(global);
+
+    const auto retries = global.Get<size_t>("--retry", 0);
     const auto localNetId = global.Get<std::string>("--localams");
     if (!localNetId.empty()) {
         bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
@@ -620,9 +647,9 @@ int ParseCommand(int argc, const char* argv[])
 
     const auto cmd = args.Pop<const char*>("Command is missing");
     if (!strcmp("addroute", cmd)) {
-        return RunAddRoute(netId, args);
+        return Run(std::bind(RunAddRoute, netId, args), retries);
     } else if (!strcmp("netid", cmd)) {
-        return RunNetId(netId);
+        return Run(std::bind(RunNetId, netId), retries);
     }
 
     const auto commands = CommandMap {
@@ -636,7 +663,7 @@ int ParseCommand(int argc, const char* argv[])
     };
     const auto it = commands.find(cmd);
     if (it != commands.end()) {
-        return it->second(make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args);
+        return Run(std::bind(it->second, make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args), retries);
     }
     usage(std::string {"Unknown command >"} + cmd + "<\n");
 }
