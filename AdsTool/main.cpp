@@ -570,6 +570,22 @@ static T try_stoi(const char* str, const T defaultValue = 0)
     return defaultValue;
 }
 
+template<typename T>
+int TryRun(T f)
+try
+{
+    return f();
+} catch (const AdsException& ex) {
+    LOG_ERROR("AdsException message: " << ex.what() << '\n');
+    return ex.errorCode;
+} catch (const std::exception& ex) {
+    LOG_ERROR("Exception: " << ex.what() << '\n');
+    return -2;
+} catch (...) {
+    LOG_ERROR("Unknown exception\n");
+    return -1;
+}
+
 int ParseCommand(int argc, const char* argv[])
 {
     auto args = bhf::Commandline {usage, argc, argv};
@@ -627,16 +643,5 @@ int ParseCommand(int argc, const char* argv[])
 
 int main(int argc, const char* argv[])
 {
-    try {
-        return ParseCommand(argc, argv);
-    } catch (const AdsException& ex) {
-        LOG_ERROR("AdsException message: " << ex.what() << '\n');
-        return ex.errorCode;
-    } catch (const std::exception& ex) {
-        LOG_ERROR("Exception: " << ex.what() << '\n');
-        return -2;
-    } catch (...) {
-        LOG_ERROR("Unknown exception\n");
-        return -1;
-    }
+    return TryRun(std::bind(ParseCommand, argc, argv));
 }
