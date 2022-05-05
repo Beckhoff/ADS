@@ -1,3 +1,12 @@
+adstool (0.0.13-1) bullseye; urgency=medium
+
+  * AdsTool: adjust manpage for TC/BSD and other variants
+    AdsTool: replace SYSTEMSERVICE_OPENGENERIC with FOPEN::READ
+    AdsTool: implement --retry
+    AdsDef: deprecate enum nSystemServiceOpenFile
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Thu, 05 May 2022 14:23:58 +0200
+
 adstool (0.0.12-1) bullseye; urgency=medium
 
   * AdsTool: repair var --type=BOOL/BYTE
