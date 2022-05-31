@@ -13,9 +13,9 @@ namespace ads
 {
 struct LicenseAccess {
     LicenseAccess(const std::string& gw, AmsNetId netid, uint16_t port);
-    bool ShowPlatformId(std::ostream& os) const;
-    bool ShowSystemId(std::ostream& os) const;
-    bool ShowVolumeNo(std::ostream& os) const;
+    int ShowPlatformId(std::ostream& os) const;
+    int ShowSystemId(std::ostream& os) const;
+    int ShowVolumeNo(std::ostream& os) const;
 private:
     AdsDevice device;
 };

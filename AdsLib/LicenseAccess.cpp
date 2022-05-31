@@ -18,7 +18,7 @@ LicenseAccess::LicenseAccess(const std::string& gw, const AmsNetId netid, const 
     : device(gw, netid, port ? port : 30)
 {}
 
-bool LicenseAccess::ShowPlatformId(std::ostream& os) const
+int LicenseAccess::ShowPlatformId(std::ostream& os) const
 {
     uint16_t platformId;
     uint32_t bytesRead = 0;
@@ -29,13 +29,13 @@ bool LicenseAccess::ShowPlatformId(std::ostream& os) const
                                           &bytesRead);
     if (ADSERR_NOERR != status) {
         LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return false;
+        return 1;
     }
     os << bhf::ads::letoh(platformId) << '\n';
     return !os.good();
 }
 
-bool LicenseAccess::ShowSystemId(std::ostream& os) const
+int LicenseAccess::ShowSystemId(std::ostream& os) const
 {
     std::vector<uint8_t> readBuffer(16);
     uint32_t bytesRead = 0;
@@ -46,7 +46,7 @@ bool LicenseAccess::ShowSystemId(std::ostream& os) const
                                           &bytesRead);
     if (ADSERR_NOERR != status) {
         LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return false;
+        return 1;
     }
     char buf[38];
     snprintf(buf, sizeof(buf), "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X\n"
@@ -60,7 +60,7 @@ bool LicenseAccess::ShowSystemId(std::ostream& os) const
     return !os.good();
 }
 
-bool LicenseAccess::ShowVolumeNo(std::ostream& os) const
+int LicenseAccess::ShowVolumeNo(std::ostream& os) const
 {
     uint32_t volumeNo;
     uint32_t bytesRead = 0;
@@ -71,7 +71,7 @@ bool LicenseAccess::ShowVolumeNo(std::ostream& os) const
                                           &bytesRead);
     if (ADSERR_NOERR != status) {
         LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return false;
+        return 1;
     }
     os << bhf::ads::letoh(volumeNo) << '\n';
     return !os.good();
