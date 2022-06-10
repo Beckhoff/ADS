@@ -1,6 +1,6 @@
 This library is intended to provide easy use as ADS client applications running on non-windows systems (e.g. FreeBSD, Linux, ...) to communicate with TwinCAT devices via TCP/IP.
 
-To build this library a recent compiler with C++14 support is required. 
+To build this library a recent compiler with C++14 support is required.
 
 Currently (2022-02-21) tested with:
 ===================================
@@ -38,8 +38,8 @@ Prepare your target to run the example
 
 Sample AMS route:
   Name:           MyAdsClient     
-  AMS Net Id:     192.168.0.1.1.1 # Derived from the IP address of your ADS client
-  Address:        192.168.0.1     # Use the IP which is connected to the TwinCAT target
+  AMS Net Id:     192.168.0.1.1.1 # NetId of your ADS client, derived from its IP address or set by bhf::ads:SetLocalAdress().
+  Address:        192.168.0.1     # Use the IP of the ADS client, which is connected to your TwinCAT target
   Transport Type: TCP/IP
   Remote Route:   None / Server
   Unidirectional: false
@@ -55,7 +55,11 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 
 *Requires a TwinCAT restart.
 
-- set "remoteNetId" and "remoteIpV4" and enable bhf::ads::SetLocalAddress() in "example/example.cpp" according to your own setup
+Prepare your client to run the example/example.cpp
+==================================================
+- set "remoteNetId" to the AMS NetId of your TwinCAT target (this is the AMS NetId found in the "About TwinCAT System window" e.g. "192.168.0.2.1.1").
+- set "remoteIpV4" to the IP Address of your TwinCAT target (e.g. 192.168.0.2)
+- (optional) enable bhf::ads::SetLocalAddress() and set to the AMS NetId you choose for the ADS client (e.g. 192.168.0.1.1.1).
 
 # configure meson to build example into "build" dir
 meson example/build example
