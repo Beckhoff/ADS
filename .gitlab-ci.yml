@@ -27,6 +27,12 @@ cache:
     - docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:40549
 
+build-alpine:
+  extends: .build-meson-docker
+  image: ${DOCKER_PROXY}alpine:3.16.2
+  before_script:
+    - apk add g++ meson
+
 build-linux-clang:
   extends: .build-meson-docker
   variables:
