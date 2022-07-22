@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-
+#include <map>
 /**
  * @brief Maximum size for device name.
  */
@@ -56,6 +56,10 @@ struct AdsDevice {
     AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port);
 
     DeviceInfo GetDeviceInfo() const;
+
+
+    /** Get list of ADS variable in PLC by name/type of data */
+    std::map<string,string> GetDeviceAdsVariables() const;
 
     /** Get handle to access AdsVariable by indexGroup/Offset */
     AdsHandle GetHandle(uint32_t offset) const;
