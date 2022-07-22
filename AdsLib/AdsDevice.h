@@ -12,6 +12,7 @@
 #include <functional>
 #include <memory>
 #include <map>
+#include <iostream>
 /**
  * @brief Maximum size for device name.
  */
@@ -59,7 +60,7 @@ struct AdsDevice {
 
 
     /** Get list of ADS variable in PLC by name/type of data */
-    std::map<string,string> GetDeviceAdsVariables() const;
+    std::map<std::string,std::string> GetDeviceAdsVariables() const;
 
     /** Get handle to access AdsVariable by indexGroup/Offset */
     AdsHandle GetHandle(uint32_t offset) const;

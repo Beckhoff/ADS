@@ -55,7 +55,7 @@ DeviceInfo AdsDevice::GetDeviceInfo() const
 }
 
 
-std::map<string,string> AdsDevice::GetDeviceAdsVariables() const
+std::map<std::string,std::string> AdsDevice::GetDeviceAdsVariables() const
 {
     long 			nErr;
     uint32_t			uiIndex;
@@ -63,7 +63,7 @@ std::map<string,string> AdsDevice::GetDeviceAdsVariables() const
     char* 			pchSymbols = NULL;
     AdsSymbolUploadInfo   	tAdsSymbolUploadInfo;
     PAdsSymbolEntry       	pAdsSymbolEntry;
-    std::map<string,string>     lADSVariables;
+    std::map<std::string,std::string>     lADSVariables;
 
 
     // Read the length of the variable declaration
