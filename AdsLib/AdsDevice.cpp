@@ -59,42 +59,74 @@ std::map<std::string,std::string> AdsDevice::GetDeviceAdsVariables() const
 {
     long 			nErr;
     uint32_t			uiIndex;
-    uint32_t			bytesRead = 0;
+    uint32_t			bytesReadInfo = 0;
+    uint32_t			bytesReadEntry = 0;
     char* 			pchSymbols = NULL;
-    AdsSymbolUploadInfo   	tAdsSymbolUploadInfo;
-    PAdsSymbolEntry       	pAdsSymbolEntry;
+    AdsSymbolUploadInfo  adsSymbolUploadInfo;
+    AdsSymbolEntry*      	pAdsSymbolEntry;
     std::map<std::string,std::string>     lADSVariables;
 
 
     // Read the length of the variable declaration
-    nErr = ReadReqEx2(ADSIGRP_SYM_UPLOADINFO, 0x0, sizeof(tAdsSymbolUploadInfo), &tAdsSymbolUploadInfo, &bytesRead);
-    if(nErr != 0) {
+    nErr = ReadReqEx2(ADSIGRP_SYM_UPLOADINFO, 0x0, sizeof(AdsSymbolEntry), &adsSymbolUploadInfo, &bytesReadInfo);
+    if(nErr != 0 && bytesReadInfo != sizeof(adsSymbolUploadInfo)) {
       throw AdsException(nErr);
     }
-    pchSymbols = new char[tAdsSymbolUploadInfo.nSymSize];
+    pchSymbols = new char[adsSymbolUploadInfo.nSymSize];
 
     // Read information about the PLC variables 
-    nErr = ReadReqEx2(ADSIGRP_SYM_UPLOAD, 0x0, tAdsSymbolUploadInfo.nSymSize, pchSymbols, &bytesRead);
-    if(nErr != 0) {
+    nErr = ReadReqEx2(ADSIGRP_SYM_UPLOAD, 0x0, adsSymbolUploadInfo.nSymSize, pchSymbols, &bytesReadEntry);
+    if(nErr != 0 ) {
       throw AdsException(nErr);
     }
 
     //Output information about the PLC variables
-    pAdsSymbolEntry = (PAdsSymbolEntry)pchSymbols;
-    for (uiIndex = 0; uiIndex < tAdsSymbolUploadInfo.nSymbols; uiIndex++)
+    pAdsSymbolEntry = (AdsSymbolEntry*)pchSymbols;
+
+
+    for (uiIndex = 0; uiIndex < bytesReadEntry;  uiIndex = uiIndex + pAdsSymbolEntry->entryLength)
     {
-	std::string nameVar(PADSSYMBOLNAME(pAdsSymbolEntry));
-	std::string typeVar(PADSSYMBOLTYPE(pAdsSymbolEntry));
-	lADSVariables[nameVar] = typeVar;
-        pAdsSymbolEntry = PADSNEXTSYMBOLENTRY(pAdsSymbolEntry); std::cout.flush();
+
+        pAdsSymbolEntry = (AdsSymbolEntry*) (pchSymbols + uiIndex);
+
+        //Check if pAdsSymbolEntry is well formated
+        if(pAdsSymbolEntry->entryLength + uiIndex < bytesReadEntry )
+        {
+            std::string nameVar;
+            nameVar = GetNameVar(pAdsSymbolEntry );
+            std::string typeVar;
+            typeVar = GetTypeVar(pAdsSymbolEntry );
+            lADSVariables[nameVar] = typeVar;
+        }
+
     }
 
     return lADSVariables;
 }
 
 
+std::string AdsDevice::GetNameVar(AdsSymbolEntry* pAdsSymbolEntry) const
+{
+    char *  data=(char*)( pAdsSymbolEntry) + sizeof(pAdsSymbolEntry);
+    std::string nameVar(data);
+    return nameVar;
+}
 
+std::string AdsDevice::GetTypeVar(AdsSymbolEntry* pAdsSymbolEntry) const
+{
 
+    char *  data= (char*)pAdsSymbolEntry + sizeof(pAdsSymbolEntry) + pAdsSymbolEntry->nameLength +1;
+    std::string typeVar(data);
+    return typeVar;
+}
+
+std::string AdsDevice::GetComment(AdsSymbolEntry* pAdsSymbolEntry) const
+{
+
+    char *  data= (char*)pAdsSymbolEntry + sizeof(pAdsSymbolEntry) + (pAdsSymbolEntry->nameLength +1) + (pAdsSymbolEntry->typeLength +1);
+    std::string Comment(data);
+    return Comment;
+}
 
 AdsHandle AdsDevice::GetHandle(const uint32_t offset) const
 {

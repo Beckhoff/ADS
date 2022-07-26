@@ -378,7 +378,9 @@ typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificat
  * be followed by zero terminated strings for "symbol name", "type name"
  * and a "comment"
  */
-typedef struct {
+
+
+struct AdsSymbolEntry{
     uint32_t entryLength; // length of complete symbol entry
     uint32_t iGroup; // indexGroup of symbol: input, output etc.
     uint32_t iOffs; // indexOffset of symbol
@@ -388,15 +390,7 @@ typedef struct {
     uint16_t nameLength; // length of symbol name (null terminating character not counted)
     uint16_t typeLength; // length of type name (null terminating character not counted)
     uint16_t commentLength; // length of comment (null terminating character not counted)
-}AdsSymbolEntry, *PAdsSymbolEntry, **PPAdsSymbolEntry;
-
-#define	PADSSYMBOLNAME(p)			((char*)(((PAdsSymbolEntry)p)+1))
-#define	PADSSYMBOLTYPE(p)			(((char*)(((PAdsSymbolEntry)p)+1))+((PAdsSymbolEntry)p)->nameLength+1)
-#define	PADSSYMBOLCOMMENT(p)		(((char*)(((PAdsSymbolEntry)p)+1))+((PAdsSymbolEntry)p)->nameLength+1+((PAdsSymbolEntry)p)->typeLength+1)
-
-#define	PADSNEXTSYMBOLENTRY(pEntry)	(*((uint32_t*)(((char*)pEntry)+((PAdsSymbolEntry)pEntry)->entryLength)) \
-						? ((PAdsSymbolEntry)(((char*)pEntry)+((PAdsSymbolEntry)pEntry)->entryLength)): NULL)
-
+} ;
 
 /**
  * @brief This structure is used to provide ADS symbol information for ADS SUM commands
@@ -407,11 +401,10 @@ struct AdsSymbolInfoByName {
     uint32_t cbLength;
 };
 
-typedef struct
-{
+struct AdsSymbolUploadInfo {
     uint32_t	nSymbols; 
     uint32_t	nSymSize;
-} AdsSymbolUploadInfo, *PAdsSymbolUploadInfo;
+}  ;
 
 
 #pragma pack( pop )

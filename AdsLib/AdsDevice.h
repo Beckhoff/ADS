@@ -103,4 +103,9 @@ private:
     long CloseFile(uint32_t handle) const;
     long DeleteNotificationHandle(uint32_t handle) const;
     long DeleteSymbolHandle(uint32_t handle) const;
+
+    std::string GetNameVar(AdsSymbolEntry* pAdsSymbolEntry) const;
+    std::string GetTypeVar(AdsSymbolEntry* pAdsSymbolEntry) const;
+    std::string GetComment(AdsSymbolEntry* pAdsSymbolEntry) const;
+
 };
