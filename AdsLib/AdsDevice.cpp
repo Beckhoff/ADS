@@ -6,7 +6,6 @@
 #include "AdsDevice.h"
 #include "AdsException.h"
 #include "AdsLib.h"
-
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 {
     const auto error = bhf::ads::AddLocalRoute(ams, ip);
@@ -96,6 +95,7 @@ std::map<std::string,std::string> AdsDevice::GetDeviceAdsVariables() const
             nameVar = GetNameVar(pAdsSymbolEntry );
             std::string typeVar;
             typeVar = GetTypeVar(pAdsSymbolEntry );
+
             lADSVariables[nameVar] = typeVar;
         }
 
@@ -107,7 +107,7 @@ std::map<std::string,std::string> AdsDevice::GetDeviceAdsVariables() const
 
 std::string AdsDevice::GetNameVar(AdsSymbolEntry* pAdsSymbolEntry) const
 {
-    char *  data=(char*)( pAdsSymbolEntry) + sizeof(pAdsSymbolEntry);
+    char *  data=(char*)( pAdsSymbolEntry) +sizeof(AdsSymbolEntry);
     std::string nameVar(data);
     return nameVar;
 }
@@ -115,7 +115,7 @@ std::string AdsDevice::GetNameVar(AdsSymbolEntry* pAdsSymbolEntry) const
 std::string AdsDevice::GetTypeVar(AdsSymbolEntry* pAdsSymbolEntry) const
 {
 
-    char *  data= (char*)pAdsSymbolEntry + sizeof(pAdsSymbolEntry) + pAdsSymbolEntry->nameLength +1;
+    char *  data= (char*)pAdsSymbolEntry + sizeof(AdsSymbolEntry) + pAdsSymbolEntry->nameLength +1;
     std::string typeVar(data);
     return typeVar;
 }
@@ -123,7 +123,7 @@ std::string AdsDevice::GetTypeVar(AdsSymbolEntry* pAdsSymbolEntry) const
 std::string AdsDevice::GetComment(AdsSymbolEntry* pAdsSymbolEntry) const
 {
 
-    char *  data= (char*)pAdsSymbolEntry + sizeof(pAdsSymbolEntry) + (pAdsSymbolEntry->nameLength +1) + (pAdsSymbolEntry->typeLength +1);
+    char *  data= (char*)pAdsSymbolEntry + sizeof(AdsSymbolEntry) + (pAdsSymbolEntry->nameLength +1) + (pAdsSymbolEntry->typeLength +1);
     std::string Comment(data);
     return Comment;
 }
