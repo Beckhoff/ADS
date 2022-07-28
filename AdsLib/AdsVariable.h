@@ -48,6 +48,14 @@ struct AdsVariable  : public IAdsVariable{
         Read(sizeof(buffer), &buffer);
         return buffer;
     }
+    
+    void ReadValue(double *res) override
+    {
+	T buffer;
+        Read(sizeof(buffer), &buffer);
+
+	*res = (double)buffer;
+    }
 
     void operator=(const T& value) const
     {
