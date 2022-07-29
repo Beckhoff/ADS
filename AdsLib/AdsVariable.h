@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AdsDevice.h"
+#include "cstring"
 
 
 struct IAdsVariable {
@@ -22,7 +23,7 @@ struct IAdsVariable {
   virtual void operator=(const float& value){}
   virtual void operator=(const double& value){}
  
-  virtual void ReadValue(double *res){}
+  virtual void ReadValue(void *res){}
 }; 
 
 
@@ -49,12 +50,11 @@ struct AdsVariable  : public IAdsVariable{
         return buffer;
     }
     
-    void ReadValue(double *res) override
+    void ReadValue(void *res) override
     {
 	T buffer;
-        Read(sizeof(buffer), &buffer);
-
-	*res = (double)buffer;
+    Read(sizeof(buffer), &buffer);
+    memcpy(res, &buffer, sizeof(T));
     }
 
     void operator=(const T& value) const
