@@ -136,6 +136,17 @@ test-linux-gcc-mips:
     - update-binfmts --enable qemu-mips
     - update-binfmts --disable qemu-mipsn32
 
+test-fbsd-clang:
+  extends: .test-with-service-container
+  needs: [
+    "build-fbsd-clang",
+  ]
+  script:
+    - wget --quiet https://freebsdpkg01.beckhoff.com/TCBSD/13/testing/iso/TCBSD-x64-13-63944.iso
+    - jitlab clone test_stage
+    - cp -a .test-stage/* test_stage/
+    - ./test_stage/test_stage.sh --nat-if=eth0 qemu ./*.iso
+
 build-debian:
   image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: build
