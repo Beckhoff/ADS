@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcLicenseInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2011/11/TcLicenseInfo">
+  <TargetInfo>
+    <TcTargetDesc>
+      <TargetType/>
+      <TargetVersion>
+        <Version/>
+        <Revision/>
+        <Build/>
+      </TargetVersion>
+      <TargetFeatures>
+        <Level/>
+        <NetId/>
+      </TargetFeatures>
+      <Hardware>
+        <Model/>
+        <SerialNo/>
+        <CPUVersion/>
+        <Date/>
+        <CPUArchitecture/>
+      </Hardware>
+      <OsImage>
+        <ImageDevice/>
+        <ImageVersion/>
+        <ImageLevel/>
+        <OsName/>
+        <OsVersion/>
+      </OsImage>
+    </TcTargetDesc>
+  </TargetInfo>
+  <LicenseInfo>
+    <SystemId Level="90">{3F632E80-4FE8-2FCD-2B04-6154E399A473}</SystemId>
+    <PurchaseOrder><![CDATA[PatrickBr,AndriesM]]></PurchaseOrder>
+    <IssueTime>2022-06-23T06:27:03</IssueTime>
+    <LicenseKey>c0183af8abeb46a4b117ed83a85947e3c44db1226b6ec6e7a555edc8618d0451873b0fdc48534f7c716b909d5b720eb13c6b03306374894d958f64607925d2e7804eb57c4895459da49ee068e452ae00085d7ab11ea69a0b664fd6759bee403239d6e04dfb2d27f579382857187e4575f30c1c42388c29b2079195da79e6a193729747b90a1d6ce1b00411b5b8875230be108bf64d6dad01ad150e1e16ebf0ec297582000b623057c5997b3c841d7175ef902a5e9d6f9ef70926e3b93bed7354f3047ac2fe1114222da82df6484cd3ca45f8affa502bec35541802c1ac8fff33e4acc9d55e64b1ec3367ccc366652d9609c938572530c19de0c5409fff17dfe2</LicenseKey>
+    <License ManuallyAdded="true">
+      <LicenseId>{4C256767-E6E6-4AF5-BD68-9F7ABAD0C200}</LicenseId>
+      <Name>TC3 ADS</Name>
+      <OrderNo>TC1000</OrderNo>
+      <TAN>SX25F-JJ5PW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{3FF18E97-7754-401B-93FB-70544DE28A13}</LicenseId>
+      <Name>TC3 IO</Name>
+      <OrderNo>TC1100</OrderNo>
+      <TAN>MTH5F-11646</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{66689887-CCBD-452C-AC9A-039D997C6E66}</LicenseId>
+      <Name>TC3 PLC</Name>
+      <OrderNo>TC1200</OrderNo>
+      <TAN>SXH5F-J154W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{66689887-CCBD-452C-AC9A-039D997C6E66}</LicenseId>
+      <Name>TC3 PLC</Name>
+      <OrderNo>TC1200</OrderNo>
+      <TAN>2MH6Q-2RG02</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{19E93A3D-90D1-45B9-A28A-32DD8D2A166A}</LicenseId>
+      <Name>TC3 PLC / C++</Name>
+      <OrderNo>TC1210</OrderNo>
+      <TAN>MXH5F-115PW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{96ADB134-211A-4863-977F-10E53B30C2D2}</LicenseId>
+      <Name>TC3 PLC / C++ / MatSim</Name>
+      <OrderNo>TC1220</OrderNo>
+      <TAN>STH5F-J16P6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{8C57D0A8-BD63-4554-BAE1-E9C797EF0D0E}</LicenseId>
+      <Name>TC3 PLC / NC PTP 10</Name>
+      <OrderNo>TC1250</OrderNo>
+      <TAN>DT1K$-125X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{F8F2DBC7-3228-4672-91A9-C5D46C32B544}</LicenseId>
+      <Name>TC3 PLC / NC PTP 10 / NC I</Name>
+      <OrderNo>TC1260</OrderNo>
+      <TAN>GX1K$-J26XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7B9C044C-F003-44F9-8552-FA9D08753C91}</LicenseId>
+      <Name>TC3 PLC / NC PTP 10 / NC I / CNC</Name>
+      <OrderNo>TC1270</OrderNo>
+      <TAN>DX1K$-126RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{68A05D95-13CD-491E-A0DD-DC396DC90A19}</LicenseId>
+      <Name>TC3 PLC / NC PTP 10 / NC I / CNC-E</Name>
+      <OrderNo>TC1275</OrderNo>
+      <TAN>GT1K$-J25R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{304D006A-8299-4560-AB79-438534B50288}</LicenseId>
+      <Name>TC3 C++</Name>
+      <OrderNo>TC1300</OrderNo>
+      <TAN>DX4K$-1B6XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{AD7F40C3-F160-4413-83E3-6B7656A795A2}</LicenseId>
+      <Name>TC3 C++ / MatSim</Name>
+      <OrderNo>TC1320</OrderNo>
+      <TAN>GT4K$-JB5X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{4AB869F0-145C-4EB0-878E-69BB1793E116}</LicenseId>
+      <Name>TC3 Realtime Monitor</Name>
+      <OrderNo>TE1010</OrderNo>
+      <TAN>GX95F-J251W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{94C87B69-26C2-4677-9F7E-27E770C481BE}</LicenseId>
+      <Name>TC3 Simulation Manager</Name>
+      <OrderNo>TE1110</OrderNo>
+      <TAN>DTB5F-1B6J6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{94C91BCC-DC1F-4EBC-AEFD-2DC25DF4708B}</LicenseId>
+      <Name>TC3 EtherCAT Simulation</Name>
+      <OrderNo>TE1111</OrderNo>
+      <TAN>GXB5F-JB5JW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{D59230D3-7C55-4138-859C-234C1C6CFDA8}</LicenseId>
+      <Name>TC3 XCAD Interface</Name>
+      <OrderNo>TE1120</OrderNo>
+      <TAN>DXB5F-1B51W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{65C77515-1C63-44D0-B1C5-CAFA820ADD41}</LicenseId>
+      <Name>TC3 CAD Simulation Interface</Name>
+      <OrderNo>TE1130</OrderNo>
+      <TAN>GTB5F-JB616</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{9FD32FC8-0CF9-4C5B-95FB-F35423496A77}</LicenseId>
+      <Name>TC3 PLC Static Analysis</Name>
+      <OrderNo>TE1200</OrderNo>
+      <TAN>MT9KF-115J6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{B937370F-23C1-47BE-B537-8F8FF797B168}</LicenseId>
+      <Name>TC3 PLC Profiler</Name>
+      <OrderNo>TE1210</OrderNo>
+      <TAN>SX9KF-J16JW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{4989A799-AEEA-4FEE-88EF-666B99EEFB45}</LicenseId>
+      <Name>TC3 Scope View Professional</Name>
+      <OrderNo>TE1300</OrderNo>
+      <TAN>MX9KF-1161W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{73C71EBD-104A-4EE6-955D-ADE86A37EFC3}</LicenseId>
+      <Name>TC3 Target For Simulink</Name>
+      <OrderNo>TE1400</OrderNo>
+      <TAN>ST9KF-J1516</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{FF7D97E4-982F-4ABD-87CE-19164A0571CA}</LicenseId>
+      <Name>TC3 Target For Matlab</Name>
+      <OrderNo>TE1401</OrderNo>
+      <TAN>MXBKF-1J6JW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{96F8FBEB-48D6-4061-A973-35866BF21BE0}</LicenseId>
+      <Name>TC3 Interface For Matlab Simulink</Name>
+      <OrderNo>TE1410</OrderNo>
+      <TAN>STBKF-JJ5J6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{B639B94F-1480-4FEF-ACD2-7ACB6020AEED}</LicenseId>
+      <Name>TC3 Target for FMI</Name>
+      <OrderNo>TE1420</OrderNo>
+      <TAN>MTBKF-1J516</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{3F5F739E-20C5-4B02-9334-D87F72BD0681}</LicenseId>
+      <Name>TC3 Valve-Diagram-Editor</Name>
+      <OrderNo>TE1500</OrderNo>
+      <TAN>SXBKF-JJ61W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{4156C772-5DC6-40A9-B3F8-C3D5A097513C}</LicenseId>
+      <Name>TC3 Cam-Design-Tool</Name>
+      <OrderNo>TE1510</OrderNo>
+      <TAN>MX25F-1J54W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{BB40055B-8333-4223-90EA-7C4559DC7C69}</LicenseId>
+      <Name>TC3 Analytics Workbench</Name>
+      <OrderNo>TE3500</OrderNo>
+      <TAN>ST25F-JJ646</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{88FA6DAB-09EF-464E-A413-EE4B97F3F185}</LicenseId>
+      <Name>TC3 Analytics Service Tool</Name>
+      <OrderNo>TE3520</OrderNo>
+      <TAN>MT25F-1J6P6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{FDE02854-39A7-440C-9EAE-C234A16A3CED}</LicenseId>
+      <Name>TC3 PLC-HMI</Name>
+      <OrderNo>TF1800</OrderNo>
+      <TAN>DT4K$-1B5R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7AFD0713-1333-4A3B-938C-7B9BD0418C8D}</LicenseId>
+      <Name>TC3 PLC-HMI Web</Name>
+      <OrderNo>TF1810</OrderNo>
+      <TAN>GX4K$-JB6RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7AFD0713-1333-4A3B-938C-7B9BD0418C8D}</LicenseId>
+      <Name>TC3 PLC-HMI Web</Name>
+      <OrderNo>TF1810</OrderNo>
+      <TAN>RM1C3-B$032</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{B27B051A-CA6A-42EA-833E-82CC92903D83}</LicenseId>
+      <Name>TC3 UML</Name>
+      <OrderNo>TF1910</OrderNo>
+      <TAN>DXP5$-1B58W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{796D380F-D49E-4C0C-A05F-500052FAC883}</LicenseId>
+      <Name>TC3 HMI Server</Name>
+      <OrderNo>TF2000</OrderNo>
+      <TAN>GTP5$-JB686</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2752D285-16AD-4E89-AE6C-80E72784D264}</LicenseId>
+      <Name>TC3 HMI Clients Pack 1</Name>
+      <OrderNo>TF2010</OrderNo>
+      <TAN>DTP5$-1B6L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{CB3D4492-5E9E-43BC-AB3B-27CF3896EEC2}</LicenseId>
+      <Name>TC3 HMI Clients Pack 2</Name>
+      <OrderNo>TF2015</OrderNo>
+      <TAN>GXP5$-JB5LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{648F394E-7DD1-499C-8112-7C38E161A94C}</LicenseId>
+      <Name>TC3 HMI Clients Pack 3</Name>
+      <OrderNo>TF2020</OrderNo>
+      <TAN>DTJ5$-12686</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{99A3CF49-FFBF-49D4-BA30-F4C0593B5161}</LicenseId>
+      <Name>TC3 HMI Clients Pack 5</Name>
+      <OrderNo>TF2025</OrderNo>
+      <TAN>GXJ5$-J258W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{8161723B-0C2E-405C-B829-EDC5DAAB5104}</LicenseId>
+      <Name>TC3 HMI Clients Pack 10</Name>
+      <OrderNo>TF2030</OrderNo>
+      <TAN>DXJ5$-125LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{97127BE5-AB00-4872-8A0E-0120D605FA10}</LicenseId>
+      <Name>TC3 HMI Clients Pack 20</Name>
+      <OrderNo>TF2035</OrderNo>
+      <TAN>GTJ5$-J26L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{E8CE55B5-3125-49FB-B21B-4CB7A751D68B}</LicenseId>
+      <Name>TC3 HMI Clients Pack 25</Name>
+      <OrderNo>TF2040</OrderNo>
+      <TAN>MTPK$-1J586</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{927A7313-A412-4376-8911-4A8F60EC8651}</LicenseId>
+      <Name>TC3 HMI Clients Pack 100</Name>
+      <OrderNo>TF2045</OrderNo>
+      <TAN>SXPK$-JJ68W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{F1CFF3CF-B042-45EE-A380-4FB3270F0BA5}</LicenseId>
+      <Name>TC3 HMI Targets Pack 1</Name>
+      <OrderNo>TF2050</OrderNo>
+      <TAN>MXPK$-1J6LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{AC534BD2-49E1-4025-9C78-0BC8AE4A36A9}</LicenseId>
+      <Name>TC3 HMI Targets Pack 2</Name>
+      <OrderNo>TF2055</OrderNo>
+      <TAN>STPK$-JJ5L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5002C16A-02B3-4A8C-8C5C-A65EDD0AE398}</LicenseId>
+      <Name>TC3 HMI Targets Pack 3</Name>
+      <OrderNo>TF2060</OrderNo>
+      <TAN>MXJK$-1168W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2D2E5D68-23A1-4B53-BDF7-41C3861F6DB7}</LicenseId>
+      <Name>TC3 HMI Targets Pack 5</Name>
+      <OrderNo>TF2065</OrderNo>
+      <TAN>STJK$-J1586</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{1C20D4D8-C732-464D-AF34-6EA5D2180E06}</LicenseId>
+      <Name>TC3 HMI Targets Pack 10</Name>
+      <OrderNo>TF2070</OrderNo>
+      <TAN>MTJK$-115L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{C1126695-F4A2-4F2D-AA1A-311783D98273}</LicenseId>
+      <Name>TC3 HMI Targets Pack 20</Name>
+      <OrderNo>TF2075</OrderNo>
+      <TAN>SXJK$-J16LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{E40D9E9D-E242-457A-9AC7-C915753AC810}</LicenseId>
+      <Name>TC3 HMI Targets Pack 25</Name>
+      <OrderNo>TF2080</OrderNo>
+      <TAN>MX15$-115XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{067D1C29-F119-431C-A681-E503451951C7}</LicenseId>
+      <Name>TC3 HMI Targets Pack 100</Name>
+      <OrderNo>TF2090</OrderNo>
+      <TAN>ST15$-J16X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{ADDFAE21-8CFE-4AF3-9F46-29C36F985936}</LicenseId>
+      <Name>TC3 HMI OPC UA</Name>
+      <OrderNo>TF2110</OrderNo>
+      <TAN>MT15$-116R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{D58728E0-7762-4145-8A93-80D55E0453A6}</LicenseId>
+      <Name>TC3 HMI Extension SDK</Name>
+      <OrderNo>TF2200</OrderNo>
+      <TAN>SX15$-J15RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{27326EE5-AB30-4084-B15B-8CCA96CCBF0B}</LicenseId>
+      <Name>TC3 HMI Scope</Name>
+      <OrderNo>TF2300</OrderNo>
+      <TAN>MT45$-1J6X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{3DDCAB25-BF0E-412C-A721-DC77C1B8099C}</LicenseId>
+      <Name>TC3 Scope Server</Name>
+      <OrderNo>TF3300</OrderNo>
+      <TAN>SX45$-JJ5XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{02AC2825-C3C7-4D15-AAF6-4EB45EFAA2D0}</LicenseId>
+      <Name>TC3 Analytics Logger</Name>
+      <OrderNo>TF3500</OrderNo>
+      <TAN>MX45$-1J5RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}</LicenseId>
+      <Name>TC3 Analytics Library</Name>
+      <OrderNo>TF3510</OrderNo>
+      <TAN>ST45$-JJ6R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{0070B910-0995-4F44-83BF-D1E141B4D8C3}</LicenseId>
+      <Name>TC3 Analytics StorageProvider</Name>
+      <OrderNo>TF3520</OrderNo>
+      <TAN>M79K$-1B586</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{EE499E71-9522-4C05-86B4-8AD0F904E0C4}</LicenseId>
+      <Name>TC3 Analytics Runtime</Name>
+      <OrderNo>TF3550</OrderNo>
+      <TAN>S89K$-JB68W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{21C146FF-61EE-4911-969B-61339FE7DB69}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 4</Name>
+      <OrderNo>TF3560</OrderNo>
+      <TAN>M89K$-1B6LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7561ACC6-B225-4960-A93E-395C788D9597}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 8</Name>
+      <OrderNo>TF3561</OrderNo>
+      <TAN>S79K$-JB5L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{466B3E5B-C981-4F63-B61F-0BBB84BD539D}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 16</Name>
+      <OrderNo>TF3562</OrderNo>
+      <TAN>M8BK$-1268W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2BCD4DD5-B4D5-4DD3-8B07-11FEAAD83E08}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 32</Name>
+      <OrderNo>TF3563</OrderNo>
+      <TAN>S7BK$-J2586</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{A344D952-F848-4482-8B39-B0F02B8B7A6E}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 64</Name>
+      <OrderNo>TF3564</OrderNo>
+      <TAN>M7BK$-125L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{133B41A5-2827-4423-8FEB-78AF4E0C890F}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack 128</Name>
+      <OrderNo>TF3565</OrderNo>
+      <TAN>S8BK$-J26LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{A0C635DF-5F13-43BE-8D0B-613386AD9A20}</LicenseId>
+      <Name>TC3 Condition Monitoring Level 1</Name>
+      <OrderNo>TF3600</OrderNo>
+      <TAN>M825$-125XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5BE000FB-98CE-4B83-A754-2CB323710E14}</LicenseId>
+      <Name>TC3 Condition Monitoring Level 2</Name>
+      <OrderNo>TF3601</OrderNo>
+      <TAN>S725$-J26X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{D06E108C-0E3C-48D7-A589-8961B3FC9AC0}</LicenseId>
+      <Name>TC3 Power Monitoring</Name>
+      <OrderNo>TF3650</OrderNo>
+      <TAN>M725$-126R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7371CC89-F21A-4584-994B-8B112F6EB1A0}</LicenseId>
+      <Name>TC3 Filter</Name>
+      <OrderNo>TF3680</OrderNo>
+      <TAN>S825$-J25RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6425CC43-74BE-40EB-B459-8349B5AB98BD}</LicenseId>
+      <Name>TC3 Machine Learning Inference Engine</Name>
+      <OrderNo>TF3800</OrderNo>
+      <TAN>M7H5$-1B6X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{3DA5D7CD-70F1-4894-B3AD-D35619CB19FA}</LicenseId>
+      <Name>TC3 Neural Network Inference Engine</Name>
+      <OrderNo>TF3810</OrderNo>
+      <TAN>S8H5$-JB5XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5A66BBF9-8644-450F-9F23-1B3A7DAEEAD1}</LicenseId>
+      <Name>TC3 Solar-Position-Algorithm</Name>
+      <OrderNo>TF3900</OrderNo>
+      <TAN>M8H5$-1B5RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{777F1598-583B-4503-99BB-7C02E0ABD97E}</LicenseId>
+      <Name>TC3 Controller Toolbox</Name>
+      <OrderNo>TF4100</OrderNo>
+      <TAN>S7H5$-JB6R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{1EEBBAAA-51E1-4750-9D6A-7B04116EA32B}</LicenseId>
+      <Name>TC3 Temperature-Controller</Name>
+      <OrderNo>TF4110</OrderNo>
+      <TAN>D72K$-115X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{24E29A6B-99AE-42CD-816C-1D69E1E3ADA4}</LicenseId>
+      <Name>TC3 Speech</Name>
+      <OrderNo>TF4500</OrderNo>
+      <TAN>G82K$-J16XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{520DE751-9DB6-47CB-8240-BD5C466E7E64}</LicenseId>
+      <Name>TC3 NC PTP</Name>
+      <OrderNo>TF5000</OrderNo>
+      <TAN>D82K$-116RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{BF78CFC7-2E63-42C3-8C07-BB6C346BFB8B}</LicenseId>
+      <Name>TC3 NC PTP Axes Pack 25</Name>
+      <OrderNo>TF5010</OrderNo>
+      <TAN>G72K$-J15R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{57BD9670-089D-434A-85CF-90A857EE0EFF}</LicenseId>
+      <Name>TC3 NC PTP Axes Pack unlimited</Name>
+      <OrderNo>TF5020</OrderNo>
+      <TAN>D8HK$-1J6XW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6C4B2C28-7A9E-41AD-B5FE-6D61422A73D6}</LicenseId>
+      <Name>TC3 NC Camming</Name>
+      <OrderNo>TF5050</OrderNo>
+      <TAN>STJHL-6J6RK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{FBEA583E-F05B-406A-BD9F-2BFA59244888}</LicenseId>
+      <Name>TC3 NC Flying Saw</Name>
+      <OrderNo>TF5055</OrderNo>
+      <TAN>M727L-SB58K</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{D3BAA5E2-D7DF-46FC-B537-C52A686A73FF}</LicenseId>
+      <Name>TC3 NC FIFO Axes</Name>
+      <OrderNo>TF5060</OrderNo>
+      <TAN>S827L-6B68Q</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6DFE338D-A25E-4F4B-A02A-2E93F21C1763}</LicenseId>
+      <Name>TC3 Motion-Control-XFC</Name>
+      <OrderNo>TF5065</OrderNo>
+      <TAN>M827L-SB6LQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{DEA72F0A-9EA0-48F4-ABB5-766516202B8E}</LicenseId>
+      <Name>TC3 NC I</Name>
+      <OrderNo>TF5100</OrderNo>
+      <TAN>G7HK$-JJ5X6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{C0BF0BC1-CBED-4D55-86DC-0706BF289DCE}</LicenseId>
+      <Name>TC3 Kinematic Transformation L1</Name>
+      <OrderNo>TF5110</OrderNo>
+      <TAN>D7HK$-1J5R6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{B56E7280-5DD4-4AB8-8075-075DD69C1C3D}</LicenseId>
+      <Name>TC3 Kinematic Transformation L2</Name>
+      <OrderNo>TF5111</OrderNo>
+      <TAN>G8HK$-JJ6RW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{EDABAF2B-31BD-44EA-812D-3BEA277A1355}</LicenseId>
+      <Name>TC3 Kinematic Transformation L3</Name>
+      <OrderNo>TF5112</OrderNo>
+      <TAN>D895$-1J58W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{1C844D20-6568-4164-87F8-B6791D563CA7}</LicenseId>
+      <Name>TC3 Kinematic Transformation L4</Name>
+      <OrderNo>TF5113</OrderNo>
+      <TAN>G795$-JJ686</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{D6854388-0494-4832-9169-8003C437CBA5}</LicenseId>
+      <Name>TC3 Robotics mxAutomation</Name>
+      <OrderNo>TF5120</OrderNo>
+      <TAN>D795$-1J6L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{9AA6BD77-2143-4739-8C48-B36DEAAA1790}</LicenseId>
+      <Name>TC3 Robotics uniVAL PLC</Name>
+      <OrderNo>TF5130</OrderNo>
+      <TAN>G895$-JJ5LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5F80BDB9-D9AC-40A4-9C8A-62EE6295DE0F}</LicenseId>
+      <Name>TC3 CNC</Name>
+      <OrderNo>TF5200</OrderNo>
+      <TAN>D7B5$-11686</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{A6DA2335-6B5A-4627-8824-0B8D5E3E73C5}</LicenseId>
+      <Name>TC3 CNC-E</Name>
+      <OrderNo>TF5210</OrderNo>
+      <TAN>G8B5$-J158W</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6560E068-08E6-4CE9-BFC8-B47975C26686}</LicenseId>
+      <Name>TC3 CNC Axes Pack</Name>
+      <OrderNo>TF5220</OrderNo>
+      <TAN>D8B5$-115LW</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6F53AC28-F6A2-47FE-89A6-F2AB8FE337D2}</LicenseId>
+      <Name>TC3 CNC Measurement</Name>
+      <OrderNo>TF5225</OrderNo>
+      <TAN>G7B5$-J16L6</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5533D163-895A-4487-AF42-1659698510A7}</LicenseId>
+      <Name>TC3 CNC Channel</Name>
+      <OrderNo>TF5230</OrderNo>
+      <TAN>DXJ7L-SB6XQ</TAN>
+      <Instances>27</Instances>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5533D163-895A-4487-AF42-1659698510A7}</LicenseId>
+      <Name>TC3 CNC Channel</Name>
+      <OrderNo>TF5230</OrderNo>
+      <TAN>DT4HL-S268K</TAN>
+      <Instances>27</Instances>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{5533D163-895A-4487-AF42-1659698510A7}</LicenseId>
+      <Name>TC3 CNC Channel</Name>
+      <OrderNo>TF5230</OrderNo>
+      <TAN>MT17L-SJ58K</TAN>
+      <Instances>27</Instances>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2F2AA838-26BB-4435-83FD-B4EB6CBB0C6C}</LicenseId>
+      <Name>TC3 CNC Trafo</Name>
+      <OrderNo>TF5240</OrderNo>
+      <TAN>SX47L-616LQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{EC7969FF-C0D8-41A5-9693-92BFB866A89E}</LicenseId>
+      <Name>TC3 CNC Kinematic Optimization</Name>
+      <OrderNo>TF5245</OrderNo>
+      <TAN>MXPHL-S15XQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{0874FC73-9646-40A4-942D-F8C71CB228AE}</LicenseId>
+      <Name>TC3 CNC HSC</Name>
+      <OrderNo>TF5250</OrderNo>
+      <TAN>STPHL-616XK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{18FCE643-3C14-4527-A934-A9042FF9E7DE}</LicenseId>
+      <Name>TC3 CNC Spline</Name>
+      <OrderNo>TF5260</OrderNo>
+      <TAN>MTPHL-S16RK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{34E7B37F-BCDF-4169-BDE0-5EDE77BD1CD3}</LicenseId>
+      <Name>TC3 CNC Virtual NCK Basis</Name>
+      <OrderNo>TF5270</OrderNo>
+      <TAN>SXPHL-615RQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{352C9D05-CA12-4E54-B55A-575B64624E9C}</LicenseId>
+      <Name>TC3 CNC Virtual NCK Options</Name>
+      <OrderNo>TF5271</OrderNo>
+      <TAN>MTJHL-SJ6XK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7637A32E-299D-4A54-9201-DA676B288A41}</LicenseId>
+      <Name>TC3 CNC Volumetric Compensation</Name>
+      <OrderNo>TF5280</OrderNo>
+      <TAN>SXJHL-6J5XQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{342C16A8-A110-474E-99D1-26DF22353503}</LicenseId>
+      <Name>TC3 CNC Cutting Plus</Name>
+      <OrderNo>TF5290</OrderNo>
+      <TAN>MXJHL-SJ5RQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{C7C2EEE2-23C9-47B9-82D4-0ADF5D82C0A0}</LicenseId>
+      <Name>TC3 Motion Collision Avoidance</Name>
+      <OrderNo>TF5410</OrderNo>
+      <TAN>S727L-6B5LK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{A15FA260-08A3-4DCD-93E9-5F22F7D234ED}</LicenseId>
+      <Name>TC3 Motion Pick-and-Place</Name>
+      <OrderNo>TF5420</OrderNo>
+      <TAN>M8H7L-S268Q</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{4207A273-D64C-4314-BDC9-4D7933161B91}</LicenseId>
+      <Name>TC3 Digital Cam Server</Name>
+      <OrderNo>TF5800</OrderNo>
+      <TAN>S7H7L-6258K</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{7A0CF84A-530D-4F8B-8C98-33A57151C348}</LicenseId>
+      <Name>TC3 Hydraulic Positioning</Name>
+      <OrderNo>TF5810</OrderNo>
+      <TAN>M7H7L-S25LK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{1293A494-551F-4DB7-86DB-E11F826C9DD9}</LicenseId>
+      <Name>TC3 Line Control</Name>
+      <OrderNo>TF5820</OrderNo>
+      <TAN>S8H7L-626LQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{FB6D691D-478A-4C62-9D57-8A3A1727A76B}</LicenseId>
+      <Name>TC3 ADS-Communication-Library</Name>
+      <OrderNo>TF6000</OrderNo>
+      <TAN>M89HL-S25XQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{E008E3C8-6BD9-491C-B673-DC45CC7AA4F1}</LicenseId>
+      <Name>TC3 JSON Data Interface</Name>
+      <OrderNo>TF6020</OrderNo>
+      <TAN>S79HL-626XK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</LicenseId>
+      <Name>TC3 OPC-UA</Name>
+      <OrderNo>TF6100</OrderNo>
+      <TAN>M79HL-S26RK</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{1601B55A-B68B-4C5B-9A42-31E9CA63F286}</LicenseId>
+      <Name>TC3 OPC-DA</Name>
+      <OrderNo>TF6120</OrderNo>
+      <TAN>S89HL-625RQ</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{6952449D-F68C-49A2-ADE4-8639D85B33A4}</LicenseId>
+      <Name>TC3 Modbus-TCP</Name>
+      <OrderNo>TF6250</OrderNo>
+      <TAN>43PWB-XC4LP</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{3EBB9639-5FF3-42B6-8847-35C70DC013C8}</LicenseId>
+      <Name>TC3 TCP/IP</Name>
+      <OrderNo>TF6310</OrderNo>
+      <TAN>46PWJ-KCS8Y</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{92583661-35AE-45CE-BD4F-C35BFE16F07E}</LicenseId>
+      <Name>TC3 Database-Server</Name>
+      <OrderNo>TF6420</OrderNo>
+      <TAN>1D1C3-2$G31</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2AFA4536-55C8-4554-BE9D-FAF0C7E2EFC3}</LicenseId>
+      <Name>TC3 XML-Server</Name>
+      <OrderNo>TF6421</OrderNo>
+      <TAN>86PWJ-YCSLY</TAN>
+    </License>
+    <License ManuallyAdded="true">
+      <LicenseId>{2A62CBE6-0999-4FCB-AF97-0676B22890FB}</LicenseId>
+      <Name>TC3 S7 Communication</Name>
+      <OrderNo>TF6620</OrderNo>
+      <TAN>S71Z8-W6M4M</TAN>
+    </License>
+    <License AddedThrough="{2A62CBE6-0999-4FCB-AF97-0676B22890FB}">
+      <LicenseId>{081AC839-28D0-49CA-9792-72680E1F3249}</LicenseId>
+      <Name>TC3 TCP/UDP RT</Name>
+      <OrderNo>TF6311</OrderNo>
+    </License>
+    <License AddedThrough="{C0BF0BC1-CBED-4D55-86DC-0706BF289DCE}">
+      <LicenseId>{C13CAEC7-1F41-4491-935E-FF6254005C74}</LicenseId>
+      <Name>TC3 Physics Base</Name>
+      <OrderNo>TF5440</OrderNo>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{0505DF81-9DBD-4AFF-AB60-514E12F6B79E}</LicenseId>
+      <Name>TC3 Condition Monitoring Advanced Transformation</Name>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{DC0EBB5C-9D0B-48B5-9C56-F763587B9F27}</LicenseId>
+      <Name>TC3 Condition Monitoring Application</Name>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{6DD3E954-87EE-40A1-9DA6-D24C6BF1034C}</LicenseId>
+      <Name>TC3 Condition Monitoring Advanced Analysis</Name>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{22B6DFEE-9DC6-49C6-8499-2235F89970F6}</LicenseId>
+      <Name>TC3 Condition Monitoring Advanced Classification</Name>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{BBAB9258-23C8-479B-B837-1EBD31BE6456}</LicenseId>
+      <Name>TC3 Condition Monitoring Advanced Frequency Analysis</Name>
+    </License>
+    <License AddedThrough="{5BE000FB-98CE-4B83-A754-2CB323710E14}">
+      <LicenseId>{08480D65-FB0E-4EA0-AFC8-5556227C58D0}</LicenseId>
+      <Name>TC3 Condition Monitoring Advanced Statistics</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{66CC3150-21F4-46E1-BF43-E3917CA57246}</LicenseId>
+      <Name>TC3 Filter Res</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{B4047401-070E-4860-BA21-5A422ACE1881}</LicenseId>
+      <Name>TC3 Condition Monitoring Base Classification</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{2BA61DF3-1410-4F2F-B2D7-9A6297EA65F1}</LicenseId>
+      <Name>TC3 Condition Monitoring Base Statistics</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{59BEB6AE-4014-4AF3-A61C-D8B206EBCBA6}</LicenseId>
+      <Name>TC3 Condition Monitoring Base Gear Analysis</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{6F8F0088-6E32-4670-A15C-76AC00868FAB}</LicenseId>
+      <Name>TC3 Condition Monitoring Base Bearing Analysis</Name>
+    </License>
+    <License AddedThrough="{A0C635DF-5F13-43BE-8D0B-613386AD9A20}">
+      <LicenseId>{D21C0A22-8F22-4CBD-B5A3-0DC7936E4726}</LicenseId>
+      <Name>TC3 Condition Monitoring Base Frequency Analysis</Name>
+    </License>
+    <License AddedThrough="{EE499E71-9522-4C05-86B4-8AD0F904E0C4}">
+      <LicenseId>{CCE50C10-2CAA-4243-8182-080F02C5BE3D}</LicenseId>
+      <Name>TC3 Reporting Server</Name>
+    </License>
+    <License AddedThrough="{EE499E71-9522-4C05-86B4-8AD0F904E0C4}">
+      <LicenseId>{36DE5066-5F1E-4C9F-AED5-D8D1E392C9CB}</LicenseId>
+      <Name>TC3 Analytics Control Device Pack</Name>
+      <Instances>256</Instances>
+    </License>
+    <License AddedThrough="{EE499E71-9522-4C05-86B4-8AD0F904E0C4}">
+      <LicenseId>{70A64701-DC70-4557-B425-EC0B67E22215}</LicenseId>
+      <Name>TC3 IoT HTTP Protocol</Name>
+    </License>
+    <License AddedThrough="{EE499E71-9522-4C05-86B4-8AD0F904E0C4}">
+      <LicenseId>{42E60F0D-E1AD-4B78-84B8-FD3ECF44FAA7}</LicenseId>
+      <Name>TC3 IoT HTTPS/REST</Name>
+      <OrderNo>TF6760</OrderNo>
+    </License>
+    <License AddedThrough="{EE499E71-9522-4C05-86B4-8AD0F904E0C4}">
+      <LicenseId>{CC0FE26F-70E5-4410-8487-8A75250F91A2}</LicenseId>
+      <Name>TC3 Analytics Stream Helper</Name>
+    </License>
+    <License AddedThrough="{0070B910-0995-4F44-83BF-D1E141B4D8C3}">
+      <LicenseId>{0ABFD2B0-EAE1-4DC7-AABE-03093B0786B7}</LicenseId>
+      <Name>TC3 IoT Communication (MQTT)</Name>
+      <OrderNo>TF6701</OrderNo>
+    </License>
+    <License AddedThrough="{0070B910-0995-4F44-83BF-D1E141B4D8C3}">
+      <LicenseId>{E0012AB1-862B-4965-BD3B-E8374A313232}</LicenseId>
+      <Name>TC3 Analytics Storage Provider Library</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{42025D77-320A-4A1A-A36B-26D25FEB8C2C}</LicenseId>
+      <Name>TC3 Analytics - Preprocessing</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{0DC5DE55-06C2-4875-9657-A516B71B6522}</LicenseId>
+      <Name>TC3 Analytics - Advanced Statistics</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{F5BA86DE-04D5-454D-8B63-57C5900151B5}</LicenseId>
+      <Name>TC3 Analytics - Outlier Detection</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{8A716C85-A7D9-443F-A69D-DB7D6CCE6CF7}</LicenseId>
+      <Name>TC3 Analytics - Clustering</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{2109B407-000F-4725-8AA2-B126F0B1C327}</LicenseId>
+      <Name>TC3 Analytics - XY Path Analysis</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{C38C3040-F29A-4F8F-B730-9E12A86D31C9}</LicenseId>
+      <Name>TC3 Analytics - Motion Statistics</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{821FE232-C4AE-4D3B-BA3C-FFD1116F579D}</LicenseId>
+      <Name>TC3 Analytics - ML Base</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{CF9AF283-6829-4276-A6F3-2ED38D08A2C8}</LicenseId>
+      <Name>TC3 Analytics - Vision</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{ED986C21-CE99-4CB4-8257-46B7A7218EFA}</LicenseId>
+      <Name>TC3 Analytics - XTS</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{BB071F9B-03C9-4836-99BA-B51B2C167AC3}</LicenseId>
+      <Name>TC3 Analytics - Training Base</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{8EC413FE-24F8-4829-9D43-6592A14E645D}</LicenseId>
+      <Name>TC3 Analytics - Math</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{A4B90BAF-C47D-4721-802D-C3EB00A416CA}</LicenseId>
+      <Name>TC3 Analytics - IoT</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{0223514F-99E7-48E9-A35C-5D8FEFCE6EA9}</LicenseId>
+      <Name>TC3 Analytics - Device Diagnosis</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{A9637E30-A517-4DDB-AB46-659D84CC17CD}</LicenseId>
+      <Name>TC3 Analytics - Compare</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{8334310E-A938-452F-B407-DBB9033D3E3C}</LicenseId>
+      <Name>TC3 Analytics - Classification</Name>
+    </License>
+    <License AddedThrough="{BB7AE665-A8D6-41F6-954F-961DDDCDA42B}">
+      <LicenseId>{10032AB1-C6C6-40E5-890B-594BF889C5A3}</LicenseId>
+      <Name>TC3 Analytics - Base</Name>
+    </License>
+    <License AddedThrough="{02AC2825-C3C7-4D15-AAF6-4EB45EFAA2D0}">
+      <LicenseId>{973BA0B1-AADD-41C1-B518-302802473922}</LicenseId>
+      <Name>TC3 IoT MQTT Protocol</Name>
+    </License>
+    <License AddedThrough="{796D380F-D49E-4C0C-A05F-500052FAC883}">
+      <LicenseId>{A2091C4C-7D04-4202-B173-9984E7125BC0}</LicenseId>
+      <Name>TC3 HMI Targets</Name>
+      <Instances>168</Instances>
+    </License>
+    <License AddedThrough="{796D380F-D49E-4C0C-A05F-500052FAC883}">
+      <LicenseId>{37E5160D-987B-4640-888D-0F97727B53E2}</LicenseId>
+      <Name>TC3 HMI Clients</Name>
+      <Instances>171</Instances>
+    </License>
+    <License AddedThrough="{FDE02854-39A7-440C-9EAE-C234A16A3CED}">
+      <LicenseId>{D4390DEA-A64D-494D-9E09-275326DBB0CB}</LicenseId>
+      <Name>TC3 PLC-HMI (RT)</Name>
+    </License>
+    <License AddedThrough="{7B9C044C-F003-44F9-8552-FA9D08753C91}">
+      <LicenseId>{281D57F6-ECA5-4116-A7E2-E5565EF04976}</LicenseId>
+      <Name>TC3 CNC Axis</Name>
+    </License>
+    <License AddedThrough="{8C57D0A8-BD63-4554-BAE1-E9C797EF0D0E}">
+      <LicenseId>{A19036CF-A53B-4E3A-99FF-023EF5C4798B}</LicenseId>
+      <Name>TC3 NC PTP Axis</Name>
+    </License>
+    <License AddedThrough="{96ADB134-211A-4863-977F-10E53B30C2D2}">
+      <LicenseId>{2D6F11C0-6F75-4E5D-A07D-D83A5E0C9F10}</LicenseId>
+      <Name>Runtime for MATLAB / Simulink</Name>
+      <OrderNo>TF1400</OrderNo>
+    </License>
+  </LicenseInfo>
+</TcLicenseInfo>
