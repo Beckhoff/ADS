@@ -94,7 +94,7 @@ if get_option('tcadsdll_include') != ''
       inc,
     ],
     dependencies: [
-      meson.get_compiler('cpp').find_library('libTcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
+      meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
       libs,
     ],
     link_with: tcadslib,
