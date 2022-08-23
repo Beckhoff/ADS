@@ -133,26 +133,6 @@ test-linux-gcc-mips:
     - update-binfmts --enable qemu-mips
     - update-binfmts --disable qemu-mipsn32
 
-test-fbsd-clang:
-  stage: test
-  needs: [
-    "build-fbsd-clang",
-  ]
-  tags:
-    - adslib
-    - tcbsd
-  variables:
-    BHF_CI_NAT_IP: '172.17.62.51'
-    EXPECTED_PLATFORMID: 90
-    EXPECTED_SYSTEMID: 'E5898A06-9629-71CC-8474-DD555071C0EB'
-  before_script:
-    - echo "172.17.66.104 ads-server" | doas tee -a /etc/hosts
-    - nc -z 172.17.66.104 48897
-    - sleep 10
-  script:
-    - doas pkg install -y vim
-    - ./tools/90_run_tests.sh
-
 build-debian:
   image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: build
