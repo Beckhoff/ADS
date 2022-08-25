@@ -16,8 +16,11 @@
 #include <iostream>
 #include <limits>
 #include <thread>
-#include <unistd.h>
 #include <vector>
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+#include <io.h>
+#endif
 
 static int version()
 {
