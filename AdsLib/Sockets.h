@@ -47,7 +47,7 @@ protected:
     SOCKET m_Socket;
     sockaddr_storage m_SockAddress;
     const sockaddr* const m_DestAddr;
-    size_t m_DestAddrLen;
+    socklen_t m_DestAddrLen;
 
     Socket(const struct addrinfo* host, int type);
     ~Socket();
