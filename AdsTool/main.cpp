@@ -473,29 +473,29 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
         switch (bytesRead) {
         case sizeof(uint8_t):
             {
-                const auto value = *(reinterpret_cast<uint8_t*>(readBuffer.data()));
-                std::cout << std::dec << (int)value << '\n';
+                const auto v = *(reinterpret_cast<uint8_t*>(readBuffer.data()));
+                std::cout << std::dec << (int)v << '\n';
                 return !std::cout.good();
             }
 
         case sizeof(uint16_t):
             {
-                const auto value = *(reinterpret_cast<uint16_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                const auto v = *(reinterpret_cast<uint16_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
                 return !std::cout.good();
             }
 
         case sizeof(uint32_t):
             {
-                const auto value = *(reinterpret_cast<uint32_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                const auto v = *(reinterpret_cast<uint32_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
                 return !std::cout.good();
             }
 
         case sizeof(uint64_t):
             {
-                const auto value = *(reinterpret_cast<uint64_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(value) << '\n';
+                const auto v = *(reinterpret_cast<uint64_t*>(readBuffer.data()));
+                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
                 return !std::cout.good();
             }
         }
