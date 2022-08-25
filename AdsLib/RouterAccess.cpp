@@ -15,10 +15,10 @@ namespace ads
 {
 struct SearchPciBusReq {
     SearchPciBusReq(const uint64_t quad)
-        : leVendorID(bhf::ads::htole<uint16_t>(quad >> 48))
-        , leDeviceID(bhf::ads::htole<uint16_t>(quad >> 32))
-        , leSubVendorID(bhf::ads::htole<uint16_t>(quad >> 16))
-        , leSubSystemID(bhf::ads::htole<uint16_t>(quad))
+        : leVendorID(bhf::ads::htole<uint16_t>(static_cast<uint16_t>(quad >> 48)))
+        , leDeviceID(bhf::ads::htole<uint16_t>(static_cast<uint16_t>(quad >> 32)))
+        , leSubVendorID(bhf::ads::htole<uint16_t>(static_cast<uint16_t>(quad >> 16)))
+        , leSubSystemID(bhf::ads::htole<uint16_t>(static_cast<uint16_t>(quad)))
     {}
 private:
     const uint16_t leVendorID;
