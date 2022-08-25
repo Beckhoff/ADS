@@ -82,7 +82,7 @@ bool RouterAccess::PciScan(const uint64_t pci_id, std::ostream& os) const
 
     if (res.slot.size() < res.nFound()) {
         LOG_WARN(__FUNCTION__
-                 << "(): data seems corrupt. Slot count 0x" << std::hex << res.nFound() << " exceedes maximum 0x" << res.slot.size() <<
+                 << "(): data seems corrupt. Slot count 0x" << std::hex << res.nFound() << " exceeds maximum 0x" << res.slot.size() <<
                  " -> truncating\n");
     }
 
