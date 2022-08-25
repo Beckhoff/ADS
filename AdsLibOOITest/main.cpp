@@ -374,8 +374,8 @@ struct TestAds : test_base<TestAds> {
     void testAdsNotification(const std::string&)
     {
         static const uint32_t NOTIFY_CYCLE_100NS = 1000000;
-        static const size_t MAX_NOTIFICATIONS_PER_PORT = 1024;
-        static const size_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
+        static const uint32_t MAX_NOTIFICATIONS_PER_PORT = 1024;
+        static const uint32_t LEAKED_NOTIFICATIONS = MAX_NOTIFICATIONS_PER_PORT / 2;
         AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {NOTIFY_CYCLE_100NS}};
 
         AdsDevice route {"ads-server", serverNetId, AMSPORT_R0_PLC_TC3};
@@ -421,11 +421,11 @@ struct TestAds : test_base<TestAds> {
         {
             g_NumNotifications = 0;
             std::vector<AdsNotification> notifications;
-            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
+            for (uint32_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
                 notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
+            for (uint32_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
                 notifications.pop_back();
             }
             fructose_assert(g_NumNotifications > 0);
@@ -434,11 +434,11 @@ struct TestAds : test_base<TestAds> {
             static const char handleName[] = "MAIN.byByte";
             g_NumNotifications = 0;
             std::vector<AdsNotification> notifications;
-            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
+            for (uint32_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT; ++i) {
                 notifications.emplace_back(route, handleName, attrib, &NotifyCallback, i);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            for (size_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
+            for (uint32_t i = 0; i < MAX_NOTIFICATIONS_PER_PORT - LEAKED_NOTIFICATIONS; ++i) {
                 notifications.pop_back();
             }
             fructose_assert(g_NumNotifications > 0);
@@ -511,7 +511,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
 
     void testEndurance(const std::string& testname)
     {
-        static const size_t numNotifications = 1024;
+        static const uint32_t numNotifications = 1024;
         const long port = AdsPortOpenEx();
         fructose_assert(0 != port);
 
@@ -527,7 +527,7 @@ struct TestAdsPerformance : test_base<TestAdsPerformance> {
         }
 
         const auto start = std::chrono::high_resolution_clock::now();
-        for (size_t i = 0; i < numNotifications; ++i) {
+        for (uint32_t i = 0; i < numNotifications; ++i) {
             notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
         }
 
@@ -551,7 +551,7 @@ private:
         AdsNotificationAttrib attrib = {1, ADSTRANS_SERVERCYCLE, 0, {1000000}};
         std::vector<AdsNotification> notifications;
 
-        for (size_t i = 0; i < numNotifications; ++i) {
+        for (uint32_t i = 0; i < numNotifications; ++i) {
             notifications.emplace_back(route, 0x4020, 4, attrib, &NotifyCallback, i);
         }
         std::this_thread::sleep_for(std::chrono::seconds(5));
