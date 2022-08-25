@@ -71,9 +71,10 @@ build-win10:
   script:
     - C:\ProgramData\chocolatey\bin\choco install --no-progress -y meson ninja
     - $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    - meson setup build -Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include -Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib
+    - $prog_x86 = [System.Environment]::GetFolderPath('ProgramFilesX86'); $vswhere = "${prog_x86}\Microsoft Visual Studio\Installer\vswhere.exe"; $vsInstallPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath; Import-Module "$vsInstallPath\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"; Enter-VsDevShell -VsInstallPath:$vsInstallPath -SkipAutomaticLocation -DevCmdArguments:'-arch=x64 -host_arch=x64'
+    - meson setup build -Dwerror=false -Dcpp_args="-D_CRT_NONSTDC_NO_WARNINGS=1, -D_CRT_SECURE_NO_WARNINGS=1, -DNOMINMAX=1" -Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include -Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib
     - ninja -C build
-    - meson setup example/build example -Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include -Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib
+    - meson setup example/build example -Dwerror=false -Dcpp_args="-D_CRT_NONSTDC_NO_WARNINGS=1, -D_CRT_SECURE_NO_WARNINGS=1, -DNOMINMAX=1" -Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include -Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib
     - ninja -C example/build
   artifacts:
     when: always
