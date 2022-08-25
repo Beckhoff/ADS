@@ -6,6 +6,7 @@
 #include "AdsDevice.h"
 #include "AdsException.h"
 #include "AdsLib.h"
+#include <limits>
 
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 {
@@ -177,7 +178,10 @@ AdsHandle AdsDevice::OpenFile(const std::string& filename, const uint32_t flags)
 
 long AdsDevice::ReadReqEx2(uint32_t group, uint32_t offset, size_t length, void* buffer, uint32_t* bytesRead) const
 {
-    return AdsSyncReadReqEx2(*m_LocalPort, &m_Addr, group, offset, length, buffer, bytesRead);
+    if (length > std::numeric_limits<uint32_t>::max()) {
+        return ADSERR_DEVICE_INVALIDSIZE;
+    }
+    return AdsSyncReadReqEx2(*m_LocalPort, &m_Addr, group, offset, static_cast<uint32_t>(length), buffer, bytesRead);
 }
 
 long AdsDevice::ReadWriteReqEx2(uint32_t    indexGroup,
@@ -188,16 +192,25 @@ long AdsDevice::ReadWriteReqEx2(uint32_t    indexGroup,
                                 const void* writeData,
                                 uint32_t*   bytesRead) const
 {
+    if (readLength > std::numeric_limits<uint32_t>::max()) {
+        return ADSERR_DEVICE_INVALIDSIZE;
+    }
+    if (writeLength > std::numeric_limits<uint32_t>::max()) {
+        return ADSERR_DEVICE_INVALIDSIZE;
+    }
     return AdsSyncReadWriteReqEx2(GetLocalPort(),
                                   &m_Addr,
                                   indexGroup, indexOffset,
-                                  readLength, readData,
-                                  writeLength, writeData,
+                                  static_cast<uint32_t>(readLength), readData,
+                                  static_cast<uint32_t>(writeLength), writeData,
                                   bytesRead
                                   );
 }
 
 long AdsDevice::WriteReqEx(uint32_t group, uint32_t offset, size_t length, const void* buffer) const
 {
-    return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, length, buffer);
+    if (length > std::numeric_limits<uint32_t>::max()) {
+        return ADSERR_DEVICE_INVALIDSIZE;
+    }
+    return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, static_cast<uint32_t>(length), buffer);
 }
