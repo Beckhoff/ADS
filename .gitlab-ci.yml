@@ -83,9 +83,9 @@ build-win10:
     - example/build/
 
 
-.test-linux:
+.test-with-service-container:
   stage: test
-  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:4.5
+  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.22
   tags:
     - docker_vm_runner
     - few_vcpus
@@ -95,6 +95,9 @@ build-win10:
   variables:
     EXPECTED_PLATFORMID: 92
     EXPECTED_SYSTEMID: '95EEFDE0-0392-1452-275F-1BF9ACCB924E'
+
+.test-linux:
+  extends: .test-with-service-container
   script:
     - apt update -y && apt install -y socat xxd
     - ./tools/90_run_tests.sh
