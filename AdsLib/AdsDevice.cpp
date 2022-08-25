@@ -175,16 +175,16 @@ AdsHandle AdsDevice::OpenFile(const std::string& filename, const uint32_t flags)
     return {new uint32_t {handle}, {std::bind(&AdsDevice::CloseFile, this, std::placeholders::_1)}};
 }
 
-long AdsDevice::ReadReqEx2(uint32_t group, uint32_t offset, uint32_t length, void* buffer, uint32_t* bytesRead) const
+long AdsDevice::ReadReqEx2(uint32_t group, uint32_t offset, size_t length, void* buffer, uint32_t* bytesRead) const
 {
     return AdsSyncReadReqEx2(*m_LocalPort, &m_Addr, group, offset, length, buffer, bytesRead);
 }
 
 long AdsDevice::ReadWriteReqEx2(uint32_t    indexGroup,
                                 uint32_t    indexOffset,
-                                uint32_t    readLength,
+                                size_t      readLength,
                                 void*       readData,
-                                uint32_t    writeLength,
+                                size_t      writeLength,
                                 const void* writeData,
                                 uint32_t*   bytesRead) const
 {
@@ -197,7 +197,7 @@ long AdsDevice::ReadWriteReqEx2(uint32_t    indexGroup,
                                   );
 }
 
-long AdsDevice::WriteReqEx(uint32_t group, uint32_t offset, uint32_t length, const void* buffer) const
+long AdsDevice::WriteReqEx(uint32_t group, uint32_t offset, size_t length, const void* buffer) const
 {
     return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, length, buffer);
 }
