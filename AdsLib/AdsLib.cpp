@@ -7,6 +7,7 @@
 #include "Log.h"
 #include "wrap_endian.h"
 #include <cstring>
+#include <limits>
 
 namespace bhf
 {
@@ -21,7 +22,11 @@ static bool PrependUdpLenTagId(Frame& frame, const uint16_t length, const uint16
 
 static bool PrependUdpTag(Frame& frame, const std::string& value, const uint16_t tagId)
 {
-    const uint16_t length = value.length() + 1;
+    if (value.length() + 1 > std::numeric_limits<uint16_t>::max()) {
+        LOG_WARN(__FUNCTION__ << "(): value is too long, skipping tagId (" << std::dec << tagId << ")\n");
+        return false;
+    }
+    const auto length = static_cast<uint16_t>(value.length() + 1);
     frame.prepend(value.data(), length);
     return PrependUdpLenTagId(frame, length, tagId);
 }
