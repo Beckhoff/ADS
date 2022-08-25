@@ -29,12 +29,12 @@ private:
 
 struct SearchPciSlotResNew {
     static constexpr size_t MAXBASEADDRESSES = 6;
-    const std::array<uint32_t, MAXBASEADDRESSES> leBaseAddresses;
-    const uint32_t leSize[MAXBASEADDRESSES];
-    const uint32_t leBusNumber;
-    const uint32_t leSlotNumber;
-    const uint16_t leBoardIrq;
-    const uint16_t lePciRegViaPorts;
+    std::array<uint32_t, MAXBASEADDRESSES> leBaseAddresses;
+    uint32_t leSize[MAXBASEADDRESSES];
+    uint32_t leBusNumber;
+    uint32_t leSlotNumber;
+    uint16_t leBoardIrq;
+    uint16_t lePciRegViaPorts;
 };
 
 struct SearchPciBusResNew {
