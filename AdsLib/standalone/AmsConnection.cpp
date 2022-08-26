@@ -247,7 +247,9 @@ void AmsConnection::ReceiveFrame(AmsResponse* const response, size_t bytesLeft, 
         Receive(request->buffer, bytesLeft, request->deadline);
 
         if (request->bytesRead) {
-            *(request->bytesRead) = bytesLeft;
+            // We already checked bytesLeft <= request->bufferLength
+            const auto v = static_cast<std::remove_pointer<decltype(AmsRequest::bytesRead)>::type>(bytesLeft);
+            *(request->bytesRead) = v;
         }
         response->Notify(header.result());
     } catch (const Socket::TimeoutEx&) {
@@ -284,7 +286,8 @@ bool AmsConnection::ReceiveNotification(const AoEHeader& header)
     while (bytesLeft > chunk) {
         Receive(ring.write, chunk);
         ring.Write(chunk);
-        bytesLeft -= chunk;
+        // We already checked bytesLeft > chunk, well it was not obvious enough for MSVC
+        bytesLeft -= static_cast<decltype(bytesLeft)>(chunk);
         chunk = ring.WriteChunk();
     }
     Receive(ring.write, bytesLeft);
