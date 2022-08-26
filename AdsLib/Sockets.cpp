@@ -122,7 +122,12 @@ Socket::Socket(const struct addrinfo* const host, const int type)
                 continue;
             }
         } else { /*if (SOCK_DGRAM == type)*/
+#if defined(_WIN32) || defined(__CYGWIN__)
+            // MSVC on Windows is the only platform using different types for connect() and ai_addrlen ...
+            m_DestAddrLen = static_cast<decltype(m_DestAddrLen)>(rp->ai_addrlen);
+#else
             m_DestAddrLen = rp->ai_addrlen;
+#endif
         }
         memcpy(&m_SockAddress, rp->ai_addr, std::min<size_t>(sizeof(m_SockAddress), rp->ai_addrlen));
         return;
