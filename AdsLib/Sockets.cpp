@@ -152,8 +152,8 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
         return 0;
     }
 
-    maxBytes = static_cast<int>(std::min<size_t>(INT_MAX, maxBytes));
-    const int bytesRead = recv(m_Socket, reinterpret_cast<char*>(buffer), maxBytes, 0);
+    const auto msvcMaxBytes = static_cast<int>(std::min<size_t>(std::numeric_limits<int>::max(), maxBytes));
+    const int bytesRead = recv(m_Socket, reinterpret_cast<char*>(buffer), msvcMaxBytes, 0);
     if (bytesRead > 0) {
         return bytesRead;
     }
