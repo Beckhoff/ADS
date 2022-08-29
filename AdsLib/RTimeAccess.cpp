@@ -15,13 +15,13 @@ static std::ostream& operator<<(std::ostream& os, const bhf::ads::RTimeCpuLatenc
 
 std::ostream& operator<<(std::ostream& os, const bhf::ads::RTimeCpuSettings& info)
 {
-    return os << std::hex <<
+    return os << std::dec <<
            "nWinCPUs: " << info.nWinCPUs << '\n' <<
            "nNonWinCPUs: " << info.nNonWinCPUs << '\n' <<
-           "dwAffinityMask: " << info.affinityMask << '\n' <<
-           "nRtCpus: " << info.nRtCpus << '\n' <<
-           "nCpuType: " << info.nCpuType << '\n' <<
-           "nCpuFamily: " << info.nCpuFamily << '\n' <<
+           "dwAffinityMask: 0x" << std::hex << info.affinityMask << '\n' <<
+           "nRtCpus: " << std::dec << info.nRtCpus << '\n' <<
+           "nCpuType: 0x" << std::hex << info.nCpuType << '\n' <<
+           "nCpuFamily: 0x" << info.nCpuFamily << '\n' <<
            "nCpuFreq: " << std::dec << info.nCpuFreq << '\n'
     ;
 }
