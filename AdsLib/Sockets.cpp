@@ -7,9 +7,9 @@
 #include "Log.h"
 
 #include <algorithm>
-#include <climits>
 #include <cstring>
 #include <exception>
+#include <limits>
 #include <sstream>
 #include <system_error>
 
@@ -210,7 +210,7 @@ bool Socket::Select(timeval* timeout) const
 
 size_t Socket::write(const Frame& frame) const
 {
-    if (frame.size() > INT_MAX) {
+    if (frame.size() > std::numeric_limits<int>::max()) {
         LOG_ERROR("frame length: " << frame.size() << " exceeds maximum length for sockets");
         return 0;
     }
