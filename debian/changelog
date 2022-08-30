@@ -1,3 +1,9 @@
+adstool (0.0.16-1) bullseye; urgency=medium
+
+  * AdsTool: bump version to force debian release
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Tue, 30 Aug 2022 11:11:04 +0200
+
 adstool (0.0.15-1) bullseye; urgency=medium
 
   * RTimeAccess: use decimal output for plain numbers
