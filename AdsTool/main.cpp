@@ -131,6 +131,11 @@ COMMANDS:
 		3:0 @ 0x4028629004
 		7:0 @ 0x4026531852
 
+	plc read-symbol <name>
+		Read the value of the symbol described by <name> and print it to stdout.
+	examples:
+		$ adstool 5.24.37.144.1.1 plc read-symbol "MAIN.nNum1"
+
 	plc show-symbols
 		Print information about all PLC symbols to stdout in JSON format.
 	examples:
@@ -373,7 +378,10 @@ int RunPLC(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
     auto device = bhf::ads::SymbolAccess{ gw, netid, port };
     const auto command = args.Pop<std::string>("plc command is missing");
 
-    if (!command.compare("show-symbols")) {
+    if (!command.compare("read-symbol")) {
+        const auto name = args.Pop<std::string>("Variable name is missing");
+        return device.Read(name, std::cout);
+    } else if (!command.compare("show-symbols")) {
         return device.ShowSymbols(std::cout);
     }
     LOG_ERROR(__FUNCTION__ << "(): Unknown PLC command '" << command << "'\n");

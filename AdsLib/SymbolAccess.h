@@ -27,6 +27,7 @@ using SymbolEntryMap = std::map<std::string, SymbolEntry>;
 struct SymbolAccess {
     SymbolAccess(const std::string& gw, AmsNetId netid, uint16_t port);
     SymbolEntryMap FetchSymbolEntries() const;
+    int Read(const std::string& name, std::ostream& os) const;
     int ShowSymbols(std::ostream& os) const;
 private:
     AdsDevice device;

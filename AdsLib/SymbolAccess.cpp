@@ -142,6 +142,71 @@ SymbolEntryMap SymbolAccess::FetchSymbolEntries() const
     throw AdsException(ADSERR_DEVICE_INVALIDDATA);
 }
 
+int SymbolAccess::Read(const std::string& name, std::ostream& os) const
+{
+    const auto entries = FetchSymbolEntries();
+    const auto it = entries.find(name);
+    if (it == entries.end()) {
+        LOG_WARN(__FUNCTION__ << "(): symbol '" << name << "' not found\n");
+        return ADSERR_DEVICE_SYMBOLNOTFOUND;
+    }
+
+    const auto entry = it->second;
+    std::vector<uint8_t> readBuffer(entry.header.size + 2);
+    uint32_t bytesRead = 0;
+    const auto status = device.ReadReqEx2(entry.header.iGroup,
+                                          entry.header.iOffs,
+                                          readBuffer.size(),
+                                          readBuffer.data(),
+                                          &bytesRead);
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+        return status;
+    }
+
+    switch (entry.header.dataType) {
+    case 0x2:     //INT
+        os << std::dec << letoh(*reinterpret_cast<int16_t*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x3:     //DINT
+        os << std::dec << letoh(*reinterpret_cast<int32_t*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x4:     //REAL
+        os << std::dec << letoh(*reinterpret_cast<float*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x5:     //LREAL
+        os << std::dec << letoh(*reinterpret_cast<double*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x11:     // BYTE
+    case 0x21:     // BOOL
+        os << std::dec << (int)readBuffer.data()[0] << '\n';
+        break;
+
+    case 0x12:     // WORD, UINT
+        os << std::dec << letoh(*reinterpret_cast<uint16_t*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x13:     // DWORD, UDINT
+        os << std::dec << letoh(*reinterpret_cast<uint32_t*>(readBuffer.data())) << '\n';
+        break;
+
+    case 0x15:     // LWORD, ULINT
+        os << std::dec << letoh(*reinterpret_cast<uint64_t*>(readBuffer.data())) << '\n';
+        break;
+
+    default:
+        LOG_WARN(__FUNCTION__ << "() Unknown type '" << entry.typeName << "' output in binary\n");
+        os.write((const char*)readBuffer.data(), bytesRead);
+        break;
+    }
+
+    return !std::cout.good();
+}
+
 int SymbolAccess::ShowSymbols(std::ostream& os) const
 {
     for (const auto& entry: FetchSymbolEntries()) {
