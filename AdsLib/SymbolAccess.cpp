@@ -207,6 +207,86 @@ int SymbolAccess::Read(const std::string& name, std::ostream& os) const
     return !std::cout.good();
 }
 
+template<typename T>
+int SymbolAccess::Write(const SymbolEntry& entry, const std::string& v) const
+{
+    T value = {};
+    if (v.size()) {
+        const auto asHex = (v.npos != v.rfind("0x", 0));
+        std::stringstream converter;
+        converter << (asHex ? std::hex : std::dec) << v;
+        converter >> value;
+    }
+    value = bhf::ads::htole(value);
+    return device.WriteReqEx(entry.header.iGroup,
+                             entry.header.iOffs,
+                             sizeof(value),
+                             &value);
+}
+
+template<>
+int SymbolAccess::Write<std::string>(const SymbolEntry& entry, const std::string& value) const
+{
+    return device.WriteReqEx(entry.header.iGroup,
+                             entry.header.iOffs,
+                             value.size(),
+                             value.data());
+}
+
+int SymbolAccess::Write(const std::string& name, const std::string& value) const
+{
+    const auto entries = FetchSymbolEntries();
+    const auto it = entries.find(name);
+    if (it == entries.end()) {
+        LOG_WARN(__FUNCTION__ << "(): symbol '" << name << "' not found\n");
+        return ADSERR_DEVICE_SYMBOLNOTFOUND;
+    }
+
+    const auto entry = it->second;
+    std::vector<uint8_t> readBuffer(entry.header.size + 2);
+    uint32_t bytesRead = 0;
+    const auto status = device.ReadReqEx2(entry.header.iGroup,
+                                          entry.header.iOffs,
+                                          readBuffer.size(),
+                                          readBuffer.data(),
+                                          &bytesRead);
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+        return status;
+    }
+
+    switch (entry.header.dataType) {
+    case 0x2:     //INT
+        return Write<int16_t>(entry, value);
+
+    case 0x3:     //DINT
+        return Write<int32_t>(entry, value);
+
+    case 0x4:     //REAL
+        return Write<float>(entry, value);
+
+    case 0x5:     //LREAL
+        return Write<double>(entry, value);
+
+    case 0x11:     // BYTE
+    case 0x21:     // BOOL
+        return Write<uint8_t>(entry, value);
+
+    case 0x12:     // WORD, UINT
+        return Write<uint16_t>(entry, value);
+
+    case 0x13:     // DWORD, UDINT
+        return Write<uint32_t>(entry, value);
+
+    case 0x15:     // LWORD, ULINT
+        return Write<uint64_t>(entry, value);
+
+    default:
+        LOG_WARN(__FUNCTION__ << "() Unknown type '" << entry.typeName << "' writting as string\n");
+        return Write<std::string>(entry, value);
+    }
+}
+
 int SymbolAccess::ShowSymbols(std::ostream& os) const
 {
     for (const auto& entry: FetchSymbolEntries()) {

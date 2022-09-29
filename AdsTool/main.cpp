@@ -136,6 +136,12 @@ COMMANDS:
 	examples:
 		$ adstool 5.24.37.144.1.1 plc read-symbol "MAIN.nNum1"
 
+	plc write-symbol <name> <value>
+		Write the <value> to the symbol described by <name>
+	examples:
+		$ adstool 5.24.37.144.1.1 plc write-symbol "MAIN.nNum1" 10
+		$ adstool 5.24.37.144.1.1 plc write-symbol "MAIN.nNum1" 0xA
+
 	plc show-symbols
 		Print information about all PLC symbols to stdout in JSON format.
 	examples:
@@ -381,6 +387,10 @@ int RunPLC(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
     if (!command.compare("read-symbol")) {
         const auto name = args.Pop<std::string>("Variable name is missing");
         return device.Read(name, std::cout);
+    } else if (!command.compare("write-symbol")) {
+        const auto name = args.Pop<std::string>("Variable name is missing");
+        const auto value = args.Pop<std::string>("Value is missing");
+        return device.Write(name, value);
     } else if (!command.compare("show-symbols")) {
         return device.ShowSymbols(std::cout);
     }

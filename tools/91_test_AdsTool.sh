@@ -96,8 +96,32 @@ check_pciscan() {
 	check pciscan 0x15EC5000
 }
 
+
+check_plc_variable() {
+	local _var="${1}"
+	local _value="${2}"
+
+	# Try to read a generic variable
+	check plc read-symbol "${_var}" | tee "${tmpfile}.backup"
+
+	# Overwrite a generic variable and verify the value was changed
+	check plc write-symbol "${_var}" "${_value}"
+	check plc read-symbol "${_var}" | diff - "${tmpfile}"
+
+	# Now, restore the old value of the variable and verify the value
+	# is back to original.
+	check plc write-symbol "${_var}" "$(cat "${tmpfile}.backup")"
+	check plc read-symbol "${_var}" | diff - "${tmpfile}.backup"
+}
+
 check_plc() {
+	# Basic JSON output is working
 	check plc show-symbols
+
+	# Try generic access to integer variables
+	printf '10\n' > "${tmpfile}"
+	check_plc_variable MAIN.nTestCasesFailed 10
+	check_plc_variable MAIN.nTestCasesFailed '0xA'
 }
 
 check_raw() {

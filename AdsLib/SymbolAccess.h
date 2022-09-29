@@ -28,9 +28,12 @@ struct SymbolAccess {
     SymbolAccess(const std::string& gw, AmsNetId netid, uint16_t port);
     SymbolEntryMap FetchSymbolEntries() const;
     int Read(const std::string& name, std::ostream& os) const;
+    int Write(const std::string& name, const std::string& value) const;
     int ShowSymbols(std::ostream& os) const;
 private:
     AdsDevice device;
+    template<typename T>
+    int Write(const SymbolEntry& symbol, const std::string& value) const;
 };
 }
 }
