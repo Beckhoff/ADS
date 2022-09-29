@@ -435,6 +435,21 @@ int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, b
     return 0;
 }
 
+template<typename T>
+int PrintAs(const std::vector<uint8_t>& readBuffer)
+{
+    const auto v = *(reinterpret_cast<const T*>(readBuffer.data()));
+    std::cout << std::dec << bhf::ads::letoh(v) << '\n';
+    return !std::cout.good();
+}
+
+template<>
+int PrintAs<uint8_t>(const std::vector<uint8_t>& readBuffer)
+{
+    std::cout << std::dec << (int)readBuffer[0] << '\n';
+    return !std::cout.good();
+}
+
 int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
     bhf::ParameterList params = {
@@ -478,37 +493,22 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
         switch (bytesRead) {
         case sizeof(uint8_t):
-            {
-                const auto v = *(reinterpret_cast<uint8_t*>(readBuffer.data()));
-                std::cout << std::dec << (int)v << '\n';
-                return !std::cout.good();
-            }
+            return PrintAs<uint8_t>(readBuffer);
 
         case sizeof(uint16_t):
-            {
-                const auto v = *(reinterpret_cast<uint16_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
-                return !std::cout.good();
-            }
+            return PrintAs<uint16_t>(readBuffer);
 
         case sizeof(uint32_t):
-            {
-                const auto v = *(reinterpret_cast<uint32_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
-                return !std::cout.good();
-            }
+            return PrintAs<uint32_t>(readBuffer);
 
         case sizeof(uint64_t):
-            {
-                const auto v = *(reinterpret_cast<uint64_t*>(readBuffer.data()));
-                std::cout << std::dec << bhf::ads::letoh(v) << '\n';
-                return !std::cout.good();
-            }
-        }
+            return PrintAs<uint64_t>(readBuffer);
 
-        ForceBinaryOutputOnWindows();
-        std::cout.write((const char*)readBuffer.data(), bytesRead);
-        return !std::cout.good();
+        default:
+            ForceBinaryOutputOnWindows();
+            std::cout.write((const char*)readBuffer.data(), bytesRead);
+            return !std::cout.good();
+        }
     }
 
     LOG_VERBOSE("name>" << name << "< value>" << value << "<\n");
