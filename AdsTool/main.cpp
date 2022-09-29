@@ -450,6 +450,17 @@ int PrintAs<uint8_t>(const std::vector<uint8_t>& readBuffer)
     return !std::cout.good();
 }
 
+template<typename T>
+int Write(const AdsDevice& device, const AdsHandle& handle, const char* const value)
+{
+    const auto writeBuffer = bhf::ads::htole(bhf::StringTo<T>(value));
+    const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
+                                          *handle,
+                                          sizeof(writeBuffer),
+                                          &writeBuffer);
+    return status;
+}
+
 int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
     bhf::ParameterList params = {
@@ -516,48 +527,16 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
     switch (size) {
     case sizeof(uint8_t):
-        {
-            const auto writeBuffer = bhf::StringTo<uint8_t>(value);
-            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint32_t)writeBuffer << "<\n");
-            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                                  *handle,
-                                                  sizeof(writeBuffer),
-                                                  &writeBuffer);
-            return status;
-        }
+        return Write<uint8_t>(device, handle, value);
 
     case sizeof(uint16_t):
-        {
-            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint16_t>(value));
-            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint16_t)writeBuffer << "<\n");
-            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                                  *handle,
-                                                  sizeof(writeBuffer),
-                                                  &writeBuffer);
-            return status;
-        }
+        return Write<uint16_t>(device, handle, value);
 
     case sizeof(uint32_t):
-        {
-            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint32_t>(value));
-            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint32_t)writeBuffer << "<\n");
-            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                                  *handle,
-                                                  sizeof(writeBuffer),
-                                                  &writeBuffer);
-            return status;
-        }
+        return Write<uint32_t>(device, handle, value);
 
     case sizeof(uint64_t):
-        {
-            const auto writeBuffer = bhf::ads::htole(bhf::StringTo<uint32_t>(value));
-            LOG_VERBOSE("name>" << name << "< value>0x" << std::hex << (uint64_t)writeBuffer << "<\n");
-            const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                                  *handle,
-                                                  sizeof(writeBuffer),
-                                                  &writeBuffer);
-            return status;
-        }
+        return Write<uint64_t>(device, handle, value);
 
     default:
         {
