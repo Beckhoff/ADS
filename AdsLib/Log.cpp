@@ -24,7 +24,9 @@
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) std::strftime(DATE_TIME, sizeof(DATE_TIME), "%FT%T%z ", localtime(TIME_T));
 #endif
 
-size_t Logger::logLevel = 1;
+#ifndef ADS_LOGLVL
+#define ADS_LOGLVL 1
+#endif
 
 static const char* CATEGORY[] = {
     "Verbose: ",
@@ -35,7 +37,7 @@ static const char* CATEGORY[] = {
 
 void Logger::Log(const size_t level, const std::string& msg)
 {
-    if (level >= logLevel) {
+    if (level >= ADS_LOGLVL) {
         std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         const auto category = CATEGORY[std::min(level, sizeof(CATEGORY) / sizeof(CATEGORY[0]))];
         char dateTime[28];
