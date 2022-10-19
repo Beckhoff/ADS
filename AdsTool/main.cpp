@@ -584,18 +584,19 @@ static T try_stoi(const char* str, const T defaultValue = 0)
 
 template<typename T>
 int TryRun(T f)
-try
 {
-    return f();
-} catch (const AdsException& ex) {
-    LOG_ERROR("AdsException message: " << ex.what() << '\n');
-    return ex.errorCode;
-} catch (const std::exception& ex) {
-    LOG_ERROR("Exception: " << ex.what() << '\n');
-    return -2;
-} catch (...) {
-    LOG_ERROR("Unknown exception\n");
-    return -1;
+    try {
+        return f();
+    } catch (const AdsException& ex) {
+        LOG_ERROR("AdsException message: " << ex.what() << '\n');
+        return ex.errorCode;
+    } catch (const std::exception& ex) {
+        LOG_ERROR("Exception: " << ex.what() << '\n');
+        return -2;
+    } catch (...) {
+        LOG_ERROR("Unknown exception\n");
+        return -1;
+    }
 }
 
 template<typename T>
