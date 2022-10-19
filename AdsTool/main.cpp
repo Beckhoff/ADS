@@ -19,7 +19,11 @@
 #include <vector>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
+#include <fcntl.h>
 #include <io.h>
+#define ForceBinaryOutputOnWindows(X) _setmode(_fileno( stdout ), O_BINARY)
+#else
+#define ForceBinaryOutputOnWindows(X)
 #endif
 
 static int version()
@@ -262,6 +266,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
             char buf[1024];
 
             adsFile.Read(sizeof(buf), buf, bytesRead);
+            ForceBinaryOutputOnWindows();
             std::cout.write(buf, bytesRead);
         } while (bytesRead > 0);
     } else if (!command.compare("write")) {
@@ -397,6 +402,7 @@ int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
         LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
         return status;
     }
+    ForceBinaryOutputOnWindows();
     std::cout.write((const char*)readBuffer.data(), readBuffer.size());
     return !std::cout.good();
 }
@@ -500,6 +506,7 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
             }
         }
 
+        ForceBinaryOutputOnWindows();
         std::cout.write((const char*)readBuffer.data(), bytesRead);
         return !std::cout.good();
     }
