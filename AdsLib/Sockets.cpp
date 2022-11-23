@@ -52,6 +52,7 @@ AddressList GetListOfAddresses(const std::string& hostPort, const std::string& d
     auto service = std::string(defaultPort);
     ParseHostAndPort(host, service);
 
+    InitSocketLibrary();
     struct addrinfo* results;
     if (getaddrinfo(host.c_str(), service.c_str(), nullptr, &results)) {
         throw std::runtime_error("Invalid or unknown host: " + host);
