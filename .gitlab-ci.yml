@@ -149,7 +149,7 @@ test-fbsd-clang:
     "build-fbsd-clang",
   ]
   script:
-    - wget --quiet https://freebsdpkg01.beckhoff.com/TCBSD/13/testing/iso/TCBSD-x64-13-63944.iso
+    - luemuctl get-latest-tcbsd
     - jitlab clone test_stage
     - cp -a .test-stage/* test_stage/
     - ./test_stage/test_stage.sh --nat-if=eth0 qemu ./*.iso
