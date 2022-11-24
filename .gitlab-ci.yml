@@ -92,7 +92,7 @@ build-win10:
 
 .test-with-service-container:
   stage: test
-  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.22
+  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.30
   tags:
     - docker_vm_runner
     - few_vcpus
@@ -150,9 +150,10 @@ test-fbsd-clang:
   ]
   script:
     - luemuctl get-latest-tcbsd
-    - jitlab clone test_stage
+    - jitlab shallow-clone test_stage master
     - cp -a .test-stage/* test_stage/
-    - ./test_stage/test_stage.sh --nat-if=eth0 qemu ./*.iso
+    - rackctl-emulate add test-device 200
+    - test_stage/test_stage.sh testrack QEMU "$(rackctl-config get test-device ip)" ./*.iso
 
 build-debian:
   image: ${REGISTRY_HOST}/beckhoff/bdpg:master
