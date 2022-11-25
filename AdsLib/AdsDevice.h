@@ -86,7 +86,7 @@ struct AdsDevice {
                          uint32_t    indexOffset,
                          size_t      readLength,
                          void*       readData,
-                         size_t    writeLength,
+                         size_t      writeLength,
                          const void* writeData,
                          uint32_t*   bytesRead) const;
     long WriteReqEx(uint32_t group, uint32_t offset, size_t length, const void* buffer) const;
