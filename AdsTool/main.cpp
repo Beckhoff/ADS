@@ -21,7 +21,7 @@
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <fcntl.h>
 #include <io.h>
-#define ForceBinaryOutputOnWindows(X) _setmode(_fileno( stdout ), O_BINARY)
+#define ForceBinaryOutputOnWindows(X) _setmode(_fileno(stdout), O_BINARY)
 #else
 #define ForceBinaryOutputOnWindows(X)
 #endif
