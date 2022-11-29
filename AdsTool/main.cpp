@@ -171,7 +171,7 @@ COMMANDS:
 	state [<value>]
 		Read or write the ADS state of the device at AmsPort (default 10000).
 		ADS states are documented here:
-		https://infosys.beckhoff.com/index.php?content=../content/1031/tcadswcf/html/tcadswcf.tcadsservice.enumerations.adsstate.html
+		https://infosys.beckhoff.com/english.php?content=../content/1033/tc3_adsdll2/117556747.html
 	examples:
 		Check if TwinCAT is in RUN:
 		$ adstool 5.24.37.144.1.1 state
