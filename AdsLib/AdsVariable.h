@@ -49,7 +49,7 @@ struct AdsVariable  : public IAdsVariable{
         Read(sizeof(buffer), &buffer);
         return buffer;
     }
-    
+
     void ReadValue(void *res) override
     {
 	T buffer;
@@ -57,7 +57,7 @@ struct AdsVariable  : public IAdsVariable{
     memcpy(res, &buffer, sizeof(T));
     }
 
-    void operator=(const T& value) const
+    void operator=(const T& value) override
     {
         Write(sizeof(T), &value);
     }
