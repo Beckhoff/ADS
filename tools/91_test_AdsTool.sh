@@ -40,6 +40,13 @@ check_file() {
 	fi
 }
 
+check_registry () {
+	local _regfile="${script_path}/test-data/simple.reg"
+
+	# Parse a registry file and dump our parsed output and compare it with the original
+	check registry verify < "${_regfile}" | tee check-registry-verify.log | diff --text - "${_regfile}"
+}
+
 expected_id_pairs() {
 	cat <<-EOF
 		3F632E80-4FE8-2FCD-2B04-6154E399A473 90
@@ -227,6 +234,7 @@ check_loglevel
 check_state
 
 check_file
+check_registry
 check_license
 check_pciscan
 check_raw
