@@ -154,6 +154,12 @@ COMMANDS:
 		and read result into read.bin:
 		$ adstool 5.24.37.144.1.1 raw --read=4 "0xF003" "0x0" < write.bin > read.bin
 
+	registry import
+		Import registry from stdin
+	examples:
+		Import registry settings from a file, which was exported with RegEdit.exe on Windows
+		$ dos2unix < file.reg | adstool 5.24.37.144.1.1 registry import
+
 	rtime < read-latency | reset-latency >
 		Access rtime latency information
 	examples:
@@ -293,7 +299,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
     return 0;
 }
 
-int RunRegistry(const AmsNetId /*netid*/, const uint16_t /*port*/, const std::string& /*gw*/, bhf::Commandline& args)
+int RunRegistry(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
     const auto command = args.Pop<std::string>("registry command is missing");
 
@@ -301,6 +307,10 @@ int RunRegistry(const AmsNetId /*netid*/, const uint16_t /*port*/, const std::st
         return bhf::ads::RegistryAccess::Verify(std::cin, std::cout);
     }
 
+    const auto reg = bhf::ads::RegistryAccess { gw, netid, port };
+    if (!command.compare("import")) {
+        return reg.Import(std::cin);
+    }
     LOG_ERROR(__FUNCTION__ << "(): Unknown registry command '" << command << "'\n");
     return -1;
 }
