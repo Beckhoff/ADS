@@ -31,6 +31,11 @@ namespace ads
 // First line of valid registry file
 constexpr const char* WINDOWS_REGISTRY_HEADER = "Windows Registry Editor Version 5.00";
 
+// Registry System Service Flags
+constexpr uint32_t REGFLAG_ENUMVALUE_MASK = 0xC0000000;
+constexpr uint32_t REGFLAG_ENUMKEYS = 0x00000000;
+constexpr uint32_t REGFLAG_ENUMVALUE_VTD = 0xC0000000;
+
 static const std::map<nRegHive, std::string> g_HiveMapping = {
     { nRegHive::REG_HKEYCURRENTUSER, "HKEY_CURRENT_USER\\" },
     { nRegHive::REG_HKEYCLASSESROOT, "HKEY_CLASSES_ROOT\\" },
@@ -305,6 +310,31 @@ RegistryEntry RegistryEntry::Create(const std::string& line)
     return item;
 }
 
+RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const nRegHive hive)
+{
+    const auto stringLen = 1 + strnlen(reinterpret_cast<const char*>(buffer.data()), buffer.size());
+    if (buffer.size() < stringLen) {
+        throw std::runtime_error("missing value string terminator");
+    }
+
+    if (buffer.size() == stringLen) {
+        // Registry key has only the name as a NULL terminated string
+        return RegistryEntry { buffer, hive, stringLen, 0, 0, 0 };
+    }
+    auto bytesLeft = buffer.size() - stringLen;
+    uint32_t type = 0;
+    if (bytesLeft < sizeof(type)) {
+        throw std::runtime_error("not enough bytes for type left");
+    }
+
+    for (size_t i = 0; i < sizeof(type); i++) {
+        type += buffer[stringLen + i] << i * 8;
+        --bytesLeft;
+    }
+    VerifyDataLen(type, bytesLeft, std::numeric_limits<size_t>::max());
+    return RegistryEntry { buffer, hive, 0, stringLen, type, bytesLeft };
+}
+
 void RegistryEntry::ParseStringValue(const char*& it, size_t& lineNumber)
 {
     // Skip opening quote
@@ -398,6 +428,59 @@ std::ostream& RegistryEntry::Write(std::ostream& os) const
 RegistryAccess::RegistryAccess(const std::string& ipV4, AmsNetId netId, uint16_t port)
     : device(ipV4, netId, port ? port : 10000)
 {}
+
+std::vector<RegistryEntry> RegistryAccess::Enumerate(const RegistryEntry& key, const uint32_t regFlag,
+                                                     const size_t bufferSize) const
+{
+    std::vector<RegistryEntry> entries;
+    for (auto offset = regFlag; (offset & REGFLAG_ENUMVALUE_MASK) == regFlag; ++offset) {
+        uint32_t bytesRead = 0;
+        std::vector<uint8_t> data(bufferSize);
+        const auto ret = device.ReadWriteReqEx2(key.hive,
+                                                offset,
+                                                bufferSize,
+                                                data.data(),
+                                                key.keyLen,
+                                                key.buffer.data(),
+                                                &bytesRead);
+        if (ret == ADSERR_DEVICE_NOTFOUND) {
+            // ADS_ERR_DEVICE_NOTFOUND is returned once the enumeration is exhausted.
+            return entries;
+        } else if (ret) {
+            throw AdsException(ret);
+        }
+        data.resize(bytesRead);
+        entries.push_back(RegistryEntry::Create(std::move(data), key.hive));
+    }
+    throw std::runtime_error("overflow in offset detected");
+}
+
+int RegistryAccess::Export(const std::string& firstKey, std::ostream& os) const
+{
+    os << bhf::ads::WINDOWS_REGISTRY_HEADER << "\n";
+
+    for (std::list<RegistryEntry> pendingKeys { RegistryEntry::Create(firstKey) }; !pendingKeys.empty(); ) {
+        auto key = pendingKeys.front();
+        pendingKeys.pop_front();
+        key.Write(os);
+
+        // First dump all the values of a key
+        for (const auto& value: Enumerate(key, REGFLAG_ENUMVALUE_VTD, 0x800)) {
+            value.Write(os);
+        }
+
+        // Then find all subkey and put them into a queue to omit recursion
+        const auto pendingKeysFront = pendingKeys.cbegin();
+        for (auto& newKey: Enumerate(key, REGFLAG_ENUMKEYS, 0x400)) {
+            newKey.buffer.insert(newKey.buffer.begin(), key.buffer.cbegin(), key.buffer.cend());
+            newKey.buffer[key.buffer.size() - 1] = '\\';
+            newKey.keyLen += key.buffer.size();
+            pendingKeys.insert(pendingKeysFront, newKey);
+        }
+    }
+    os << '\n';
+    return 0;
+}
 
 int RegistryAccess::Import(std::istream& is) const
 {

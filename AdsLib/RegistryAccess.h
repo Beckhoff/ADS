@@ -44,10 +44,13 @@ struct RegistryEntry {
 
 struct RegistryAccess {
     RegistryAccess(const std::string& ipV4, AmsNetId netId, uint16_t port);
+    int Export(const std::string& key, std::ostream& os) const;
     int Import(std::istream& is) const;
     static int Verify(std::istream& is, std::ostream& os);
 
 private:
+    std::vector<RegistryEntry> Enumerate(const RegistryEntry& key, const uint32_t regFlag,
+                                         const size_t bufferSize) const;
     AdsDevice device;
 };
 }

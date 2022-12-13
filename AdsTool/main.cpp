@@ -154,6 +154,12 @@ COMMANDS:
 		and read result into read.bin:
 		$ adstool 5.24.37.144.1.1 raw --read=4 "0xF003" "0x0" < write.bin > read.bin
 
+	registry export <key>
+		Export registry key to stdout
+	examples:
+		Write registry key to stdout
+		$ adstool 5.24.37.144.1.1 registry export 'HKLM/Software/Beckhoff/TwinCAT3'
+
 	registry import
 		Import registry from stdin
 	examples:
@@ -308,6 +314,10 @@ int RunRegistry(const AmsNetId netid, const uint16_t port, const std::string& gw
     }
 
     const auto reg = bhf::ads::RegistryAccess { gw, netid, port };
+    if (!command.compare("export")) {
+        const auto key = args.Pop<std::string>("registry key is missing");
+        return reg.Export(key, std::cout);
+    }
     if (!command.compare("import")) {
         return reg.Import(std::cin);
     }
