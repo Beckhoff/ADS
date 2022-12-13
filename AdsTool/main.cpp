@@ -9,13 +9,13 @@
 #include "AdsLib.h"
 #include "LicenseAccess.h"
 #include "Log.h"
+#include "RegistryAccess.h"
 #include "RouterAccess.h"
 #include "RTimeAccess.h"
 #include "ParameterList.h"
 #include <cstring>
 #include <iostream>
 #include <thread>
-#include <vector>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <fcntl.h>
@@ -291,6 +291,18 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
         return -1;
     }
     return 0;
+}
+
+int RunRegistry(const AmsNetId /*netid*/, const uint16_t /*port*/, const std::string& /*gw*/, bhf::Commandline& args)
+{
+    const auto command = args.Pop<std::string>("registry command is missing");
+
+    if (!command.compare("verify")) {
+        return bhf::ads::RegistryAccess::Verify(std::cin, std::cout);
+    }
+
+    LOG_ERROR(__FUNCTION__ << "(): Unknown registry command '" << command << "'\n");
+    return -1;
 }
 
 int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -643,6 +655,7 @@ int ParseCommand(int argc, const char* argv[])
 
     const auto commands = CommandMap {
         {"file", RunFile},
+        {"registry", RunRegistry},
         {"license", RunLicense},
         {"pciscan", RunPCIScan},
         {"raw", RunRaw},
