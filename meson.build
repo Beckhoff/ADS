@@ -14,14 +14,14 @@ add_project_arguments('-D_FORTIFY_SOURCE=2', language: 'cpp')
 common_files = files([
   'AdsLib/AdsDef.cpp',
   'AdsLib/AdsDevice.cpp',
-  'AdsLib/AdsLib.cpp',
   'AdsLib/AdsFile.cpp',
+  'AdsLib/AdsLib.cpp',
+  'AdsLib/Frame.cpp',
   'AdsLib/LicenseAccess.cpp',
   'AdsLib/Log.cpp',
-  'AdsLib/RouterAccess.cpp',
   'AdsLib/RTimeAccess.cpp',
+  'AdsLib/RouterAccess.cpp',
   'AdsLib/Sockets.cpp',
-  'AdsLib/Frame.cpp',
 ])
 
 router_files = files([
