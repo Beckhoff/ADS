@@ -99,9 +99,6 @@ build-win10:
   services:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
-  variables:
-    EXPECTED_PLATFORMID: 92
-    EXPECTED_SYSTEMID: '95EEFDE0-0392-1452-275F-1BF9ACCB924E'
 
 .test-linux:
   extends: .test-with-service-container

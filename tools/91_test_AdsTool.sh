@@ -40,21 +40,30 @@ check_file() {
 	fi
 }
 
-check_license() {
-	readonly EXPECTED_PLATFORMID="${EXPECTED_PLATFORMID-60}"
-	local _platformid
+expected_id_pairs() {
+	cat <<-EOF
+		3F632E80-4FE8-2FCD-2B04-6154E399A473 90
+		95EEFDE0-0392-1452-275F-1BF9ACCB924E 92
+	EOF
+}
 
-	_platformid="$(check license platformid)"
-	if ! test "${EXPECTED_PLATFORMID}" -eq "${_platformid}"; then
-		printf 'check_license() platformid mismatch:\n>%s<\n>%s<\n' "${EXPECTED_PLATFORMID}" "${_platformid}" >&2
+check_license() {
+	local _platformid
+	if ! _platformid="$(check license platformid)"; then
+		printf 'check_license() reading platformid failed\n' >&2
 		return 1
 	fi
 
-	readonly EXPECTED_SYSTEMID="${EXPECTED_SYSTEMID-"12313354-E6B5-7F39-D952-04E011223BCC"}"
 	local _systemid
-	_systemid="$(check license systemid)"
-	if ! test "${EXPECTED_SYSTEMID}" = "${_systemid}"; then
-		printf 'check_license() systemid mismatch:\n>%s<\n>%s<\n' "${EXPECTED_SYSTEMID}" "${_systemid}" >&2
+	if ! _systemid="$(check license systemid)"; then
+		printf 'check_license() reading systemid failed\n' >&2
+		return 1
+	fi
+
+	local _pair="${_systemid} ${_platformid}"
+	if ! expected_id_pairs | grep --quiet "${_pair}"; then
+		printf 'check_license() id mismatch:\n>%s<\nExpected one of these:\n' "${_pair}" >&2
+		expected_id_pairs >&2
 		return 1
 	fi
 }

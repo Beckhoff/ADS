@@ -19,7 +19,5 @@ scp -r \
 # Run our generic tests within the QEMU test-device.
 ${ssh_cmd} /bin/sh -$- <<- EOF
 	export BHF_CI_NAT_IP="$(ip_route_src ads-server)"
-	export EXPECTED_PLATFORMID="${EXPECTED_PLATFORMID}"
-	export EXPECTED_SYSTEMID="${EXPECTED_SYSTEMID}"
 	./tools/90_run_tests.sh
 EOF
