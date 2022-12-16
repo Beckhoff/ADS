@@ -44,6 +44,9 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+doc/build
+docs/html
+docs/latex
 
 # Visual Studo 2015 cache/options directory
 .vs/
