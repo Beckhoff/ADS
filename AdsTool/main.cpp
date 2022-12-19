@@ -102,7 +102,7 @@ COMMANDS:
 		Copy local file to remote:
 		$ adstool 5.24.37.144.1.1 file write 'C:\Windows\explorer.exe' < ./explorer.exe
 
-	license < platformid | systemid | volumeno>
+	license < platformid | systemid | volumeno >
 		Read license information from device.
 	examples:
 		Read platformid from device
