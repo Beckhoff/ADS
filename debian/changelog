@@ -1,3 +1,11 @@
+adstool (0.0.17-1) bullseye; urgency=medium
+
+  * AdsTool: add support for registry access
+    AdsTool: fix binary output on stdout on Windows
+    Sockets: run WSAStartup() before getaddrinfo() on Windows
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Tue, 20 Dec 2022 12:22:45 +0100
+
 adstool (0.0.16-1) bullseye; urgency=medium
 
   * AdsTool: bump version to force debian release
