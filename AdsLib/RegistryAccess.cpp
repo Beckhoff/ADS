@@ -239,7 +239,7 @@ std::vector<RegistryEntry> RegFileParse(std::istream& input)
     // try to detect CRLF line endings as std::getline will not automatically strip the trailing \r
     if (version[version.length() - 1] == '\r') {
         PARSING_EXCEPTION(
-            "carriage return detected! Please ensure \\n (LF, unix) line endings instead of \\pS\\n (CRLF, dos). You can use dos2unix to convert the file beforehand");
+            "carriage return detected! Please ensure \\n (LF, unix) line endings instead of \\r\\n (CRLF, dos). You can use dos2unix to convert the file beforehand");
     }
 
     // there are older versions as well but this hasn't changed in ages
