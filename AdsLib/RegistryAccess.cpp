@@ -121,16 +121,20 @@ static void ParseStringData(bhf::ads::RegistryEntry& value, const char*& it, std
 
 static void ParseDwordData(bhf::ads::RegistryEntry& value, const char*& it, std::istream& /*input*/, size_t& lineNumber)
 {
+    if ('\0' == *it) {
+        PARSING_EXCEPTION("invalid dword hex character length (no data)");
+    }
+
     uint32_t v = 0;
     std::stringstream converter;
     for (auto i = 2 * sizeof(v); i; --i, ++it) {
         if ('\0' == *it) {
-            PARSING_EXCEPTION("invalid dword hex character length (to short)");
+            break;
         }
         converter << std::hex << *it;
     }
     if ('\0' != *it) {
-        PARSING_EXCEPTION("invalid dword hex character length (to long)");
+        PARSING_EXCEPTION("invalid dword hex character length (too long)");
     }
 
     converter >> v;
