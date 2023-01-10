@@ -158,7 +158,7 @@ COMMANDS:
 		Export registry key to stdout
 	examples:
 		Write registry key to stdout
-		$ adstool 5.24.37.144.1.1 registry export 'HKLM/Software/Beckhoff/TwinCAT3'
+		$ adstool 5.24.37.144.1.1 registry export 'HKEY_LOCAL_MACHINE\Software\Beckhoff\TwinCAT3'
 
 	registry import
 		Import registry from stdin
