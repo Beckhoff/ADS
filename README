@@ -25,7 +25,7 @@ git clone https://github.com/Beckhoff/ADS.git
 cd ADS
 
 # configure meson to build the library into "build" dir
-meson build
+meson setup build
 
 # let ninja build the library
 ninja -C build
