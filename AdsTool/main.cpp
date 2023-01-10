@@ -37,7 +37,7 @@ static int version()
      * "--help" is the only case we are called with an empty errorMessage. That
      * seems the only case we should really print to stdout instead of stderr.
      */
-    errorMessage.empty() ? std::cout : std::cerr << errorMessage <<
+    (errorMessage.empty() ? std::cout : std::cerr) << errorMessage <<
         R"(
 USAGE:
 	[<target[:port]>] [OPTIONS...] <command> [CMD_OPTIONS...] [<command_parameter>...]
