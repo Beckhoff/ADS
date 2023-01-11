@@ -106,7 +106,7 @@ static void VerifyDataLen(const uint32_t type, const size_t dataLen, const size_
     }
 }
 
-static void ParseStringData(bhf::ads::RegistryEntry& value, const char*& it, std::istream& /*input*/, size_t& lineNumber)
+static void ParseStringData(RegistryEntry& value, const char*& it, std::istream& /*input*/, size_t& lineNumber)
 {
     // REG_SZ data should end with a closing quote and null terminator
     while ('\0' != it[0] && '\0' != it[1]) {
