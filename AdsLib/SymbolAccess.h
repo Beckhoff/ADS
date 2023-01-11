@@ -19,6 +19,7 @@ struct SymbolEntry {
     std::string name;
     std::string typeName;
     std::string comment;
+    void WriteAsJSON(std::ostream& os) const;
 };
 
 using SymbolEntryMap = std::map<std::string, SymbolEntry>;
@@ -26,6 +27,7 @@ using SymbolEntryMap = std::map<std::string, SymbolEntry>;
 struct SymbolAccess {
     SymbolAccess(const std::string& gw, AmsNetId netid, uint16_t port);
     SymbolEntryMap FetchSymbolEntries() const;
+    int ShowSymbols(std::ostream& os) const;
 private:
     AdsDevice device;
 };

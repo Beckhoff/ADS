@@ -66,6 +66,34 @@ std::pair<std::string, SymbolEntry> SymbolEntry::Parse(const uint8_t* data, size
     return {entry.name, entry};
 }
 
+void SymbolEntry::WriteAsJSON(std::ostream& os) const
+{
+#define JSONEntryHex(member) \
+    "  \"" << #member << "\": \"0x" << std::hex << header.member << "\",\n"
+#define JSONEntryString(member) \
+    "  \"" << #member << "\": \"" << member << "\",\n"
+#define JSONNumber(member) \
+    "  \"" << #member << "\": " << std::dec << header.member
+#define JSONEntryNumber(member) \
+    JSONNumber(member) << ",\n"
+
+    os
+        << "{\n"
+        << JSONEntryString(name)
+        << JSONEntryString(typeName)
+        << JSONEntryString(comment)
+        << JSONEntryNumber(entryLength)
+        << JSONEntryHex(iGroup)
+        << JSONEntryHex(iOffs)
+        << JSONEntryNumber(size)
+        << JSONEntryHex(dataType)
+        << JSONEntryNumber(nameLength)
+        << JSONEntryNumber(typeLength)
+        << JSONNumber(commentLength) << '\n'
+        << "}\n"
+    ;
+}
+
 SymbolAccess::SymbolAccess(const std::string& gw, const AmsNetId netid, const uint16_t port)
     : device(gw, netid, port ? port : uint16_t(AMSPORT_R0_PLC_TC3))
 {}
@@ -112,6 +140,14 @@ SymbolEntryMap SymbolAccess::FetchSymbolEntries() const
     }
     LOG_ERROR(__FUNCTION__ << "(): nSymbols: " << uploadInfo.nSymbols << " nSymSize:" << uploadInfo.nSymSize << "'\n");
     throw AdsException(ADSERR_DEVICE_INVALIDDATA);
+}
+
+int SymbolAccess::ShowSymbols(std::ostream& os) const
+{
+    for (const auto& entry: FetchSymbolEntries()) {
+        entry.second.WriteAsJSON(os);
+    }
+    return 0;
 }
 }
 }
