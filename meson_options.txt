@@ -15,3 +15,6 @@ option('tcadsdll_include', type: 'string', value: '')
 # On TC/BSD the default path is:
 # '/usr/local/lib'
 option('tcadsdll_lib', type: 'string', value: '')
+
+# Set this option to configure the default loglevel.
+option('default_loglevel', type: 'string', value: '-DCONFIG_DEFAULT_LOGLEVEL=1')

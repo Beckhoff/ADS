@@ -10,6 +10,7 @@ project('AdsLib', 'cpp',
 
 # some hardening options
 add_project_arguments('-D_FORTIFY_SOURCE=2', language: 'cpp')
+add_project_arguments(get_option('default_loglevel'), language: 'cpp')
 
 common_files = files([
   'AdsLib/AdsDef.cpp',

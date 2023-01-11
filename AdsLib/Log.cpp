@@ -24,7 +24,7 @@
 #define TIME_T_TO_STRING(DATE_TIME, TIME_T) std::strftime(DATE_TIME, sizeof(DATE_TIME), "%FT%T%z ", localtime(TIME_T));
 #endif
 
-size_t Logger::logLevel = 1;
+size_t Logger::logLevel = CONFIG_DEFAULT_LOGLEVEL;
 
 static const char* CATEGORY[] = {
     "Verbose: ",
