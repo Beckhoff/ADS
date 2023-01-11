@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Beckhoff Automation GmbH & Co. KG
+# Copyright (C) 2021 - 2023 Beckhoff Automation GmbH & Co. KG
 # Author: Patrick Bruenn <p.bruenn@beckhoff.com>
 
 cleanup() {
@@ -94,6 +94,10 @@ check_loglevel() {
 
 check_pciscan() {
 	check pciscan 0x15EC5000
+}
+
+check_plc() {
+	check plc show-symbols
 }
 
 check_raw() {
@@ -237,6 +241,7 @@ check_file
 check_registry
 check_license
 check_pciscan
+check_plc
 check_raw
 check_rtime
 check_var

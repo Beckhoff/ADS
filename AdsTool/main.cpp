@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-    Copyright (C) 2021 - 2022 Beckhoff Automation GmbH & Co. KG
+    Copyright (C) 2021 - 2023 Beckhoff Automation GmbH & Co. KG
     Author: Patrick Bruenn <p.bruenn@beckhoff.com>
  */
 
@@ -13,6 +13,7 @@
 #include "RouterAccess.h"
 #include "RTimeAccess.h"
 #include "ParameterList.h"
+#include "SymbolAccess.h"
 #include <cstring>
 #include <iostream>
 #include <thread>
@@ -129,6 +130,12 @@ COMMANDS:
 		PCI devices found: 2
 		3:0 @ 0x4028629004
 		7:0 @ 0x4026531852
+
+	plc show-symbols
+		Print information about all PLC symbols to stdout in JSON format.
+	examples:
+		Write PLC symbol information into an out.json file
+		$ adstool 5.24.37.144.1.1 plc show-symbols > out.json
 
 	raw [--read=<number_of_bytes>] <IndexGroup> <IndexOffset>
 		This command gives low level access to:
@@ -359,6 +366,18 @@ int RunPCIScan(const AmsNetId netid, const uint16_t port, const std::string& gw,
         pciId <<= 32;
     }
     return device.PciScan(pciId, std::cout);
+}
+
+int RunPLC(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    auto device = bhf::ads::SymbolAccess{ gw, netid, port };
+    const auto command = args.Pop<std::string>("plc command is missing");
+
+    if (!command.compare("show-symbols")) {
+        return device.ShowSymbols(std::cout);
+    }
+    LOG_ERROR(__FUNCTION__ << "(): Unknown PLC command '" << command << "'\n");
+    return -1;
 }
 
 int RunRTime(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -677,6 +696,7 @@ int ParseCommand(int argc, const char* argv[])
         {"registry", RunRegistry},
         {"license", RunLicense},
         {"pciscan", RunPCIScan},
+        {"plc", RunPLC},
         {"raw", RunRaw},
         {"rtime", RunRTime},
         {"state", RunState},
