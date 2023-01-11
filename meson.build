@@ -24,6 +24,7 @@ common_files = files([
   'AdsLib/RegistryAccess.cpp',
   'AdsLib/RouterAccess.cpp',
   'AdsLib/Sockets.cpp',
+  'AdsLib/SymbolAccess.cpp',
 ])
 
 router_files = files([
