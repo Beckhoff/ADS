@@ -8,7 +8,6 @@
 #include "AdsDef.h"
 #include "RingBuffer.h"
 
-#include <utility>
 #include <vector>
 
 using VirtualConnection = std::pair<uint16_t, AmsAddr>;
