@@ -8,7 +8,7 @@ add_route_ads() {
 	_container_ip="$(ip_route_src "${1}")"
 	echo "CONTAINER_IP: ${_container_ip}"
 
-	./build/adstool "${test_device}" --retry=9 addroute "--netid=${_container_ip}.1.1" "--addr=${BHF_CI_NAT_IP-${_container_ip}}" --password=1
+	${QEMU_USER_EMULATION-} ./build/adstool "${test_device}" --retry=9 addroute "--netid=${_container_ip}.1.1" "--addr=${BHF_CI_NAT_IP-${_container_ip}}" --password=1
 }
 
 set -e

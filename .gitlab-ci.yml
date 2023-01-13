@@ -134,11 +134,9 @@ test-linux-gcc-mips:
   ]
   variables:
     QEMU_LD_PREFIX: '/usr/mips-linux-gnu'
+    QEMU_USER_EMULATION: 'qemu-mips'
   before_script:
     - apt update -y && apt install -y binfmt-support libstdc++-dev-mips-cross qemu-user-binfmt
-    # TODO remove as soon as we won't require privileged containers for TC anymore
-    - update-binfmts --enable qemu-mips
-    - update-binfmts --disable qemu-mipsn32
 
 test-fbsd-clang:
   extends: .test-with-service-container

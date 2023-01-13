@@ -18,7 +18,7 @@ as_hex() {
 }
 
 check() {
-	"${ads_tool}" "${netid}" "--gw=${remote}" "$@"
+	${ads_tool} "${netid}" "--gw=${remote}" "$@"
 }
 
 check_file() {
@@ -77,7 +77,7 @@ check_license() {
 
 check_loglevel() {
 	local _hidden
-	_hidden="$("${ads_tool}" [] --log-level=4 netid 2>&1 | tee "${tmpfile}" | wc -l)"
+	_hidden="$(${ads_tool} [] --log-level=4 netid 2>&1 | tee "${tmpfile}" | wc -l)"
 	if test "${_hidden}" -gt 0; then
 		printf 'check_loglevel(): failed.\n--log-level=4 should have disable all messages, but we saw:\n' >&2
 		cat "${tmpfile}"
@@ -85,7 +85,7 @@ check_loglevel() {
 	fi
 
 	local _default
-	_default="$("${ads_tool}" [] netid 2>&1 | wc -l)"
+	_default="$(${ads_tool} [] netid 2>&1 | wc -l)"
 	if ! test "${_default}" -gt 0; then
 		printf 'check_loglevel() failed.\nBy default we should see an error message for our broken hostname\n' >&2
 		return 1
@@ -200,7 +200,7 @@ check_version() {
 	local _debian_version
 	local _our_version
 
-	_our_version="$("${ads_tool}" --version)"
+	_our_version="$(${ads_tool} --version)"
 	_debian_version="$(awk '{print $2; exit}' "${script_path}/../debian/changelog")"
 	if ! test "(${_our_version})" = "${_debian_version}"; then
 		printf 'ERROR version missmatch between tool(%s) and debian package(%s)\n' \
@@ -218,9 +218,9 @@ readonly ADSSTATE_RUN=5
 
 readonly script_path="$(cd "$(dirname "${0}")" && pwd)"
 readonly remote="${1-ads-server}"
-readonly ads_tool="${2-${script_path}/../build/adstool}"
+readonly ads_tool="${QEMU_USER_EMULATION-} ${2-${script_path}/../build/adstool}"
 
-netid="$("${ads_tool}" "${remote}" netid)"
+netid="$(${ads_tool} "${remote}" netid)"
 readonly netid
 
 trap cleanup EXIT INT TERM

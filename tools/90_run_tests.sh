@@ -25,7 +25,7 @@ if test "Linux" = "$(uname)"; then
 		sleep 1
 		echo waiting for socat
 	done
-	./build/adstool "$(./build/adstool ads-server netid)" --gw=127.0.0.1:12345 --localams="$(ip_route_src ads-server).1.1" license systemid
+	${QEMU_USER_EMULATION-} ./build/adstool "$(./build/adstool ads-server netid)" --gw=127.0.0.1:12345 --localams="$(ip_route_src ads-server).1.1" license systemid
 fi
 
 # setup fake ads server and install cleanup trap
@@ -40,6 +40,6 @@ ln -s build/AdsLibTest AdsLibTest.bin || true
 ln -s build/AdsLibOOITest AdsLibOOITest.bin || true
 ln -s build/example example/example.bin || true
 
-./AdsLibTest.bin
-./AdsLibOOITest.bin
-./example/example.bin
+${QEMU_USER_EMULATION-} ./AdsLibTest.bin
+${QEMU_USER_EMULATION-} ./AdsLibOOITest.bin
+${QEMU_USER_EMULATION-} ./example/example.bin
