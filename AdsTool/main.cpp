@@ -274,11 +274,10 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
                                 bhf::ads::FOPEN::ENSURE_DIR};
         uint32_t bytesRead;
         do {
-            char buf[1024];
-
-            adsFile.Read(sizeof(buf), buf, bytesRead);
+            std::vector<char> buf(1024*1024); // 1MB
+            adsFile.Read(buf.size(), buf.data(), bytesRead);
             ForceBinaryOutputOnWindows();
-            std::cout.write(buf, bytesRead);
+            std::cout.write(buf.data(), bytesRead);
         } while (bytesRead > 0);
     } else if (!command.compare("write")) {
         bool append = !next.compare("--append");
@@ -290,11 +289,11 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
 
         const auto path = append ? args.Pop<std::string>("path is missing") : next;
         const AdsFile adsFile { device, path, flags};
-        char buf[1024];
-        auto length = read(0, buf, sizeof(buf));
+        std::vector<char> buf(1024*1024); // 1MB
+        auto length = read(0, buf.data(), buf.size());
         while (length > 0) {
-            adsFile.Write(length, buf);
-            length = read(0, buf, sizeof(buf));
+            adsFile.Write(length, buf.data());
+            length = read(0, buf.data(), buf.size());
         }
     } else if (!command.compare("delete")) {
         AdsFile::Delete(device, next, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
