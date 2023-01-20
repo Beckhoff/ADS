@@ -14,6 +14,7 @@
 #include "RTimeAccess.h"
 #include "ParameterList.h"
 #include "SymbolAccess.h"
+#include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <set>
@@ -197,6 +198,14 @@ COMMANDS:
 		6
 		$ adstool 5.24.37.144.1.1 rtime read-latency
 		1
+
+	startprocess [--directory=<directory>] [--hidden] <application> [<commandline>]
+		Starts a new process <application> on the target device, optionally using the specified <commandline>
+		and a different starting <directory>. For Windows targets the --hidden flag can be used to hide the
+		application window.
+	examples:
+		List all files with details from the /var/log folder and write the result to /tmp/output.txt
+		$ adstool 5.24.37.144.1.1 startprocess --directory=/var/log /usr/bin/ls "-l --all > /tmp/output.txt"
 
 	state [<value>]
 		Read or write the ADS state of the device at AmsPort (default 10000).
@@ -479,6 +488,68 @@ int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
     return !std::cout.good();
 }
 
+int RunStartProcess(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    auto device = AdsDevice{ gw, netid, port ? port : uint16_t(10000) };
+
+    bhf::ParameterList params = {
+        {"--directory"},
+        {"--hidden", true},
+    };
+    args.Parse(params);
+
+    const auto application = args.Pop<std::string>("application is missing");
+    if (std::numeric_limits<uint32_t>::max() < application.length()) {
+        LOG_ERROR("The length of <application> exceeds its 32bit value limit");
+        return 1;
+    }
+
+    const auto directory = params.Get<std::string>("--directory");
+    if (std::numeric_limits<uint32_t>::max() < directory.length()) {
+        LOG_ERROR("The length of <directory> exceeds its 32bit value limit");
+        return 1;
+    }
+
+    const auto commandline = args.Pop<std::string>();
+    if (std::numeric_limits<uint32_t>::max() < commandline.length()) {
+        LOG_ERROR("The length of <commandline> exceeds its 32bit value limit");
+        return 1;
+    }
+
+    struct AdsStartProcessHeader {
+        uint32_t leApplicationLength;
+        uint32_t leDirectoryLength;
+        uint32_t leCommandlineLength;
+        const uint8_t* cdata() const
+        {
+            return reinterpret_cast<const uint8_t*>(&leApplicationLength);
+        }
+    } header = {
+        bhf::ads::htole<uint32_t>(application.length()),
+        bhf::ads::htole<uint32_t>(directory.length()),
+        bhf::ads::htole<uint32_t>(commandline.length()),
+    };
+
+    std::vector<uint8_t> data;
+    std::copy_n(header.cdata(), sizeof(header), std::back_inserter(data));
+    // empty strings (zero terminators) always need to be present
+    std::move(application.begin(), application.end(), std::back_inserter(data));
+    data.push_back(0);
+    std::move(directory.begin(), directory.end(), std::back_inserter(data));
+    data.push_back(0);
+    std::move(commandline.begin(), commandline.end(), std::back_inserter(data));
+    data.push_back(0);
+
+    uint32_t opts = params.Get<bool>("--hidden") << sizeof(uint16_t) * 8;
+
+    const auto status = device.WriteReqEx(SYSTEMSERVICE_STARTPROCESS, opts, data.size(), data.data());
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+    }
+
+    return status;
+}
+
 int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
     bhf::ParameterList params = {
@@ -734,6 +805,7 @@ int ParseCommand(int argc, const char* argv[])
         {"plc", RunPLC},
         {"raw", RunRaw},
         {"rtime", RunRTime},
+        {"startprocess", RunStartProcess},
         {"state", RunState},
         {"var", RunVar},
     };
