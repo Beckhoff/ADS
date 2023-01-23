@@ -35,10 +35,6 @@ int ParameterList::Parse(int argc, const char* argv[])
     while ((found < argc) && ('-' == argv[found][0])) {
         auto key_value = std::string(argv[found]);
         const auto keylen = key_value.find_first_of("=");
-        if (key_value.npos == keylen) {
-            throw std::runtime_error("Invalid parameter '" + key_value + "'");
-        }
-
         const auto key = key_value.substr(0, keylen);
         auto it = map.find(key);
         if (it == map.end()) {
@@ -54,6 +50,10 @@ int ParameterList::Parse(int argc, const char* argv[])
         if (o.isFlag) {
             o.value = "true";
             continue;
+        }
+        if (key_value.npos == keylen) {
+            LOG_ERROR("Parameter '" << o.key << "' needs a value");
+            throw ERR_INVALID_PARAMETER;
         }
         o.value = key_value.substr(keylen + 1);
     }
