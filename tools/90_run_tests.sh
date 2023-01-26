@@ -35,11 +35,6 @@ ncat_pid=$!
 # wait for fake ads server to accept connections
 while ! nc -z localhost 48898; do sleep 1; done
 
-# transitional hack to test meson or legacy build binaries
-ln -s build/AdsLibTest AdsLibTest.bin || true
-ln -s build/AdsLibOOITest AdsLibOOITest.bin || true
-ln -s build/example example/example.bin || true
-
-${QEMU_USER_EMULATION-} ./AdsLibTest.bin
-${QEMU_USER_EMULATION-} ./AdsLibOOITest.bin
-${QEMU_USER_EMULATION-} ./example/example.bin
+${QEMU_USER_EMULATION-} ./build/AdsLibTest
+${QEMU_USER_EMULATION-} ./build/AdsLibOOITest
+${QEMU_USER_EMULATION-} ./example/build/example
