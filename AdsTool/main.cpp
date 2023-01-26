@@ -292,7 +292,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
                                 bhf::ads::FOPEN::ENSURE_DIR};
         uint32_t bytesRead;
         do {
-            std::vector<char> buf(1024*1024); // 1MB
+            std::vector<char> buf(1024 * 1024); // 1MB
             adsFile.Read(buf.size(), buf.data(), bytesRead);
             ForceBinaryOutputOnWindows();
             std::cout.write(buf.data(), bytesRead);
@@ -307,7 +307,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
 
         const auto path = append ? args.Pop<std::string>("path is missing") : next;
         const AdsFile adsFile { device, path, flags};
-        std::vector<char> buf(1024*1024); // 1MB
+        std::vector<char> buf(1024 * 1024); // 1MB
         auto length = read(0, buf.data(), buf.size());
         while (length > 0) {
             adsFile.Write(length, buf.data());
