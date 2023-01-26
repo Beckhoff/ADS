@@ -171,23 +171,14 @@ check_state() {
 		return 1
 	fi
 
-	# This might disconnect our ADS connection, so we ignore that expected error and wait a short moment
+	# This might disconnect our ADS connection, so we ignore that expected error
 	check state "${ADSSTATE_RESET}" || true
-	sleep 2
 
 	# Now, wait until TwinCAT reaches RUN
-	local _state
-	_state="$(check state)"
-	local _retries=0
-	while ! check state | grep -E "^(${ADSSTATE_RUN})\$"; do
-		retries=$((retries + 1))
-		if ! test "${_retries}" -lt "${BHF_CI_ADS_RETRY_LIMIT}"; then
-			return 1
-		fi
-		printf 'state is %s waiting for %s\n' "${_state}" "${ADSSTATE_RUN}" >&2
-		sleep 1
-		_state="$(check state)"
-	done
+	check "--retry=${BHF_CI_ADS_RETRY_LIMIT}" state --compare 5
+
+	# And wait until the PLC is ready, too
+	${ads_tool} "${netid}:851" "--gw=${remote}" "--retry=${BHF_CI_ADS_RETRY_LIMIT}" state --compare 5
 }
 
 check_var() {

@@ -16,6 +16,7 @@
 #include "SymbolAccess.h"
 #include <cstring>
 #include <iostream>
+#include <set>
 #include <thread>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -209,6 +210,9 @@ COMMANDS:
 		Set TwinCAT to CONFIG mode:
 		$ adstool 5.24.37.144.1.1 state 16
 
+		Wait about one minute for TwinCAT to report either RUN or CONFIG mode:
+		$ adstool 5.24.37.144.1.1 --retry=60 state --compare 5 15
+
 	var [--type=<DATATYPE>] <variable name> [<value>]
 		Reads/Write from/to a given PLC variable.
 		If value is not set, a read operation will be executed. Otherwise 'value' will
@@ -253,6 +257,7 @@ COMMANDS:
 		$ adstool 5.24.37.144.1.1 var "MAIN.sString1" "STRING" "\"Hello World\""
 		$ adstool 5.24.37.144.1.1 var "MAIN.sString1" "STRING"
 		"Hello World!"
+
 )";
     exit(!errorMessage.empty());
 }
@@ -476,20 +481,32 @@ int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 
 int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
+    bhf::ParameterList params = {
+        {"--compare", true},
+    };
+    args.Parse(params);
+
+    std::set<int> stateList;
+    while (const auto value = args.Pop<const char*>()) {
+        const auto requestedState = stateList.insert(std::stoi(value)).first;
+        if (*requestedState >= ADSSTATE::ADSSTATE_MAXSTATES) {
+            usage("Requested state '" + std::to_string(*requestedState) + "' exceeds max (" +
+                  std::to_string(ADSSTATE::ADSSTATE_MAXSTATES) + ")\n");
+        }
+    }
     auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
     const auto oldState = device.GetState();
-    const auto value = args.Pop<const char*>();
-    if (value) {
-        const auto requestedState = std::stoi(value);
-        if (requestedState >= ADSSTATE::ADSSTATE_MAXSTATES) {
-            LOG_ERROR(
-                "Requested state '" << std::dec << requestedState << "' exceeds max (" <<
-                    uint16_t(ADSSTATE::ADSSTATE_MAXSTATES) <<
-                    ")\n");
-            return ADSERR_CLIENT_INVALIDPARM;
+    if (params.Get<bool>("--compare")) {
+        if (stateList.empty()) {
+            usage("--compare requires at least one state");
         }
+        // TODO: switch to std::set::contains() with c++20
+        return stateList.end() == stateList.find(oldState.ads);
+    }
+
+    if (!stateList.empty()) {
         try {
-            device.SetState(static_cast<ADSSTATE>(requestedState), oldState.device);
+            device.SetState(static_cast<ADSSTATE>(*stateList.begin()), oldState.device);
         } catch (const AdsException& ex) {
             // ignore AdsError 1861 after RUN/CONFIG mode change
             if (ex.errorCode != 1861) {
