@@ -165,6 +165,44 @@ check_rtime() {
 	fi
 }
 
+check_startprocess() {
+	local _result="result$(date +%s).sh"
+	local _dir='/root'
+
+	# Check that result cannot be executed yet (nonexistent)
+	if check startprocess "${_dir}/${_result}"; then
+		printf 'check_startprocess(): succeeded where it should not!\n' >&2
+		return 1
+	fi
+
+	# Now, we use startprocess to create an empty executable on the target
+	# device. We have to use /usr/bin/env, because the used tools have different
+	# pathes on Debian and FreeBSD. Additionally, we wait a second after each
+	# command, because ADS will return immediately after the process was started,
+	# but we have no easy possibility to find out when it is finished. Yeah, we
+	# could run a loop in /bin/sh but doing that correctly with a timeout limit
+	# is not trivial and overkill, if sleep 1 is sufficient for our test!
+	if ! check startprocess "--directory=${_dir}" /usr/bin/env "touch '${_result}'"; then
+		printf 'check_startprocess(): failed to create empty file!\n' >&2
+		return 1
+	fi
+
+	# Increase the chance that we lose the race against "touch" running on the target
+	sleep 1
+	if ! check startprocess --hidden /usr/bin/env "chmod +x '${_dir}/${_result}'"; then
+		printf 'check_startprocess(): failed to make file executable!\n' >&2
+		return 1
+	fi
+
+	# Increase the chance that we lose the race against "chmod" running on the target
+	sleep 1
+	# Check that we can now execute the result
+	if ! check startprocess "${_dir}/${_result}"; then
+		printf 'check_startprocess(): failed to run test file!\n' >&2
+		return 1
+	fi
+}
+
 check_state() {
 	if ! check state; then
 		printf 'check_state() could not read anything\n' >&2
@@ -259,5 +297,6 @@ check_pciscan
 check_plc
 check_raw
 check_rtime
+check_startprocess
 check_var
 check_version
