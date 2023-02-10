@@ -51,7 +51,7 @@ build-fbsd-clang:
   before_script:
     - doas pkg install -y meson
     # we dont limit grep --max-count=1, because curl would complain if grep closes the pipe
-    - curl https://tcbsd.beckhoff.com/TCBSD/12/stable/packages/All/ | grep --only-matching -e "href='.*ADS-Comm-Lib.*'" | cut -d "'" -f 2 | xargs -I{} fetch https://tcbsd.beckhoff.com/TCBSD/12/stable/packages/All/{}
+    - curl https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/ | grep --only-matching -e "href='.*ADS-Comm-Lib.*'" | cut -d "'" -f 2 | xargs -I{} fetch https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/{}
     - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
