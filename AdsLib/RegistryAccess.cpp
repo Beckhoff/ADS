@@ -323,7 +323,7 @@ RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const n
 
     if (buffer.size() == stringLen) {
         // Registry key has only the name as a NULL terminated string
-        return RegistryEntry { buffer, hive, stringLen, 0, 0, 0 };
+        return RegistryEntry { buffer, hive, stringLen, 0, 0 };
     }
     auto bytesLeft = buffer.size() - stringLen;
     uint32_t type = 0;
@@ -336,7 +336,7 @@ RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const n
         --bytesLeft;
     }
     VerifyDataLen(type, bytesLeft, std::numeric_limits<size_t>::max());
-    return RegistryEntry { buffer, hive, 0, stringLen, type, bytesLeft };
+    return RegistryEntry { buffer, hive, 0, type, bytesLeft };
 }
 
 void RegistryEntry::ParseStringValue(const char*& it, size_t& lineNumber)
@@ -354,7 +354,6 @@ void RegistryEntry::ParseStringValue(const char*& it, size_t& lineNumber)
             }
         }
         buffer.push_back(*it);
-        ++valueLen;
     }
     PARSING_EXCEPTION("missing closing quotation mark for value");
 }

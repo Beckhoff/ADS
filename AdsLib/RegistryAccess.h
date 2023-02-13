@@ -24,7 +24,6 @@ struct RegistryEntry {
     std::vector<uint8_t> buffer;
     nRegHive hive;
     size_t keyLen;
-    size_t valueLen;
     uint32_t type;
     size_t dataLen;
 
