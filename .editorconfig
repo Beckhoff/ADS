@@ -1,0 +1,19 @@
+#  https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# C++
+[*.{cpp,h}]
+indent_style = space
+indent_size = 4
+
+# Meson
+[meson.build]
+indent_style = space
+indent_size = 2
+
+# Shell script
+[*.sh]
+indent_style = tab
+
