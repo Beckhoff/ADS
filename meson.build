@@ -25,6 +25,7 @@ common_files = files([
   'AdsLib/RouterAccess.cpp',
   'AdsLib/Sockets.cpp',
   'AdsLib/SymbolAccess.cpp',
+  'AdsLib/bhf/ParameterList.cpp',
 ])
 
 router_files = files([
@@ -72,7 +73,6 @@ adslibooitest = executable('AdsLibOOITest',
 
 adstool = executable('adstool',
   'AdsTool/main.cpp',
-  'AdsTool/ParameterList.cpp',
   include_directories: inc,
   dependencies: libs,
   link_with: adslib,
@@ -90,7 +90,6 @@ if get_option('tcadsdll_include') != ''
 
   tcadstool = executable('tcadstool',
     'AdsTool/main.cpp',
-    'AdsTool/ParameterList.cpp',
     cpp_args: '-DUSE_TWINCAT_ROUTER',
     include_directories: [
       get_option('tcadsdll_include'),
