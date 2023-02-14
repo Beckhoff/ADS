@@ -19,7 +19,7 @@ install: $(BINARY) $(MANPAGE)
 	find AdsLib -type f -name "*.h" -exec install --mode=644 -D {} "$(DESTDIR)$(prefix)/include/{}" \;
 
 uncrustify:
-	find Ads* example -name "*.h" -or -name "*.cpp" | uncrustify --no-backup -c tools/uncrustify.cfg -F -
+	./tools/run-uncrustify.sh format
 
 clean:
 	rm -rf build

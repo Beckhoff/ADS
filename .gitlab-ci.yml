@@ -7,6 +7,23 @@ cache:
   paths:
   - apt-cache/
 
+codestyle:
+  stage: build
+  tags:
+    - docker
+  image: ${DOCKER_PROXY}debian:bookworm-slim
+  before_script:
+    - apt update -y && apt install -y uncrustify
+    - uncrustify -v
+  script:
+    - ./tools/run-uncrustify.sh check
+  rules:
+    - if: $BHF_CI_SKIP_CODESTYLE == "y"
+      when: never
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+    - when: on_success
+
 .build-meson:
   stage: build
   script:
