@@ -30,7 +30,7 @@ struct RegistryEntry {
     // Create a registry key from a string
     static RegistryEntry Create(const std::string& line);
     // Create a registry key or value from a byte buffer (network)
-    static RegistryEntry Create(const std::vector<uint8_t>&& buffer, nRegHive hive);
+    static RegistryEntry Create(const std::vector<uint8_t>&& buffer, nRegHive hive, uint32_t regFlag);
     std::ostream& Write(std::ostream& os) const;
     size_t Append(const void* data, size_t length);
     template<typename T>

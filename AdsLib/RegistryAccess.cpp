@@ -314,7 +314,7 @@ RegistryEntry RegistryEntry::Create(const std::string& line)
     return item;
 }
 
-RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const nRegHive hive)
+RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const nRegHive hive, const uint32_t regFlag)
 {
     const auto stringLen = 1 + strnlen(reinterpret_cast<const char*>(buffer.data()), buffer.size());
     if (buffer.size() < stringLen) {
@@ -323,8 +323,15 @@ RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const n
 
     if (buffer.size() == stringLen) {
         // Registry key has only the name as a NULL terminated string
-        return RegistryEntry { buffer, hive, stringLen, 0, 0 };
+        if (regFlag != REGFLAG_ENUMKEYS) {
+            throw std::runtime_error("Got registry key from network, but we expected somthing else.");
+        }
+        return RegistryEntry{ buffer, hive, stringLen, 0, 0 };
     }
+    if (regFlag != REGFLAG_ENUMVALUE_VTD) {
+        throw std::runtime_error("Got registry value from network, but we expected something else.");
+    }
+
     auto bytesLeft = buffer.size() - stringLen;
     uint32_t type = 0;
     if (bytesLeft < sizeof(type)) {
@@ -453,7 +460,7 @@ std::vector<RegistryEntry> RegistryAccess::Enumerate(const RegistryEntry& key, c
             throw AdsException(ret);
         }
         data.resize(bytesRead);
-        entries.push_back(RegistryEntry::Create(std::move(data), key.hive));
+        entries.push_back(RegistryEntry::Create(std::move(data), key.hive, regFlag));
     }
     throw std::runtime_error("overflow in offset detected");
 }
