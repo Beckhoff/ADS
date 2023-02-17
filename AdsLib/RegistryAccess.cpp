@@ -318,7 +318,7 @@ RegistryEntry RegistryEntry::Create(const std::vector<uint8_t>&& buffer, const n
 {
     const auto stringLen = 1 + strnlen(reinterpret_cast<const char*>(buffer.data()), buffer.size());
     if (buffer.size() < stringLen) {
-        throw std::runtime_error("missing value string terminator");
+        throw std::runtime_error("missing string terminator for value or key.");
     }
 
     if (buffer.size() == stringLen) {
