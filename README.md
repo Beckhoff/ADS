@@ -19,17 +19,21 @@ Currently (2022-02-21) tested with:
 # compile & usage
 
 ## clone the repository
+```
 git clone https://github.com/Beckhoff/ADS.git
-
+```
 ## change into root of the cloned repository
+```
 cd ADS
-
+```
 ## configure meson to build the library into "build" dir
+```
 meson setup build
-
+```
 ## let ninja build the library
+```
 ninja -C build
-
+```
 
 # Prepare your target to run the example
 
@@ -62,13 +66,16 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 - (optional) enable bhf::ads::SetLocalAddress() and set to the AMS NetId you choose for the ADS client (e.g. 192.168.0.1.1.1).
 
 ## configure meson to build example into "build" dir
+```
 meson example/build example
-
+```
 ## let ninja build the example
+```
 ninja -C example/build
-
+```
 ## and run the example
+```
 ./example/build/example
-
+```
 ---
 ADS/AMS Specification: https://infosys.beckhoff.com/content/1033/tc3_ads_intro/index.html
