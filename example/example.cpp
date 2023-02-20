@@ -8,28 +8,29 @@
 #include "AdsVariable.h"
 
 #include <array>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 
+using ExampleDatatype = uint8_t;
+
 static void NotifyCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
 {
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(pNotification + 1);
+    ExampleDatatype data{};
+    std::memcpy(&data, pNotification + 1, std::min<size_t>(sizeof(data), pNotification->cbSampleSize));
     std::cout << std::setfill('0') <<
         "NetId: " << pAddr->netId <<
         " hUser 0x" << std::hex << hUser <<
         " sample time: " << std::dec << pNotification->nTimeStamp <<
         " sample size: " << std::dec << pNotification->cbSampleSize <<
-        " value:";
-    for (size_t i = 0; i < pNotification->cbSampleSize; ++i) {
-        std::cout << " 0x" << std::hex << (int)data[i];
-    }
-    std::cout << '\n';
+        " value:" << " 0x" << std::hex << +data <<
+        '\n';
 }
 
 static void notificationExample(std::ostream& out, const AdsDevice& route)
 {
     const AdsNotificationAttrib attrib = {
-        1,
+        sizeof(ExampleDatatype),
         ADSTRANS_SERVERCYCLE,
         0,
         {4000000}
@@ -43,7 +44,7 @@ static void notificationExample(std::ostream& out, const AdsDevice& route)
 static void notificationByNameExample(std::ostream& out, const AdsDevice& route)
 {
     const AdsNotificationAttrib attrib = {
-        1,
+        sizeof(ExampleDatatype),
         ADSTRANS_SERVERCYCLE,
         0,
         {4000000}
