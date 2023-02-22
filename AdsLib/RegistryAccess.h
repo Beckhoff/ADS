@@ -18,6 +18,9 @@ enum nRegHive : uint32_t {
     REG_HKEYLOCALMACHINE = 200,
     REG_HKEYCURRENTUSER = 201,
     REG_HKEYCLASSESROOT = 202,
+    REG_DELETE_HKEYLOCALMACHINE = 206,
+    REG_DELETE_HKEYCURRENTUSER = 207,
+    REG_DELETE_HKEYCLASSESROOT = 208,
 };
 
 struct RegistryEntry {
@@ -33,6 +36,7 @@ struct RegistryEntry {
     static RegistryEntry Create(const std::vector<uint8_t>&& buffer, nRegHive hive, uint32_t regFlag);
 
     size_t Append(const void* data, size_t length);
+    bool IsForDeletion() const;
     void ParseStringValue(const char*& it, size_t& lineNumber);
     template<typename T>
     void PushData(T data)

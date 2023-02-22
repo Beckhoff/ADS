@@ -40,6 +40,9 @@ static const std::map<nRegHive, std::string> g_HiveMapping = {
     { nRegHive::REG_HKEYCURRENTUSER, "HKEY_CURRENT_USER\\" },
     { nRegHive::REG_HKEYCLASSESROOT, "HKEY_CLASSES_ROOT\\" },
     { nRegHive::REG_HKEYLOCALMACHINE, "HKEY_LOCAL_MACHINE\\" },
+    { nRegHive::REG_DELETE_HKEYCURRENTUSER, "-HKEY_CURRENT_USER\\" },
+    { nRegHive::REG_DELETE_HKEYCLASSESROOT, "-HKEY_CLASSES_ROOT\\" },
+    { nRegHive::REG_DELETE_HKEYLOCALMACHINE, "-HKEY_LOCAL_MACHINE\\" },
 };
 
 static nRegHive GetRegHive(const std::string& key, size_t& keyOffset)
@@ -252,7 +255,10 @@ std::vector<RegistryEntry> RegFileParse(std::istream& input)
     }
 
     std::string line;
+    // TODO: Change entries vector to something like std::vector<std::unique_ptr<RegistryEntry>>.
+    //       Then we can replace these two booleans with a pointer to the last key.
     auto keyIsMissing = true;
+    auto keyIsForDeletion = false;
     for (lineNumber++; std::getline(input, line); lineNumber++) {
         // Skip empty lines and comments
         if (line.empty() || (line.front() == ';')) {
@@ -263,6 +269,7 @@ std::vector<RegistryEntry> RegFileParse(std::istream& input)
         if ((line.front() == '[') && (line.back() == ']')) {
             keyIsMissing = false;
             entries.push_back(RegistryEntry::Create(line.substr(1, line.length() - 2)));
+            keyIsForDeletion = entries.back().IsForDeletion();
             continue;
         }
 
@@ -286,6 +293,9 @@ std::vector<RegistryEntry> RegFileParse(std::istream& input)
         ++it;
 
         ParseHexArchetype(it, value, input, lineNumber);
+        if (keyIsForDeletion) {
+            PARSING_EXCEPTION("associated key will be deleted.");
+        }
         entries.push_back(std::move(value));
     }
     return entries;
@@ -300,6 +310,19 @@ size_t RegistryEntry::Append(const void* data, const size_t length)
         ++next;
     }
     return length;
+}
+
+bool RegistryEntry::IsForDeletion() const
+{
+    switch (hive) {
+    case REG_DELETE_HKEYLOCALMACHINE:
+    case REG_DELETE_HKEYCURRENTUSER:
+    case REG_DELETE_HKEYCLASSESROOT:
+        return true;
+
+    default:
+        return false;
+    }
 }
 
 RegistryEntry RegistryEntry::Create(const std::string& line)
@@ -494,13 +517,41 @@ int RegistryAccess::Export(const std::string& firstKey, std::ostream& os) const
 
 int RegistryAccess::Import(std::istream& is) const
 {
+    constexpr auto SYSTEMSERVICE_REGISTRY_INVALIDKEY = 1;
     auto entries = RegFileParse(is);
     const auto* key = &entries.front();
     for (auto& next: entries) {
         if (next.keyLen) {
             key = &next;
+            if (key->IsForDeletion()) {
+                const auto status = device.WriteReqEx(key->hive, 0, key->buffer.size(), key->buffer.data());
+
+                switch (status) {
+                case ADSERR_NOERR:
+                    break; // OK
+
+                case SYSTEMSERVICE_REGISTRY_INVALIDKEY:
+                    LOG_WARN(__FUNCTION__
+                             << "(): failed to delete registry key \""
+                             << (g_HiveMapping.at(key->hive).c_str() + 1)
+                             << key->buffer.data()
+                             << "\". It could not be found in the registry of the target.\n");
+                    break; // OK: The key could not be found. But that is OK, because we wanted to delete it.
+
+                default:
+                    LOG_ERROR(__FUNCTION__
+                              << "(): failed to delete registry key \""
+                              << (g_HiveMapping.at(key->hive).c_str() + 1)
+                              << key->buffer.data()
+                              << "\" with error code: 0x"
+                              << std::hex << status << '\n');
+                    return 1;
+                }
+            }
             continue;
         }
+
+        // Prepend key path before value name
         next.buffer.insert(next.buffer.begin(), key->buffer.cbegin(), key->buffer.cend());
         const auto status = device.WriteReqEx(key->hive, 0, next.buffer.size(), next.buffer.data());
         if (ADSERR_NOERR != status) {
