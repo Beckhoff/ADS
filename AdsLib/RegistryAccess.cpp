@@ -495,14 +495,14 @@ int RegistryAccess::Export(const std::string& firstKey, std::ostream& os) const
 int RegistryAccess::Import(std::istream& is) const
 {
     auto entries = RegFileParse(is);
-    auto key = entries.front();
+    const auto* key = &entries.front();
     for (auto& next: entries) {
         if (next.keyLen) {
-            key = next;
+            key = &next;
             continue;
         }
-        next.buffer.insert(next.buffer.begin(), key.buffer.cbegin(), key.buffer.cend());
-        const auto status = device.WriteReqEx(key.hive, 0, next.buffer.size(), next.buffer.data());
+        next.buffer.insert(next.buffer.begin(), key->buffer.cbegin(), key->buffer.cend());
+        const auto status = device.WriteReqEx(key->hive, 0, next.buffer.size(), next.buffer.data());
         if (ADSERR_NOERR != status) {
             LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
             return 1;
