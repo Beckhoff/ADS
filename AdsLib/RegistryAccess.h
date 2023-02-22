@@ -31,14 +31,15 @@ struct RegistryEntry {
     static RegistryEntry Create(const std::string& line);
     // Create a registry key or value from a byte buffer (network)
     static RegistryEntry Create(const std::vector<uint8_t>&& buffer, nRegHive hive, uint32_t regFlag);
-    std::ostream& Write(std::ostream& os) const;
+
     size_t Append(const void* data, size_t length);
+    void ParseStringValue(const char*& it, size_t& lineNumber);
     template<typename T>
     void PushData(T data)
     {
         dataLen += Append(&data, sizeof(data));
     }
-    void ParseStringValue(const char*& it, size_t& lineNumber);
+    std::ostream& Write(std::ostream& os) const;
 };
 
 struct RegistryAccess {
