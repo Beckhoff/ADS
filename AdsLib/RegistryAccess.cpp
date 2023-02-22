@@ -286,7 +286,7 @@ std::vector<RegistryEntry> RegFileParse(std::istream& input)
         ++it;
 
         ParseHexArchetype(it, value, input, lineNumber);
-        entries.push_back(value);
+        entries.push_back(std::move(value));
     }
     return entries;
 }
