@@ -1,3 +1,10 @@
+adstool (0.0.20-1) bullseye; urgency=medium
+
+  *  AdsTool: Extend .reg file format for deletion of keys
+     AdsTool: add startprocess command
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Mon, 06 Mar 2023 10:12:53 +0100
+
 adstool (0.0.19-1) bullseye; urgency=medium
 
   * AdsTool: add state --compare command
