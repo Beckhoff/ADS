@@ -16,22 +16,16 @@ Currently (2022-02-21) tested with:
 |  Windows 10      | win64 | gcc 8.3.0 |
 
 
-# compile & usage
+# Compile & usage
 
-## clone the repository
-```
+```shell
+# clone the repository
 git clone https://github.com/Beckhoff/ADS.git
-```
-## change into root of the cloned repository
-```
+# change into root of the cloned repository
 cd ADS
-```
-## configure meson to build the library into "build" dir
-```
+# configure meson to build the library into "build" dir
 meson setup build
-```
-## let ninja build the library
-```
+# let ninja build the library
 ninja -C build
 ```
 
@@ -48,6 +42,7 @@ Sample AMS route:
   Remote Route:   None / Server
   Unidirectional: false
   Secure ADS:     false
+
   
 Routes can be configured by several possibilities
 TwinCAT Engineering:  Go to the tree item SYSTEM/Routes and add a static route.
@@ -65,16 +60,12 @@ IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configur
 - set "remoteIpV4" to the IP Address of your TwinCAT target (e.g. 192.168.0.2)
 - (optional) enable bhf::ads::SetLocalAddress() and set to the AMS NetId you choose for the ADS client (e.g. 192.168.0.1.1.1).
 
-## configure meson to build example into "build" dir
-```
+```shell
+# configure meson to build example into "build" dir
 meson example/build example
-```
-## let ninja build the example
-```
+# let ninja build the example
 ninja -C example/build
-```
-## and run the example
-```
+# and run the example
 ./example/build/example
 ```
 ---
