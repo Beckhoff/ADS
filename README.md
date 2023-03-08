@@ -34,6 +34,20 @@ Prepare your target to run the example
 ======================================
 - Download your PLC project to your target e.g. "PLC-TestProject" of our GitHub repository.
 - Authorise your ADS client for the TwinCAT target by adding an AMS route.
+    - TwinCAT Engineering:
+      Go to the tree item SYSTEM/Routes and add a static route.
+
+    - TwinCAT Systray:
+      Open the context menue by right click the TwinCAT systray icon. (not available on Windows CE devices) 
+
+    - TC2:
+      Go to Properties/AMS Router/Remote Computers and restart TwinCAT
+    - TC3:
+      Go to  Router/Edit routes.
+    - TcAmsRemoteMgr:
+      Windows CE devices can be configured locally (TC2 requires a TwinCAT restart). Tool location: `/Hard Disk/System/TcAmsRemoteMgr.exe`
+    - IPC Diagnose:
+      Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/index.html?id=286
 
 Sample AMS route:
 ```
@@ -45,18 +59,6 @@ Sample AMS route:
   Unidirectional: false
   Secure ADS:     false
 ```
-
-Routes can be configured by several possibilities
-```
-TwinCAT Engineering:  Go to the tree item SYSTEM/Routes and add a static route.
-TwinCAT Systray:      Open the context menue by right click the TwinCAT systray icon. (not available on Windows CE devices) 
-  TC2*: Go to Properties/AMS Router/Remote Computers
-  TC3:  Go to  Router/Edit routes.
-TcAmsRemoteMgr: Windows CE devices can be configured locally (TC2*/TC3). Tool location: /Hard Disk/System/TcAmsRemoteMgr.exe
-IPC Diagnose: Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/index.html?id=286
-```
-
-*Requires a TwinCAT restart.
 
 Prepare your client to run the example/example.cpp
 ==================================================
