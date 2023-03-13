@@ -48,6 +48,7 @@ ncat_pid=$!
 # wait for fake ads server to accept connections
 while ! nc -z localhost 48898; do sleep 1; done
 
+${QEMU_USER_EMULATION-} ./build/AdsTest 192.168.0.231.1.1 --gw=ads-server registry testdeletekey
 ${QEMU_USER_EMULATION-} ./build/AdsLibTest
 ${QEMU_USER_EMULATION-} ./build/AdsLibOOITest
 ${QEMU_USER_EMULATION-} ./example/build/example

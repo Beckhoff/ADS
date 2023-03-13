@@ -116,6 +116,18 @@ adslibooitest = executable('AdsLibOOITest',
   link_with: adslib,
 )
 
+adstest_files = files([
+  'AdsTest/main.cpp',
+  'AdsTest/RegistryAccessTest.cpp',
+])
+
+adstest = executable('AdsTest',
+  adstest_files,
+  include_directories: inc,
+  dependencies: libs,
+  link_with: adslib,
+)
+
 adstool = executable('adstool',
   'AdsTool/main.cpp',
   include_directories: inc,
@@ -142,6 +154,19 @@ if get_option('tcadsdll_include') != ''
 
   tcadstool = executable('tcadstool',
     'AdsTool/main.cpp',
+    cpp_args: '-DUSE_TWINCAT_ROUTER',
+    include_directories: [
+      get_option('tcadsdll_include'),
+      inc,
+    ],
+    dependencies: [
+      tcadsdll_deps
+    ],
+    link_with: tcadslib,
+  )
+
+  tcadstest = executable('tcAdsTest',
+    adstest_files,
     cpp_args: '-DUSE_TWINCAT_ROUTER',
     include_directories: [
       get_option('tcadsdll_include'),
