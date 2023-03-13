@@ -59,18 +59,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #endif
 
-#ifndef __cpp_lib_uncaught_exceptions
-namespace std {
-    int uncaught_exceptions() noexcept {
-        return std::uncaught_exception();
-    }
-}
-#endif
-
 /**
  * All unit test facilities associated are scoped to the fructose namespace.
  */
 namespace fructose {
+
+inline int uncaught_exceptions() noexcept {
+#ifndef __cpp_lib_uncaught_exceptions
+    return std::uncaught_exception();
+#else
+    return std::uncaught_exceptions();
+#endif
+}
 
 /**
  * Base class for test_base template.
@@ -588,7 +588,7 @@ test_root::test_root()
 inline
 test_root::~test_root()
 {
-    if (std::uncaught_exceptions())
+    if (uncaught_exceptions())
     {
         increase_error_count();
     }
