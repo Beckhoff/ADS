@@ -14,19 +14,12 @@
 #include "RTimeAccess.h"
 #include "SymbolAccess.h"
 #include "bhf/ParameterList.h"
+#include "bhf/WindowsQuirks.h"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <thread>
-
-#if defined(_WIN32) || defined(__CYGWIN__)
-#include <fcntl.h>
-#include <io.h>
-#define ForceBinaryOutputOnWindows() (void)_setmode(_fileno(stdout), O_BINARY)
-#else
-#define ForceBinaryOutputOnWindows()
-#endif
 
 static int version()
 {
@@ -308,7 +301,7 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
         do {
             std::vector<char> buf(1024 * 1024); // 1MB
             adsFile.Read(buf.size(), buf.data(), bytesRead);
-            ForceBinaryOutputOnWindows();
+            bhf::ForceBinaryOutputOnWindows();
             std::cout.write(buf.data(), bytesRead);
         } while (bytesRead > 0);
     } else if (!command.compare("write")) {
@@ -483,7 +476,7 @@ int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
         LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
         return status;
     }
-    ForceBinaryOutputOnWindows();
+    bhf::ForceBinaryOutputOnWindows();
     std::cout.write((const char*)readBuffer.data(), readBuffer.size());
     return !std::cout.good();
 }
@@ -671,7 +664,7 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
             return PrintAs<uint64_t>(readBuffer);
 
         default:
-            ForceBinaryOutputOnWindows();
+            bhf::ForceBinaryOutputOnWindows();
             std::cout.write((const char*)readBuffer.data(), bytesRead);
             return !std::cout.good();
         }
