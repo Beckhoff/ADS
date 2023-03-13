@@ -23,6 +23,11 @@ enum nRegHive : uint32_t {
     REG_DELETE_HKEYCLASSESROOT = 208,
 };
 
+// Registry System Service Flags
+constexpr uint32_t REGFLAG_ENUMVALUE_MASK = 0xC0000000;
+constexpr uint32_t REGFLAG_ENUMKEYS = 0x00000000;
+constexpr uint32_t REGFLAG_ENUMVALUE_VTD = 0xC0000000;
+
 struct RegistryEntry {
     std::vector<uint8_t> buffer;
     nRegHive hive;
@@ -48,13 +53,12 @@ struct RegistryEntry {
 
 struct RegistryAccess {
     RegistryAccess(const std::string& ipV4, AmsNetId netId, uint16_t port);
+    std::vector<RegistryEntry> Enumerate(const RegistryEntry& key, const uint32_t regFlag,
+                                         const size_t bufferSize) const;
     int Export(const std::string& key, std::ostream& os) const;
     int Import(std::istream& is) const;
     static int Verify(std::istream& is, std::ostream& os);
 
-private:
-    std::vector<RegistryEntry> Enumerate(const RegistryEntry& key, const uint32_t regFlag,
-                                         const size_t bufferSize) const;
     AdsDevice device;
 };
 }

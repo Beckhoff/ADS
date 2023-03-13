@@ -31,11 +31,6 @@ namespace ads
 // First line of valid registry file
 constexpr const char* WINDOWS_REGISTRY_HEADER = "Windows Registry Editor Version 5.00";
 
-// Registry System Service Flags
-constexpr uint32_t REGFLAG_ENUMVALUE_MASK = 0xC0000000;
-constexpr uint32_t REGFLAG_ENUMKEYS = 0x00000000;
-constexpr uint32_t REGFLAG_ENUMVALUE_VTD = 0xC0000000;
-
 static const std::map<nRegHive, std::string> g_HiveMapping = {
     { nRegHive::REG_HKEYCURRENTUSER, "HKEY_CURRENT_USER\\" },
     { nRegHive::REG_HKEYCLASSESROOT, "HKEY_CLASSES_ROOT\\" },
