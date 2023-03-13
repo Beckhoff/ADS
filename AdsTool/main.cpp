@@ -14,6 +14,7 @@
 #include "RTimeAccess.h"
 #include "SymbolAccess.h"
 #include "bhf/ParameterList.h"
+#include "bhf/StringToInteger.h"
 #include "bhf/WindowsQuirks.h"
 #include <algorithm>
 #include <cstring>
@@ -699,17 +700,6 @@ int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf
 }
 
 template<typename T>
-static T try_stoi(const char* str, const T defaultValue = 0)
-{
-    try {
-        if (str && *str) {
-            return static_cast<T>(std::stoi(++str));
-        }
-    } catch (...) {}
-    return defaultValue;
-}
-
-template<typename T>
 int TryRun(T f)
 {
     try {
@@ -762,7 +752,7 @@ int ParseCommand(int argc, const char* argv[])
     }
     const auto split = std::strcspn(str, ":");
     const auto netId = std::string {str, split};
-    const auto port = try_stoi<uint16_t>(str + split);
+    const auto port = bhf::try_stoi<uint16_t>(str + split);
     LOG_VERBOSE("NetId>" << netId << "< port>" << port << "<\n");
 
     bhf::ParameterList global = {
