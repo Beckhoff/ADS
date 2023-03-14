@@ -88,6 +88,11 @@ if get_option('tcadsdll_include') != ''
     ],
   )
 
+  tcadsdll_deps = [
+      meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
+      libs,
+  ]
+
   tcadstool = executable('tcadstool',
     'AdsTool/main.cpp',
     cpp_args: '-DUSE_TWINCAT_ROUTER',
@@ -96,8 +101,7 @@ if get_option('tcadsdll_include') != ''
       inc,
     ],
     dependencies: [
-      meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
-      libs,
+      tcadsdll_deps
     ],
     link_with: tcadslib,
   )
