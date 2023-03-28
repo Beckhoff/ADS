@@ -23,6 +23,9 @@ namespace ads
  */
 static void ParseHostAndPort(std::string& host, std::string& port)
 {
+    if (host.empty()) {
+        return;
+    }
     auto split = host.find_last_of(":");
 
     if (host.find_first_of(":") != split) {
