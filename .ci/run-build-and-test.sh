@@ -51,6 +51,19 @@ ninja -C example/build
 # the "install" target, after we already build the "example".
 ${SUDO_CMD-} ninja -C build install
 
+# We need the AdsTest tool in different flavours for our test pack. The test
+# runner always runs on Linux, but it can either be amd64 or arm64.
+case "${CI_JOB_NAME}" in
+	*tclur*)
+		readonly adstest_dir='.test-pack/T_100_test_delete_reg_key/bin'
+		mkdir -p "${adstest_dir}"
+		cp -a "build/AdsTest${ADSTEST_FILE_EXTENSION-}" "${adstest_dir}/AdsTest-$(uname -m)"
+		;;
+	*)
+		# We don't need other platforms than tclur amd64/arm64.
+		;;
+esac
+
 # If the job name contains 'test' we run tests, too.
 case "${CI_JOB_NAME}" in
 	*test*)

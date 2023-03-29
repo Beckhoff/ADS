@@ -53,6 +53,7 @@ build-only:
     when: always
     paths:
     - .test-stage/reports/*
+    - .test-pack/T_100_test_delete_reg_key/bin
     - AdsLib/**/*.h
     - build/
     - example/build/
@@ -144,6 +145,27 @@ build-and-test-in-vm:
     - tools/prepare_test_stage.sh
     - rackctl-emulate add test-device 200
     - test_stage/test_stage.sh --config-dir=.test-stage rackctl --install="$(realpath ./*.iso)" test-device & wait $!
+
+test-pack:
+  stage: build
+  image: ${CI_REGISTRY}/beckhoff/test_stage/test-pack:v13.7
+  needs:
+    - job: build-and-test
+      parallel:
+        matrix:
+          - FLAVOR: 'tclur'
+            BHF_CI_ARCH:
+            - amd64
+            - arm64
+            CXX: g++
+  before_script:
+    - export AWS_ACCESS_KEY_ID=test-packs
+    - export AWS_SECRET_ACCESS_KEY="${S3_TEST_PACKS_PASS}"
+  script:
+    - test-pack push-pipelines --write-gitlab-dotenv=test-pack.env .test-pack
+  artifacts:
+    reports:
+      dotenv: test-pack.env
 
 build-debian:
   parallel:

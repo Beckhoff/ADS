@@ -1,0 +1,22 @@
+#!/bin/sh
+# SPDX-License-Identifier: MIT
+# Copyright (C) Beckhoff Automation GmbH & Co. KG
+
+set -e
+set -u
+
+readonly test_device="${1?Missing <test_device>}"
+: "${BHF_CI_TEST_DIR:="${0%.*}"}"
+
+bhfci-ads set-config "${test_device}"
+
+# bhfci-ads normaly does this to call the adstool, now we have to source the
+# route to call the AdsTest similar to how bhfci-ads would call adstool.
+. "${HOME}/.config/bhfci/routes.d/${test_device}"
+
+# The test runner is always Linux but it could run on amd64 or arm64.
+"${BHF_CI_TEST_DIR}/bin/AdsTest-$(uname --machine)" \
+	${BHF_CI_TARGET_AMS_NET_ID} --localams="${BHF_CI_LOCALAMS}" --log-level=2 --gw="${test_device}" \
+	registry testdeletekey
+
+printf '"test delete reg key" was successful\n'
