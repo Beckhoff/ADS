@@ -3,7 +3,7 @@
    Copyright (c) 2020 - 2022 Beckhoff Automation GmbH & Co. KG
  */
 #pragma once
-#ifdef __FreeBSD__
+#if defined(unix) || defined(__unix__) || defined(__unix)
 #define POSIX
 #define NULL nullptr
 #define AMSPORT_R0_PLC_TC3 851
