@@ -5,7 +5,9 @@
 #pragma once
 #if defined(unix) || defined(__unix__) || defined(__unix)
 #define POSIX
+#ifndef NULL
 #define NULL nullptr
+#endif
 #define AMSPORT_R0_PLC_TC3 851
 #else
 using BOOL = int;
