@@ -75,6 +75,14 @@ build-fbsd-clang:
 
 build-linux-gcc:
   extends: .build-meson-docker
+  variables:
+    BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/include -Dtcadsdll_lib=/usr/lib'
+  before_script:
+    - echo 'Acquire::http { Proxy "http://freebsdpkg01.beckhoff.com:3142"; }' > /etc/apt/apt.conf.d/proxy
+    - echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
+    - curl https://freebsdpkg01.beckhoff.com/repo.pub -o /usr/share/keyrings/bhf.asc
+    - printf 'deb [signed-by=/usr/share/keyrings/bhf.asc] https://freebsdpkg01.beckhoff.com/debian bullseye main\n' > /etc/apt/sources.list.d/bhf.list
+    - apt update -y && apt install -y libadscomm-dev
 
 build-linux-gcc-i386:
   extends: .build-meson-docker
