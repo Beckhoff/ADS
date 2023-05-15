@@ -89,7 +89,7 @@ if get_option('tcadsdll_include') != ''
   )
 
   tcadsdll_deps = [
-      meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'), required: true),
+      meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib')),
       libs,
   ]
 
