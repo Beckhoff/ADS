@@ -10,6 +10,11 @@ set(SOURCES
   RTimeAccess.cpp
   Sockets.cpp
 
+  RegistryAccess.cpp
+  SymbolAccess.cpp
+
+  bhf/ParameterList.cpp
+
   standalone/AdsLib.cpp
   standalone/AmsConnection.cpp
   standalone/AmsNetId.cpp
@@ -19,8 +24,10 @@ set(SOURCES
 )
 
 add_library(ads ${SOURCES})
+add_library(ads::ads ALIAS ads)
 
-target_include_directories(ads PUBLIC .)
+target_include_directories(ads PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+$<INSTALL_INTERFACE:include/ads>)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   target_link_libraries(ads PUBLIC wsock32)
