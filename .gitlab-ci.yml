@@ -7,19 +7,6 @@ cache:
   paths:
   - apt-cache/
 
-build-nuspec:
-  stage: build
-  tags:
-    - docker
-  image: alpine:latest
-  before_script:
-    - apk update && apk add dpkg-dev xmlstarlet
-  script:
-    - xml ed -L -u //_:package/_:metadata/_:version -v "$(dpkg-parsechangelog -S Version | tr - .)" adstool.nuspec
-  artifacts:
-    paths:
-    - adstool.nuspec
-
 codestyle:
   stage: build
   tags:
@@ -118,9 +105,6 @@ build-win10:
   stage: build
   tags:
     - MD_TWINCAT_XAE
-  needs: ["build-nuspec"]
-  dependencies:
-    - build-nuspec
   script:
     - C:\ProgramData\chocolatey\bin\choco install --no-progress -y meson ninja
     - $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
@@ -129,7 +113,6 @@ build-win10:
     - ninja -C build
     - meson setup example/build example -Dwerror=false -Dcpp_args="-D_CRT_NONSTDC_NO_WARNINGS=1, -D_CRT_SECURE_NO_WARNINGS=1, -DNOMINMAX=1" -Dtcadsdll_include=c:\TwinCAT\AdsApi\TcAdsDll\Include -Dtcadsdll_lib=c:\TwinCAT\AdsApi\TcAdsDll\x64\lib
     - ninja -C example/build
-    - tcpkg pack adstool.nuspec --out build
   artifacts:
     when: always
     paths:
@@ -137,6 +120,19 @@ build-win10:
     - build/
     - example/build/
 
+build-tcpkg:
+  stage: build
+  image: ${REGISTRY_HOST}/beckhoff/docker-tcpkg:main
+  tags:
+    - docker
+  needs:
+    - build-win10
+  script:
+    - xmlstarlet ed -L -u //_:package/_:metadata/_:version -v "$(dpkg-parsechangelog -S Version | tr - .)" adstool.nuspec
+    - tcpkg pack adstool.nuspec
+  artifacts:
+    paths:
+    - "*.nupkg"
 
 .test-with-service-container:
   stage: test
@@ -226,10 +222,11 @@ release-push:
 
 tcpkg:
   stage: release-push
+  image: ${REGISTRY_HOST}/beckhoff/docker-tcpkg:main
   tags:
-    - MD_TWINCAT_XAE
+    - docker
   dependencies:
-    - build-win10
+    - build-tcpkg
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: manual
@@ -241,5 +238,4 @@ tcpkg:
           - testing
           - stable
   script:
-    - cd build
     - tcpkg push -k "${TCPKG_PUSH_APIKEY}" -s "${TCPKG_PUSH_URL}/${TCPKG_FEED}" -f
