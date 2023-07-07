@@ -120,6 +120,14 @@ build-win10:
     - build/
     - example/build/
 
+build-clangcl:
+  extends: .build-meson
+  image: ${REGISTRY_HOST}/beckhoff/docker-clangcl:main
+  tags:
+    - docker
+  variables:
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.clang-cl.win32 -Dcpp_args=["-D_CRT_NONSTDC_NO_WARNINGS=1","-D_CRT_SECURE_NO_WARNINGS=1","-DNOMINMAX=1"]'
+
 build-tcpkg:
   stage: build
   image: ${REGISTRY_HOST}/beckhoff/docker-tcpkg:main

@@ -1,0 +1,14 @@
+[binaries]
+cpp = 'cl.exe'
+cpp_ld = 'link.exe'
+ar = 'llvm-lib'
+strip = 'llvm-strip'
+
+[built-in options]
+b_pie = false # clang-cl does not support this for the target x86_64-pc-windows-msvc
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
