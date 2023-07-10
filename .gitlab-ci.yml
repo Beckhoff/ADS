@@ -126,7 +126,12 @@ build-clangcl:
   tags:
     - docker
   variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.clang-cl.win32 -Dcpp_args=["-D_CRT_NONSTDC_NO_WARNINGS=1","-D_CRT_SECURE_NO_WARNINGS=1","-DNOMINMAX=1"]'
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.clang-cl.win32 -Dcpp_args=["-D_CRT_NONSTDC_NO_WARNINGS=1","-D_CRT_SECURE_NO_WARNINGS=1","-DNOMINMAX=1"] -Dtcadsdll_include=/opt/TcAdsDll/Include -Dtcadsdll_lib=/opt/TcAdsDll/Lib/x64'
+  before_script:
+    - tcpkg download TwinCAT.XAE.AdsApi -o _packages -y
+    - unzip _packages/TwinCAT.XAE.AdsApi.*.nupkg -d _packages/nupkg
+    - msiextract _packages/nupkg/tools/TwinCAT-XAE-AdsApi.msi -C _packages/msi
+    - mv _packages/msi/Program\ Files/AdsApi/TcAdsDll /opt/TcAdsDll
 
 build-tcpkg:
   stage: build
