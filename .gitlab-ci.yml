@@ -128,8 +128,8 @@ build-tcpkg:
   needs:
     - build-win10
   script:
-    - xmlstarlet ed -L -u //_:package/_:metadata/_:version -v "$(dpkg-parsechangelog -S Version | tr - .)" adstool.nuspec
-    - tcpkg pack adstool.nuspec
+    - xmlstarlet ed -L -u //_:package/_:metadata/_:version -v "$(dpkg-parsechangelog -S Version | tr - .)" TwinCAT.XAE.AdsTool.nuspec
+    - tcpkg pack TwinCAT.XAE.AdsTool.nuspec
   artifacts:
     paths:
     - "*.nupkg"
