@@ -8,7 +8,6 @@
 #ifndef NULL
 #define NULL nullptr
 #endif
-#define AMSPORT_R0_PLC_TC3 851
 #else
 using BOOL = int;
 #define TCADSDLL_API __stdcall
@@ -20,6 +19,9 @@ using ads_ui32 = unsigned long;
 #include <string>
 #include <stdint.h>
 #include <TcAdsDef.h>
+#ifndef AMSPORT_R0_PLC_TC3
+#define AMSPORT_R0_PLC_TC3 851
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // ADS Cmd Ids
