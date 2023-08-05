@@ -6,6 +6,8 @@
 #pragma once
 
 #include "AmsConnection.h"
+#include <condition_variable>
+#include <mutex>
 #include <unordered_set>
 
 struct AmsRouter : Router {
@@ -30,10 +32,13 @@ struct AmsRouter : Router {
 private:
     AmsNetId localAddr;
     std::recursive_mutex mutex;
+    std::condition_variable_any connection_attempt_events;
+    std::map<AmsNetId, std::tuple<>> connection_attempts;
     std::unordered_set<std::unique_ptr<AmsConnection> > connections;
     std::map<AmsNetId, AmsConnection*> mapping;
 
     void DeleteIfLastConnection(const AmsConnection* conn);
+    void AwaitConnectionAttempts(const AmsNetId& ams, std::unique_lock<std::recursive_mutex>& lock);
 
     std::array<AmsPort, NUM_PORTS_MAX> ports;
 };

@@ -7,6 +7,9 @@
 #include "Log.h"
 
 #include <algorithm>
+#include <exception>
+#include <memory>
+#include <mutex>
 
 AmsRouter::AmsRouter(AmsNetId netId)
     : localAddr(netId)
@@ -33,7 +36,10 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
      */
     auto hostAddresses = bhf::ads::GetListOfAddresses(host, "48898");
 
-    std::lock_guard<std::recursive_mutex> lock(mutex);
+    std::unique_lock<std::recursive_mutex> lock(mutex);
+    
+    AwaitConnectionAttempts(ams, lock);
+
     const auto oldConnection = GetConnection(ams);
     if (oldConnection && !oldConnection->IsConnectedTo(hostAddresses.get())) {
         /**
@@ -51,22 +57,40 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
         }
     }
 
-    auto conn = connections.emplace(std::unique_ptr<AmsConnection>(new AmsConnection { *this, hostAddresses.get()}));
-    if (conn.second) {
-        /** in case no local AmsNetId was set previously, we derive one */
-        if (!localAddr) {
-            localAddr = AmsNetId {conn.first->get()->ownIp};
+    connection_attempts[ams] = {};
+    lock.unlock();
+
+    try {
+        auto new_connection = std::unique_ptr<AmsConnection>(new AmsConnection { *this, hostAddresses.get()});
+        lock.lock();
+        connection_attempts.erase(ams);
+        connection_attempt_events.notify_all();
+
+        auto conn = connections.emplace(std::move(new_connection));
+        if (conn.second) {
+            /** in case no local AmsNetId was set previously, we derive one */
+            if (!localAddr) {
+                localAddr = AmsNetId {conn.first->get()->ownIp};
+            }
+            conn.first->get()->refCount++;
+            mapping[ams] = conn.first->get();
+            return !conn.first->get()->ownIp;
         }
-        conn.first->get()->refCount++;
-        mapping[ams] = conn.first->get();
-        return !conn.first->get()->ownIp;
+
+        return -1;
+    } catch (std::exception& e) {
+        lock.lock();
+        connection_attempts.erase(ams);
+        connection_attempt_events.notify_all();
+        throw e;
     }
-    return -1;
 }
 
 void AmsRouter::DelRoute(const AmsNetId& ams)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex);
+    std::unique_lock<std::recursive_mutex> lock(mutex);
+
+    AwaitConnectionAttempts(ams, lock);
 
     auto route = mapping.find(ams);
     if (route != mapping.end()) {
@@ -208,4 +232,8 @@ long AmsRouter::DelNotification(uint16_t port, const AmsAddr* pAddr, uint32_t hN
 {
     auto& p = ports[port - Router::PORT_BASE];
     return p.DelNotification(*pAddr, hNotification);
+}
+
+void AmsRouter::AwaitConnectionAttempts(const AmsNetId& ams, std::unique_lock<std::recursive_mutex>& lock) {
+    connection_attempt_events.wait(lock, [&]() { return connection_attempts.find(ams) == connection_attempts.end(); });
 }
