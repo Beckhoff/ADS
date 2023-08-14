@@ -1,3 +1,13 @@
+adstool (0.0.22-1) bullseye; urgency=medium
+
+  * AmsRouter: Stop holding global lock during connect
+        This will speed up scenarios connecting to different TwinCAT
+        routers in parallel. However, calling AddRoute() for the same
+        target host concurrently, will now leave only the last AmsNetId
+        usable. So make sure to avoid that case in your application.
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Mon, 14 Aug 2023 11:14:18 +0200
+
 adstool (0.0.21-1) bullseye; urgency=medium
 
   * TcAdsTool: ship with Debian package
