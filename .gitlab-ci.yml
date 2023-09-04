@@ -1,3 +1,6 @@
+variables:
+  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.63
+
 stages:
   - build
   - test
@@ -149,7 +152,7 @@ build-tcpkg:
 
 .test-with-service-container:
   stage: test
-  image: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.40
+  image: ${TEST_RUNNER_CONTAINER}
   tags:
     - docker_vm_runner
     - few_vcpus
