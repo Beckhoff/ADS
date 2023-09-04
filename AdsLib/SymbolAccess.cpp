@@ -243,17 +243,6 @@ int SymbolAccess::Write(const std::string& name, const std::string& value) const
     }
 
     const auto entry = it->second;
-    std::vector<uint8_t> readBuffer(entry.header.size + 2);
-    uint32_t bytesRead = 0;
-    const auto status = device.ReadReqEx2(entry.header.iGroup,
-                                          entry.header.iOffs,
-                                          readBuffer.size(),
-                                          readBuffer.data(),
-                                          &bytesRead);
-    if (ADSERR_NOERR != status) {
-        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return status;
-    }
 
     switch (entry.header.dataType) {
     case 0x2:     //INT
