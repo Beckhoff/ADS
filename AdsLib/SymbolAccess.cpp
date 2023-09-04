@@ -227,10 +227,16 @@ int SymbolAccess::Write(const SymbolEntry& entry, const std::string& v) const
 template<>
 int SymbolAccess::Write<std::string>(const SymbolEntry& entry, const std::string& value) const
 {
+    // Copy value to a temporary buffer so we can fill it with null bytes. PLC
+    // strings are just an array of random bytes so we have to overwrite the
+    // entire array to get "normal" string behaviour. E.g. overwriting a long
+    // string with a shorter string, should overwrite the old string entirely!
+    auto buffer = value;
+    buffer.resize(entry.header.size);
     return device.WriteReqEx(entry.header.iGroup,
                              entry.header.iOffs,
-                             value.size(),
-                             value.data());
+                             buffer.size(),
+                             buffer.data());
 }
 
 int SymbolAccess::Write(const std::string& name, const std::string& value) const

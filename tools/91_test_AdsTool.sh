@@ -122,6 +122,15 @@ check_plc() {
 	printf '2147483647\n' > "${tmpfile}"
 	check_plc_variable MAIN.nTestCasesFailed 2147483647
 	check_plc_variable MAIN.nTestCasesFailed '0x7FFFFFFF'
+
+	# sLogPath is a T_MaxString, which is a 255 byte character array with one
+	# additional byte for the zero terminator. So we expect 254 padding bytes
+	# behind our string, when we read it back.
+	{
+		printf '10'
+		dd if=/dev/zero bs=1 count=254
+	} > "${tmpfile}"
+	check_plc_variable MAIN.sLogPath '10'
 }
 
 check_raw() {
