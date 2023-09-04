@@ -152,7 +152,7 @@ int SymbolAccess::Read(const std::string& name, std::ostream& os) const
     }
 
     const auto entry = it->second;
-    std::vector<uint8_t> readBuffer(entry.header.size + 2);
+    std::vector<uint8_t> readBuffer(entry.header.size);
     uint32_t bytesRead = 0;
     const auto status = device.ReadReqEx2(entry.header.iGroup,
                                           entry.header.iOffs,
