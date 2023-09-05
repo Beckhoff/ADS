@@ -123,6 +123,12 @@ check_plc() {
 	check_plc_variable MAIN.nTestCasesFailed 2147483647
 	check_plc_variable MAIN.nTestCasesFailed '0x7FFFFFFF'
 
+	# BOOL and byte are more special cases we should verify
+	printf '1\n' > "${tmpfile}"
+	check_plc_variable MAIN.bInitTest 1
+	printf '10\n' > "${tmpfile}"
+	check_plc_variable MAIN.moreBytes 10
+
 	# sLogPath is a T_MaxString, which is a 255 byte character array with one
 	# additional byte for the zero terminator. So we expect 254 padding bytes
 	# behind our string, when we read it back.

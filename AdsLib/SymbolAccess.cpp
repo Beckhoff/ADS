@@ -7,6 +7,7 @@
 #include "SymbolAccess.h"
 #include "Log.h"
 #include <iostream>
+#include <limits>
 #include <vector>
 
 namespace bhf
@@ -227,6 +228,35 @@ int SymbolAccess::Write(const SymbolEntry& entry, const std::string& v) const
     }
 
     value = bhf::ads::htole(value);
+    return device.WriteReqEx(entry.header.iGroup,
+                             entry.header.iOffs,
+                             sizeof(value),
+                             &value);
+}
+
+template<>
+int SymbolAccess::Write<uint8_t>(const SymbolEntry& entry, const std::string& v) const
+{
+    if (!v.size()) {
+        LOG_ERROR(__FUNCTION__ << "<uint8_t>() empty strings are not supported\n");
+        return ADSERR_DEVICE_INVALIDDATA;
+    }
+
+    const auto asHex = (v.npos != v.rfind("0x", 0));
+    std::stringstream converter;
+    converter << (asHex ? std::hex : std::dec) << v;
+
+    uint16_t integer_value = {};
+    converter >> integer_value;
+    if (converter.fail()) {
+        LOG_ERROR(__FUNCTION__ << "() parsing '" << v << "' failed\n");
+        return ADSERR_DEVICE_INVALIDDATA;
+    }
+    if (integer_value > std::numeric_limits<uint8_t>::max()) {
+        LOG_ERROR(__FUNCTION__ << "() '" << v << "' does not fit into a single byte\n");
+        return ADSERR_DEVICE_INVALIDDATA;
+    }
+    auto value = static_cast<uint8_t>(integer_value);
     return device.WriteReqEx(entry.header.iGroup,
                              entry.header.iOffs,
                              sizeof(value),
