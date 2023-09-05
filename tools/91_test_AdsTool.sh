@@ -119,9 +119,9 @@ check_plc() {
 	check plc show-symbols
 
 	# Try generic access to integer variables
-	printf '10\n' > "${tmpfile}"
-	check_plc_variable MAIN.nTestCasesFailed 10
-	check_plc_variable MAIN.nTestCasesFailed '0xA'
+	printf '2147483647\n' > "${tmpfile}"
+	check_plc_variable MAIN.nTestCasesFailed 2147483647
+	check_plc_variable MAIN.nTestCasesFailed '0x7FFFFFFF'
 }
 
 check_raw() {
