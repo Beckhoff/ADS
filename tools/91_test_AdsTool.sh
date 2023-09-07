@@ -40,6 +40,36 @@ check_file() {
 	fi
 }
 
+check_file_find() {
+	# Prepare a well defined directory tree on the test-device
+	check file write '/dev/shm/adslib-test/1/a'
+	check file write '/dev/shm/adslib-test/1/aa'
+	check file write '/dev/shm/adslib-test/1/2/b'
+	check file write '/dev/shm/adslib-test/1/2/3/c'
+	check file write '/dev/shm/adslib-test/1/2/3/4/d'
+
+	# List a full directory hierarchy
+	cat >"${tmpfile}" <<- 'EOF'
+		/dev/shm/adslib-test
+		/dev/shm/adslib-test/1
+		/dev/shm/adslib-test/1/2
+		/dev/shm/adslib-test/1/2/3
+		/dev/shm/adslib-test/1/2/3/4
+		/dev/shm/adslib-test/1/2/3/4/d
+		/dev/shm/adslib-test/1/2/3/c
+		/dev/shm/adslib-test/1/2/b
+		/dev/shm/adslib-test/1/a
+		/dev/shm/adslib-test/1/aa
+	EOF
+	check file find "/dev/shm/adslib-test" | LC_ALL=C sort | diff --text - "${tmpfile}"
+
+	# Non existing file
+	if check file find "/dev/shm/adslib-test/missing"; then
+		printf 'check_file_find(): succeeded where it should not!\n' >&2
+		return 1
+	fi
+}
+
 check_registry () {
 	local _regfile="${script_path}/test-data/simple.reg"
 
@@ -306,6 +336,7 @@ check_loglevel
 check_state
 
 check_file
+check_file_find
 check_registry
 check_license
 check_pciscan
