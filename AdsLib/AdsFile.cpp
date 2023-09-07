@@ -90,11 +90,16 @@ void AdsFile::Delete(const AdsDevice& route, const std::string& filename, const 
     }
 }
 
-int AdsFile::Find(const AdsDevice& route, const std::string& basePath, std::ostream& os)
+int AdsFile::Find(const AdsDevice& route, const std::string& basePath, const size_t maxdepth, std::ostream& os)
 {
-    std::list<std::string> pendingDirs{basePath};
+    struct Path {
+        size_t depth;
+        std::string path;
+    };
+    std::list<struct Path> pendingDirs{{ 0, basePath} };
     while (!pendingDirs.empty()) {
-        auto path = pendingDirs.front();
+        auto path = pendingDirs.front().path;
+        auto depth = pendingDirs.front().depth;
         pendingDirs.pop_front();
 
         TcFileFindData parent;
@@ -105,13 +110,13 @@ int AdsFile::Find(const AdsDevice& route, const std::string& basePath, std::ostr
         // Path exists print it and prepare traversing
         os << path << '\n';
 
-        if (parent.isDirectory()) {
+        if (parent.isDirectory() && (depth < maxdepth)) {
             // Finding files in a directory is a bit weird. We get only one entry per call and for
             // every call we pass the last found item to get the next. The first item is special.
             // To get the children of a directory we have to append '/*'to the path of the directory.
             for (auto last = FindFirst(route, parent, path + "/*"); !last; last = FindNext(route, parent)) {
                 if (parent.isDirectory()) {
-                    pendingDirs.push_back(path + '/' + parent.cFileName);
+                    pendingDirs.push_back({depth + 1, path + '/' + parent.cFileName});
                 } else {
                     os << path << '/' << parent.cFileName << '\n';
                 }

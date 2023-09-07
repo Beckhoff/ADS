@@ -33,7 +33,7 @@ struct AdsFile {
     void Write(const size_t size, const void* data) const;
 
     static void Delete(const AdsDevice& route, const std::string& filename, uint32_t flags);
-    static int Find(const AdsDevice& route, const std::string& path, std::ostream& os);
+    static int Find(const AdsDevice& route, const std::string& path, const size_t maxdepth, std::ostream& os);
 private:
     const AdsDevice& m_Route;
     const AdsHandle m_Handle;

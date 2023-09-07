@@ -98,11 +98,17 @@ COMMANDS:
 		Copy local file to remote:
 		$ adstool 5.24.37.144.1.1 file write 'C:\Windows\explorer.exe' < ./explorer.exe
 
-	file find <path>
+	file find [--maxdepth=<depth>] <path>
 		Find files the given path.
 	examples:
 		Show all files and directories in "C:/TwinCAT"
 		$ adstool 5.24.37.144.1.1 file find 'C:/TwinCAT'
+
+		Show only direct children of "C:/TwinCAT"
+		$ adstool 5.24.37.144.1.1 file find --maxdepth=1 'C:/TwinCAT'
+
+		Test if file or directory exists
+		$ adstool 5.24.37.144.1.1 file find --maxdepth=0 'C:/TwinCAT'
 
 	license < platformid | systemid | volumeno >
 		Read license information from device.
@@ -335,8 +341,14 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
         const auto path = args.Pop<std::string>("path is missing");
         AdsFile::Delete(device, path, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
     } else if (!command.compare("find")) {
+        bhf::ParameterList params = {
+            {"--maxdepth"},
+        };
+        args.Parse(params);
+        const auto maxdepth = params.Get<size_t>("--maxdepth", std::numeric_limits<size_t>::max());
+
         const auto path = args.Pop<std::string>("path is missing");
-        return AdsFile::Find(device, path, std::cout);
+        return AdsFile::Find(device, path, maxdepth, std::cout);
     } else {
         LOG_ERROR(__FUNCTION__ << "(): Unknown file command '" << command << "'\n");
         return -1;
