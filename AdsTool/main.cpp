@@ -291,11 +291,11 @@ int RunAddRoute(const std::string& remote, bhf::Commandline& args)
 int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
 {
     const auto command = args.Pop<std::string>("file command is missing");
-    const auto next = args.Pop<std::string>("path is missing");
     auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
 
     if (!command.compare("read")) {
-        const AdsFile adsFile { device, next,
+        const auto path = args.Pop<std::string>("path is missing");
+        const AdsFile adsFile { device, path,
                                 bhf::ads::FOPEN::READ | bhf::ads::FOPEN::BINARY |
                                 bhf::ads::FOPEN::ENSURE_DIR};
         uint32_t bytesRead;
@@ -306,14 +306,18 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
             std::cout.write(buf.data(), bytesRead);
         } while (bytesRead > 0);
     } else if (!command.compare("write")) {
-        bool append = !next.compare("--append");
+        bhf::ParameterList params = {
+            {"--append", true},
+        };
+        args.Parse(params);
+        const auto append = params.Get<bool>("--append");
         const auto flags = (append ? bhf::ads::FOPEN::APPEND : bhf::ads::FOPEN::WRITE) |
                            bhf::ads::FOPEN::BINARY |
                            bhf::ads::FOPEN::PLUS |
                            bhf::ads::FOPEN::ENSURE_DIR
         ;
 
-        const auto path = append ? args.Pop<std::string>("path is missing") : next;
+        const auto path = args.Pop<std::string>("path is missing");
         const AdsFile adsFile { device, path, flags};
         std::vector<char> buf(1024 * 1024); // 1MB
         auto length = read(0, buf.data(), buf.size());
@@ -322,7 +326,8 @@ int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bh
             length = read(0, buf.data(), buf.size());
         }
     } else if (!command.compare("delete")) {
-        AdsFile::Delete(device, next, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
+        const auto path = args.Pop<std::string>("path is missing");
+        AdsFile::Delete(device, path, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
     } else {
         LOG_ERROR(__FUNCTION__ << "(): Unknown file command '" << command << "'\n");
         return -1;
