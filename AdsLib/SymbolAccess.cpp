@@ -221,6 +221,11 @@ int SymbolAccess::Write(const SymbolEntry& entry, const std::string& v) const
 
     T value = {};
     converter >> value;
+    if (converter.fail()) {
+        LOG_ERROR(__FUNCTION__ << "() parsing '" << v << "' failed\n");
+        return ADSERR_DEVICE_INVALIDDATA;
+    }
+
     value = bhf::ads::htole(value);
     return device.WriteReqEx(entry.header.iGroup,
                              entry.header.iOffs,
