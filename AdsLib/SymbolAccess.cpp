@@ -210,13 +210,17 @@ int SymbolAccess::Read(const std::string& name, std::ostream& os) const
 template<typename T>
 int SymbolAccess::Write(const SymbolEntry& entry, const std::string& v) const
 {
-    T value = {};
-    if (v.size()) {
-        const auto asHex = (v.npos != v.rfind("0x", 0));
-        std::stringstream converter;
-        converter << (asHex ? std::hex : std::dec) << v;
-        converter >> value;
+    if (!v.size()) {
+        LOG_ERROR(__FUNCTION__ << "<T>() empty strings are not supported\n");
+        return ADSERR_DEVICE_INVALIDDATA;
     }
+
+    const auto asHex = (v.npos != v.rfind("0x", 0));
+    std::stringstream converter;
+    converter << (asHex ? std::hex : std::dec) << v;
+
+    T value = {};
+    converter >> value;
     value = bhf::ads::htole(value);
     return device.WriteReqEx(entry.header.iGroup,
                              entry.header.iOffs,
