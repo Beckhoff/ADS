@@ -63,6 +63,27 @@ check_file_find() {
 	EOF
 	check file find "/dev/shm/adslib-test" | LC_ALL=C sort | diff --text - "${tmpfile}"
 
+	# Limit max depth
+	cat >"${tmpfile}" <<- 'EOF'
+		/dev/shm/adslib-test
+		/dev/shm/adslib-test/1
+		/dev/shm/adslib-test/1/2
+		/dev/shm/adslib-test/1/a
+		/dev/shm/adslib-test/1/aa
+	EOF
+	check file find --maxdepth=2 "/dev/shm/adslib-test" | LC_ALL=C sort | diff --text - "${tmpfile}"
+
+	# Single file or directory exists
+	# Limit max depth
+	cat >"${tmpfile}" <<- 'EOF'
+		/dev/shm/adslib-test/1
+	EOF
+	check file find --maxdepth=1 "/dev/shm/adslib-test/1"
+	cat >"${tmpfile}" <<- 'EOF'
+		/dev/shm/adslib-test/1/a
+	EOF
+	check file find --maxdepth=1 "/dev/shm/adslib-test/1/a"
+
 	# Non existing file
 	if check file find "/dev/shm/adslib-test/missing"; then
 		printf 'check_file_find(): succeeded where it should not!\n' >&2
