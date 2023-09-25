@@ -7,6 +7,7 @@
 #include "AdsDevice.h"
 #include "AdsFile.h"
 #include "AdsLib.h"
+#include "ECatAccess.h"
 #include "LicenseAccess.h"
 #include "Log.h"
 #include "RegistryAccess.h"
@@ -69,6 +70,9 @@ COMMANDS:
 
 		Use 'guest' account to add a route with a selfdefined name
 		$ adstool 192.168.0.231 addroute --addr=192.168.0.1 --netid=192.168.0.1.1.1 --password=1 --username=guest --routename=Testroute
+
+	ecat list-masters
+		Print a list of all active EtherCAT Masters and their respective AmsNetIds to stdout
 
 	file read <path>
 		Dump content of the file from <path> to stdout
@@ -298,6 +302,19 @@ int RunAddRoute(const std::string& remote, bhf::Commandline& args)
                                     params.Get<std::string>("--username"),
                                     params.Get<std::string>("--password")
                                     );
+}
+
+int RunECat(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    const auto command = args.Pop<std::string>("ecat command is missing (list)");
+
+    auto device = bhf::ads::ECatAccess(gw, netid, port);
+    if (!command.compare("list-masters")) {
+        return device.ListECatMasters(std::cout);
+    }
+
+    LOG_ERROR(__FUNCTION__ << "(): Unknown ecat command '" << command << "'\n");
+    return -1;
 }
 
 int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -807,6 +824,7 @@ int ParseCommand(int argc, const char* argv[])
     }
 
     const auto commands = CommandMap {
+        {"ecat", RunECat},
         {"file", RunFile},
         {"registry", RunRegistry},
         {"license", RunLicense},
