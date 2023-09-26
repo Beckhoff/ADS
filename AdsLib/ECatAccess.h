@@ -12,6 +12,7 @@ struct ECatAccess {
 
 private:
     AdsDevice device;
+    uint32_t CountECatSlaves(const AmsNetId& ecatMaster) const;
 };
 }
 }

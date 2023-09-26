@@ -1,4 +1,5 @@
 #include "ECatAccess.h"
+#include "AdsLib.h"
 #include "Log.h"
 #include <iostream>
 #include <vector>
@@ -13,6 +14,29 @@ namespace ads
 #define IOADS_IOF_READDEVCOUNT          0x2
 #define IOADS_IOF_READDEVNETID          0x5
 #define IOADS_IOF_READDEVTYPE           0x7
+
+#define ECADS_IGRP_MASTER_FLBCMDS 0x0000002C
+
+#define SOCCOM_REG_SOCCOM_TYPE 0
+#define EC_CMD_TYPE_APRD 1
+#define EC_HEAD_IDX_EXTERN_VALUE 0xff
+
+#pragma pack(push, 1)
+struct ETYPE_EC_HEADER {
+    uint8_t cmd;
+    uint8_t idx;
+    uint16_t adp;
+    uint16_t ado;
+    uint16_t length;
+    uint16_t irq;
+};
+
+struct ETYPE_EC_ULONG_CMD {
+    ETYPE_EC_HEADER head;
+    uint32_t data;
+    uint16_t cnt;
+};
+#pragma pack(pop)
 
 ECatAccess::ECatAccess(const std::string& gw, const AmsNetId netid, const uint16_t port)
     : device(gw, netid, port ? port : uint16_t(AMSPORT_R0_IO))
@@ -94,9 +118,48 @@ long ECatAccess::ListECatMasters(std::ostream& os) const
             return status;
         }
 
-        os << deviceIds[i] << " | " << devType << " | " << deviceName << " | " << netId << '\n';
+        const auto slaveCount = CountECatSlaves(netId);
+        os << deviceIds[i] << " | " << devType << " | " << deviceName << " | " << netId << " | " << slaveCount << '\n';
     }
     return status;
+}
+
+uint32_t ECatAccess::CountECatSlaves(const AmsNetId& ecatMaster) const
+{
+    uint32_t bytesRead;
+
+    ETYPE_EC_ULONG_CMD cmd = {};
+    cmd.head.cmd = EC_CMD_TYPE_APRD;
+    cmd.head.idx = EC_HEAD_IDX_EXTERN_VALUE;
+    cmd.head.adp = 0;
+    cmd.head.ado = SOCCOM_REG_SOCCOM_TYPE;
+    cmd.head.length = sizeof(uint32_t);
+    cmd.head.irq = 0;
+
+    // We have to talk to a different AdsDevice, the EtherCAT master. Now, it
+    // is handy that ADS doesn't really implement "connections" so we can just
+    // use the AMS port of our R0_IO object, but adust the target AmsPort.
+    const AmsAddr addr { ecatMaster, 0xffff };
+    const auto status = AdsSyncReadWriteReqEx2(
+        device.GetLocalPort(),
+        &addr,
+        ECADS_IGRP_MASTER_FLBCMDS,
+        0,
+        sizeof(cmd), &cmd,
+        sizeof(cmd), &cmd,
+        &bytesRead
+        );
+
+    // When no coupler is connected, the request returns a device timeout
+    if (status == ADSERR_DEVICE_TIMEOUT) {
+        return 0;
+    }
+    if (status == ADSERR_NOERR) {
+        return cmd.head.adp;
+    }
+
+    LOG_ERROR("Reading slave count for [" << ecatMaster << "] failed with 0x" << std::hex << status);
+    throw AdsException(status);
 }
 }
 }
