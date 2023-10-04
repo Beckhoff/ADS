@@ -1,3 +1,17 @@
+adstool (0.0.23-1) bullseye; urgency=medium
+
+  * AdsFile: add Find() to list files and directories
+    AdsFile::Find(): add --maxdepth support
+    AdsTool: refactor commandline parsing for file
+    SymbolAccess::Read(): stop reading more than we need
+    SymbolAccess::Write(): fill string with null bytes
+    SymbolAccess::Write(): parse integer values more strictly
+    SymbolAccess::Write(): stop accepting empty strings for integers
+    SymbolAccess::Write(): stop reading the values before write
+    SymbolAccess::Write(): uint8_t needs special treatment
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Wed, 04 Oct 2023 10:49:31 +0200
+
 adstool (0.0.22-1) bullseye; urgency=medium
 
   * AmsRouter: Stop holding global lock during connect
