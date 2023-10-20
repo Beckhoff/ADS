@@ -11,7 +11,7 @@ Build-Depends:
 Standards-Version: 4.1.4
 
 Package: adstool
-Architecture: amd64
+Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: command line tool to access TwinCAT systems via ADS
@@ -24,7 +24,7 @@ Description: command line tool to access TwinCAT systems via ADS
   - access TwinCAT state
 
 Package: libads-dev
-Architecture: amd64
+Architecture: any
 Multi-Arch: foreign
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Description: development files to use AdsLib
