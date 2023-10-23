@@ -51,6 +51,7 @@ libs = [
 adslib = static_library('AdsLib',
   [common_files, router_files],
   include_directories: inc,
+  install: true,
 )
 
 adslib_dep = declare_dependency(
