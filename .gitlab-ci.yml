@@ -222,6 +222,7 @@ build-debian:
     - apt-get update && mk-build-deps --install --remove debian/control
   script:
     - bdpg build
+    - bdpg push-pipelines ./debian-release/*.deb
   artifacts:
     expire_in: 1 week
     when: always
