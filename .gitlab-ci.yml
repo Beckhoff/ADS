@@ -1,6 +1,6 @@
 variables:
-  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.66
-  BHF_CI_TEST_STAGE_GIT_REF: v4.66
+  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.69
+  BHF_CI_TEST_STAGE_GIT_REF: v4.69
 
 stages:
   - build
