@@ -213,7 +213,7 @@ build-debian:
   image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: build
   before_script:
-    - apt-get update && apt-get install -y --no-install-recommends libadscomm-dev meson
+    - apt-get update && mk-build-deps --install --remove debian/control
   script:
     - bdpg build
   artifacts:

@@ -3,7 +3,11 @@ Section: net
 Priority: optional
 Maintainer: Patrick Bruenn <p.bruenn@beckhoff.com>
 Uploaders: Julian Heuking <J.Heuking@beckhoff.com>
-Build-Depends: debhelper (>=11~), meson (>=0.49)
+Build-Depends:
+ debhelper (>=11~),
+ libadscomm-dev,
+ meson (>=0.49),
+ python3-sphinx,
 Standards-Version: 4.1.4
 
 Package: adstool
