@@ -274,16 +274,6 @@ public:
      */
     typedef void (test_container::*test_case)(const std::string&);
     
-    // compiler-generated default constructor would be OK
-    // but gives warnings with GCC's -Weffc++.
-
-    test_base<test_container>()
-      : m_tests()
-      , m_available_tests(suite())
-      , m_exceptionPending("")
-      {
-      }
-
     /**
      * Register a test case
      * 
