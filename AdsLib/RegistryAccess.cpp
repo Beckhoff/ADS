@@ -429,8 +429,12 @@ std::ostream& RegistryEntry::Write(std::ostream& os) const
         const auto dataBegin = buffer.data() + buffer.size() - dataLen;
         WriteEscaped(os, dataBegin, false);
     } else if (type == REG_DWORD) {
-        os << std::hex << std::setw(8) << std::setfill('0') <<
-            *reinterpret_cast<const uint32_t*>(&buffer[buffer.size() - sizeof(uint32_t)]);
+        uint32_t val = 0;
+        for (size_t i = buffer.size() - sizeof(uint32_t); i < buffer.size(); ++i) {
+            val <<= 8;
+            val += buffer[i];
+        }
+        os << std::hex << std::setw(8) << std::setfill('0') << val;
     } else {
         if (dataLen > 0) {
             // Windows always exports 25 pairs of hex bytes (delimited by a comma) on each line
