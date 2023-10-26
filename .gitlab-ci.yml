@@ -17,7 +17,6 @@ codestyle:
   stage: build
   tags:
     - docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-bhf:unstable
   before_script:
     - apt update -y && apt install -y uncrustify
     - uncrustify -v
