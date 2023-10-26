@@ -46,7 +46,7 @@ codestyle:
   extends: .build-meson
   tags:
     - docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:40549
+  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
 
 build-arch:
   extends: .build-meson-docker
@@ -64,6 +64,8 @@ build-linux-clang:
   extends: .build-meson-docker
   variables:
     CXX: clang++
+  before_script:
+    - apt-get update && apt-get --assume-yes install clang meson
 
 build-fbsd-clang:
   extends: .build-meson
@@ -82,26 +84,25 @@ build-linux-gcc:
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/include -Dtcadsdll_lib=/usr/lib'
   before_script:
-    - echo 'Acquire::http { Proxy "http://freebsdpkg01.beckhoff.com:3142"; }' > /etc/apt/apt.conf.d/proxy
-    - echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
-    - curl https://freebsdpkg01.beckhoff.com/repo.pub -o /usr/share/keyrings/bhf.asc
-    - printf 'deb [signed-by=/usr/share/keyrings/bhf.asc] https://freebsdpkg01.beckhoff.com/debian bullseye main\n' > /etc/apt/sources.list.d/bhf.list
-    - apt update -y && apt install -y libadscomm-dev
+    - apt-get update && apt-get --assume-yes install libadscomm-dev meson
 
 build-linux-gcc-i386:
   extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i386'
+  before_script:
+    - apt-get update && apt-get --assume-yes install libc6-dev-i386 g++-multilib meson
 
 build-linux-gcc-mips:
   extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.mips'
   before_script:
-    - apt update -y && apt install -y g++-mips-linux-gnu
+    - apt-get update && apt-get --assume-yes install g++-mips-linux-gnu meson
 
 build-mxe:
   extends: .build-meson-docker
+  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:40549
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32 -Dcpp_std=c++14 -Db_pie=false'
 
