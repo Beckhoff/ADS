@@ -85,6 +85,7 @@ build-linux-gcc:
     matrix:
       - BHF_CI_ARCH:
         - amd64
+        - arm64
   tags:
     - "docker_${BHF_CI_ARCH}"
   variables:
@@ -247,6 +248,7 @@ build-debian:
     matrix:
       - BHF_CI_ARCH:
         - amd64
+        - arm64
   stage: build
   tags:
     - "docker_${BHF_CI_ARCH}"
