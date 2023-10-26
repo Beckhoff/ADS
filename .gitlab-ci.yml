@@ -81,6 +81,12 @@ build-fbsd-clang:
 
 build-linux-gcc:
   extends: .build-meson-docker
+  parallel:
+    matrix:
+      - BHF_CI_ARCH:
+        - amd64
+  tags:
+    - "docker_${BHF_CI_ARCH}"
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/include -Dtcadsdll_lib=/usr/lib'
   before_script:
@@ -187,11 +193,13 @@ test-linux-clang:
     "build-linux-clang",
   ]
 
-test-linux-gcc:
+test-linux-gcc-amd64:
   extends: .test-linux
-  needs: [
-    "build-linux-gcc",
-  ]
+  needs:
+    - job: build-linux-gcc
+      parallel:
+        matrix:
+          - BHF_CI_ARCH: amd64
 
 test-linux-gcc-i386:
   extends: .test-linux
@@ -235,7 +243,13 @@ test-fbsd-clang:
     - test_stage/test_stage.sh --config-dir=.test-stage rackctl --install="$(realpath ./*.iso)" test-device & wait $!
 
 build-debian:
+  parallel:
+    matrix:
+      - BHF_CI_ARCH:
+        - amd64
   stage: build
+  tags:
+    - "docker_${BHF_CI_ARCH}"
   before_script:
     - apt-get update && mk-build-deps --install --remove debian/control
   script:
