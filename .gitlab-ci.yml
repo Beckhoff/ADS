@@ -100,6 +100,13 @@ build-linux-gcc-mips:
   before_script:
     - apt-get update && apt-get --assume-yes install g++-mips-linux-gnu meson
 
+build-linux-gcc-riscv64:
+  extends: .build-meson-docker
+  variables:
+    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.riscv64'
+  before_script:
+    - apt-get update && apt-get --assume-yes install g++-riscv64-linux-gnu meson
+
 build-mxe:
   extends: .build-meson-docker
   image: ${REGISTRY_HOST}/beckhoff/docker-mxe:40549
@@ -205,6 +212,17 @@ test-linux-gcc-mips:
     QEMU_USER_EMULATION: 'qemu-mips'
   before_script:
     - apt update -y && apt install -y binfmt-support libstdc++-dev-mips-cross qemu-user-binfmt
+
+test-linux-gcc-riscv64:
+  extends: .test-linux
+  needs: [
+    "build-linux-gcc-riscv64",
+  ]
+  variables:
+    QEMU_LD_PREFIX: '/usr/riscv64-linux-gnu'
+    QEMU_USER_EMULATION: 'qemu-riscv64'
+  before_script:
+    - apt update -y && apt install -y binfmt-support libstdc++-dev-riscv64-cross qemu-user-binfmt
 
 test-fbsd-clang:
   extends: .test-with-service-container

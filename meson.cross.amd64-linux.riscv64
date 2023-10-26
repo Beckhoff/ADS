@@ -1,0 +1,13 @@
+[binaries]
+c = '/usr/bin/riscv64-linux-gnu-gcc'
+cpp = '/usr/bin/riscv64-linux-gnu-g++'
+ar = '/usr/bin/riscv64-linux-gnu-ar'
+strip = '/usr/bin/riscv64-gnu-linux-strip'
+pkgconfig = '/usr/bin/pkg-config-32'
+llvm-config = '/usr/bin/llvm-config32'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'riscv64'
+cpu = 'riscv64'
+endian = 'big'
