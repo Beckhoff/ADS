@@ -2,6 +2,8 @@ variables:
   TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.69
   BHF_CI_TEST_STAGE_GIT_REF: v4.69
 
+image: ${REGISTRY_HOST}/beckhoff/bdpg:master
+
 stages:
   - build
   - test
@@ -46,7 +48,6 @@ codestyle:
   extends: .build-meson
   tags:
     - docker
-  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
 
 build-arch:
   extends: .build-meson-docker
@@ -217,7 +218,6 @@ test-fbsd-clang:
     - test_stage/test_stage.sh --config-dir=.test-stage rackctl --install="$(realpath ./*.iso)" test-device & wait $!
 
 build-debian:
-  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: build
   before_script:
     - apt-get update && mk-build-deps --install --remove debian/control
@@ -231,7 +231,6 @@ build-debian:
       - ./debian-release
 
 release-push:
-  image: ${REGISTRY_HOST}/beckhoff/bdpg:master
   stage: release-push
   dependencies:
     - build-debian
