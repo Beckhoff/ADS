@@ -1,3 +1,18 @@
+adstool (0.0.24-1) bookworm; urgency=medium
+
+  * AdsTool: Add "ecat list-masters" to display all ethercat masters
+    AdsTool: Add "file find" to list files and directories
+    AdsTool: Add --maxdepth support for "file find"
+    RegistryAccess::Write(): fix dword parsing/calculation
+    SymbolAccess::Write(): uint8_t needs special treatment
+    SymbolAccess::Write(): parse integer values more strictly
+    SymbolAccess::Write(): stop accepting empty strings for integers
+    SymbolAccess::Write(): fill string with null bytes
+    SymbolAccess::Read(): stop reading more than we need
+    SymbolAccess::Write(): stop reading the values before write
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Wed, 08 Nov 2023 14:07:13 +0100
+
 adstool (0.0.23-1) bullseye; urgency=medium
 
   * AdsFile: add Find() to list files and directories
