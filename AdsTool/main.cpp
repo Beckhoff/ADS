@@ -213,6 +213,19 @@ COMMANDS:
 		$ adstool 5.24.37.144.1.1 rtime read-latency
 		1
 
+	rtime set-shared-cores <num_shared_cores>
+		Configure the number of shared cores. All remaining cores will be isolated.
+		To configure all cores as shared use 0xffffffff for num_shared_cores.
+		If the requested core configuration is already active on the device the tool
+		will return ADSERR_DEVICE_EXISTS -> 1807 mod 256 -> 15. And the text:
+		"Requested shared core configuration already active, no change applied."
+	examples:
+		Isolate all but one core
+		$ adstool 5.24.37.144.1.1 rtime set-shared-cores 1
+
+		Set all cores as shared core
+		$ adstool 5.24.37.144.1.1 rtime set-shared-cores 0xffffffff
+
 	startprocess [--directory=<directory>] [--hidden] <application> [<commandline>]
 		Starts a new process <application> on the target device, optionally using the specified <commandline>
 		and a different starting <directory>. For Windows targets the --hidden flag can be used to hide the
@@ -462,6 +475,9 @@ int RunRTime(const AmsNetId netid, const uint16_t port, const std::string& gw, b
         return device.ShowLatency(RTIME_READ_LATENCY);
     } else if (!command.compare("reset-latency")) {
         return device.ShowLatency(RTIME_RESET_LATENCY);
+    } else if (!command.compare("set-shared-cores")) {
+        const auto sharedCores = args.Pop<uint32_t>("Number of shared cores is missing");
+        return device.SetSharedCores(sharedCores);
     } else {
         LOG_ERROR(__FUNCTION__ << "(): Unknown rtime command'" << command << "'\n");
         return -1;
