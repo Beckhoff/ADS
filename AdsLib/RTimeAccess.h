@@ -34,6 +34,7 @@ struct RTimeCpuLatency {
 struct RTimeAccess {
     RTimeAccess(const std::string& gw, AmsNetId netid, uint16_t port);
     RTimeCpuSettings ReadCpuSettings() const;
+    long SetSharedCores(uint32_t sharedCores) const;
     long ShowLatency(uint32_t indexOffset) const;
     long ShowLatency(uint32_t indexOffset, uint32_t cpuId) const;
 private:

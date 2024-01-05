@@ -4,6 +4,7 @@
  */
 
 #include "RTimeAccess.h"
+#include "AdsLib.h"
 #include "Log.h"
 #include <iostream>
 #include <limits>
@@ -49,6 +50,36 @@ RTimeCpuSettings RTimeAccess::ReadCpuSettings() const
         throw AdsException(status);
     }
     return settings;
+}
+
+long RTimeAccess::SetSharedCores(const uint32_t sharedCores) const
+{
+    const auto oldSettings = ReadCpuSettings();
+
+    if (sharedCores == std::numeric_limits<uint32_t>::max()) {
+        // 0xffffffff means RESET -> no isolated cores, all shared.
+        if (0 == oldSettings.nNonWinCPUs) {
+            std::cout << "Requested shared core configuration already active, no change applied.\n";
+            return ADSERR_DEVICE_EXISTS;
+        }
+    } else {
+        // All other values mean limit the number of shared cores -> use remaining cores as isolated.
+        if (sharedCores == oldSettings.nWinCPUs) {
+            std::cout << "Requested shared core configuration already active, no change applied.\n";
+            return ADSERR_DEVICE_EXISTS;
+        }
+    }
+    // We have to apply changes to the current core configuration. For this we
+    // have to talk to a different AdsDevice, the system service. Now, it is handy
+    // that ADS doesn't really implement "connections" so we can just use the AMS
+    // port of our RTimeAccess object, but adust the target AmsPort.
+    const AmsAddr systemService { device.m_Addr.netId, 10000 };
+    return AdsSyncWriteReqEx(device.GetLocalPort(),
+                             &systemService,
+                             SYSTEMSERVICE_SETNUMPROC,
+                             0,
+                             sizeof(sharedCores),
+                             &sharedCores);
 }
 
 long RTimeAccess::ShowLatency(const uint32_t indexOffset, const uint32_t cpuId) const
