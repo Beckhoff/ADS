@@ -34,6 +34,23 @@ RTimeAccess::RTimeAccess(const std::string& gw, const AmsNetId netid, const uint
     : device(gw, netid, port ? port : 200)
 {}
 
+RTimeCpuSettings RTimeAccess::ReadCpuSettings() const
+{
+    struct RTimeCpuSettings settings;
+    uint32_t bytesRead;
+
+    const auto status = device.ReadReqEx2(ADSSRVID_READDEVICEINFO,
+                                          RTIME_CPU_SETTINGS,
+                                          sizeof(settings),
+                                          &settings,
+                                          &bytesRead);
+    if (ADSERR_NOERR != status) {
+        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
+        throw AdsException(status);
+    }
+    return settings;
+}
+
 long RTimeAccess::ShowLatency(const uint32_t indexOffset, const uint32_t cpuId) const
 {
     struct RTimeCpuLatency info;
@@ -57,14 +74,8 @@ long RTimeAccess::ShowLatency(const uint32_t indexOffset, const uint32_t cpuId) 
 
 long RTimeAccess::ShowLatency(const uint32_t indexOffset) const
 {
-    struct RTimeCpuSettings info;
-    uint32_t bytesRead;
+    const auto info = ReadCpuSettings();
 
-    const auto status = device.ReadReqEx2(ADSSRVID_READDEVICEINFO, RTIME_CPU_SETTINGS, sizeof(info), &info, &bytesRead);
-    if (ADSERR_NOERR != status) {
-        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return status;
-    }
     std::cout << "RTimeCpuSettings:\n" << info;
     for (uint8_t cpuId = 0; cpuId < 8 * sizeof(info.affinityMask); ++cpuId) {
         static_assert((8 * sizeof(info.affinityMask) < std::numeric_limits<decltype(cpuId)>::max()),
