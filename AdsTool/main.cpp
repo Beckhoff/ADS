@@ -196,16 +196,20 @@ COMMANDS:
 		Import registry settings from a file, which was exported with RegEdit.exe on Windows
 		$ dos2unix < file.reg | adstool 5.24.37.144.1.1 registry import
 
-	rtime < read-latency | reset-latency >
-		Access rtime latency information
+	rtime read-latency
+		Read rtime latency information.
 	examples:
 		Read maximum rtime latency
 		$ adstool 5.24.37.144.1.1 rtime read-latency
 		6
 
-		Read maximum rtime latency and reset:
+	rtime reset-latency
+		Show current maximum rtime latency and reset.
+	examples:
+		Read old maximum rtime latency and reset:
 		$ adstool 5.24.37.144.1.1 rtime reset-latency
 		6
+		Show new maximum rtime latency:
 		$ adstool 5.24.37.144.1.1 rtime read-latency
 		1
 
