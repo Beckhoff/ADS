@@ -3,6 +3,7 @@ set(SOURCES
   AdsDevice.cpp
   AdsFile.cpp
   AdsLib.cpp
+  ECatAccess.cpp
   Frame.cpp
   LicenseAccess.cpp
   Log.cpp
