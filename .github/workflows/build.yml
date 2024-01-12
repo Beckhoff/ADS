@@ -1,7 +1,7 @@
 name: build
 on: push
 jobs:
-  build-ubuntu:
+  build-ubuntu-meson:
     runs-on: ubuntu-latest
     steps:
       - name: install meson
@@ -13,7 +13,65 @@ jobs:
         run: meson example/build example && ninja -C example/build
       - uses: actions/upload-artifact@v2
         with:
-          name: ubuntu
+          name: ubuntu-meson
           path: |
             build/
-            example/build/
+            example/build/  build-ubuntu:
+  build-ubuntu-cmake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install ninja-build
+        run: sudo apt update -y && sudo apt install -y ninja-build
+      - uses: actions/checkout@v2
+      - name: compile library
+        run: cmake -S . -B build && cmake --build build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ubuntu-cmake
+          path: |
+            build/
+  collect-and-release:
+    needs: [build-ubuntu-meson, build-ubuntu-cmake]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download artifact ubuntu-meson
+      uses: actions/download-artifact@v3
+      with:
+        name: ubuntu-meson
+        path: ./build-ubuntu-meson
+    - name: Download artifact ubuntu-cmake
+      uses: actions/download-artifact@v3
+      with:
+        name: ubuntu-cmake
+        path: ./build-ubuntu-cmake
+
+    - name: 'Compress files for the linux-x64 release artifact'
+      shell: bash
+      run: |
+        zip --junk-paths ./linux-x64.zip ./build-ubuntu-cmake/**/*.so ./build-ubuntu-cmake/**/*.so.* ./build-ubuntu-meson/build/adstool
+
+    - name: 'Obtain the current version number from the debian changelog. We need it to create the release.'
+      shell: bash
+      run: |
+        echo "GITHUB_ADSLIB_VERSION_NUMBER=$(dpkg-parsechangelog -SVersion --file ./debian/changelog)" >> $GITHUB_ENV
+    - name: Create release
+      if: startsWith(github.ref, 'refs/tags/v')
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.GITHUB_ADSLIB_VERSION_NUMBER }}
+        release_name: ${{ env.GITHUB_ADSLIB_VERSION_NUMBER }}
+        generate_release_notes: true
+    - name: 'Upload release asset'
+      if: steps.create_release.outcome == 'success'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./linux-x64.zip
+        asset_name: linux-x64.zip
+        asset_content_type: application/zip
