@@ -7,6 +7,11 @@
 #include "AdsException.h"
 #include "AdsLib.h"
 #include <limits>
+#include "Log.h"
+
+std::mutex AdsDevice::m_CallbackMutex;
+uint32_t AdsDevice::m_NextCallbackHandle = 0x80000000;
+std::unordered_map<uint32_t, PAdsNotificationFuncExFunc> AdsDevice::m_FuncCallbacks;
 
 static AmsNetId* AddRoute(AmsNetId ams, const char* ip)
 {
@@ -23,8 +28,9 @@ AdsDevice::AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port)
     m_LocalPort(new long { AdsPortOpenEx() }, {AdsPortCloseEx})
 {}
 
-long AdsDevice::DeleteNotificationHandle(uint32_t handle) const
+long AdsDevice::DeleteNotificationHandle(uint32_t handle, uint32_t hUser) const
 {
+    AdsDevice::DeleteFuncCallback(hUser);
     if (handle) {
         return AdsSyncDelDeviceNotificationReqEx(GetLocalPort(), &m_Addr, handle);
     }
@@ -40,6 +46,7 @@ long AdsDevice::DeleteSymbolHandle(uint32_t handle) const
 {
     return WriteReqEx(ADSIGRP_SYM_RELEASEHND, 0, sizeof(handle), &handle);
 }
+
 
 DeviceInfo AdsDevice::GetDeviceInfo() const
 {
@@ -83,22 +90,23 @@ AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
 AdsHandle AdsDevice::GetHandle(const uint32_t               indexGroup,
                                const uint32_t               indexOffset,
                                const AdsNotificationAttrib& notificationAttributes,
-                               PAdsNotificationFuncEx       callback,
-                               const uint32_t               hUser) const
+                               PAdsNotificationFuncExFunc   callback) const
 {
     uint32_t handle = 0;
+    uint32_t hUser = AdsDevice::AddFuncCallback(callback);
     auto error = AdsSyncAddDeviceNotificationReqEx(
         *m_LocalPort, &m_Addr,
         indexGroup, indexOffset,
         &notificationAttributes,
-        callback,
+        &AdsDevice::CallFuncCallback,
         hUser,
         &handle);
     if (error || !handle) {
+        AdsDevice::DeleteFuncCallback(hUser);
         throw AdsException(error);
     }
     handle = bhf::ads::letoh(handle);
-    return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteNotificationHandle, this, std::placeholders::_1)}};
+    return {new uint32_t {handle}, {std::bind(&AdsDevice::DeleteNotificationHandle, this, std::placeholders::_1, hUser)}};
 }
 
 long AdsDevice::GetLocalPort() const
@@ -213,4 +221,32 @@ long AdsDevice::WriteReqEx(uint32_t group, uint32_t offset, size_t length, const
         return ADSERR_DEVICE_INVALIDSIZE;
     }
     return AdsSyncWriteReqEx(GetLocalPort(), &m_Addr, group, offset, static_cast<uint32_t>(length), buffer);
+}
+
+uint32_t AdsDevice::AddFuncCallback(PAdsNotificationFuncExFunc callback)
+{
+    std::lock_guard<decltype(m_CallbackMutex)> lock(m_CallbackMutex);
+    m_FuncCallbacks.insert(std::make_pair(m_NextCallbackHandle, callback));
+    return m_NextCallbackHandle++;
+}
+
+void AdsDevice::DeleteFuncCallback(uint32_t handle)
+{
+    std::lock_guard<decltype(m_CallbackMutex)> lock(m_CallbackMutex);
+    if(m_FuncCallbacks.erase(handle) == 0)
+    {
+        LOG_WARN("Handle " << handle << " has already been deleted.");
+    }
+}
+
+void AdsDevice::CallFuncCallback(CONST AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser)
+{
+    std::lock_guard<decltype(m_CallbackMutex)> lock(m_CallbackMutex);
+    auto it = m_FuncCallbacks.find(hUser);
+    if(it == m_FuncCallbacks.end())
+    {
+        LOG_WARN("Callback for handle " << hUser << " not found.");
+        return;
+    }
+    it->second(pAddr, pNotification);
 }

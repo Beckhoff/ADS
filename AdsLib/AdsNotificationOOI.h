@@ -19,7 +19,18 @@ struct AdsNotification {
                     uint32_t                     hUser)
         : m_Symbol(route.GetHandle(symbolName)),
         m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes,
-                                       reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
+                                       [hUser, callback](const AmsAddr* pAddr, const AdsNotificationHeader* pNotification){
+                                        callback(pAddr, pNotification, hUser);
+                                       }))
+    {}
+
+    AdsNotification(const AdsDevice&             route,
+                    const std::string&           symbolName,
+                    const AdsNotificationAttrib& notificationAttributes,
+                    PAdsNotificationFuncExFunc  callback)
+        : m_Symbol(route.GetHandle(symbolName)),
+        m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes,
+                                       callback))
     {}
 
     AdsNotification(const AdsDevice&             route,
@@ -29,7 +40,9 @@ struct AdsNotification {
                     uint32_t                     hUser)
         : m_Symbol(route.GetHandle(symbolName)),
         m_Notification(route.GetHandle(ADSIGRP_SYM_VALBYHND, *m_Symbol, notificationAttributes,
-                                       reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
+                                       [hUser, callback](const AmsAddr* pAddr, const AdsNotificationHeader* pNotification){
+                                        callback(const_cast<AmsAddr*>(pAddr), const_cast<AdsNotificationHeader*>(pNotification), hUser);
+                                       }))
     {}
 
     AdsNotification(const AdsDevice&             route,
@@ -40,7 +53,19 @@ struct AdsNotification {
                     uint32_t                     hUser)
         : m_Symbol{route.GetHandle(indexOffset)},
         m_Notification(route.GetHandle(indexGroup, indexOffset, notificationAttributes,
-                                       reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
+                                       [hUser, callback](const AmsAddr* pAddr, const AdsNotificationHeader* pNotification){
+                                        callback(pAddr, pNotification, hUser);
+                                       }))
+    {}
+
+    AdsNotification(const AdsDevice&             route,
+                    uint32_t                     indexGroup,
+                    uint32_t                     indexOffset,
+                    const AdsNotificationAttrib& notificationAttributes,
+                    PAdsNotificationFuncExFunc  callback)
+        : m_Symbol{route.GetHandle(indexOffset)},
+        m_Notification(route.GetHandle(indexGroup, indexOffset, notificationAttributes,
+                                       callback))
     {}
 
     AdsNotification(const AdsDevice&             route,
@@ -51,7 +76,9 @@ struct AdsNotification {
                     uint32_t                     hUser)
         : m_Symbol{route.GetHandle(indexOffset)},
         m_Notification(route.GetHandle(indexGroup, indexOffset, notificationAttributes,
-                                       reinterpret_cast<PAdsNotificationFuncEx>(callback), hUser))
+                                       [hUser, callback](const AmsAddr* pAddr, const AdsNotificationHeader* pNotification){
+                                        callback(const_cast<AmsAddr*>(pAddr), const_cast<AdsNotificationHeader*>(pNotification), hUser);
+                                       }))
     {}
 
 private:
