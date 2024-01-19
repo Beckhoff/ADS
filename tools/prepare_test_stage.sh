@@ -3,7 +3,7 @@
 # Copyright (C) 2020 Beckhoff Automation GmbH & Co. KG
 
 download_iso() {
-	isoctl-get tcbsd 13/experimental
+	isoctl-get tcbsd 14/experimental
 
 	# Noninteractive doas is a critical requirement in CI. We need it to
 	# gather crashdumps and other error diagnostics, when a test breaks.
