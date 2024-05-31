@@ -16,7 +16,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   )
   add_definitions(-D_GNU_SOURCE)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # Compiler flags and definitions for Visual Studio come here
+  add_definitions(-DNOMINMAX)
 endif()
 
 add_definitions(-DCONFIG_DEFAULT_LOGLEVEL=1)
