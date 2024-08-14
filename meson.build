@@ -17,6 +17,7 @@ common_files = files([
   'AdsLib/AdsDevice.cpp',
   'AdsLib/AdsFile.cpp',
   'AdsLib/AdsLib.cpp',
+  'AdsLib/MasterDcStatAccess.cpp',
   'AdsLib/ECatAccess.cpp',
   'AdsLib/Frame.cpp',
   'AdsLib/LicenseAccess.cpp',

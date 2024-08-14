@@ -7,6 +7,7 @@
 #include "AdsDevice.h"
 #include "AdsFile.h"
 #include "AdsLib.h"
+#include "MasterDcStatAccess.h"
 #include "ECatAccess.h"
 #include "LicenseAccess.h"
 #include "Log.h"
@@ -70,6 +71,22 @@ COMMANDS:
 
 		Use 'guest' account to add a route with a selfdefined name
 		$ adstool 192.168.0.231 addroute --addr=192.168.0.1 --netid=192.168.0.1.1.1 --password=1 --username=guest --routename=Testroute
+
+	dc-diag <activate|deactivate|clear|print>
+		Manage the state of the Distributed Clock Diagnosis for a given EtherCAT Master.
+		To get the NetId of the EtherCAT Master use the 'ecat list-masters' command.
+	examples:
+		Activate the DC Diagnosis. To get accurate results, the TwinCAT System should be in run mode
+		$ adstool 5.121.233.243.2.1 dc-diag activate
+
+		Deactivate the DC Diagnosis
+		$ adstool 5.121.233.243.2.1 dc-diag deactivate
+
+		Reset the packet counts of the DC Diagnosis
+		$ adstool 5.121.233.243.2.1 dc-diag clear
+
+		Print out the packet counts of the DC Diagnosis
+		$ adstool 5.121.233.243.2.1 dc-diag print
 
 	ecat list-masters
 		Print a list of all active EtherCAT Masters and their respective AmsNetIds to stdout
@@ -319,6 +336,25 @@ int RunAddRoute(const std::string& remote, bhf::Commandline& args)
                                     params.Get<std::string>("--username"),
                                     params.Get<std::string>("--password")
                                     );
+}
+
+int RunDCDiag(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+{
+    const auto command = args.Pop<std::string>("dc-diag command is missing (activate, deactivate, clear, print)");
+
+    auto device = bhf::ads::MasterDcStatAccess(gw, netid, port);
+    if (!command.compare("activate")) {
+        return device.Activate();
+    } else if (!command.compare("deactivate")) {
+        return device.Deactivate();
+    } else if (!command.compare("clear")) {
+        return device.Clear();
+    } else if (!command.compare("print")) {
+        return device.Print(std::cout);
+    }
+
+    LOG_ERROR(__FUNCTION__ << "(): Unknown dc-diag command '" << command << "'\n");
+    return -1;
 }
 
 int RunECat(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
@@ -844,6 +880,7 @@ int ParseCommand(int argc, const char* argv[])
     }
 
     const auto commands = CommandMap {
+        {"dc-diag", RunDCDiag},
         {"ecat", RunECat},
         {"file", RunFile},
         {"registry", RunRegistry},
