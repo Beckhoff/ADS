@@ -36,12 +36,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Download artifact ubuntu-meson
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ubuntu-meson
         path: ./build-ubuntu-meson
     - name: Download artifact ubuntu-cmake
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4.1.7
       with:
         name: ubuntu-cmake
         path: ./build-ubuntu-cmake
