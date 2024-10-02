@@ -23,28 +23,29 @@ struct Notification {
         : connection({__port, __amsAddr}),
         callback(__func),
         buffer(sizeof(AdsNotificationHeader) + length),
-        hUser(__hUser)
+        hUser(__hUser),
+        size(length)
     {
         auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.data());
         header->hNotification = 0;
         header->cbSampleSize = length;
     }
 
-    void Notify(uint64_t timestamp, RingBuffer& ring)
+    void Notify(RingBuffer& ring, const uint64_t timestamp, const uint32_t sampleSize)
     {
         auto header = reinterpret_cast<AdsNotificationHeader*>(buffer.data());
         uint8_t* data = reinterpret_cast<uint8_t*>(header + 1);
-        for (size_t i = 0; i < header->cbSampleSize; ++i) {
+        header->cbSampleSize = sampleSize;
+        header->nTimeStamp = timestamp;
+        for (size_t i = 0; i < sampleSize; ++i) {
             data[i] = ring.ReadFromLittleEndian<uint8_t>();
         }
-        header->nTimeStamp = timestamp;
         callback(&connection.second, header, hUser);
     }
 
     uint32_t Size() const
     {
-        auto header = reinterpret_cast<const AdsNotificationHeader*>(buffer.data());
-        return header->cbSampleSize;
+        return size;
     }
 
     void hNotify(uint32_t value)
@@ -57,4 +58,5 @@ private:
     const PAdsNotificationFuncEx callback;
     std::vector<uint8_t> buffer;
     const uint32_t hUser;
+    const uint32_t size;
 };
