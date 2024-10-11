@@ -451,7 +451,9 @@ int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw,
     auto device = bhf::ads::LicenseAccess{ gw, netid, port };
     const auto command = args.Pop<std::string>();
 
-    if (!command.compare("platformid")) {
+    if (!command.compare("onlineinfo")) {
+        return device.ShowOnlineInfo(std::cout);
+    } else if (!command.compare("platformid")) {
         return device.ShowPlatformId(std::cout);
     } else if (!command.compare("systemid")) {
         return device.ShowSystemId(std::cout);
