@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-   Copyright (c) 2021 - 2022 Beckhoff Automation GmbH & Co. KG
+   Copyright (c) Beckhoff Automation GmbH & Co. KG
  */
 
 #pragma once
@@ -13,6 +13,7 @@ namespace ads
 {
 struct LicenseAccess {
     LicenseAccess(const std::string& gw, AmsNetId netid, uint16_t port);
+    int ShowOnlineInfo(std::ostream& os) const;
     int ShowPlatformId(std::ostream& os) const;
     int ShowSystemId(std::ostream& os) const;
     int ShowVolumeNo(std::ostream& os) const;
