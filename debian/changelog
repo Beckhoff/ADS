@@ -1,3 +1,11 @@
+adstool (0.0.27-1) bookworm; urgency=medium
+
+  * AdsTool: add license onlineinfo
+  * LicenseAccess: Add ShowOnlineInfo()
+  * DCAccess: Add Distributed Clocks Diagnosis
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Wed, 16 Oct 2024 12:27:35 +0100
+
 adstool (0.0.26-1) bookworm; urgency=medium
 
   * ECatAccess: show slave count in 'ecat list-masters'

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 /**
-    Copyright (C) 2021 Beckhoff Automation GmbH & Co. KG
+    Copyright (C) Beckhoff Automation GmbH & Co. KG
     Author: Patrick Bruenn <p.bruenn@beckhoff.com>
  */
 
@@ -26,7 +26,7 @@
 
 static int version()
 {
-    std::cout << "0.0.26-1\n";
+    std::cout << "0.0.27-1\n";
     return 0;
 }
 
