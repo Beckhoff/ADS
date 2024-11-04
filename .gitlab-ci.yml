@@ -140,37 +140,6 @@ build-win10:
     - build/
     - example/build/
 
-build-clangcl:
-  extends: .build-meson
-  image: ${REGISTRY_HOST}/beckhoff/docker-clangcl:main
-  tags:
-    - docker
-  variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.clang-cl.win32 -Dcpp_args=["-D_CRT_NONSTDC_NO_WARNINGS=1","-D_CRT_SECURE_NO_WARNINGS=1","-DNOMINMAX=1"] -Dtcadsdll_include=/opt/TcAdsDll/Include -Dtcadsdll_lib=/opt/TcAdsDll/Lib/x64'
-  before_script:
-    - unset CI_COMMIT_MESSAGE
-    - unset CI_COMMIT_DESCRIPTION
-    - tcpkg download TwinCAT.XAE.AdsApi -o _packages -y
-    - unzip _packages/TwinCAT.XAE.AdsApi.*.nupkg -d _packages/nupkg
-    - msiextract _packages/nupkg/tools/TwinCAT-XAE-AdsApi.msi -C _packages/msi
-    - mv _packages/msi/Program\ Files/AdsApi/TcAdsDll /opt/TcAdsDll
-
-build-tcpkg:
-  stage: build
-  image: ${REGISTRY_HOST}/beckhoff/docker-tcpkg:main
-  tags:
-    - docker
-  needs:
-    - build-win10
-  script:
-    - unset CI_COMMIT_MESSAGE
-    - unset CI_COMMIT_DESCRIPTION
-    - xmlstarlet ed -L -u //_:package/_:metadata/_:version -v "$(dpkg-parsechangelog -S Version | tr - .)" TwinCAT.XAE.AdsTool.nuspec
-    - tcpkg pack TwinCAT.XAE.AdsTool.nuspec
-  artifacts:
-    paths:
-    - "*.nupkg"
-
 .test-with-service-container:
   stage: test
   image: ${TEST_RUNNER_CONTAINER}
@@ -275,23 +244,3 @@ release-push:
     - printf '\t%s\n' "StrictHostKeyChecking no" "UserKnownHostsFile /dev/null" >> /root/.ssh/config
     - .ci/publish_debian_package.sh
   allow_failure: true
-
-tcpkg:
-  stage: release-push
-  image: ${REGISTRY_HOST}/beckhoff/docker-tcpkg:main
-  tags:
-    - docker
-  dependencies:
-    - build-tcpkg
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
-  parallel:
-    matrix:
-      - TCPKG_FEED:
-          - experimental
-          - unstable
-          - testing
-          - stable
-  script:
-    - tcpkg push -k "${TCPKG_PUSH_APIKEY}" -s "${TCPKG_PUSH_URL}/${TCPKG_FEED}" -f
