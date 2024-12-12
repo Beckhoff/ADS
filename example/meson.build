@@ -21,13 +21,13 @@ example = executable('example',
   'example.cpp',
   include_directories: include_directories('../AdsLib'),
   dependencies: [
-    cxx.find_library('AdsLib', dirs: meson.source_root() + '/../build/'),
+    cxx.find_library('AdsLib', dirs: meson.project_source_root() + '/../build/'),
     libs,
   ]
 )
 
 if get_option('tcadsdll_lib') != ''
-  libs += cxx.find_library('TcAdsLib', dirs: meson.source_root() + '/../build/')
+  libs += cxx.find_library('TcAdsLib', dirs: meson.project_source_root() + '/../build/')
   libs += cxx.find_library('TcAdsDll', dirs: get_option('tcadsdll_lib'))
 else
   libs = disabler()
