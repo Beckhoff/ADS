@@ -51,8 +51,13 @@ codestyle:
 build-arch:
   extends: .build-meson-docker
   image: ${DOCKER_PROXY}archlinux:base-devel
+  parallel:
+    matrix:
+      - CXX:
+        - clang++
+        - g++
   before_script:
-    - pacman --noconfirm --refresh --sync --sysupgrade meson
+    - pacman --noconfirm --refresh --sync --sysupgrade clang meson
 
 build-alpine:
   extends: .build-meson-docker
