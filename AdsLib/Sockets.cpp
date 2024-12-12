@@ -214,7 +214,7 @@ bool Socket::Select(timeval* timeout) const
 
 size_t Socket::write(const Frame& frame) const
 {
-    if (frame.size() > std::numeric_limits<int>::max()) {
+    if (frame.size() > static_cast<size_t>(std::numeric_limits<int>::max())) {
         LOG_ERROR("frame length: " << frame.size() << " exceeds maximum length for sockets");
         return 0;
     }
