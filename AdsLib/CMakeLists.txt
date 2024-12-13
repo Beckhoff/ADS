@@ -7,11 +7,11 @@ set(SOURCES
   Frame.cpp
   LicenseAccess.cpp
   Log.cpp
-  RouterAccess.cpp
+  MasterDcStatAccess.cpp
   RTimeAccess.cpp
-  Sockets.cpp
-
   RegistryAccess.cpp
+  RouterAccess.cpp
+  Sockets.cpp
   SymbolAccess.cpp
 
   bhf/ParameterList.cpp

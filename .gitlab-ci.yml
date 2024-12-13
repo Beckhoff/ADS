@@ -65,6 +65,21 @@ build-alpine:
   before_script:
     - apk add g++ meson
 
+build-cmake:
+  stage: build
+  tags:
+    - docker
+  before_script:
+    - apt-get update && apt-get --assume-yes install cmake
+  script:
+    - cmake -S . -B build
+    - cmake --build build
+  artifacts:
+    when: always
+    paths:
+    - AdsLib/**/*.h
+    - build/
+
 build-linux-clang:
   extends: .build-meson-docker
   variables:
