@@ -1,3 +1,9 @@
+adstool (0.0.28-1) bookworm; urgency=medium
+
+  * Drop CHANGES file, use debian/changelog instead
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Fri, 13 Dec 2024 07:48:56 +0100
+
 adstool (0.0.27-1) bookworm; urgency=medium
 
   * AdsTool: add license onlineinfo

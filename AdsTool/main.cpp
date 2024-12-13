@@ -26,7 +26,7 @@
 
 static int version()
 {
-    std::cout << "0.0.27-1\n";
+    std::cout << "0.0.28-1\n";
     return 0;
 }
 
