@@ -17,8 +17,6 @@ namespace bhf
 {
 namespace ads
 {
-constexpr const size_t msvcSockMaxBufferLength = static_cast<size_t>(std::numeric_limits<int>::max());
-
 /**
  * Splits the provided host string into host and port. If no port was found
  * in the host string, port is returned untouched acting as a default value.
@@ -66,6 +64,8 @@ AddressList GetListOfAddresses(const std::string& hostPort, const std::string& d
 }
 }
 }
+
+constexpr const size_t msvcSockMaxBufferLength = static_cast<size_t>(std::numeric_limits<int>::max());
 
 static const struct addrinfo addrinfo = []() {
                                             struct addrinfo a;
