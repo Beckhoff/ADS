@@ -11,7 +11,7 @@ jobs:
         run: meson build && ninja -C build
       - name: compile example
         run: meson example/build example && ninja -C example/build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-meson
           path: |
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile library
         run: cmake -S . -B build && cmake --build build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-cmake
           path: |
@@ -36,12 +36,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Download artifact ubuntu-meson
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ubuntu-meson
         path: ./build-ubuntu-meson
     - name: Download artifact ubuntu-cmake
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ubuntu-cmake
         path: ./build-ubuntu-cmake
