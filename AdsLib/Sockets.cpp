@@ -17,6 +17,8 @@ namespace bhf
 {
 namespace ads
 {
+constexpr const size_t msvcSockMaxBufferLength = static_cast<size_t>(std::numeric_limits<int>::max());
+
 /**
  * Splits the provided host string into host and port. If no port was found
  * in the host string, port is returned untouched acting as a default value.
@@ -161,7 +163,7 @@ size_t Socket::read(uint8_t* buffer, size_t maxBytes, timeval* timeout) const
         return 0;
     }
 
-    const auto msvcMaxBytes = static_cast<int>(std::min<size_t>(std::numeric_limits<int>::max(), maxBytes));
+    const auto msvcMaxBytes = static_cast<int>(std::min(msvcSockMaxBufferLength, maxBytes));
     const int bytesRead = recv(m_Socket, reinterpret_cast<char*>(buffer), msvcMaxBytes, 0);
     if (bytesRead > 0) {
         return bytesRead;
@@ -214,7 +216,7 @@ bool Socket::Select(timeval* timeout) const
 
 size_t Socket::write(const Frame& frame) const
 {
-    if (frame.size() > static_cast<size_t>(std::numeric_limits<int>::max())) {
+    if (frame.size() > msvcSockMaxBufferLength) {
         LOG_ERROR("frame length: " << frame.size() << " exceeds maximum length for sockets");
         return 0;
     }
