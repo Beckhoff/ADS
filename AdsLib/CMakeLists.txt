@@ -16,6 +16,11 @@ set(SOURCES
 
   bhf/ParameterList.cpp
 
+  RegistryAccess.cpp
+  SymbolAccess.cpp
+
+  bhf/ParameterList.cpp
+
   standalone/AdsLib.cpp
   standalone/AmsConnection.cpp
   standalone/AmsNetId.cpp
