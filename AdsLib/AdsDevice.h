@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <unordered_map>
+#include <mutex>
 
 /**
  * @brief Maximum size for device name.
@@ -52,6 +54,8 @@ using AdsResource = std::unique_ptr<T, ResourceDeleter<T> >;
 
 using AdsHandle = AdsResource<uint32_t>;
 
+typedef std::function<void (const AmsAddr* pAddr, const AdsNotificationHeader* pNotification)> PAdsNotificationFuncExFunc;
+
 struct AdsDevice {
     AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port);
 
@@ -67,8 +71,7 @@ struct AdsDevice {
     AdsHandle GetHandle(uint32_t                     indexGroup,
                         uint32_t                     indexOffset,
                         const AdsNotificationAttrib& notificationAttributes,
-                        PAdsNotificationFuncEx       callback,
-                        uint32_t                     hUser) const;
+                        PAdsNotificationFuncExFunc   callback) const;
 
     /** Get handle to access files */
     AdsHandle OpenFile(const std::string& filename, uint32_t flags) const;
@@ -96,6 +99,13 @@ struct AdsDevice {
 private:
     AdsResource<const long> m_LocalPort;
     long CloseFile(uint32_t handle) const;
-    long DeleteNotificationHandle(uint32_t handle) const;
+    long DeleteNotificationHandle(uint32_t handle, uint32_t hUser) const;
     long DeleteSymbolHandle(uint32_t handle) const;
+
+    static std::mutex m_CallbackMutex;
+    static uint32_t m_NextCallbackHandle;
+    static std::unordered_map<uint32_t, PAdsNotificationFuncExFunc> m_FuncCallbacks;
+    static uint32_t AddFuncCallback(PAdsNotificationFuncExFunc callback);
+    static void DeleteFuncCallback(uint32_t handle);
+    static void CallFuncCallback(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification, uint32_t hUser);
 };
