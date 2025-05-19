@@ -57,7 +57,8 @@ DeviceInfo AdsDevice::GetDeviceInfo() const
 
 AdsHandle AdsDevice::GetHandle(const uint32_t offset) const
 {
-    return {new uint32_t {offset}, {[](uint32_t){ return 0; }}};
+    static const auto deleter = ResourceDeleter<uint32_t>{[](uint32_t){ return 0; }};
+    return {new uint32_t {offset}, deleter};
 }
 
 AdsHandle AdsDevice::GetHandle(const std::string& symbolName) const
