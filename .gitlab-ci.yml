@@ -16,7 +16,8 @@ cache:
 codestyle:
   stage: build
   tags:
-    - docker
+    - arm64
+    - docker-v2
   before_script:
     - apt update -y && apt install -y uncrustify
     - uncrustify -v
@@ -46,7 +47,8 @@ codestyle:
 .build-meson-docker:
   extends: .build-meson
   tags:
-    - docker
+    - amd64
+    - docker-v2
 
 build-arch:
   extends: .build-meson-docker
@@ -68,7 +70,8 @@ build-alpine:
 build-cmake:
   stage: build
   tags:
-    - docker
+    - amd64
+    - docker-v2
   before_script:
     - apt-get update && apt-get --assume-yes install cmake
   script:
@@ -107,7 +110,8 @@ build-linux-gcc:
         - amd64
         - arm64
   tags:
-    - "docker_${BHF_CI_ARCH}"
+    - ${BHF_CI_ARCH}
+    - docker-v2
   variables:
     BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/include -Dtcadsdll_lib=/usr/lib'
   before_script:
@@ -164,8 +168,9 @@ build-win10:
   stage: test
   image: ${TEST_RUNNER_CONTAINER}
   tags:
-    - docker_vm_runner
+    - amd64
     - few_vcpus
+    - vm-runner
   services:
     - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
       alias: ads-server
@@ -241,7 +246,8 @@ build-debian:
         - arm64
   stage: build
   tags:
-    - "docker_${BHF_CI_ARCH}"
+    - ${BHF_CI_ARCH}
+    - docker-v2
   before_script:
     - apt-get update && mk-build-deps --install --remove debian/control
   script:
