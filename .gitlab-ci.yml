@@ -2,7 +2,7 @@ variables:
   TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.69
   BHF_CI_TEST_STAGE_GIT_REF: v4.69
 
-image: ${REGISTRY_HOST}/beckhoff/bdpg:master
+image: ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
 
 stages:
   - build
