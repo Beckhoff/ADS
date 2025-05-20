@@ -1,6 +1,6 @@
 variables:
-  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.69
-  BHF_CI_TEST_STAGE_GIT_REF: v4.69
+  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v4.133
+  BHF_CI_TEST_STAGE_GIT_REF: v4.133
 
 image: ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
 
@@ -196,6 +196,8 @@ test-linux-gcc-i386:
     "build-linux-gcc-i386",
   ]
   before_script:
+    - rm /etc/apt/sources.list.d/*
+    - printf 'deb https://deb.debian.org/debian bookworm main contrib non-free-firmware\n' > /etc/apt/sources.list.d/i386.list
     - dpkg --add-architecture i386
     - apt update -y && apt install -y libc6:i386 libstdc++6:i386
 
