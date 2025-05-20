@@ -287,21 +287,31 @@ check_state() {
 
 check_var() {
 	local _response
-	check var --type=BOOL 'MAIN.bInitTest' '1'
+
+	if ! check var --type=BOOL 'MAIN.bInitTest' '1'; then
+		printf 'check_var() BOOL write 1 failed\n' >&2
+		return 1
+	fi
 	_response="$(check var --type=BOOL 'MAIN.bInitTest')"
 	if ! test "${_response}" = '1'; then
 		printf 'check_var() BOOL mismatch:\n>%s<\n>%s<\n' "1" "${_response}" >&2
 		return 1
 	fi
 
-	check var --type=BOOL 'MAIN.bInitTest' '0'
+	if ! check var --type=BOOL 'MAIN.bInitTest' '0'; then
+		printf 'check_var() BOOL write 0 failed\n' >&2
+		return 1
+	fi
 	_response="$(check var --type=BOOL 'MAIN.bInitTest')"
 	if ! test "${_response}" = '0'; then
 		printf 'check_var() BOOL mismatch:\n>%s<\n>%s<\n' "0" "${_response}" >&2
 		return 1
 	fi
 
-	check var --type=DWORD 'MAIN.nTestCasesFailed' '10'
+	if ! check var --type=DWORD 'MAIN.nTestCasesFailed' '10'; then
+		printf 'check_var() DWORD write 10 failed\n' >&2
+		return 1
+	fi
 	_response="$( check var --type=DWORD 'MAIN.nTestCasesFailed')"
 	if ! test "${_response}" = '10'; then
 		printf 'check_var() DWORD mismatch:\n>%s<\n>%s<\n' "10" "${_response}" >&2
@@ -311,7 +321,10 @@ check_var() {
 	local _test_string
 	_test_string="$(date +%F%T)"
 	readonly _test_string
-	check var --type=STRING 'MAIN.sLogPath' "${_test_string}"
+	if ! check var --type=STRING 'MAIN.sLogPath' "${_test_string}"; then
+		printf 'check_var() string write >%s< failed\n' "${_test_string}" >&2
+		return 1
+	fi
 	_response="$(check var --type=STRING 'MAIN.sLogPath')"
 	if ! test "${_test_string}" = "${_response}"; then
 		printf 'check_var() string mismatch:\n>%s<\n>%s<\n' "${_test_string}" "${_response}" >&2
