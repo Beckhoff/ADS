@@ -4,12 +4,6 @@ variables:
 
 image: ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
 
-stages:
-  - .pre
-  - build
-  - test
-  - release-push
-
 cache:
   paths:
   - apt-cache/
@@ -296,7 +290,7 @@ build-debian:
       - ./debian-release
 
 release-push:
-  stage: release-push
+  stage: deploy
   dependencies:
     - build-debian
   only:
