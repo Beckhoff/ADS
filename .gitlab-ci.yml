@@ -38,6 +38,7 @@ docker-image:
     matrix:
       - BHF_CI_ARCH:
         - amd64
+        - arm64
   tags:
     - ${BHF_CI_ARCH}
     - docker-v2-privileged
@@ -183,12 +184,12 @@ build-win10:
   image: ${TEST_RUNNER_CONTAINER}
   variables:
     CI_DEBUG_SERVICES: 'true'
+    BHF_CI_ARCH: 'amd64'
   tags:
-    - amd64
-    - few_vcpus
+    - ${BHF_CI_ARCH}
     - vm-runner
   services:
-    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-amd64"
+    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
       alias: ads-server
       variables:
         TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
@@ -219,6 +220,16 @@ test-linux-gcc-amd64:
       parallel:
         matrix:
           - BHF_CI_ARCH: amd64
+
+test-linux-gcc-arm64:
+  extends: .test-linux
+  variables:
+    BHF_CI_ARCH: 'arm64'
+  needs:
+    - job: build-linux-gcc
+      parallel:
+        matrix:
+          - BHF_CI_ARCH: arm64
 
 test-linux-gcc-i386:
   extends: .test-linux
