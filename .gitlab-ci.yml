@@ -287,12 +287,11 @@ release-push:
   stage: deploy
   dependencies:
     - build-debian
-  only:
-    refs:
-      - master
-  script:
-    - mkdir -p "/root/.ssh"
-    - printf '%s\n' "Host *" > /root/.ssh/config
-    - printf '\t%s\n' "StrictHostKeyChecking no" "UserKnownHostsFile /dev/null" >> /root/.ssh/config
-    - .ci/publish_debian_package.sh
+  script: bdpg push
+  rules:
+    - if: $CI_DEFAULT_BRANCH != $CI_COMMIT_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE != "push"
+      when: never
+    - when: on_success
   allow_failure: true
