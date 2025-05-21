@@ -1,0 +1,3 @@
+[project options]
+tcadsdll_include = '/usr/include'
+tcadsdll_lib = '/usr/lib'

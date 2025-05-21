@@ -109,7 +109,7 @@ build-fbsd-clang:
     - curl https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/ | grep --only-matching -e "href='.*ADS-Comm-Lib.*'" | cut -d "'" -f 2 | xargs -I{} fetch https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/{}
     - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
   variables:
-    BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/local/include -Dtcadsdll_lib=/usr/local/lib'
+    BHF_CI_MESON_OPTIONS: '--native-file meson.native.tcbsd'
 
 build-linux-gcc:
   extends: .build-meson-docker
@@ -122,7 +122,7 @@ build-linux-gcc:
     - ${BHF_CI_ARCH}
     - docker-v2
   variables:
-    BHF_CI_MESON_OPTIONS: '-Dtcadsdll_include=/usr/include -Dtcadsdll_lib=/usr/lib'
+    BHF_CI_MESON_OPTIONS: '--native-file meson.native.tclur'
   before_script:
     - apt-get update && apt-get --assume-yes install libadscomm-dev meson
 
