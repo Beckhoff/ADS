@@ -278,11 +278,10 @@ build-debian:
   tags:
     - ${BHF_CI_ARCH}
     - docker-v2
-  before_script:
-    - apt-get update && mk-build-deps --install --remove debian/control
   script:
+    - bdpg install-build-deps
     - bdpg build
-    - bdpg push-pipelines ./debian-release/*.deb
+    - bdpg push-pipelines
   artifacts:
     expire_in: 1 week
     when: always
