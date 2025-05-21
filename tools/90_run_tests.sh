@@ -23,6 +23,9 @@ readonly localaddr="${1:-${container_ip}}"
 # First have to add an ADS route on the target to reach back to us.
 ${QEMU_USER_EMULATION-} ./build/adstool ads-server --retry=9 addroute "--netid=${localams}" "--addr=${localaddr}" --password=1
 
+# Now, we have to install a PLC license on the target.
+${QEMU_USER_EMULATION-} ./build/adstool 192.168.0.231.1.1 --gw=ads-server file write '%TC_LICENSEPATH%/dongle-pl94.tclrs' < "${DONGLE_P94_LICENSE}"
+
 "${script_path}/91_test_AdsTool.sh"
 
 # Setup socat port forwarding to test variable ADS ports. We have no socat on

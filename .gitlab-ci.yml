@@ -181,13 +181,24 @@ build-win10:
 .test-with-service-container:
   stage: test
   image: ${TEST_RUNNER_CONTAINER}
+  variables:
+    CI_DEBUG_SERVICES: 'true'
   tags:
     - amd64
     - few_vcpus
     - vm-runner
   services:
-    - name: ${REGISTRY_HOST}/beckhoff/build-linuxum:patrickbr-docker-adslib
+    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-amd64"
       alias: ads-server
+      variables:
+        TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
+  after_script:
+    - mkdir -p .test-stage/reports/
+    - cp -a /builds/service-container-${CI_JOB_ID}/* .test-stage/reports/
+  artifacts:
+    when: always
+    paths:
+    - .test-stage/reports/*
 
 .test-linux:
   extends: .test-with-service-container
