@@ -1,0 +1,15 @@
+ARG REGISTRY_HOST
+FROM ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
+RUN apt-get update \
+        && apt-get install --yes --no-install-recommends \
+		clang \
+		cmake \
+		g++ \
+		g++-i686-linux-gnu \
+		g++-mips-linux-gnu \
+		g++-riscv64-linux-gnu \
+		libadscomm-dev \
+		meson \
+        && rm -rf /var/lib/apt/lists/* \
+        && rm -rf /var/cache/apt/* \
+	# END OF LIST
