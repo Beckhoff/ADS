@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<TcRegistry>
+        <Key Name="HKLM">
+                <Key Name="Software">
+                        <Key Name="Beckhoff">
+                                <Key Name="TwinCAT3">
+                                        <Value Name="CurrentVersion" Type="SZ">3.1</Value>
+                                        <Key Name="System">
+                                                <Value Name="RunAsDevice" Type="DW">1</Value>
+                                                <Value Name="RTimeMode" Type="DW">5</Value>
+                                                <Value Name="AmsNetId" Type="BIN">C0A800E70101</Value>
+                                        </Key>
+                                        <Key Name="3.1">
+                                                <Value Name="BootDir" Type="SZ">/etc/TwinCAT/3.1/Boot/</Value>
+                                                <Value Name="ConfigDir" Type="SZ">/etc/TwinCAT/3.1/Config/</Value>
+                                                <Value Name="InstallDir" Type="SZ">/etc/TwinCAT/3.1/</Value>
+                                                <Value Name="TargetDir" Type="SZ">/etc/TwinCAT/3.1/Target/</Value>
+                                                <Value Name="DriverAutoLoadDir" Type="SZ">/etc/TwinCAT/3.1/Driver/AutoLoad/</Value>
+                                        </Key>
+                                </Key>
+                        </Key>
+                </Key>
+                <Key Name="Ident">
+                        <Value Name="DeviceType" Type="SZ">LINUX-U</Value>
+                </Key>
+        </Key>
+</TcRegistry>

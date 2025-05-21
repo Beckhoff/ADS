@@ -5,6 +5,7 @@ variables:
 image: ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
 
 stages:
+  - .pre
   - build
   - test
   - release-push
@@ -29,6 +30,19 @@ codestyle:
     - if: $CI_MERGE_REQUEST_ID
       when: never
     - when: on_success
+
+docker-image:
+  image: ${CI_REGISTRY}/beckhoff/okinak:master
+  stage: .pre
+  parallel:
+    matrix:
+      - BHF_CI_ARCH:
+        - amd64
+  tags:
+    - ${BHF_CI_ARCH}
+    - docker-v2-privileged
+  script:
+    - okinak build-native
 
 .build-meson:
   stage: build
