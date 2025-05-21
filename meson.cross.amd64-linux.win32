@@ -11,3 +11,7 @@ system = 'windows'
 cpu_family = 'x86'
 cpu = 'i686'
 endian = 'little'
+
+[built-in options]
+b_pie = false
+cpp_std = 'c++14'
