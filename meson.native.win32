@@ -1,0 +1,9 @@
+[properties]
+cpp_args = ['-D_CRT_NONSTDC_NO_WARNINGS=1'] + ['-D_CRT_SECURE_NO_WARNINGS=1'] + ['-DNOMINMAX=1']
+
+[project options]
+tcadsdll_include = 'c:\Program Files (x86)\Beckhoff\TwinCAT\AdsApi\TcAdsDll\Include'
+tcadsdll_lib = 'c:\Program Files (x86)\Beckhoff\TwinCAT\AdsApi\TcAdsDll\lib\x64'
+
+[built-in options]
+werror = false
