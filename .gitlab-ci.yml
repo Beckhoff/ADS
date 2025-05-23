@@ -47,11 +47,7 @@ docker-image-build:
   image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
   variables:
     BHF_CI_ARCH: 'amd64'
-  script:
-    - meson setup build ${BHF_CI_MESON_OPTIONS}
-    - ninja -C build
-    - meson setup example/build example ${BHF_CI_MESON_OPTIONS}
-    - ninja -C example/build
+  script: .ci/run-build-and-test.sh
   artifacts:
     when: always
     paths:
