@@ -44,9 +44,10 @@ docker-image-build:
 
 .build-meson:
   stage: build
-  image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
+  image: "${IMAGE}"
   variables:
     BHF_CI_ARCH: 'amd64'
+    IMAGE: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
   script: .ci/run-build-and-test.sh
   artifacts:
     when: always
@@ -61,22 +62,19 @@ docker-image-build:
     - amd64
     - docker-v2
 
-build-arch:
+build-only:
   extends: .build-meson-docker
-  image: ${DOCKER_PROXY}archlinux:base-devel
   parallel:
     matrix:
-      - CXX:
+      - FLAVOR: 'alpine'
+        IMAGE: "${DOCKER_PROXY}alpine:3.21.0"
+      - FLAVOR: 'arch'
+        CXX:
         - clang++
         - g++
-  before_script:
-    - pacman --noconfirm --refresh --sync --sysupgrade clang meson
-
-build-alpine:
-  extends: .build-meson-docker
-  image: ${DOCKER_PROXY}alpine:3.21.0
-  before_script:
-    - apk add g++ meson
+        IMAGE: "${DOCKER_PROXY}archlinux:base-devel"
+      - FLAVOR: 'mxe'
+        IMAGE: "${REGISTRY_HOST}/beckhoff/docker-mxe:40549"
 
 build-cmake:
   stage: build
@@ -138,12 +136,6 @@ build-linux-gcc-riscv64:
   extends: .build-meson-docker
   variables:
     BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.riscv64'
-
-build-mxe:
-  extends: .build-meson-docker
-  image: ${REGISTRY_HOST}/beckhoff/docker-mxe:40549
-  variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.win32'
 
 build-win10:
   stage: build
