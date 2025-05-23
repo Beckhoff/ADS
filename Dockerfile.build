@@ -1,7 +1,8 @@
-ARG REGISTRY_HOST
-FROM ${REGISTRY_HOST}/beckhoff/bdpg:v1.3.1
+ARG TEST_RUNNER_CONTAINER
+FROM ${TEST_RUNNER_CONTAINER}
 RUN apt-get update \
         && apt-get install --yes --no-install-recommends \
+		binfmt-support \
 		clang \
 		cmake \
 		g++ \
@@ -9,7 +10,26 @@ RUN apt-get update \
 		g++-mips-linux-gnu \
 		g++-riscv64-linux-gnu \
 		libadscomm-dev \
+		libstdc++-dev-mips-cross \
+		libstdc++-dev-riscv64-cross \
 		meson \
+		qemu-user-binfmt \
+		socat \
+		xxd \
+        && rm -rf /var/lib/apt/lists/* \
+        && rm -rf /var/cache/apt/* \
+	# END OF LIST
+
+# We have no i386 synced into our deb-mirror, so here we go and hack the apt
+# configuration to use upstream servers. This should be okay until somebody
+# tries to use this container as a basis for another one.
+RUN rm /etc/apt/sources.list.d/*
+RUN printf 'deb https://deb.debian.org/debian bookworm main contrib non-free-firmware\n' > /etc/apt/sources.list.d/i386.list
+RUN dpkg --add-architecture i386
+RUN apt-get update \
+        && apt-get install --yes --no-install-recommends \
+		libc6:i386 \
+		libstdc++6:i386 \
         && rm -rf /var/lib/apt/lists/* \
         && rm -rf /var/cache/apt/* \
 	# END OF LIST

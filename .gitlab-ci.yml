@@ -171,7 +171,7 @@ build-win10:
 
 .test-with-service-container:
   stage: test
-  image: ${TEST_RUNNER_CONTAINER}
+  image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
   variables:
     CI_DEBUG_SERVICES: 'true'
     BHF_CI_ARCH: 'amd64'
@@ -226,11 +226,6 @@ test-linux-gcc-i686:
   needs: [
     "build-linux-gcc-i686",
   ]
-  before_script:
-    - rm /etc/apt/sources.list.d/*
-    - printf 'deb https://deb.debian.org/debian bookworm main contrib non-free-firmware\n' > /etc/apt/sources.list.d/i386.list
-    - dpkg --add-architecture i386
-    - apt update -y && apt install -y libc6:i386 libstdc++6:i386
 
 test-linux-gcc-mips:
   extends: .test-linux
@@ -240,8 +235,6 @@ test-linux-gcc-mips:
   variables:
     QEMU_LD_PREFIX: '/usr/mips-linux-gnu'
     QEMU_USER_EMULATION: 'qemu-mips'
-  before_script:
-    - apt update -y && apt install -y binfmt-support libstdc++-dev-mips-cross qemu-user-binfmt
 
 test-linux-gcc-riscv64:
   extends: .test-linux
@@ -251,8 +244,6 @@ test-linux-gcc-riscv64:
   variables:
     QEMU_LD_PREFIX: '/usr/riscv64-linux-gnu'
     QEMU_USER_EMULATION: 'qemu-riscv64'
-  before_script:
-    - apt update -y && apt install -y binfmt-support libstdc++-dev-riscv64-cross qemu-user-binfmt
 
 test-fbsd-clang:
   extends: .test-with-service-container
