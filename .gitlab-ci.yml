@@ -52,6 +52,7 @@ docker-image-build:
   artifacts:
     when: always
     paths:
+    - .test-stage/reports/*
     - AdsLib/**/*.h
     - build/
     - example/build/
@@ -59,7 +60,7 @@ docker-image-build:
 .build-meson-docker:
   extends: .build-meson
   tags:
-    - amd64
+    - ${BHF_CI_ARCH}
     - docker-v2
 
 .with-service-container:
@@ -88,6 +89,31 @@ build-only:
       - FLAVOR: 'mxe'
         IMAGE: "${REGISTRY_HOST}/beckhoff/docker-mxe:40549"
 
+build-and-test:
+  extends: build-only
+  variables:
+    CI_DEBUG_SERVICES: 'true'
+  services:
+    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
+      alias: ads-server
+      variables:
+        TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
+  after_script:
+    - mkdir -p .test-stage/reports/
+    - cp -a /builds/service-container-${CI_JOB_ID}/* .test-stage/reports/
+  parallel:
+    matrix:
+      - FLAVOR: 'cross-i686'
+      - FLAVOR: 'cross-mips'
+      - FLAVOR: 'cross-riscv64'
+      - FLAVOR: 'tclur'
+        BHF_CI_ARCH:
+        - amd64
+        - arm64
+        CXX:
+        - clang++
+        - g++
+
 build-cmake:
   stage: build
   tags:
@@ -104,11 +130,6 @@ build-cmake:
     - AdsLib/**/*.h
     - build/
 
-build-linux-clang:
-  extends: .build-meson-docker
-  variables:
-    CXX: clang++
-
 build-fbsd-clang:
   extends: .build-meson
   tags:
@@ -120,34 +141,6 @@ build-fbsd-clang:
     - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
   variables:
     BHF_CI_MESON_OPTIONS: '--native-file meson.native.tcbsd'
-
-build-linux-gcc:
-  extends: .build-meson-docker
-  parallel:
-    matrix:
-      - BHF_CI_ARCH:
-        - amd64
-        - arm64
-  tags:
-    - ${BHF_CI_ARCH}
-    - docker-v2
-  variables:
-    BHF_CI_MESON_OPTIONS: '--native-file meson.native.tclur'
-
-build-linux-gcc-i686:
-  extends: .build-meson-docker
-  variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.i686'
-
-build-linux-gcc-mips:
-  extends: .build-meson-docker
-  variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.mips'
-
-build-linux-gcc-riscv64:
-  extends: .build-meson-docker
-  variables:
-    BHF_CI_MESON_OPTIONS: '--cross-file meson.cross.amd64-linux.riscv64'
 
 build-win10:
   stage: build
@@ -169,7 +162,7 @@ build-win10:
     - build/
     - example/build/
 
-.test-with-service-container:
+test-fbsd-clang:
   extends: .with-service-container
   stage: test
   image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
@@ -182,63 +175,6 @@ build-win10:
     when: always
     paths:
     - .test-stage/reports/*
-
-.test-linux:
-  extends: .test-with-service-container
-  script:
-    - apt update -y && apt install -y socat xxd
-    - ./tools/90_run_tests.sh
-
-test-linux-clang:
-  extends: .test-linux
-  needs: [
-    "build-linux-clang",
-  ]
-
-test-linux-gcc-amd64:
-  extends: .test-linux
-  needs:
-    - job: build-linux-gcc
-      parallel:
-        matrix:
-          - BHF_CI_ARCH: amd64
-
-test-linux-gcc-arm64:
-  extends: .test-linux
-  variables:
-    BHF_CI_ARCH: 'arm64'
-  needs:
-    - job: build-linux-gcc
-      parallel:
-        matrix:
-          - BHF_CI_ARCH: arm64
-
-test-linux-gcc-i686:
-  extends: .test-linux
-  needs: [
-    "build-linux-gcc-i686",
-  ]
-
-test-linux-gcc-mips:
-  extends: .test-linux
-  needs: [
-    "build-linux-gcc-mips",
-  ]
-  variables:
-    QEMU_LD_PREFIX: '/usr/mips-linux-gnu'
-    QEMU_USER_EMULATION: 'qemu-mips'
-
-test-linux-gcc-riscv64:
-  extends: .test-linux
-  needs: [
-    "build-linux-gcc-riscv64",
-  ]
-  variables:
-    QEMU_LD_PREFIX: '/usr/riscv64-linux-gnu'
-    QEMU_USER_EMULATION: 'qemu-riscv64'
-
-test-fbsd-clang:
-  extends: .test-with-service-container
   needs: [
     "build-fbsd-clang",
   ]
