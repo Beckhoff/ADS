@@ -62,6 +62,18 @@ docker-image-build:
     - amd64
     - docker-v2
 
+.with-service-container:
+  variables:
+    CI_DEBUG_SERVICES: 'true'
+  services:
+    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
+      alias: ads-server
+      variables:
+        TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
+  after_script:
+    - mkdir -p .test-stage/reports/
+    - cp -a /builds/service-container-${CI_JOB_ID}/* .test-stage/reports/
+
 build-only:
   extends: .build-meson-docker
   parallel:
@@ -158,22 +170,14 @@ build-win10:
     - example/build/
 
 .test-with-service-container:
+  extends: .with-service-container
   stage: test
   image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
   variables:
-    CI_DEBUG_SERVICES: 'true'
     BHF_CI_ARCH: 'amd64'
   tags:
     - ${BHF_CI_ARCH}
     - vm-runner
-  services:
-    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
-      alias: ads-server
-      variables:
-        TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
-  after_script:
-    - mkdir -p .test-stage/reports/
-    - cp -a /builds/service-container-${CI_JOB_ID}/* .test-stage/reports/
   artifacts:
     when: always
     paths:
