@@ -63,18 +63,6 @@ docker-image-build:
     - ${BHF_CI_ARCH}
     - docker-v2
 
-.with-service-container:
-  variables:
-    CI_DEBUG_SERVICES: 'true'
-  services:
-    - name: "${CI_REGISTRY_IMAGE}:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
-      alias: ads-server
-      variables:
-        TCSYSTEMSERVICEUM_LOG: '/builds/service-container-${CI_JOB_ID}/ads-server.log'
-  after_script:
-    - mkdir -p .test-stage/reports/
-    - cp -a /builds/service-container-${CI_JOB_ID}/* .test-stage/reports/
-
 build-only:
   extends: .build-meson-docker
   parallel:
@@ -130,18 +118,6 @@ build-cmake:
     - AdsLib/**/*.h
     - build/
 
-build-fbsd-clang:
-  extends: .build-meson
-  tags:
-    - tcbsd_poudriere
-  before_script:
-    - doas pkg install -y meson
-    # we dont limit grep --max-count=1, because curl would complain if grep closes the pipe
-    - curl https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/ | grep --only-matching -e "href='.*ADS-Comm-Lib.*'" | cut -d "'" -f 2 | xargs -I{} fetch https://tcbsd.beckhoff.com/TCBSD/13/stable/packages/All/{}
-    - doas pkg install -y -f TF6000-ADS-Comm-Lib-*
-  variables:
-    BHF_CI_MESON_OPTIONS: '--native-file meson.native.tcbsd'
-
 build-win10:
   stage: build
   tags:
@@ -162,22 +138,14 @@ build-win10:
     - build/
     - example/build/
 
-test-fbsd-clang:
-  extends: .with-service-container
-  stage: test
-  image: "${CI_REGISTRY_IMAGE}/build:${CI_PIPELINE_ID}-${BHF_CI_ARCH}"
-  variables:
-    BHF_CI_ARCH: 'amd64'
+build-and-test-in-vm:
+  extends: build-and-test
+  parallel:
+    matrix:
+      - FLAVOR: 'tcbsd'
   tags:
     - ${BHF_CI_ARCH}
     - vm-runner
-  artifacts:
-    when: always
-    paths:
-    - .test-stage/reports/*
-  needs: [
-    "build-fbsd-clang",
-  ]
   script:
     - tools/prepare_test_stage.sh
     - rackctl-emulate add test-device 200

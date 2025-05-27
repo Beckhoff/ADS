@@ -11,10 +11,8 @@ readonly test_device="${1?Missing <test-device>}"
 
 # Copy all necessary files from test-runner container into the test-device.
 scp -r \
-	"${script_path}/../../../build" \
-	"${script_path}/../../../debian" \
-	"${script_path}/../../../example" \
-	"${script_path}/../../../tools" \
+	"${CI_PROJECT_DIR}/"* \
+	"${CI_PROJECT_DIR}/".ci \
 	"Administrator@${test_device}:"
 
 # Run our generic tests within the QEMU test-device. For this to work we have
@@ -25,4 +23,9 @@ if ! container_ip="$(ip_route_src ads-server)"; then
 	exit 1
 fi
 scp "${DONGLE_P94_LICENSE}" "Administrator@${test_device}:dongle-pl94.tclrs"
-ssh "Administrator@${test_device}" DONGLE_P94_LICENSE="dongle-pl94.tclrs" ./tools/90_run_tests.sh "${container_ip}"
+ssh "Administrator@${test_device}" <<- EOF
+	export DONGLE_P94_LICENSE="dongle-pl94.tclrs"
+	export CI_JOB_NAME="${CI_JOB_NAME}"
+	.ci/run-build-and-test.sh
+EOF
+

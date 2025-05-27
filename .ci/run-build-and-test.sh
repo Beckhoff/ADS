@@ -29,6 +29,9 @@ case "${CI_JOB_NAME}" in
 		export QEMU_LD_PREFIX='/usr/riscv64-linux-gnu'
 		export QEMU_USER_EMULATION='qemu-riscv64'
 		;;
+	*tcbsd*):
+		BHF_CI_MESON_OPTIONS='--native-file meson.native.tcbsd'
+		;;
 	*tclur*):
 		BHF_CI_MESON_OPTIONS='--native-file meson.native.tclur'
 		;;
