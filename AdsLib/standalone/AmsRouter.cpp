@@ -79,7 +79,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string& host)
         lock.lock();
         connection_attempts.erase(ams);
         connection_attempt_events.notify_all();
-        throw e;
+        throw;
     }
 }
 
