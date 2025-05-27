@@ -42,7 +42,7 @@ docker-image:
 docker-image-build:
   extends: docker-image
 
-.build-meson:
+build-only:
   stage: build
   image: "${IMAGE}"
   variables:
@@ -56,15 +56,9 @@ docker-image-build:
     - AdsLib/**/*.h
     - build/
     - example/build/
-
-.build-meson-docker:
-  extends: .build-meson
   tags:
     - ${BHF_CI_ARCH}
     - docker-v2
-
-build-only:
-  extends: .build-meson-docker
   parallel:
     matrix:
       - FLAVOR: 'alpine'
