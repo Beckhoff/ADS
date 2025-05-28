@@ -14,8 +14,8 @@ codestyle:
     - arm64
     - docker-v2
   before_script:
-    - apt update -y && apt install -y uncrustify
-    - uncrustify -v
+    - apt update -y && apt install -y clang-format
+    - clang-format --version
   script:
     - ./tools/run-uncrustify.sh check
   rules:

@@ -6,7 +6,7 @@
 run_uncrustify() {
 	(
 		cd "${script_path}/.."
-		find Ads* example -name "*.h" -or -name "*.cpp" | uncrustify -c tools/uncrustify.cfg -F - "${@}"
+		find Ads* example \( -name "*.h" -or -name "*.cpp" \) -exec clang-format "${@}" {} \+
 	)
 }
 
@@ -19,10 +19,10 @@ readonly script_path
 
 case "${1-}" in
 	check)
-		run_uncrustify --check
+		run_uncrustify --dry-run --Werror
 		;;
 	format)
-		run_uncrustify --no-backup
+		run_uncrustify -i
 		;;
 	*)
 		printf 'Unknown or missing command "%s"\n' "${1-}"
