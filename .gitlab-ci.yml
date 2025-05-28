@@ -159,6 +159,11 @@ build-debian:
     - bdpg install-build-deps
     - bdpg build
     - bdpg push-pipelines
+  artifacts:
+    expire_in: 1 week
+    when: always
+    paths:
+      - ./debian-release
 
 release-push:
   stage: deploy
