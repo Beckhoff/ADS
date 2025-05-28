@@ -21,81 +21,82 @@ static const size_t DEVICE_NAME_LENGTH = 16;
  * @brief Device information containing device name and version.
  */
 struct DeviceInfo {
-    /** Device name */
-    char name[DEVICE_NAME_LENGTH];
+	/** Device name */
+	char name[DEVICE_NAME_LENGTH];
 
-    /** Device version as defined above */
-    AdsVersion version;
+	/** Device version as defined above */
+	AdsVersion version;
 };
 
 struct AdsDeviceState {
-    ADSSTATE ads;
-    ADSSTATE device;
+	ADSSTATE ads;
+	ADSSTATE device;
 };
 
-template<class T>
-struct ResourceDeleter {
-    ResourceDeleter(const std::function<long(T)> func)
-        : FreeResource(func)
-    {}
+template <class T> struct ResourceDeleter {
+	ResourceDeleter(const std::function<long(T)> func)
+		: FreeResource(func)
+	{
+	}
 
-    void operator()(T* resource) noexcept
-    {
-        FreeResource(*resource);
-        delete resource;
-    }
-private:
-    const std::function<long(T)> FreeResource;
+	void operator()(T *resource) noexcept
+	{
+		FreeResource(*resource);
+		delete resource;
+	}
+
+    private:
+	const std::function<long(T)> FreeResource;
 };
-template<typename T>
+template <typename T>
 using AdsResource = std::unique_ptr<T, ResourceDeleter<T> >;
 
 using AdsHandle = AdsResource<uint32_t>;
 
 struct AdsDevice {
-    AdsDevice(const std::string& ipV4, AmsNetId netId, uint16_t port);
+	AdsDevice(const std::string &ipV4, AmsNetId netId, uint16_t port);
 
-    DeviceInfo GetDeviceInfo() const;
+	DeviceInfo GetDeviceInfo() const;
 
-    /** Get handle to access AdsVariable by indexGroup/Offset */
-    AdsHandle GetHandle(uint32_t offset) const;
+	/** Get handle to access AdsVariable by indexGroup/Offset */
+	AdsHandle GetHandle(uint32_t offset) const;
 
-    /** Get handle for access by symbol name */
-    AdsHandle GetHandle(const std::string& symbolName) const;
+	/** Get handle for access by symbol name */
+	AdsHandle GetHandle(const std::string &symbolName) const;
 
-    /** Get notification handle */
-    AdsHandle GetHandle(uint32_t                     indexGroup,
-                        uint32_t                     indexOffset,
-                        const AdsNotificationAttrib& notificationAttributes,
-                        PAdsNotificationFuncEx       callback,
-                        uint32_t                     hUser) const;
+	/** Get notification handle */
+	AdsHandle GetHandle(uint32_t indexGroup, uint32_t indexOffset,
+			    const AdsNotificationAttrib &notificationAttributes,
+			    PAdsNotificationFuncEx callback,
+			    uint32_t hUser) const;
 
-    /** Get handle to access files */
-    AdsHandle OpenFile(const std::string& filename, uint32_t flags) const;
+	/** Get handle to access files */
+	AdsHandle OpenFile(const std::string &filename, uint32_t flags) const;
 
-    long GetLocalPort() const;
+	long GetLocalPort() const;
 
-    AdsDeviceState GetState() const;
-    void SetState(const ADSSTATE AdsState, const ADSSTATE DeviceState) const;
+	AdsDeviceState GetState() const;
+	void SetState(const ADSSTATE AdsState,
+		      const ADSSTATE DeviceState) const;
 
-    uint32_t GetTimeout() const;
-    void SetTimeout(const uint32_t timeout) const;
+	uint32_t GetTimeout() const;
+	void SetTimeout(const uint32_t timeout) const;
 
-    long ReadReqEx2(uint32_t group, uint32_t offset, size_t length, void* buffer, uint32_t* bytesRead) const;
-    long ReadWriteReqEx2(uint32_t    indexGroup,
-                         uint32_t    indexOffset,
-                         size_t      readLength,
-                         void*       readData,
-                         size_t      writeLength,
-                         const void* writeData,
-                         uint32_t*   bytesRead) const;
-    long WriteReqEx(uint32_t group, uint32_t offset, size_t length, const void* buffer) const;
+	long ReadReqEx2(uint32_t group, uint32_t offset, size_t length,
+			void *buffer, uint32_t *bytesRead) const;
+	long ReadWriteReqEx2(uint32_t indexGroup, uint32_t indexOffset,
+			     size_t readLength, void *readData,
+			     size_t writeLength, const void *writeData,
+			     uint32_t *bytesRead) const;
+	long WriteReqEx(uint32_t group, uint32_t offset, size_t length,
+			const void *buffer) const;
 
-    AdsResource<const AmsNetId> m_NetId;
-    const AmsAddr m_Addr;
-private:
-    AdsResource<const long> m_LocalPort;
-    long CloseFile(uint32_t handle) const;
-    long DeleteNotificationHandle(uint32_t handle) const;
-    long DeleteSymbolHandle(uint32_t handle) const;
+	AdsResource<const AmsNetId> m_NetId;
+	const AmsAddr m_Addr;
+
+    private:
+	AdsResource<const long> m_LocalPort;
+	long CloseFile(uint32_t handle) const;
+	long DeleteNotificationHandle(uint32_t handle) const;
+	long DeleteSymbolHandle(uint32_t handle) const;
 };

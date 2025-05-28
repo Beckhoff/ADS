@@ -24,13 +24,9 @@
  * @param[out] bytesRead pointer to a variable. If successful, this variable will return the number of actually read data bytes.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncReadReqEx2(long           port,
-                       const AmsAddr* pAddr,
-                       uint32_t       indexGroup,
-                       uint32_t       indexOffset,
-                       uint32_t       bufferLength,
-                       void*          buffer,
-                       uint32_t*      bytesRead);
+long AdsSyncReadReqEx2(long port, const AmsAddr *pAddr, uint32_t indexGroup,
+		       uint32_t indexOffset, uint32_t bufferLength,
+		       void *buffer, uint32_t *bytesRead);
 
 /**
  * Reads the identification and version number of an ADS server.
@@ -40,7 +36,8 @@ long AdsSyncReadReqEx2(long           port,
  * @param[out] version Address of a variable of type AdsVersion, which will receive the version number, revision number and the build number.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, AdsVersion* version);
+long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr *pAddr, char *devName,
+				AdsVersion *version);
 
 /**
  * Reads the ADS status and the device status from an ADS server.
@@ -50,7 +47,8 @@ long AdsSyncReadDeviceInfoReqEx(long port, const AmsAddr* pAddr, char* devName, 
  * @param[out] devState Address of a variable that will receive the device status.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, uint16_t* devState);
+long AdsSyncReadStateReqEx(long port, const AmsAddr *pAddr, uint16_t *adsState,
+			   uint16_t *devState);
 
 /**
  * Writes data synchronously into an ADS server and receives data back from the ADS server.
@@ -65,15 +63,11 @@ long AdsSyncReadStateReqEx(long port, const AmsAddr* pAddr, uint16_t* adsState, 
  * @param[out] bytesRead pointer to a variable. If successful, this variable will return the number of actually read data bytes.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncReadWriteReqEx2(long           port,
-                            const AmsAddr* pAddr,
-                            uint32_t       indexGroup,
-                            uint32_t       indexOffset,
-                            uint32_t       readLength,
-                            void*          readData,
-                            uint32_t       writeLength,
-                            const void*    writeData,
-                            uint32_t*      bytesRead);
+long AdsSyncReadWriteReqEx2(long port, const AmsAddr *pAddr,
+			    uint32_t indexGroup, uint32_t indexOffset,
+			    uint32_t readLength, void *readData,
+			    uint32_t writeLength, const void *writeData,
+			    uint32_t *bytesRead);
 
 /**
  * Writes data synchronously to an ADS server.
@@ -85,12 +79,9 @@ long AdsSyncReadWriteReqEx2(long           port,
  * @param[in] buffer Buffer with data send to the ADS server.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncWriteReqEx(long           port,
-                       const AmsAddr* pAddr,
-                       uint32_t       indexGroup,
-                       uint32_t       indexOffset,
-                       uint32_t       bufferLength,
-                       const void*    buffer);
+long AdsSyncWriteReqEx(long port, const AmsAddr *pAddr, uint32_t indexGroup,
+		       uint32_t indexOffset, uint32_t bufferLength,
+		       const void *buffer);
 
 /**
  * Changes the ADS status and the device status of an ADS server.
@@ -102,12 +93,9 @@ long AdsSyncWriteReqEx(long           port,
  * @param[in] buffer Buffer with additional data send to the ADS server.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncWriteControlReqEx(long           port,
-                              const AmsAddr* pAddr,
-                              uint16_t       adsState,
-                              uint16_t       devState,
-                              uint32_t       bufferLength,
-                              const void*    buffer);
+long AdsSyncWriteControlReqEx(long port, const AmsAddr *pAddr,
+			      uint16_t adsState, uint16_t devState,
+			      uint32_t bufferLength, const void *buffer);
 
 /**
  * A notification is defined within an ADS server (e.g. PLC). When a
@@ -123,14 +111,12 @@ long AdsSyncWriteControlReqEx(long           port,
  * @param[out] pNotification Address of the variable that will receive the handle of the notification.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncAddDeviceNotificationReqEx(long                         port,
-                                       const AmsAddr*               pAddr,
-                                       uint32_t                     indexGroup,
-                                       uint32_t                     indexOffset,
-                                       const AdsNotificationAttrib* pAttrib,
-                                       PAdsNotificationFuncEx       pFunc,
-                                       uint32_t                     hUser,
-                                       uint32_t*                    pNotification);
+long AdsSyncAddDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
+				       uint32_t indexGroup,
+				       uint32_t indexOffset,
+				       const AdsNotificationAttrib *pAttrib,
+				       PAdsNotificationFuncEx pFunc,
+				       uint32_t hUser, uint32_t *pNotification);
 
 /**
  * A notification defined previously is deleted from an ADS server.
@@ -139,7 +125,8 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
  * @param[in] hNotification Address of the variable that contains the handle of the notification.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification);
+long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
+				       uint32_t hNotification);
 
 /**
  * Read the configured timeout for the ADS functions. The standard value is 5000 ms.
@@ -147,7 +134,7 @@ long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t
  * @param[out] timeout Buffer to store timeout value in ms.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsSyncGetTimeoutEx(long port, uint32_t* timeout);
+long AdsSyncGetTimeoutEx(long port, uint32_t *timeout);
 
 namespace bhf
 {
@@ -159,7 +146,7 @@ namespace ads
  * @param[in] ip address of the target system
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AddLocalRoute(AmsNetId ams, const char* ip);
+long AddLocalRoute(AmsNetId ams, const char *ip);
 
 /**
  * Delete ams route that had previously been added with AddLocalRoute().
@@ -183,12 +170,10 @@ void SetLocalAddress(AmsNetId ams);
  * @param[in] remotePassword password for the user on the remote TwinCAT system
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AddRemoteRoute(const std::string& remote,
-                    AmsNetId           destNetId,
-                    const std::string& destAddr,
-                    const std::string& routeName,
-                    const std::string& remoteUsername,
-                    const std::string& remotePassword);
+long AddRemoteRoute(const std::string &remote, AmsNetId destNetId,
+		    const std::string &destAddr, const std::string &routeName,
+		    const std::string &remoteUsername,
+		    const std::string &remotePassword);
 
 /**
  * Read AmsNetId of some TwinCAT remote host
@@ -196,8 +181,7 @@ long AddRemoteRoute(const std::string& remote,
  * @param[out] netId on success the AmsNetId of the remote TwinCAT system is written here
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long GetRemoteAddress(const std::string& remote,
-                      AmsNetId&          netId);
+long GetRemoteAddress(const std::string &remote, AmsNetId &netId);
 }
 }
 

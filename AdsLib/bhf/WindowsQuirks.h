@@ -15,7 +15,7 @@ namespace bhf
 static inline void ForceBinaryOutputOnWindows()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
-    (void)_setmode(_fileno(stdout), O_BINARY);
+	(void)_setmode(_fileno(stdout), O_BINARY);
 #endif
 }
 }

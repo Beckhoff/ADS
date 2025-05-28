@@ -9,14 +9,14 @@
 
 namespace bhf
 {
-template<class T>
-static T try_stoi(const char* str, const T defaultValue = 0)
+template <class T> static T try_stoi(const char *str, const T defaultValue = 0)
 {
-    try {
-        if (str && *str) {
-            return static_cast<T>(std::stoi(++str));
-        }
-    } catch (...) {}
-    return defaultValue;
+	try {
+		if (str && *str) {
+			return static_cast<T>(std::stoi(++str));
+		}
+	} catch (...) {
+	}
+	return defaultValue;
 }
 }

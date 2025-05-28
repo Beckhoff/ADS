@@ -14,26 +14,28 @@ namespace bhf
 namespace ads
 {
 struct SymbolEntry {
-    static std::pair<std::string, SymbolEntry> Parse(const uint8_t* data, size_t lengthLimit);
-    AdsSymbolEntry header;
-    std::string name;
-    std::string typeName;
-    std::string comment;
-    void WriteAsJSON(std::ostream& os) const;
+	static std::pair<std::string, SymbolEntry> Parse(const uint8_t *data,
+							 size_t lengthLimit);
+	AdsSymbolEntry header;
+	std::string name;
+	std::string typeName;
+	std::string comment;
+	void WriteAsJSON(std::ostream &os) const;
 };
 
 using SymbolEntryMap = std::map<std::string, SymbolEntry>;
 
 struct SymbolAccess {
-    SymbolAccess(const std::string& gw, AmsNetId netid, uint16_t port);
-    SymbolEntryMap FetchSymbolEntries() const;
-    int Read(const std::string& name, std::ostream& os) const;
-    int Write(const std::string& name, const std::string& value) const;
-    int ShowSymbols(std::ostream& os) const;
-private:
-    AdsDevice device;
-    template<typename T>
-    int Write(const SymbolEntry& symbol, const std::string& value) const;
+	SymbolAccess(const std::string &gw, AmsNetId netid, uint16_t port);
+	SymbolEntryMap FetchSymbolEntries() const;
+	int Read(const std::string &name, std::ostream &os) const;
+	int Write(const std::string &name, const std::string &value) const;
+	int ShowSymbols(std::ostream &os) const;
+
+    private:
+	AdsDevice device;
+	template <typename T>
+	int Write(const SymbolEntry &symbol, const std::string &value) const;
 };
 }
 }

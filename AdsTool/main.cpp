@@ -26,18 +26,18 @@
 
 static int version()
 {
-    std::cout << "0.0.28-1\n";
-    return 0;
+	std::cout << "0.0.28-1\n";
+	return 0;
 }
 
-[[ noreturn ]] static void usage(const std::string& errorMessage = {})
+[[noreturn]] static void usage(const std::string &errorMessage = {})
 {
-    /*
+	/*
      * "--help" is the only case we are called with an empty errorMessage. That
      * seems the only case we should really print to stdout instead of stderr.
      */
-    (errorMessage.empty() ? std::cout : std::cerr) << errorMessage <<
-        R"(
+	(errorMessage.empty() ? std::cout : std::cerr) << errorMessage <<
+		R"(
 USAGE:
 	[<target[:port]>] [OPTIONS...] <command> [CMD_OPTIONS...] [<command_parameter>...]
 
@@ -312,597 +312,622 @@ COMMANDS:
 		"Hello World!"
 
 )";
-    exit(!errorMessage.empty());
+	exit(!errorMessage.empty());
 }
 
-typedef int (* CommandFunc)(const AmsNetId, const uint16_t, const std::string&, bhf::Commandline&);
+typedef int (*CommandFunc)(const AmsNetId, const uint16_t, const std::string &,
+			   bhf::Commandline &);
 using CommandMap = std::map<const std::string, CommandFunc>;
 
-int RunAddRoute(const std::string& remote, bhf::Commandline& args)
+int RunAddRoute(const std::string &remote, bhf::Commandline &args)
 {
-    bhf::ParameterList params = {
-        {"--addr"},
-        {"--netid"},
-        {"--password"},
-        {"--username", false, "Administrator"},
-        {"--routename"},
-    };
-    args.Parse(params);
+	bhf::ParameterList params = {
+		{ "--addr" },	   { "--netid" },
+		{ "--password" },  { "--username", false, "Administrator" },
+		{ "--routename" },
+	};
+	args.Parse(params);
 
-    return bhf::ads::AddRemoteRoute(remote,
-                                    make_AmsNetId(params.Get<std::string>("--netid")),
-                                    params.Get<std::string>("--addr"),
-                                    params.Get<std::string>("--routename"),
-                                    params.Get<std::string>("--username"),
-                                    params.Get<std::string>("--password")
-                                    );
+	return bhf::ads::AddRemoteRoute(
+		remote, make_AmsNetId(params.Get<std::string>("--netid")),
+		params.Get<std::string>("--addr"),
+		params.Get<std::string>("--routename"),
+		params.Get<std::string>("--username"),
+		params.Get<std::string>("--password"));
 }
 
-int RunDCDiag(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunDCDiag(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	      bhf::Commandline &args)
 {
-    const auto command = args.Pop<std::string>("dc-diag command is missing (activate, deactivate, clear, print)");
+	const auto command = args.Pop<std::string>(
+		"dc-diag command is missing (activate, deactivate, clear, print)");
 
-    auto device = bhf::ads::MasterDcStatAccess(gw, netid, port);
-    if (!command.compare("activate")) {
-        return device.Activate();
-    } else if (!command.compare("deactivate")) {
-        return device.Deactivate();
-    } else if (!command.compare("clear")) {
-        return device.Clear();
-    } else if (!command.compare("print")) {
-        return device.Print(std::cout);
-    }
+	auto device = bhf::ads::MasterDcStatAccess(gw, netid, port);
+	if (!command.compare("activate")) {
+		return device.Activate();
+	} else if (!command.compare("deactivate")) {
+		return device.Deactivate();
+	} else if (!command.compare("clear")) {
+		return device.Clear();
+	} else if (!command.compare("print")) {
+		return device.Print(std::cout);
+	}
 
-    LOG_ERROR(__FUNCTION__ << "(): Unknown dc-diag command '" << command << "'\n");
-    return -1;
+	LOG_ERROR(__FUNCTION__ << "(): Unknown dc-diag command '" << command
+			       << "'\n");
+	return -1;
 }
 
-int RunECat(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunECat(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	    bhf::Commandline &args)
 {
-    const auto command = args.Pop<std::string>("ecat command is missing (list)");
+	const auto command =
+		args.Pop<std::string>("ecat command is missing (list)");
 
-    auto device = bhf::ads::ECatAccess(gw, netid, port);
-    if (!command.compare("list-masters")) {
-        return device.ListECatMasters(std::cout);
-    }
+	auto device = bhf::ads::ECatAccess(gw, netid, port);
+	if (!command.compare("list-masters")) {
+		return device.ListECatMasters(std::cout);
+	}
 
-    LOG_ERROR(__FUNCTION__ << "(): Unknown ecat command '" << command << "'\n");
-    return -1;
+	LOG_ERROR(__FUNCTION__ << "(): Unknown ecat command '" << command
+			       << "'\n");
+	return -1;
 }
 
-int RunFile(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunFile(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	    bhf::Commandline &args)
 {
-    const auto command = args.Pop<std::string>("file command is missing");
-    auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
+	const auto command = args.Pop<std::string>("file command is missing");
+	auto device = AdsDevice{ gw, netid, port ? port : uint16_t(10000) };
 
-    if (!command.compare("read")) {
-        const auto path = args.Pop<std::string>("path is missing");
-        const AdsFile adsFile { device, path,
-                                bhf::ads::FOPEN::READ | bhf::ads::FOPEN::BINARY |
-                                bhf::ads::FOPEN::ENSURE_DIR};
-        uint32_t bytesRead;
-        do {
-            std::vector<char> buf(1024 * 1024); // 1MB
-            adsFile.Read(buf.size(), buf.data(), bytesRead);
-            bhf::ForceBinaryOutputOnWindows();
-            std::cout.write(buf.data(), bytesRead);
-        } while (bytesRead > 0);
-    } else if (!command.compare("write")) {
-        bhf::ParameterList params = {
-            {"--append", true},
-        };
-        args.Parse(params);
-        const auto append = params.Get<bool>("--append");
-        const auto flags = (append ? bhf::ads::FOPEN::APPEND : bhf::ads::FOPEN::WRITE) |
-                           bhf::ads::FOPEN::BINARY |
-                           bhf::ads::FOPEN::PLUS |
-                           bhf::ads::FOPEN::ENSURE_DIR
-        ;
+	if (!command.compare("read")) {
+		const auto path = args.Pop<std::string>("path is missing");
+		const AdsFile adsFile{ device, path,
+				       bhf::ads::FOPEN::READ |
+					       bhf::ads::FOPEN::BINARY |
+					       bhf::ads::FOPEN::ENSURE_DIR };
+		uint32_t bytesRead;
+		do {
+			std::vector<char> buf(1024 * 1024); // 1MB
+			adsFile.Read(buf.size(), buf.data(), bytesRead);
+			bhf::ForceBinaryOutputOnWindows();
+			std::cout.write(buf.data(), bytesRead);
+		} while (bytesRead > 0);
+	} else if (!command.compare("write")) {
+		bhf::ParameterList params = {
+			{ "--append", true },
+		};
+		args.Parse(params);
+		const auto append = params.Get<bool>("--append");
+		const auto flags = (append ? bhf::ads::FOPEN::APPEND :
+					     bhf::ads::FOPEN::WRITE) |
+				   bhf::ads::FOPEN::BINARY |
+				   bhf::ads::FOPEN::PLUS |
+				   bhf::ads::FOPEN::ENSURE_DIR;
 
-        const auto path = args.Pop<std::string>("path is missing");
-        const AdsFile adsFile { device, path, flags};
-        std::vector<char> buf(1024 * 1024); // 1MB
-        auto length = read(0, buf.data(), buf.size());
-        while (length > 0) {
-            adsFile.Write(length, buf.data());
-            length = read(0, buf.data(), buf.size());
-        }
-    } else if (!command.compare("delete")) {
-        const auto path = args.Pop<std::string>("path is missing");
-        AdsFile::Delete(device, path, bhf::ads::FOPEN::READ | bhf::ads::FOPEN::ENABLE_DIR);
-    } else if (!command.compare("find")) {
-        bhf::ParameterList params = {
-            {"--maxdepth"},
-        };
-        args.Parse(params);
-        const auto maxdepth = params.Get<size_t>("--maxdepth", std::numeric_limits<size_t>::max());
+		const auto path = args.Pop<std::string>("path is missing");
+		const AdsFile adsFile{ device, path, flags };
+		std::vector<char> buf(1024 * 1024); // 1MB
+		auto length = read(0, buf.data(), buf.size());
+		while (length > 0) {
+			adsFile.Write(length, buf.data());
+			length = read(0, buf.data(), buf.size());
+		}
+	} else if (!command.compare("delete")) {
+		const auto path = args.Pop<std::string>("path is missing");
+		AdsFile::Delete(device, path,
+				bhf::ads::FOPEN::READ |
+					bhf::ads::FOPEN::ENABLE_DIR);
+	} else if (!command.compare("find")) {
+		bhf::ParameterList params = {
+			{ "--maxdepth" },
+		};
+		args.Parse(params);
+		const auto maxdepth = params.Get<size_t>(
+			"--maxdepth", std::numeric_limits<size_t>::max());
 
-        const auto path = args.Pop<std::string>("path is missing");
-        return AdsFile::Find(device, path, maxdepth, std::cout);
-    } else {
-        LOG_ERROR(__FUNCTION__ << "(): Unknown file command '" << command << "'\n");
-        return -1;
-    }
-    return 0;
+		const auto path = args.Pop<std::string>("path is missing");
+		return AdsFile::Find(device, path, maxdepth, std::cout);
+	} else {
+		LOG_ERROR(__FUNCTION__ << "(): Unknown file command '"
+				       << command << "'\n");
+		return -1;
+	}
+	return 0;
 }
 
-int RunRegistry(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunRegistry(const AmsNetId netid, const uint16_t port,
+		const std::string &gw, bhf::Commandline &args)
 {
-    const auto command = args.Pop<std::string>("registry command is missing");
+	const auto command =
+		args.Pop<std::string>("registry command is missing");
 
-    if (!command.compare("verify")) {
-        return bhf::ads::RegistryAccess::Verify(std::cin, std::cout);
-    }
+	if (!command.compare("verify")) {
+		return bhf::ads::RegistryAccess::Verify(std::cin, std::cout);
+	}
 
-    const auto reg = bhf::ads::RegistryAccess { gw, netid, port };
-    if (!command.compare("export")) {
-        const auto key = args.Pop<std::string>("registry key is missing");
-        return reg.Export(key, std::cout);
-    }
-    if (!command.compare("import")) {
-        return reg.Import(std::cin);
-    }
-    LOG_ERROR(__FUNCTION__ << "(): Unknown registry command '" << command << "'\n");
-    return -1;
+	const auto reg = bhf::ads::RegistryAccess{ gw, netid, port };
+	if (!command.compare("export")) {
+		const auto key =
+			args.Pop<std::string>("registry key is missing");
+		return reg.Export(key, std::cout);
+	}
+	if (!command.compare("import")) {
+		return reg.Import(std::cin);
+	}
+	LOG_ERROR(__FUNCTION__ << "(): Unknown registry command '" << command
+			       << "'\n");
+	return -1;
 }
 
-int RunLicense(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunLicense(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	       bhf::Commandline &args)
 {
-    auto device = bhf::ads::LicenseAccess{ gw, netid, port };
-    const auto command = args.Pop<std::string>();
+	auto device = bhf::ads::LicenseAccess{ gw, netid, port };
+	const auto command = args.Pop<std::string>();
 
-    if (!command.compare("onlineinfo")) {
-        return device.ShowOnlineInfo(std::cout);
-    } else if (!command.compare("platformid")) {
-        return device.ShowPlatformId(std::cout);
-    } else if (!command.compare("systemid")) {
-        return device.ShowSystemId(std::cout);
-    } else if (!command.compare("volumeno")) {
-        return device.ShowVolumeNo(std::cout);
-    } else {
-        LOG_ERROR(__FUNCTION__ << "(): Unknown license command '" << command << "'\n");
-        return -1;
-    }
+	if (!command.compare("onlineinfo")) {
+		return device.ShowOnlineInfo(std::cout);
+	} else if (!command.compare("platformid")) {
+		return device.ShowPlatformId(std::cout);
+	} else if (!command.compare("systemid")) {
+		return device.ShowSystemId(std::cout);
+	} else if (!command.compare("volumeno")) {
+		return device.ShowVolumeNo(std::cout);
+	} else {
+		LOG_ERROR(__FUNCTION__ << "(): Unknown license command '"
+				       << command << "'\n");
+		return -1;
+	}
 }
 
-int RunNetId(const std::string& remote)
+int RunNetId(const std::string &remote)
 {
-    AmsNetId netId;
-    bhf::ads::GetRemoteAddress(remote, netId);
-    std::cout << netId << '\n';
-    return 0;
+	AmsNetId netId;
+	bhf::ads::GetRemoteAddress(remote, netId);
+	std::cout << netId << '\n';
+	return 0;
 }
 
-int RunPCIScan(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunPCIScan(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	       bhf::Commandline &args)
 {
-    const auto device = bhf::ads::RouterAccess{ gw, netid, port };
-    auto pciId = args.Pop<uint64_t>("pciscan pci_id is missing");
+	const auto device = bhf::ads::RouterAccess{ gw, netid, port };
+	auto pciId = args.Pop<uint64_t>("pciscan pci_id is missing");
 
-    /* allow subVendorId/SystemId to be omitted from cmd */
-    if (std::numeric_limits<uint32_t>::max() >= pciId) {
-        pciId <<= 32;
-    }
-    return device.PciScan(pciId, std::cout);
+	/* allow subVendorId/SystemId to be omitted from cmd */
+	if (std::numeric_limits<uint32_t>::max() >= pciId) {
+		pciId <<= 32;
+	}
+	return device.PciScan(pciId, std::cout);
 }
 
-int RunPLC(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunPLC(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	   bhf::Commandline &args)
 {
-    auto device = bhf::ads::SymbolAccess{ gw, netid, port };
-    const auto command = args.Pop<std::string>("plc command is missing");
+	auto device = bhf::ads::SymbolAccess{ gw, netid, port };
+	const auto command = args.Pop<std::string>("plc command is missing");
 
-    if (!command.compare("read-symbol")) {
-        const auto name = args.Pop<std::string>("Variable name is missing");
-        return device.Read(name, std::cout);
-    } else if (!command.compare("write-symbol")) {
-        const auto name = args.Pop<std::string>("Variable name is missing");
-        const auto value = args.Pop<std::string>("Value is missing");
-        return device.Write(name, value);
-    } else if (!command.compare("show-symbols")) {
-        return device.ShowSymbols(std::cout);
-    }
-    LOG_ERROR(__FUNCTION__ << "(): Unknown PLC command '" << command << "'\n");
-    return -1;
+	if (!command.compare("read-symbol")) {
+		const auto name =
+			args.Pop<std::string>("Variable name is missing");
+		return device.Read(name, std::cout);
+	} else if (!command.compare("write-symbol")) {
+		const auto name =
+			args.Pop<std::string>("Variable name is missing");
+		const auto value = args.Pop<std::string>("Value is missing");
+		return device.Write(name, value);
+	} else if (!command.compare("show-symbols")) {
+		return device.ShowSymbols(std::cout);
+	}
+	LOG_ERROR(__FUNCTION__ << "(): Unknown PLC command '" << command
+			       << "'\n");
+	return -1;
 }
 
-int RunRTime(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunRTime(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	     bhf::Commandline &args)
 {
-    const auto command = args.Pop<std::string>("rtime command is missing");
-    auto device = bhf::ads::RTimeAccess{ gw, netid, port };
+	const auto command = args.Pop<std::string>("rtime command is missing");
+	auto device = bhf::ads::RTimeAccess{ gw, netid, port };
 
-    if (!command.compare("read-latency")) {
-        return device.ShowLatency(RTIME_READ_LATENCY);
-    } else if (!command.compare("reset-latency")) {
-        return device.ShowLatency(RTIME_RESET_LATENCY);
-    } else if (!command.compare("set-shared-cores")) {
-        const auto sharedCores = args.Pop<uint32_t>("Number of shared cores is missing");
-        return device.SetSharedCores(sharedCores);
-    } else {
-        LOG_ERROR(__FUNCTION__ << "(): Unknown rtime command'" << command << "'\n");
-        return -1;
-    }
+	if (!command.compare("read-latency")) {
+		return device.ShowLatency(RTIME_READ_LATENCY);
+	} else if (!command.compare("reset-latency")) {
+		return device.ShowLatency(RTIME_RESET_LATENCY);
+	} else if (!command.compare("set-shared-cores")) {
+		const auto sharedCores =
+			args.Pop<uint32_t>("Number of shared cores is missing");
+		return device.SetSharedCores(sharedCores);
+	} else {
+		LOG_ERROR(__FUNCTION__ << "(): Unknown rtime command'"
+				       << command << "'\n");
+		return -1;
+	}
 }
 
-int RunRaw(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunRaw(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	   bhf::Commandline &args)
 {
-    bhf::ParameterList params = {
-        {"--read"},
-    };
-    args.Parse(params);
+	bhf::ParameterList params = {
+		{ "--read" },
+	};
+	args.Parse(params);
 
-    const auto group = args.Pop<uint32_t>("IndexGroup is missing");
-    const auto offset = args.Pop<uint32_t>("IndexOffset is missing");
-    const auto readLen = params.Get<uint64_t>("--read");
+	const auto group = args.Pop<uint32_t>("IndexGroup is missing");
+	const auto offset = args.Pop<uint32_t>("IndexOffset is missing");
+	const auto readLen = params.Get<uint64_t>("--read");
 
-    LOG_VERBOSE("read: >" << readLen << "< group: >" << std::hex << group << "<offset:>" << offset << "<");
+	LOG_VERBOSE("read: >" << readLen << "< group: >" << std::hex << group
+			      << "<offset:>" << offset << "<");
 
-    std::vector<uint8_t> readBuffer(readLen);
-    std::vector<uint8_t> writeBuffer;
+	std::vector<uint8_t> readBuffer(readLen);
+	std::vector<uint8_t> writeBuffer;
 
-    if (!isatty(fileno(stdin))) {
-        char next_byte;
-        while (std::cin.read(&next_byte, 1)) {
-            writeBuffer.push_back(next_byte);
-        }
-    }
+	if (!isatty(fileno(stdin))) {
+		char next_byte;
+		while (std::cin.read(&next_byte, 1)) {
+			writeBuffer.push_back(next_byte);
+		}
+	}
 
-    if (!readBuffer.size() && !writeBuffer.size()) {
-        LOG_ERROR("write- and read-size is zero!\n");
-        return -1;
-    }
+	if (!readBuffer.size() && !writeBuffer.size()) {
+		LOG_ERROR("write- and read-size is zero!\n");
+		return -1;
+	}
 
-    auto device = AdsDevice { gw, netid, port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
-    long status = -1;
-    uint32_t bytesRead = 0;
-    if (!writeBuffer.size()) {
-        status = device.ReadReqEx2(group,
-                                   offset,
-                                   readBuffer.size(),
-                                   readBuffer.data(),
-                                   &bytesRead);
-    } else if (!readBuffer.size()) {
-        status = device.WriteReqEx(group,
-                                   offset,
-                                   writeBuffer.size(),
-                                   writeBuffer.data());
-    } else {
-        status = device.ReadWriteReqEx2(group,
-                                        offset,
-                                        readBuffer.size(),
-                                        readBuffer.data(),
-                                        writeBuffer.size(),
-                                        writeBuffer.data(),
-                                        &bytesRead);
-    }
+	auto device = AdsDevice{ gw, netid,
+				 port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
+	long status = -1;
+	uint32_t bytesRead = 0;
+	if (!writeBuffer.size()) {
+		status = device.ReadReqEx2(group, offset, readBuffer.size(),
+					   readBuffer.data(), &bytesRead);
+	} else if (!readBuffer.size()) {
+		status = device.WriteReqEx(group, offset, writeBuffer.size(),
+					   writeBuffer.data());
+	} else {
+		status = device.ReadWriteReqEx2(
+			group, offset, readBuffer.size(), readBuffer.data(),
+			writeBuffer.size(), writeBuffer.data(), &bytesRead);
+	}
 
-    if (ADSERR_NOERR != status) {
-        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-        return status;
-    }
-    bhf::ForceBinaryOutputOnWindows();
-    std::cout.write((const char*)readBuffer.data(), readBuffer.size());
-    return !std::cout.good();
+	if (ADSERR_NOERR != status) {
+		LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex
+				       << status << '\n');
+		return status;
+	}
+	bhf::ForceBinaryOutputOnWindows();
+	std::cout.write((const char *)readBuffer.data(), readBuffer.size());
+	return !std::cout.good();
 }
 
-int RunStartProcess(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunStartProcess(const AmsNetId netid, const uint16_t port,
+		    const std::string &gw, bhf::Commandline &args)
 {
-    auto device = AdsDevice{ gw, netid, port ? port : uint16_t(10000) };
+	auto device = AdsDevice{ gw, netid, port ? port : uint16_t(10000) };
 
-    bhf::ParameterList params = {
-        {"--directory"},
-        {"--hidden", true},
-    };
-    args.Parse(params);
+	bhf::ParameterList params = {
+		{ "--directory" },
+		{ "--hidden", true },
+	};
+	args.Parse(params);
 
-    const auto application = args.Pop<std::string>("application is missing");
-    if (std::numeric_limits<uint32_t>::max() < application.length()) {
-        LOG_ERROR("The length of <application> exceeds its 32bit value limit");
-        return 1;
-    }
+	const auto application =
+		args.Pop<std::string>("application is missing");
+	if (std::numeric_limits<uint32_t>::max() < application.length()) {
+		LOG_ERROR(
+			"The length of <application> exceeds its 32bit value limit");
+		return 1;
+	}
 
-    const auto directory = params.Get<std::string>("--directory");
-    if (std::numeric_limits<uint32_t>::max() < directory.length()) {
-        LOG_ERROR("The length of <directory> exceeds its 32bit value limit");
-        return 1;
-    }
+	const auto directory = params.Get<std::string>("--directory");
+	if (std::numeric_limits<uint32_t>::max() < directory.length()) {
+		LOG_ERROR(
+			"The length of <directory> exceeds its 32bit value limit");
+		return 1;
+	}
 
-    const auto commandline = args.Pop<std::string>();
-    if (std::numeric_limits<uint32_t>::max() < commandline.length()) {
-        LOG_ERROR("The length of <commandline> exceeds its 32bit value limit");
-        return 1;
-    }
+	const auto commandline = args.Pop<std::string>();
+	if (std::numeric_limits<uint32_t>::max() < commandline.length()) {
+		LOG_ERROR(
+			"The length of <commandline> exceeds its 32bit value limit");
+		return 1;
+	}
 
-    struct AdsStartProcessHeader {
-        uint32_t leApplicationLength;
-        uint32_t leDirectoryLength;
-        uint32_t leCommandlineLength;
-        const uint8_t* cdata() const
-        {
-            return reinterpret_cast<const uint8_t*>(&leApplicationLength);
-        }
-    } header = {
-        bhf::ads::htole<uint32_t>(application.length()),
-        bhf::ads::htole<uint32_t>(directory.length()),
-        bhf::ads::htole<uint32_t>(commandline.length()),
-    };
+	struct AdsStartProcessHeader {
+		uint32_t leApplicationLength;
+		uint32_t leDirectoryLength;
+		uint32_t leCommandlineLength;
+		const uint8_t *cdata() const
+		{
+			return reinterpret_cast<const uint8_t *>(
+				&leApplicationLength);
+		}
+	} header = {
+		bhf::ads::htole<uint32_t>(application.length()),
+		bhf::ads::htole<uint32_t>(directory.length()),
+		bhf::ads::htole<uint32_t>(commandline.length()),
+	};
 
-    std::vector<uint8_t> data;
-    std::copy_n(header.cdata(), sizeof(header), std::back_inserter(data));
-    // empty strings (zero terminators) always need to be present
-    std::move(application.begin(), application.end(), std::back_inserter(data));
-    data.push_back(0);
-    std::move(directory.begin(), directory.end(), std::back_inserter(data));
-    data.push_back(0);
-    std::move(commandline.begin(), commandline.end(), std::back_inserter(data));
-    data.push_back(0);
+	std::vector<uint8_t> data;
+	std::copy_n(header.cdata(), sizeof(header), std::back_inserter(data));
+	// empty strings (zero terminators) always need to be present
+	std::move(application.begin(), application.end(),
+		  std::back_inserter(data));
+	data.push_back(0);
+	std::move(directory.begin(), directory.end(), std::back_inserter(data));
+	data.push_back(0);
+	std::move(commandline.begin(), commandline.end(),
+		  std::back_inserter(data));
+	data.push_back(0);
 
-    uint32_t opts = params.Get<bool>("--hidden") << sizeof(uint16_t) * 8;
+	uint32_t opts = params.Get<bool>("--hidden") << sizeof(uint16_t) * 8;
 
-    const auto status = device.WriteReqEx(SYSTEMSERVICE_STARTPROCESS, opts, data.size(), data.data());
-    if (ADSERR_NOERR != status) {
-        LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-    }
+	const auto status = device.WriteReqEx(SYSTEMSERVICE_STARTPROCESS, opts,
+					      data.size(), data.data());
+	if (ADSERR_NOERR != status) {
+		LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex
+				       << status << '\n');
+	}
 
-    return status;
+	return status;
 }
 
-int RunState(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunState(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	     bhf::Commandline &args)
 {
-    bhf::ParameterList params = {
-        {"--compare", true},
-    };
-    args.Parse(params);
+	bhf::ParameterList params = {
+		{ "--compare", true },
+	};
+	args.Parse(params);
 
-    std::set<int> stateList;
-    while (const auto value = args.Pop<const char*>()) {
-        const auto requestedState = stateList.insert(std::stoi(value)).first;
-        if (*requestedState >= ADSSTATE::ADSSTATE_MAXSTATES) {
-            usage("Requested state '" + std::to_string(*requestedState) + "' exceeds max (" +
-                  std::to_string(ADSSTATE::ADSSTATE_MAXSTATES) + ")\n");
-        }
-    }
-    auto device = AdsDevice { gw, netid, port ? port : uint16_t(10000) };
-    const auto oldState = device.GetState();
-    if (params.Get<bool>("--compare")) {
-        if (stateList.empty()) {
-            usage("--compare requires at least one state");
-        }
-        // TODO: switch to std::set::contains() with c++20
-        return stateList.end() == stateList.find(oldState.ads);
-    }
+	std::set<int> stateList;
+	while (const auto value = args.Pop<const char *>()) {
+		const auto requestedState =
+			stateList.insert(std::stoi(value)).first;
+		if (*requestedState >= ADSSTATE::ADSSTATE_MAXSTATES) {
+			usage("Requested state '" +
+			      std::to_string(*requestedState) +
+			      "' exceeds max (" +
+			      std::to_string(ADSSTATE::ADSSTATE_MAXSTATES) +
+			      ")\n");
+		}
+	}
+	auto device = AdsDevice{ gw, netid, port ? port : uint16_t(10000) };
+	const auto oldState = device.GetState();
+	if (params.Get<bool>("--compare")) {
+		if (stateList.empty()) {
+			usage("--compare requires at least one state");
+		}
+		// TODO: switch to std::set::contains() with c++20
+		return stateList.end() == stateList.find(oldState.ads);
+	}
 
-    if (!stateList.empty()) {
-        try {
-            device.SetState(static_cast<ADSSTATE>(*stateList.begin()), oldState.device);
-        } catch (const AdsException& ex) {
-            // ignore AdsError 1861 after RUN/CONFIG mode change
-            if (ex.errorCode != 1861) {
-                throw;
-            }
-        }
-    } else {
-        std::cout << std::dec << (int)oldState.ads << '\n';
-    }
-    return 0;
+	if (!stateList.empty()) {
+		try {
+			device.SetState(
+				static_cast<ADSSTATE>(*stateList.begin()),
+				oldState.device);
+		} catch (const AdsException &ex) {
+			// ignore AdsError 1861 after RUN/CONFIG mode change
+			if (ex.errorCode != 1861) {
+				throw;
+			}
+		}
+	} else {
+		std::cout << std::dec << (int)oldState.ads << '\n';
+	}
+	return 0;
 }
 
-template<typename T>
-int PrintAs(const std::vector<uint8_t>& readBuffer)
+template <typename T> int PrintAs(const std::vector<uint8_t> &readBuffer)
 {
-    const auto v = *(reinterpret_cast<const T*>(readBuffer.data()));
-    std::cout << std::dec << bhf::ads::letoh(v) << '\n';
-    return !std::cout.good();
+	const auto v = *(reinterpret_cast<const T *>(readBuffer.data()));
+	std::cout << std::dec << bhf::ads::letoh(v) << '\n';
+	return !std::cout.good();
 }
 
-template<>
-int PrintAs<uint8_t>(const std::vector<uint8_t>& readBuffer)
+template <> int PrintAs<uint8_t>(const std::vector<uint8_t> &readBuffer)
 {
-    std::cout << std::dec << (int)readBuffer[0] << '\n';
-    return !std::cout.good();
+	std::cout << std::dec << (int)readBuffer[0] << '\n';
+	return !std::cout.good();
 }
 
-template<typename T>
-int Write(const AdsDevice& device, const AdsHandle& handle, const char* const value)
+template <typename T>
+int Write(const AdsDevice &device, const AdsHandle &handle,
+	  const char *const value)
 {
-    const auto writeBuffer = bhf::ads::htole(bhf::StringTo<T>(value));
-    const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                          *handle,
-                                          sizeof(writeBuffer),
-                                          &writeBuffer);
-    return status;
+	const auto writeBuffer = bhf::ads::htole(bhf::StringTo<T>(value));
+	const auto status = device.WriteReqEx(ADSIGRP_SYM_VALBYHND, *handle,
+					      sizeof(writeBuffer),
+					      &writeBuffer);
+	return status;
 }
 
-int RunVar(const AmsNetId netid, const uint16_t port, const std::string& gw, bhf::Commandline& args)
+int RunVar(const AmsNetId netid, const uint16_t port, const std::string &gw,
+	   bhf::Commandline &args)
 {
-    bhf::ParameterList params = {
-        {"--type"},
-    };
-    args.Parse(params);
+	bhf::ParameterList params = {
+		{ "--type" },
+	};
+	args.Parse(params);
 
-    const auto name = args.Pop<std::string>("Variable name is missing");
-    const auto value = args.Pop<const char*>();
-    static const std::map<const std::string, size_t> typeMap = {
-        {"BOOL", 1},
-        {"BYTE", 1},
-        {"WORD", 2},
-        {"DWORD", 4},
-        {"LWORD", 8},
-        {"STRING", 255},
-    };
-    const auto type = params.Get<std::string>("--type");
-    const auto it = typeMap.find(type);
-    if (typeMap.end() == it) {
-        LOG_ERROR(__FUNCTION__ << "(): Unknown TwinCAT type '" << type << "'\n");
-        return -1;
-    }
-    const auto size = it->second;
+	const auto name = args.Pop<std::string>("Variable name is missing");
+	const auto value = args.Pop<const char *>();
+	static const std::map<const std::string, size_t> typeMap = {
+		{ "BOOL", 1 },	{ "BYTE", 1 },	{ "WORD", 2 },
+		{ "DWORD", 4 }, { "LWORD", 8 }, { "STRING", 255 },
+	};
+	const auto type = params.Get<std::string>("--type");
+	const auto it = typeMap.find(type);
+	if (typeMap.end() == it) {
+		LOG_ERROR(__FUNCTION__ << "(): Unknown TwinCAT type '" << type
+				       << "'\n");
+		return -1;
+	}
+	const auto size = it->second;
 
-    auto device = AdsDevice { gw, netid, port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
-    const auto handle = device.GetHandle(name);
+	auto device = AdsDevice{ gw, netid,
+				 port ? port : uint16_t(AMSPORT_R0_PLC_TC3) };
+	const auto handle = device.GetHandle(name);
 
-    if (!value) {
-        std::vector<uint8_t> readBuffer(size);
-        uint32_t bytesRead = 0;
-        const auto status = device.ReadReqEx2(ADSIGRP_SYM_VALBYHND,
-                                              *handle,
-                                              readBuffer.size(),
-                                              readBuffer.data(),
-                                              &bytesRead);
-        if (ADSERR_NOERR != status) {
-            LOG_ERROR(__FUNCTION__ << "(): failed with: 0x" << std::hex << status << '\n');
-            return status;
-        }
+	if (!value) {
+		std::vector<uint8_t> readBuffer(size);
+		uint32_t bytesRead = 0;
+		const auto status = device.ReadReqEx2(
+			ADSIGRP_SYM_VALBYHND, *handle, readBuffer.size(),
+			readBuffer.data(), &bytesRead);
+		if (ADSERR_NOERR != status) {
+			LOG_ERROR(__FUNCTION__ << "(): failed with: 0x"
+					       << std::hex << status << '\n');
+			return status;
+		}
 
-        switch (bytesRead) {
-        case sizeof(uint8_t):
-            return PrintAs<uint8_t>(readBuffer);
+		switch (bytesRead) {
+		case sizeof(uint8_t):
+			return PrintAs<uint8_t>(readBuffer);
 
-        case sizeof(uint16_t):
-            return PrintAs<uint16_t>(readBuffer);
+		case sizeof(uint16_t):
+			return PrintAs<uint16_t>(readBuffer);
 
-        case sizeof(uint32_t):
-            return PrintAs<uint32_t>(readBuffer);
+		case sizeof(uint32_t):
+			return PrintAs<uint32_t>(readBuffer);
 
-        case sizeof(uint64_t):
-            return PrintAs<uint64_t>(readBuffer);
+		case sizeof(uint64_t):
+			return PrintAs<uint64_t>(readBuffer);
 
-        default:
-            bhf::ForceBinaryOutputOnWindows();
-            std::cout.write((const char*)readBuffer.data(), bytesRead);
-            return !std::cout.good();
-        }
-    }
+		default:
+			bhf::ForceBinaryOutputOnWindows();
+			std::cout.write((const char *)readBuffer.data(),
+					bytesRead);
+			return !std::cout.good();
+		}
+	}
 
-    LOG_VERBOSE("name>" << name << "< value>" << value << "<\n");
-    LOG_VERBOSE("size>" << size << "< value>" << value << "<\n");
+	LOG_VERBOSE("name>" << name << "< value>" << value << "<\n");
+	LOG_VERBOSE("size>" << size << "< value>" << value << "<\n");
 
-    switch (size) {
-    case sizeof(uint8_t):
-        return Write<uint8_t>(device, handle, value);
+	switch (size) {
+	case sizeof(uint8_t):
+		return Write<uint8_t>(device, handle, value);
 
-    case sizeof(uint16_t):
-        return Write<uint16_t>(device, handle, value);
+	case sizeof(uint16_t):
+		return Write<uint16_t>(device, handle, value);
 
-    case sizeof(uint32_t):
-        return Write<uint32_t>(device, handle, value);
+	case sizeof(uint32_t):
+		return Write<uint32_t>(device, handle, value);
 
-    case sizeof(uint64_t):
-        return Write<uint64_t>(device, handle, value);
+	case sizeof(uint64_t):
+		return Write<uint64_t>(device, handle, value);
 
-    default:
-        {
-            auto writeBuffer = std::vector<char>(size);
-            strncpy(writeBuffer.data(), value, writeBuffer.size());
-            return device.WriteReqEx(ADSIGRP_SYM_VALBYHND,
-                                     *handle,
-                                     writeBuffer.size(),
-                                     writeBuffer.data());
-        }
-    }
+	default: {
+		auto writeBuffer = std::vector<char>(size);
+		strncpy(writeBuffer.data(), value, writeBuffer.size());
+		return device.WriteReqEx(ADSIGRP_SYM_VALBYHND, *handle,
+					 writeBuffer.size(),
+					 writeBuffer.data());
+	}
+	}
 }
 
-template<typename T>
-int TryRun(T f)
+template <typename T> int TryRun(T f)
 {
-    try {
-        return f();
-    } catch (const AdsException& ex) {
-        LOG_ERROR("AdsException message: " << ex.what() << '\n');
-        return ex.errorCode;
-    } catch (const std::exception& ex) {
-        LOG_ERROR("Exception: " << ex.what() << '\n');
-        return -2;
-    } catch (...) {
-        LOG_ERROR("Unknown exception\n");
-        return -1;
-    }
+	try {
+		return f();
+	} catch (const AdsException &ex) {
+		LOG_ERROR("AdsException message: " << ex.what() << '\n');
+		return ex.errorCode;
+	} catch (const std::exception &ex) {
+		LOG_ERROR("Exception: " << ex.what() << '\n');
+		return -2;
+	} catch (...) {
+		LOG_ERROR("Unknown exception\n");
+		return -1;
+	}
 }
 
-template<typename T>
-int Run(T f, size_t retries)
+template <typename T> int Run(T f, size_t retries)
 {
-    auto result = TryRun(f);
+	auto result = TryRun(f);
 
-    // success or no retry allowed
-    if (!result || !retries) {
-        return result;
-    }
+	// success or no retry allowed
+	if (!result || !retries) {
+		return result;
+	}
 
-    while (retries-- > 0) {
-        LOG_WARN("Command failed, retrying...\n");
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        result = TryRun(f);
-        if (!result) {
-            return 0;
-        }
-    }
-    LOG_ERROR("Too many retries, giving up!\n");
-    return result;
+	while (retries-- > 0) {
+		LOG_WARN("Command failed, retrying...\n");
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		result = TryRun(f);
+		if (!result) {
+			return 0;
+		}
+	}
+	LOG_ERROR("Too many retries, giving up!\n");
+	return result;
 }
 
-int ParseCommand(int argc, const char* argv[])
+int ParseCommand(int argc, const char *argv[])
 {
-    auto args = bhf::Commandline {usage, argc, argv};
+	auto args = bhf::Commandline{ usage, argc, argv };
 
-    // drop argv[0] program name
-    args.Pop<const char*>();
-    const auto str = args.Pop<const char*>("Target is missing");
-    if (!strcmp("--help", str)) {
-        usage();
-    } else if (!strcmp("--version", str)) {
-        return version();
-    }
-    const auto split = std::strcspn(str, ":");
-    const auto netId = std::string {str, split};
-    const auto port = bhf::try_stoi<uint16_t>(str + split);
-    LOG_VERBOSE("NetId>" << netId << "< port>" << port << "<\n");
+	// drop argv[0] program name
+	args.Pop<const char *>();
+	const auto str = args.Pop<const char *>("Target is missing");
+	if (!strcmp("--help", str)) {
+		usage();
+	} else if (!strcmp("--version", str)) {
+		return version();
+	}
+	const auto split = std::strcspn(str, ":");
+	const auto netId = std::string{ str, split };
+	const auto port = bhf::try_stoi<uint16_t>(str + split);
+	LOG_VERBOSE("NetId>" << netId << "< port>" << port << "<\n");
 
-    bhf::ParameterList global = {
-        {"--gw"},
-        {"--localams"},
-        {"--log-level"},
-        {"--retry"},
-    };
-    args.Parse(global);
+	bhf::ParameterList global = {
+		{ "--gw" },
+		{ "--localams" },
+		{ "--log-level" },
+		{ "--retry" },
+	};
+	args.Parse(global);
 
-    const auto retries = global.Get<size_t>("--retry", 0);
-    const auto localNetId = global.Get<std::string>("--localams");
-    if (!localNetId.empty()) {
-        bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
-    }
+	const auto retries = global.Get<size_t>("--retry", 0);
+	const auto localNetId = global.Get<std::string>("--localams");
+	if (!localNetId.empty()) {
+		bhf::ads::SetLocalAddress(make_AmsNetId(localNetId));
+	}
 
-    const auto logLevel = global.Get<size_t>("--log-level", 1);
-    // highest loglevel is error==3, we allow 4 to disable all messages
-    Logger::logLevel = std::min(logLevel, (size_t)4);
+	const auto logLevel = global.Get<size_t>("--log-level", 1);
+	// highest loglevel is error==3, we allow 4 to disable all messages
+	Logger::logLevel = std::min(logLevel, (size_t)4);
 
-    const auto cmd = args.Pop<const char*>("Command is missing");
-    if (!strcmp("addroute", cmd)) {
-        return Run(std::bind(RunAddRoute, netId, args), retries);
-    } else if (!strcmp("netid", cmd)) {
-        return Run(std::bind(RunNetId, netId), retries);
-    }
+	const auto cmd = args.Pop<const char *>("Command is missing");
+	if (!strcmp("addroute", cmd)) {
+		return Run(std::bind(RunAddRoute, netId, args), retries);
+	} else if (!strcmp("netid", cmd)) {
+		return Run(std::bind(RunNetId, netId), retries);
+	}
 
-    const auto commands = CommandMap {
-        {"dc-diag", RunDCDiag},
-        {"ecat", RunECat},
-        {"file", RunFile},
-        {"registry", RunRegistry},
-        {"license", RunLicense},
-        {"pciscan", RunPCIScan},
-        {"plc", RunPLC},
-        {"raw", RunRaw},
-        {"rtime", RunRTime},
-        {"startprocess", RunStartProcess},
-        {"state", RunState},
-        {"var", RunVar},
-    };
-    const auto it = commands.find(cmd);
-    if (it != commands.end()) {
-        return Run(std::bind(it->second, make_AmsNetId(netId), port, global.Get<std::string>("--gw"), args), retries);
-    }
-    usage(std::string {"Unknown command >"} + cmd + "<\n");
+	const auto commands = CommandMap{
+		{ "dc-diag", RunDCDiag },  { "ecat", RunECat },
+		{ "file", RunFile },	   { "registry", RunRegistry },
+		{ "license", RunLicense }, { "pciscan", RunPCIScan },
+		{ "plc", RunPLC },	   { "raw", RunRaw },
+		{ "rtime", RunRTime },	   { "startprocess", RunStartProcess },
+		{ "state", RunState },	   { "var", RunVar },
+	};
+	const auto it = commands.find(cmd);
+	if (it != commands.end()) {
+		return Run(std::bind(it->second, make_AmsNetId(netId), port,
+				     global.Get<std::string>("--gw"), args),
+			   retries);
+	}
+	usage(std::string{ "Unknown command >" } + cmd + "<\n");
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, const char *argv[])
 {
-    return TryRun(std::bind(ParseCommand, argc, argv));
+	return TryRun(std::bind(ParseCommand, argc, argv));
 }

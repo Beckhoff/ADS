@@ -12,17 +12,17 @@
 #endif
 
 #include <iosfwd>
-bool operator<(const AmsNetId& lhs, const AmsNetId& rhs);
-bool operator<(const AmsAddr& lhs, const AmsAddr& rhs);
-std::ostream& operator<<(std::ostream& os, const AmsNetId& netId);
-AmsNetId make_AmsNetId(const std::string& addr);
+bool operator<(const AmsNetId &lhs, const AmsNetId &rhs);
+bool operator<(const AmsAddr &lhs, const AmsAddr &rhs);
+std::ostream &operator<<(std::ostream &os, const AmsNetId &netId);
+AmsNetId make_AmsNetId(const std::string &addr);
 
 namespace bhf
 {
 namespace ads
 {
 enum nSystemServiceOpenFile : uint32_t {
-    SYSTEMSERVICE_OPENGENERIC /*[[deprecated]]*/ = 1,
+	SYSTEMSERVICE_OPENGENERIC /*[[deprecated]]*/ = 1,
 };
 }
 }

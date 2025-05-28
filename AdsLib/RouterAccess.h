@@ -12,10 +12,11 @@ namespace bhf
 namespace ads
 {
 struct RouterAccess {
-    RouterAccess(const std::string& gw, AmsNetId netid, uint16_t port);
-    bool PciScan(uint64_t pci_id, std::ostream& os) const;
-private:
-    AdsDevice device;
+	RouterAccess(const std::string &gw, AmsNetId netid, uint16_t port);
+	bool PciScan(uint64_t pci_id, std::ostream &os) const;
+
+    private:
+	AdsDevice device;
 };
 }
 }

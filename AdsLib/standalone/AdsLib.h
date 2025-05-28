@@ -29,7 +29,7 @@ long AdsPortOpenEx();
  * @param[out] pAddr Pointer to the structure of type AmsAddr.
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
-long AdsGetLocalAddressEx(long port, AmsAddr* pAddr);
+long AdsGetLocalAddressEx(long port, AmsAddr *pAddr);
 
 /**
  * Alters the timeout for the ADS functions. The standard value is 5000 ms.

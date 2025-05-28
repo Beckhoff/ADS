@@ -26,22 +26,22 @@ typedef int SOCKET;
 #define CONNECTION_ABORTED ECONNABORTED
 inline int InitSocketLibrary(void)
 {
-    return 0;
+	return 0;
 }
 #define NATIVE_SELECT(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT) \
-    ::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
+	::select(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 #else // defined(_WIN32) && !defined(__CYGWIN__)
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
 #include <winsock2.h>
 #include <ws2tcpip.h>
 inline int InitSocketLibrary(void)
 {
-    WSADATA wsaData;
-    return WSAStartup(0x0202, &wsaData);
+	WSADATA wsaData;
+	return WSAStartup(0x0202, &wsaData);
 }
 
 #define NATIVE_SELECT(SOCK, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT) \
-    ::select(0, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
+	::select(0, READFDS, WRITEFDS, EXCEPTFDS, TIMEOUT)
 
 #define s_addr S_un.S_addr
 typedef int socklen_t;
