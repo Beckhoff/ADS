@@ -1,3 +1,10 @@
+adstool (113.0.29-1) trixie; urgency=medium
+
+  * ci: build with Debian trixie(13)
+  * standalone/AmsRouter::AddRoute(): preserve exception type
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Wed, 28 May 2025 12:08:06 +0200
+
 adstool (0.0.28-1) bookworm; urgency=medium
 
   * Drop CHANGES file, use debian/changelog instead
