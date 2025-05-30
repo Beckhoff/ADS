@@ -50,7 +50,7 @@ Prepare your target to run the example
     - TcAmsRemoteMgr:
       Windows CE devices can be configured locally (TC2 requires a TwinCAT restart). Tool location: `/Hard Disk/System/TcAmsRemoteMgr.exe`
     - IPC Diagnose:
-      Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/index.html?id=286
+      Beckhoff IPC’s provide a web interface for diagnose and configuration. Further information: http://infosys.beckhoff.de/content/1033/devicemanager/index.html
 
 Sample AMS route:
 ```
@@ -65,6 +65,8 @@ Sample AMS route:
 
 Prepare your client to run the example/example.cpp
 ==================================================
+## Without TwinCAT on the client
+Use this option for system with no TwinCAT 3.1 installtion:
 - set "remoteNetId" to the AMS NetId of your TwinCAT target (this is the AMS NetId found in the "About TwinCAT System window" e.g. "192.168.0.2.1.1").
 - set "remoteIpV4" to the IP Address of your TwinCAT target (e.g. 192.168.0.2)
 - (optional) enable bhf::ads::SetLocalAddress() and set to the AMS NetId you choose for the ADS client (e.g. 192.168.0.1.1.1).
@@ -77,5 +79,36 @@ ninja -C example/build
 # and run the example
 ./example/build/example
 ```
+## On TC/BSD with TwinCAT installed, you can use the local TwinCAT router
+```shell
+# Install toolchain
+doas install os-generic-userland-devtools
+# configure meson to build example into "build" dir
+meson example/build example --native-file meson.native.tcbsd
+# let ninja build the example
+ninja -C example/build
+# and run the example
+./example/build/example
+```
+## On Beckhoff RT Linux  with TwinCAT installed, you can use the local TwinCAT router
+```shell
+# configure meson to build example into "build" dir
+meson example/build example --native-file meson.native.tclur
+# let ninja build the example
+ninja -C example/build
+# and run the example
+./example/build/example
+```
+
+Note: the name of the binaries which use the TwinCAT ADS Router have a different naming scheme
+
+binary     | standalone | use TwinCAT Router
+-----------|------------|-------------------
+AdsLib     |     x      | 
+TcAdsLib   |            | x 
+adstool    |     x      | 
+tcadstool  |            | x 
+example    |     x      | 
+tcexample  |            | x 
 ---
 ADS/AMS Specification: https://infosys.beckhoff.com/content/1033/tc3_ads_intro/index.html
