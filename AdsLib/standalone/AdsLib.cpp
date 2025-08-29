@@ -182,7 +182,7 @@ long AdsSyncWriteReqEx(long port, const AmsAddr *pAddr, uint32_t indexGroup,
 		       const void *buffer)
 {
 	ASSERT_PORT_AND_AMSADDR(port, pAddr);
-	if (!buffer) {
+	if (bufferLength && !buffer) {
 		return ADSERR_CLIENT_INVALIDPARM;
 	}
 
