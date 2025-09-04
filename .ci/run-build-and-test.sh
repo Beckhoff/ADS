@@ -31,6 +31,7 @@ case "${CI_JOB_NAME}" in
 		;;
 	*tcbsd*):
 		BHF_CI_MESON_OPTIONS='--native-file meson.native.tcbsd'
+		SUDO_CMD=doas
 		;;
 	*tclur*):
 		BHF_CI_MESON_OPTIONS='--native-file meson.native.tclur'
@@ -43,6 +44,12 @@ meson setup build ${BHF_CI_MESON_OPTIONS-}
 ninja -C build
 meson setup example/build example ${BHF_CI_MESON_OPTIONS-}
 ninja -C example/build
+
+# pkg-config makes cross-compiling a nightmare so we still stick to manual
+# dependencies in our example/meson.build. However, to make native builds
+# more easy we added pkg-config support. So here we go and explicitly test
+# the "install" target, after we already build the "example".
+${SUDO_CMD-} ninja -C build install
 
 # If the job name contains 'test' we run tests, too.
 case "${CI_JOB_NAME}" in

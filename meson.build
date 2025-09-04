@@ -39,6 +39,46 @@ router_files = files([
   'AdsLib/standalone/NotificationDispatcher.cpp',
 ])
 
+install_headers(
+  'AdsLib/AdsDef.h',
+  'AdsLib/AdsDevice.h',
+  'AdsLib/AdsException.h',
+  'AdsLib/AdsFile.h',
+  'AdsLib/AdsLib.h',
+  'AdsLib/AdsNotification.h',
+  'AdsLib/AdsNotificationOOI.h',
+  'AdsLib/AdsVariable.h',
+  'AdsLib/AmsConnection.h',
+  'AdsLib/AmsHeader.h',
+  'AdsLib/AmsPort.h',
+  'AdsLib/AmsRouter.h',
+  'AdsLib/ECatAccess.h',
+  'AdsLib/Frame.h',
+  'AdsLib/LicenseAccess.h',
+  'AdsLib/Log.h',
+  'AdsLib/MasterDcStatAccess.h',
+  'AdsLib/NotificationDispatcher.h',
+  'AdsLib/RTimeAccess.h',
+  'AdsLib/RegistryAccess.h',
+  'AdsLib/RingBuffer.h',
+  'AdsLib/Router.h',
+  'AdsLib/RouterAccess.h',
+  'AdsLib/Semaphore.h',
+  'AdsLib/Sockets.h',
+  'AdsLib/SymbolAccess.h',
+  'AdsLib/TwinCAT/AdsDef.h',
+  'AdsLib/TwinCAT/AdsLib.h',
+  'AdsLib/bhf/ParameterList.h',
+  'AdsLib/bhf/StringToInteger.h',
+  'AdsLib/bhf/WindowsQuirks.h',
+  'AdsLib/standalone/AdsDef.h',
+  'AdsLib/standalone/AdsLib.h',
+  'AdsLib/wrap_endian.h',
+  'AdsLib/wrap_registry.h',
+  'AdsLib/wrap_socket.h',
+  subdir: 'AdsLib'
+)
+
 inc = include_directories([
   'AdsLib',
   'tools',
@@ -54,6 +94,8 @@ adslib = static_library('AdsLib',
   include_directories: inc,
   install: true,
 )
+
+install_libs = [ adslib ]
 
 adslib_dep = declare_dependency(
   include_directories : inc,
@@ -89,7 +131,9 @@ if get_option('tcadsdll_include') != ''
       get_option('tcadsdll_include'),
       inc,
     ],
+    install: true,
   )
+  install_libs += [ tcadslib ]
 
   tcadsdll_deps = [
       meson.get_compiler('cpp').find_library('TcAdsDll', dirs: get_option('tcadsdll_lib')),
@@ -109,3 +153,14 @@ if get_option('tcadsdll_include') != ''
     link_with: tcadslib,
   )
 endif
+
+pkg = import('pkgconfig')
+pkg.generate(
+  name: 'AdsLib',
+  description: 'Static library for AdsLib',
+  filebase: 'AdsLib',
+  subdirs: 'AdsLib',
+  libraries: install_libs,
+  version: meson.project_version(),
+)
+
