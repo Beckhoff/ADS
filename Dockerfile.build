@@ -10,8 +10,8 @@ RUN apt-get update \
 		g++-mips-linux-gnu \
 		g++-riscv64-linux-gnu \
 		libadscomm-dev \
-		libstdc++-dev-mips-cross \
-		libstdc++-dev-riscv64-cross \
+		libstdc++-14-dev-mips-cross \
+		libstdc++-14-dev-riscv64-cross \
 		meson \
 		qemu-user-binfmt \
 		socat \
@@ -24,7 +24,7 @@ RUN apt-get update \
 # configuration to use upstream servers. This should be okay until somebody
 # tries to use this container as a basis for another one.
 RUN rm /etc/apt/sources.list.d/*
-RUN printf 'deb https://deb.debian.org/debian bookworm main contrib non-free-firmware\n' > /etc/apt/sources.list.d/i386.list
+RUN printf 'deb https://deb.debian.org/debian trixie main contrib non-free-firmware\n' > /etc/apt/sources.list.d/i386.list
 RUN dpkg --add-architecture i386
 RUN apt-get update \
         && apt-get install --yes --no-install-recommends \
