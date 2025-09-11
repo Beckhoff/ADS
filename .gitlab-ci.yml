@@ -167,6 +167,26 @@ test-pack:
     reports:
       dotenv: test-pack.env
 
+test-registry:
+  stage: test
+  needs: [ 'test-pack' ]
+  parallel:
+    matrix:
+      - DOWNSTREAM: build-tcrtos
+        BHF_CI_SKIP_TEST_HARDWARE: 'n'
+      - DOWNSTREAM: tcbsd-ports
+        BHF_CI_SKIP_TEST_HARDWARE: 'y'
+      - DOWNSTREAM: test-tcos
+        BHF_CI_SKIP_TEST_HARDWARE: 'y'
+      - DOWNSTREAM: test-windows
+        BHF_CI_SKIP_TEST_HARDWARE: 'y'
+  trigger:
+    project: beckhoff/${DOWNSTREAM}
+    strategy: depend
+    forward:
+      pipeline_variables: true
+  when: manual
+
 build-debian:
   parallel:
     matrix:
@@ -199,3 +219,14 @@ release-push:
       when: never
     - when: on_success
   allow_failure: true
+
+release-test-pack:
+  stage: deploy
+  needs: [ "test-pack" ]
+  before_script:
+    - export AWS_ACCESS_KEY_ID=test-packs
+    - export AWS_SECRET_ACCESS_KEY="${S3_TEST_PACKS_PASS}"
+  script: test-pack release
+  rules:
+    - if: ($CI_DEFAULT_BRANCH == $CI_COMMIT_BRANCH) && (($CI_PIPELINE_SOURCE == "push") || ($CI_PIPELINE_SOURCE == "schedule"))
+      when: manual
