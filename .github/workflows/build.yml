@@ -8,7 +8,7 @@ jobs:
         run: sudo apt update -y && sudo apt install -y meson
       - uses: actions/checkout@v2
       - name: compile library
-        run: meson build && ninja -C build && ninja -C build install
+        run: meson build && ninja -C build && sudo ninja -C build install
       - name: compile example
         run: meson example/build example && ninja -C example/build
       - uses: actions/upload-artifact@v4
