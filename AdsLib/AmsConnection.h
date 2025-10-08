@@ -15,7 +15,6 @@
 #include <thread>
 
 using Timepoint = std::chrono::steady_clock::time_point;
-#define WAITING_FOR_RESPONSE ((uint32_t)0xFFFFFFFF)
 
 struct AmsRequest {
 	Frame frame;
@@ -62,7 +61,9 @@ struct AmsResponse {
     private:
 	std::mutex mutex;
 	std::condition_variable cv;
+	// errorCode is only valid, when wasWritten == true
 	uint32_t errorCode;
+	bool wasWritten;
 };
 
 struct AmsConnection {

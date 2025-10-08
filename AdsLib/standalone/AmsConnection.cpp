@@ -8,7 +8,7 @@
 
 AmsResponse::AmsResponse()
 	: request(nullptr)
-	, errorCode(WAITING_FOR_RESPONSE)
+	, wasWritten(false)
 {
 }
 
@@ -16,6 +16,7 @@ void AmsResponse::Notify(const uint32_t error)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	errorCode = error;
+	wasWritten = true;
 	cv.notify_all();
 }
 
@@ -32,7 +33,7 @@ uint32_t AmsResponse::Wait()
 	}
 
 	/* AmsConnection::recv() is currently processing a response and using the user supplied buffer, we need to wait until that finished */
-	cv.wait(lock, [&]() { return errorCode != WAITING_FOR_RESPONSE; });
+	cv.wait(lock, [&]() { return wasWritten; });
 	return errorCode;
 }
 
@@ -197,7 +198,7 @@ AmsResponse *AmsConnection::Reserve(AmsRequest *request, const uint16_t port)
 
 void AmsResponse::Release()
 {
-	errorCode = WAITING_FOR_RESPONSE;
+	wasWritten = false;
 	request.store(nullptr);
 }
 
