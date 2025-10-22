@@ -272,6 +272,39 @@ long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
 					   hNotification);
 }
 
+long AdsAddSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
+				       uint32_t nType,
+				       PAdsSyntheticNotificationFuncEx pFunc,
+				       uint32_t hUser, uint32_t *pNotification)
+{
+	ASSERT_PORT_AND_AMSADDR(port, pAddr);
+	if (!pFunc || !pNotification) {
+		return ADSERR_CLIENT_INVALIDPARM;
+	}
+
+	if (nType != NOTIFY_NOTIFICATION_RCV) {
+		return ADSERR_CLIENT_INVALIDPARM;
+	}
+	// TODO: Add NOTIFY_CONNECTION_LOST
+
+	try {
+		auto notify = std::make_shared<SyntheticNotification>(
+			pFunc, hUser, *pAddr, (uint16_t)port, nType);
+		return GetRouter().AddSyntheticNotification(
+			(uint16_t)port, *pAddr, pNotification, notify);
+	} catch (const std::bad_alloc &) {
+		return GLOBALERR_NO_MEMORY;
+	}
+}
+
+long AdsDelSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
+				       uint32_t hNotification)
+{
+	ASSERT_PORT_AND_AMSADDR(port, pAddr);	
+	return GetRouter().DelSyntheticNotification((uint16_t)port, pAddr,
+						    hNotification);
+}
+
 long AdsSyncGetTimeoutEx(long port, uint32_t *timeout)
 {
 	ASSERT_PORT(port);

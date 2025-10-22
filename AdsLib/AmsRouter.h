@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AmsConnection.h"
+#include <atomic>
 #include <unordered_set>
 
 struct AmsRouter : Router {
@@ -21,6 +22,11 @@ struct AmsRouter : Router {
 			     std::shared_ptr<Notification> notify);
 	long DelNotification(uint16_t port, const AmsAddr *pAddr,
 			     uint32_t hNotification);
+	long AddSyntheticNotification(uint16_t port, const AmsAddr &addr, uint32_t *pNotification,
+			     std::shared_ptr<SyntheticNotification> notify);
+	long DelSyntheticNotification(uint16_t port, const AmsAddr *pAddr,
+			     uint32_t hNotification);
+	uint32_t AllocateNotifyId();
 
 	[[deprecated]]
 	long AddRoute(AmsNetId ams, const IpV4 &ip);
@@ -43,4 +49,6 @@ struct AmsRouter : Router {
 	void DeleteIfLastConnection(const AmsConnection *conn);
 
 	std::array<AmsPort, NUM_PORTS_MAX> ports;
+
+	std::atomic<uint32_t> nextNotifyId;
 };

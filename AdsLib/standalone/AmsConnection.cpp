@@ -93,6 +93,16 @@ AmsConnection::CreateNotifyMapping(uint32_t hNotify,
 	return dispatcher;
 }
 
+SharedDispatcher
+AmsConnection::CreateSyntheticNotifyMapping(uint32_t hNotify,
+				   std::shared_ptr<SyntheticNotification> notification)
+{
+	auto dispatcher = DispatcherListAdd(notification->connection);
+	notification->hNotify(hNotify);
+	dispatcher->EmplaceSynthetic(hNotify, notification);
+	return dispatcher;
+}
+
 long AmsConnection::DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify,
 				       uint32_t tmms, uint16_t port)
 {

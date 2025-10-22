@@ -74,6 +74,9 @@ struct AmsConnection {
 	SharedDispatcher
 	CreateNotifyMapping(uint32_t hNotify,
 			    std::shared_ptr<Notification> notification);
+	SharedDispatcher
+	CreateSyntheticNotifyMapping(uint32_t hNotify,
+			    std::shared_ptr<SyntheticNotification> notification);
 	long DeleteNotification(const AmsAddr &amsAddr, uint32_t hNotify,
 				uint32_t tmms, uint16_t port);
 	long AdsRequest(AmsRequest &request, uint32_t timeout);
