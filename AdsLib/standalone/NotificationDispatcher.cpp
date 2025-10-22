@@ -6,6 +6,7 @@
 #include "NotificationDispatcher.h"
 #include "Log.h"
 #include <future>
+#include <set>
 
 NotificationDispatcher::NotificationDispatcher(DeleteNotificationCallback callback)
     : deleteNotification(callback)
@@ -27,12 +28,25 @@ void NotificationDispatcher::Emplace(uint32_t hNotify, std::shared_ptr<Notificat
     notifications.emplace(hNotify, notification);
 }
 
+void NotificationDispatcher::EmplaceSynthetic(uint32_t hNotify, std::shared_ptr<SyntheticNotification> notification)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    syntheticNotifications.emplace(hNotify, notification);
+}
+
 long NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
     const auto status = deleteNotification(hNotify, tmms);
     std::lock_guard<std::recursive_mutex> lock(mutex);
     notifications.erase(hNotify);
     return status;
+}
+
+long NotificationDispatcher::EraseSynthetic(uint32_t hNotify)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    notifications.erase(hNotify);
+    return ADSERR_NOERR;
 }
 
 std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
@@ -45,6 +59,20 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
     return {};
 }
 
+std::vector<std::shared_ptr<SyntheticNotification>> NotificationDispatcher::FindSynthetic(const std::set<VirtualConnection>& connections, uint32_t type)
+{
+    std::vector<std::shared_ptr<SyntheticNotification>> found;
+
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    for (auto& notification : syntheticNotifications) {
+        if (notification.second->type == type && connections.find(notification.second->connection) != connections.end()) {
+            found.push_back(notification.second);
+        }
+    }
+
+    return found;
+}
+
 void NotificationDispatcher::Notify()
 {
     sem.release();
@@ -52,6 +80,8 @@ void NotificationDispatcher::Notify()
 
 void NotificationDispatcher::Run()
 {
+    std::set<VirtualConnection> notifiedConnections;
+
     for ( ; ; ) {
         sem.acquire();
         if (stopExecution) {
@@ -77,6 +107,7 @@ void NotificationDispatcher::Run()
                         goto cleanup;
                     }
                     notification->Notify(timestamp, ring);
+                    notifiedConnections.emplace(notification->connection);
                 } else {
                     ring.Read(size);
                 }
@@ -85,5 +116,9 @@ void NotificationDispatcher::Run()
         }
 cleanup:
         ring.Read(fullLength);
+
+        for (auto& notification : FindSynthetic(notifiedConnections, NOTIFY_NOTIFICATION_RCV)) {
+            notification->Notify();
+        }
     }
 }

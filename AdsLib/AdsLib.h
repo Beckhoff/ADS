@@ -142,6 +142,35 @@ long AdsSyncAddDeviceNotificationReqEx(long                         port,
 long AdsSyncDelDeviceNotificationReqEx(long port, const AmsAddr* pAddr, uint32_t hNotification);
 
 /**
+ * A specific type of notification about the internal state of the library.
+ * When a state change as defined by nType parameter occurs the callback function is invoked
+ * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
+ * @param[in] pAddr Structure with NetId and port number of the ADS server.
+ * @param[in] nType The notification type.
+ * @param[in] pFunc Pointer to the structure describing the callback function.
+ * @param[in] hUser 32-bit value that is passed to the callback function.
+ * @param[out] pNotification Address of the variable that will receive the handle of the notification.
+ * @return [ADS Return
+ * Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long AdsAddSyntheticDeviceNotificationReqEx(long port,
+    const AmsAddr *pAddr,
+    uint32_t nType,
+    PAdsSyntheticNotificationFuncEx pFunc,
+    uint32_t hUser,
+    uint32_t *pNotification);
+
+/**
+ * A notification defined previously is deleted from an ADS server.
+ * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
+ * @param[in] pAddr Structure with NetId and port number of the ADS server.
+ * @param[in] hNotification Address of the variable that contains the handle of the notification.
+ * @return [ADS Return
+ * Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long AdsDelSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr, uint32_t hNotification);
+
+/**
  * Read the configured timeout for the ADS functions. The standard value is 5000 ms.
  * @param[in] port port number of an Ads port that had previously been opened with AdsPortOpenEx().
  * @param[out] timeout Buffer to store timeout value in ms.

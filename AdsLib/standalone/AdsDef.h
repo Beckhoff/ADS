@@ -216,6 +216,11 @@ enum AMSPORT : uint16_t {
 #define ADSERR_CLIENT_SYNCRESINVALID        (0x54 + ERR_ADSERRS) /**< invalid response received */
 #define ADSERR_CLIENT_SYNCPORTLOCKED        (0x55 + ERR_ADSERRS) /**< sync port is locked */
 
+////////////////////////////////////////////////////////////////////////////////
+// Synthetic notification types
+#define NOTIFY_NOTIFICATION_RCV     0x02    /**< notification received notification */
+#define NOTIFY_CONNECTION_LOST      0x01    /**< connection lost notification */
+
 #pragma pack( push, 1)
 
 /**
@@ -362,6 +367,14 @@ struct AdsNotificationHeader {
  */
 typedef void (* PAdsNotificationFuncEx)(const AmsAddr* pAddr, const AdsNotificationHeader* pNotification,
                                         uint32_t hUser);
+
+/**
+ * @brief Type definition of the callback function required by the AdsSyncAddSyntheticDeviceNotificationReqEx() function.
+ * @param[in] pAddr Structure with NetId and port number of the ADS server.
+ * @param[in] hNotification Handle for the notification. Is specified when the notification is defined.
+ * @param[in] hUser custom handle pass to AdsSyncAddSyntheticDeviceNotificationReqEx() during registration
+ */
+typedef void (* PAdsSyntheticNotificationFuncEx)(const AmsAddr *pAddr, uint32_t hNotification, uint32_t hUser);
 
 #define ADSSYMBOLFLAG_PERSISTENT    ((uint32_t)(1 << 0))
 #define ADSSYMBOLFLAG_BITVALUE      ((uint32_t)(1 << 1))
