@@ -6,12 +6,12 @@
 #include "NotificationDispatcher.h"
 #include "Log.h"
 #include <future>
-#include <set>
 
 NotificationDispatcher::NotificationDispatcher(
-	DeleteNotificationCallback callback)
+	VirtualConnection connection, DeleteNotificationCallback callback)
 	: deleteNotification(callback)
 	, ring(4 * 1024 * 1024)
+	, connection(connection)
 	, stopExecution(false)
 	, thread(&NotificationDispatcher::Run, this)
 {
@@ -63,13 +63,14 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
 	return {};
 }
 
-std::vector<std::shared_ptr<SyntheticNotification>> NotificationDispatcher::FindSynthetic(const std::set<VirtualConnection>& connections, uint32_t type)
+std::vector<std::shared_ptr<SyntheticNotification> >
+NotificationDispatcher::FindSynthetic(uint32_t type)
 {
-	std::vector<std::shared_ptr<SyntheticNotification>> found;
+	std::vector<std::shared_ptr<SyntheticNotification> > found;
 
 	std::lock_guard<std::recursive_mutex> lock(mutex);
-	for (auto& notification : syntheticNotifications) {
-		if (notification.second->type == type && connections.find(notification.second->connection) != connections.end()) {
+	for (auto &notification : syntheticNotifications) {
+		if (notification.second->type == type) {
 			found.push_back(notification.second);
 		}
 	}
@@ -84,8 +85,6 @@ void NotificationDispatcher::Notify()
 
 void NotificationDispatcher::Run()
 {
-	std::set<VirtualConnection> notifiedConnections;
-
 	for (;;) {
 		sem.acquire();
 		if (stopExecution) {
@@ -120,7 +119,6 @@ void NotificationDispatcher::Run()
 						goto cleanup;
 					}
 					notification->Notify(timestamp, ring);
-					notifiedConnections.emplace(notification->connection);
 				} else {
 					ring.Read(size);
 				}
@@ -130,7 +128,7 @@ void NotificationDispatcher::Run()
 cleanup:
 		ring.Read(fullLength);
 
-		for (auto& notification : FindSynthetic(notifiedConnections, NOTIFY_NOTIFICATION_RCV)) {
+		for (auto &notification : FindSynthetic(NOTIFY_NOTIFICATION_RCV)) {
 			notification->Notify();
 		}
 	}

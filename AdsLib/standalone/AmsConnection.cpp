@@ -47,10 +47,13 @@ AmsConnection::DispatcherListAdd(const VirtualConnection &connection)
 	std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
 	return dispatcherList
 		.emplace(connection,
-			 std::make_shared<NotificationDispatcher>(std::bind(
-				 &AmsConnection::DeleteNotification, this,
-				 connection.second, std::placeholders::_1,
-				 std::placeholders::_2, connection.first)))
+			 std::make_shared<NotificationDispatcher>(
+				 connection,
+				 std::bind(&AmsConnection::DeleteNotification,
+					   this, connection.second,
+					   std::placeholders::_1,
+					   std::placeholders::_2,
+					   connection.first)))
 		.first->second;
 }
 
