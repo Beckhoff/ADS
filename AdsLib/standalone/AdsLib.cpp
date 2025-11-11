@@ -282,10 +282,10 @@ long AdsAddSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
 		return ADSERR_CLIENT_INVALIDPARM;
 	}
 
-	if (nType != NOTIFY_NOTIFICATION_RCV) {
+	if (nType != NOTIFY_NOTIFICATION_RCV &&
+	    nType != NOTIFY_CONNECTION_LOST) {
 		return ADSERR_CLIENT_INVALIDPARM;
 	}
-	// TODO: Add NOTIFY_CONNECTION_LOST
 
 	try {
 		auto notify = std::make_shared<SyntheticNotification>(
@@ -300,7 +300,7 @@ long AdsAddSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
 long AdsDelSyntheticDeviceNotificationReqEx(long port, const AmsAddr *pAddr,
 				       uint32_t hNotification)
 {
-	ASSERT_PORT_AND_AMSADDR(port, pAddr);	
+	ASSERT_PORT_AND_AMSADDR(port, pAddr);
 	return GetRouter().DelSyntheticNotification((uint16_t)port, pAddr,
 						    hNotification);
 }

@@ -5,6 +5,7 @@
 
 #include "AmsConnection.h"
 #include "Log.h"
+#include "RingBufferTransaction.h"
 
 AmsResponse::AmsResponse()
 	: request(nullptr)
@@ -304,7 +305,7 @@ bool AmsConnection::ReceiveNotification(const AoEHeader &header)
 		return false;
 	}
 
-	auto &ring = dispatcher->ring;
+	auto ring = RingBufferTransaction(dispatcher->ring);
 	auto bytesLeft = header.length();
 	if (bytesLeft + sizeof(bytesLeft) > ring.BytesFree()) {
 		ReceiveJunk(bytesLeft);
@@ -329,6 +330,8 @@ bool AmsConnection::ReceiveNotification(const AoEHeader &header)
 	}
 	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
+
+	ring.Commit();
 	dispatcher->Notify();
 	return true;
 }
@@ -338,6 +341,9 @@ void AmsConnection::TryRecv()
 	try {
 		Recv();
 	} catch (const std::runtime_error &e) {
+		for (auto &dispatcher : dispatcherList) {
+			dispatcher.second->Notify();
+		}
 		LOG_INFO(e.what());
 	}
 }

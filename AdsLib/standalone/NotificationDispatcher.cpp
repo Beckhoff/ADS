@@ -90,6 +90,13 @@ void NotificationDispatcher::Run()
 		if (stopExecution) {
 			return;
 		}
+		if (ring.BytesAvailable() == 0) {
+			for (auto &notification : FindSynthetic(NOTIFY_CONNECTION_LOST)) {
+				notification->Notify();
+			}
+			continue;
+		}
+
 		auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
 		const auto length = ring.ReadFromLittleEndian<uint32_t>();
 		(void)length;
