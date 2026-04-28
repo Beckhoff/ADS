@@ -8,9 +8,10 @@
 #include <future>
 
 NotificationDispatcher::NotificationDispatcher(
-	DeleteNotificationCallback callback)
+	VirtualConnection connection, DeleteNotificationCallback callback)
 	: deleteNotification(callback)
 	, ring(4 * 1024 * 1024)
+	, connection(connection)
 	, stopExecution(false)
 	, thread(&NotificationDispatcher::Run, this)
 {
@@ -30,12 +31,26 @@ void NotificationDispatcher::Emplace(uint32_t hNotify,
 	notifications.emplace(hNotify, notification);
 }
 
+void NotificationDispatcher::EmplaceSynthetic(uint32_t hNotify,
+				     std::shared_ptr<SyntheticNotification> notification)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	syntheticNotifications.emplace(hNotify, notification);
+}
+
 long NotificationDispatcher::Erase(uint32_t hNotify, uint32_t tmms)
 {
 	const auto status = deleteNotification(hNotify, tmms);
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	notifications.erase(hNotify);
 	return status;
+}
+
+long NotificationDispatcher::EraseSynthetic(uint32_t hNotify)
+{
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	notifications.erase(hNotify);
+	return ADSERR_NOERR;
 }
 
 std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
@@ -46,6 +61,21 @@ std::shared_ptr<Notification> NotificationDispatcher::Find(uint32_t hNotify)
 		return it->second;
 	}
 	return {};
+}
+
+std::vector<std::shared_ptr<SyntheticNotification> >
+NotificationDispatcher::FindSynthetic(uint32_t type)
+{
+	std::vector<std::shared_ptr<SyntheticNotification> > found;
+
+	std::lock_guard<std::recursive_mutex> lock(mutex);
+	for (auto &notification : syntheticNotifications) {
+		if (notification.second->type == type) {
+			found.push_back(notification.second);
+		}
+	}
+
+	return found;
 }
 
 void NotificationDispatcher::Notify()
@@ -60,6 +90,13 @@ void NotificationDispatcher::Run()
 		if (stopExecution) {
 			return;
 		}
+		if (ring.BytesAvailable() == 0) {
+			for (auto &notification : FindSynthetic(NOTIFY_CONNECTION_LOST)) {
+				notification->Notify();
+			}
+			continue;
+		}
+
 		auto fullLength = ring.ReadFromLittleEndian<uint32_t>();
 		const auto length = ring.ReadFromLittleEndian<uint32_t>();
 		(void)length;
@@ -97,5 +134,9 @@ void NotificationDispatcher::Run()
 		}
 cleanup:
 		ring.Read(fullLength);
+
+		for (auto &notification : FindSynthetic(NOTIFY_NOTIFICATION_RCV)) {
+			notification->Notify();
+		}
 	}
 }

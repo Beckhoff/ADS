@@ -9,7 +9,7 @@
 #include <algorithm>
 
 AmsRouter::AmsRouter(AmsNetId netId)
-	: localAddr(netId)
+	: localAddr(netId), nextNotifyId(1)
 {
 }
 
@@ -236,11 +236,39 @@ long AmsRouter::AddNotification(AmsRequest &request, uint32_t *pNotification,
 	return status;
 }
 
+long AmsRouter::AddSyntheticNotification(uint16_t port, const AmsAddr &addr, uint32_t *pNotification,
+				std::shared_ptr<SyntheticNotification> notify)
+{
+	auto ads = GetConnection(addr.netId);
+	if (!ads) {
+		return GLOBALERR_MISSING_ROUTE;
+	}
+
+	*pNotification = AllocateNotifyId();
+	auto dispatcher = ads->CreateSyntheticNotifyMapping(*pNotification, notify);
+	auto& amsPort = ports[port - Router::PORT_BASE];
+	amsPort.AddSyntheticNotification(addr, *pNotification, dispatcher);
+
+	return 0;
+}
+
 long AmsRouter::DelNotification(uint16_t port, const AmsAddr *pAddr,
 				uint32_t hNotification)
 {
 	auto &p = ports[port - Router::PORT_BASE];
 	return p.DelNotification(*pAddr, hNotification);
+}
+
+long AmsRouter::DelSyntheticNotification(uint16_t port, const AmsAddr *pAddr,
+				uint32_t hNotification)
+{
+	auto &p = ports[port - Router::PORT_BASE];
+	return p.DelSyntheticNotification(*pAddr, hNotification);
+}
+
+uint32_t AmsRouter::AllocateNotifyId()
+{
+	return nextNotifyId.fetch_add(1, std::memory_order_acq_rel);
 }
 
 void AmsRouter::AwaitConnectionAttempts(

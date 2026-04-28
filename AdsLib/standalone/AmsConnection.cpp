@@ -5,6 +5,7 @@
 
 #include "AmsConnection.h"
 #include "Log.h"
+#include "RingBufferTransaction.h"
 
 AmsResponse::AmsResponse()
 	: request(nullptr)
@@ -47,10 +48,13 @@ AmsConnection::DispatcherListAdd(const VirtualConnection &connection)
 	std::lock_guard<std::recursive_mutex> lock(dispatcherListMutex);
 	return dispatcherList
 		.emplace(connection,
-			 std::make_shared<NotificationDispatcher>(std::bind(
-				 &AmsConnection::DeleteNotification, this,
-				 connection.second, std::placeholders::_1,
-				 std::placeholders::_2, connection.first)))
+			 std::make_shared<NotificationDispatcher>(
+				 connection,
+				 std::bind(&AmsConnection::DeleteNotification,
+					   this, connection.second,
+					   std::placeholders::_1,
+					   std::placeholders::_2,
+					   connection.first)))
 		.first->second;
 }
 
@@ -90,6 +94,16 @@ AmsConnection::CreateNotifyMapping(uint32_t hNotify,
 	auto dispatcher = DispatcherListAdd(notification->connection);
 	notification->hNotify(hNotify);
 	dispatcher->Emplace(hNotify, notification);
+	return dispatcher;
+}
+
+SharedDispatcher
+AmsConnection::CreateSyntheticNotifyMapping(uint32_t hNotify,
+				   std::shared_ptr<SyntheticNotification> notification)
+{
+	auto dispatcher = DispatcherListAdd(notification->connection);
+	notification->hNotify(hNotify);
+	dispatcher->EmplaceSynthetic(hNotify, notification);
 	return dispatcher;
 }
 
@@ -291,7 +305,7 @@ bool AmsConnection::ReceiveNotification(const AoEHeader &header)
 		return false;
 	}
 
-	auto &ring = dispatcher->ring;
+	auto ring = RingBufferTransaction(dispatcher->ring);
 	auto bytesLeft = header.length();
 	if (bytesLeft + sizeof(bytesLeft) > ring.BytesFree()) {
 		ReceiveJunk(bytesLeft);
@@ -316,6 +330,8 @@ bool AmsConnection::ReceiveNotification(const AoEHeader &header)
 	}
 	Receive(ring.write, bytesLeft);
 	ring.Write(bytesLeft);
+
+	ring.Commit();
 	dispatcher->Notify();
 	return true;
 }
@@ -325,6 +341,9 @@ void AmsConnection::TryRecv()
 	try {
 		Recv();
 	} catch (const std::runtime_error &e) {
+		for (auto &dispatcher : dispatcherList) {
+			dispatcher.second->Notify();
+		}
 		LOG_INFO(e.what());
 	}
 }
