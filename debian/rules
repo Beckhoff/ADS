@@ -2,3 +2,19 @@
 
 %:
 	dh $@
+
+override_dh_auto_install:
+	# TODO: fix upstream git-restore-mtime for directories[1].
+	# What we do is setting the timestamp for all directories to the latest
+	# changelog entry. After that even if a directory doesn't get more precise
+	# timestamp from git-restore-mtime, at least we will have replaced the git
+	# checkout timestamp on these directories with a well defined date, which
+	# will be the same on all build machines.
+	# [1] https://github.com/MestreLion/git-tools/issues/47
+	timestamp="$$(dpkg-parsechangelog --show-field Timestamp)" && \
+	find . -type d -exec touch --date="@$${timestamp}" {} \;
+
+	# Normalize timestamps for reproducible package builds
+	/usr/lib/git-core/git-restore-mtime
+
+	dh_auto_install
