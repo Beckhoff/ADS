@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Patrick Bruenn <p.bruenn@beckhoff.com>
 Uploaders: Julian Heuking <J.Heuking@beckhoff.com>
 Build-Depends:
- debhelper (>=11~),
+ debhelper-compat (= 13),
  git-restore-mtime,
  libadscomm-dev,
  meson (>=0.49),
