@@ -5,6 +5,7 @@
 #pragma once
 
 #include "AdsDef.h"
+#include "SecureAdsConfig.h"
 
 #ifdef BHF_ADS_EXPORT_C
 extern "C" {

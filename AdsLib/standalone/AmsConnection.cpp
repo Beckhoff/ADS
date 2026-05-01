@@ -70,10 +70,9 @@ AmsConnection::AmsConnection(Router &__router,
 			     const struct addrinfo *const destination)
 	: router(__router)
 	, socket(destination)
-	, refCount(0)
 	, invokeId(0)
-	, ownIp(socket.Connect())
 {
+	ownIp = socket.Connect();
 	receiver = std::thread(&AmsConnection::TryRecv, this);
 }
 

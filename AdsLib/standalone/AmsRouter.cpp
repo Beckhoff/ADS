@@ -4,6 +4,7 @@
  */
 
 #include "AmsRouter.h"
+#include "SecureAmsConnection.h"
 #include "Log.h"
 
 #include <algorithm>
@@ -61,7 +62,7 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string &host)
 	lock.unlock();
 
 	try {
-		auto new_connection = std::unique_ptr<AmsConnection>(
+		auto new_connection = std::unique_ptr<AmsConnectionBase>(
 			new AmsConnection{ *this, hostAddresses.get() });
 		lock.lock();
 		connection_attempts.erase(ams);
@@ -96,7 +97,7 @@ void AmsRouter::DelRoute(const AmsNetId &ams)
 
 	auto route = mapping.find(ams);
 	if (route != mapping.end()) {
-		AmsConnection *conn = route->second;
+		AmsConnectionBase *conn = route->second;
 		if (0 == --conn->refCount) {
 			mapping.erase(route);
 			DeleteIfLastConnection(conn);
@@ -104,7 +105,7 @@ void AmsRouter::DelRoute(const AmsNetId &ams)
 	}
 }
 
-void AmsRouter::DeleteIfLastConnection(const AmsConnection *const conn)
+void AmsRouter::DeleteIfLastConnection(const AmsConnectionBase *const conn)
 {
 	if (conn) {
 		for (const auto &r : mapping) {
@@ -188,7 +189,60 @@ long AmsRouter::SetTimeout(uint16_t port, uint32_t timeout)
 	return 0;
 }
 
-AmsConnection *AmsRouter::GetConnection(const AmsNetId &amsDest)
+long AmsRouter::AddSecureRoute(AmsNetId ams, const std::string &host,
+			       const bhf::ads::SecureAdsConfig &config)
+{
+	auto hostAddresses = bhf::ads::GetListOfAddresses(host, "8016");
+
+	std::unique_lock<std::recursive_mutex> lock(mutex);
+
+	AwaitConnectionAttempts(ams, lock);
+
+	const auto oldConnection = GetConnection(ams);
+	if (oldConnection &&
+	    !oldConnection->IsConnectedTo(hostAddresses.get())) {
+		return ROUTERERR_PORTALREADYINUSE;
+	}
+
+	for (const auto &conn : connections) {
+		if (conn->IsConnectedTo(hostAddresses.get())) {
+			conn->refCount++;
+			mapping[ams] = conn.get();
+			return 0;
+		}
+	}
+
+	connection_attempts[ams] = {};
+	lock.unlock();
+
+	try {
+		auto new_connection = std::unique_ptr<AmsConnectionBase>(
+			new SecureAmsConnection{ *this, hostAddresses.get(),
+						 config, localAddr });
+		lock.lock();
+		connection_attempts.erase(ams);
+		connection_attempt_events.notify_all();
+
+		auto conn = connections.emplace(std::move(new_connection));
+		if (conn.second) {
+			if (!localAddr) {
+				localAddr =
+					AmsNetId{ conn.first->get()->ownIp };
+			}
+			conn.first->get()->refCount++;
+			mapping[ams] = conn.first->get();
+			return !conn.first->get()->ownIp;
+		}
+		return -1;
+	} catch (std::exception &e) {
+		lock.lock();
+		connection_attempts.erase(ams);
+		connection_attempt_events.notify_all();
+		throw;
+	}
+}
+
+AmsConnectionBase *AmsRouter::GetConnection(const AmsNetId &amsDest)
 {
 	std::lock_guard<std::recursive_mutex> lock(mutex);
 	const auto it = mapping.find(amsDest);

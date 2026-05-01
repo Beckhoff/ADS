@@ -11,6 +11,7 @@
 #include "standalone/AdsLib.h"
 #endif
 
+#include "SecureAdsConfig.h"
 #include "Sockets.h"
 
 #ifdef BHF_ADS_EXPORT_C
@@ -157,6 +158,19 @@ namespace ads
  * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
  */
 long AddLocalRoute(AmsNetId ams, const char *ip);
+
+/**
+ * Add a Secure ADS route (TLS 1.2, port 8016) to a target system.
+ * Supports SSC (self-signed) and SCA (shared CA) modes.
+ * For SSC first-time registration, populate config.username and config.password.
+ * For SCA, set config.caPath to the CA certificate used to verify the server.
+ * @param[in] ams   AmsNetId of the target system
+ * @param[in] host  hostname or IP of the target (port 8016 used by default)
+ * @param[in] config TLS certificate paths and optional credentials
+ * @return [ADS Return Code](https://infosys.beckhoff.com/content/1031/tcadscommon/html/ads_returncodes.htm?id=1666172286265530469)
+ */
+long AddSecureRoute(AmsNetId ams, const char *host,
+		    const SecureAdsConfig &config);
 
 /**
  * Delete ams route that had previously been added with AddLocalRoute().

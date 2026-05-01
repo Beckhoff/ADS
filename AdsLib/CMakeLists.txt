@@ -22,6 +22,8 @@ set(SOURCES
   standalone/AmsPort.cpp
   standalone/AmsRouter.cpp
   standalone/NotificationDispatcher.cpp
+        standalone/SecureAmsConnection.cpp
+        standalone/TlsSocket.cpp
 )
 
 add_library(ads ${SOURCES})
@@ -39,4 +41,5 @@ if(WIN32 EQUAL 1)
     target_link_libraries(ads PUBLIC ws2_32)
 endif()
 
-target_link_libraries(ads PUBLIC Threads::Threads)
+find_package(OpenSSL REQUIRED)
+target_link_libraries(ads PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
