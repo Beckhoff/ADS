@@ -5,6 +5,7 @@
 
 #include "AdsLib.h"
 #include "AmsRouter.h"
+#include "Log.h"
 
 static AmsRouter &GetRouter()
 {
@@ -37,7 +38,8 @@ long AddLocalRoute(const AmsNetId ams, const char *ip)
 		return GetRouter().AddRoute(ams, ip);
 	} catch (const std::bad_alloc &) {
 		return GLOBALERR_NO_MEMORY;
-	} catch (const std::runtime_error &) {
+	} catch (const std::runtime_error &e) {
+		LOG_ERROR("AddLocalRoute failed: " << e.what());
 		return GLOBALERR_TARGET_PORT;
 	}
 }
@@ -50,6 +52,19 @@ void DelLocalRoute(const AmsNetId ams)
 void SetLocalAddress(const AmsNetId ams)
 {
 	GetRouter().SetLocalAddress(ams);
+}
+
+long AddSecureRoute(const AmsNetId ams, const char *host,
+		    const SecureAdsConfig &config)
+{
+	try {
+		return GetRouter().AddSecureRoute(ams, host, config);
+	} catch (const std::bad_alloc &) {
+		return GLOBALERR_NO_MEMORY;
+	} catch (const std::runtime_error &e) {
+		LOG_ERROR("AddSecureRoute failed: " << e.what());
+		return GLOBALERR_TARGET_PORT;
+	}
 }
 }
 }

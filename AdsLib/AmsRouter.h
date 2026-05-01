@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AmsConnection.h"
+#include "SecureAdsConfig.h"
 #include <unordered_set>
 
 struct AmsRouter : Router {
@@ -25,8 +26,10 @@ struct AmsRouter : Router {
 	[[deprecated]]
 	long AddRoute(AmsNetId ams, const IpV4 &ip);
 	long AddRoute(AmsNetId ams, const std::string &host);
+	long AddSecureRoute(AmsNetId ams, const std::string &host,
+			    const bhf::ads::SecureAdsConfig &config);
 	void DelRoute(const AmsNetId &ams);
-	AmsConnection *GetConnection(const AmsNetId &pAddr);
+	AmsConnectionBase *GetConnection(const AmsNetId &pAddr);
 	long AdsRequest(AmsRequest &request);
 
     private:
@@ -34,13 +37,13 @@ struct AmsRouter : Router {
 	std::recursive_mutex mutex;
 	std::condition_variable_any connection_attempt_events;
 	std::map<AmsNetId, std::tuple<> > connection_attempts;
-	std::unordered_set<std::unique_ptr<AmsConnection> > connections;
-	std::map<AmsNetId, AmsConnection *> mapping;
+	std::unordered_set<std::unique_ptr<AmsConnectionBase> > connections;
+	std::map<AmsNetId, AmsConnectionBase *> mapping;
 
 	void
 	AwaitConnectionAttempts(const AmsNetId &ams,
 				std::unique_lock<std::recursive_mutex> &lock);
-	void DeleteIfLastConnection(const AmsConnection *conn);
+	void DeleteIfLastConnection(const AmsConnectionBase *conn);
 
 	std::array<AmsPort, NUM_PORTS_MAX> ports;
 };
