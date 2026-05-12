@@ -104,6 +104,7 @@ expected_id_pairs() {
 		devp-kvmblade02-docker-runner B4EAC02D-22BD-DEF8-BA0E-C837C77F6967 93
 		devp-kvmblade03-docker-runner E84F01A1-3496-7BB5-E597-06500EA8114D 93
 		devp-kvmblade04-docker-runner 29F5975D-AA71-757F-D24C-0F99E7D64079 93
+		devp-kvmblade05-docker-runner 5D88FD40-76F8-AF0E-57CD-F10AF7F03437 93
 		devp-kvmblade06-docker-runner DA5E3595-200F-1509-8988-DC00D0575C89 93
 		devp-kvmblade07-docker-runner 7EA1BDFA-723D-5BBA-3079-C67A564C4AC3 93
 		devp-kvmblade08-docker-runner 0CB95C14-29AD-B089-621B-27E9643C6165 93
