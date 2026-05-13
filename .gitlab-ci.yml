@@ -63,12 +63,12 @@ build-only:
   parallel:
     matrix:
       - FLAVOR: 'alpine'
-        IMAGE: "${DOCKER_PROXY}alpine:3.23.3"
+        IMAGE: "${DOCKER_PROXY}library/alpine:3.23.3"
       - FLAVOR: 'arch'
         CXX:
         - clang++
         - g++
-        IMAGE: "${DOCKER_PROXY}archlinux:base-devel"
+        IMAGE: "${DOCKER_PROXY}library/archlinux:base-devel"
       - FLAVOR: 'mxe'
         IMAGE: "${REGISTRY_HOST}/beckhoff/docker-mxe:40549"
 
