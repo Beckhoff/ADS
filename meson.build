@@ -66,17 +66,29 @@ install_headers(
   'AdsLib/Semaphore.h',
   'AdsLib/Sockets.h',
   'AdsLib/SymbolAccess.h',
-  'AdsLib/TwinCAT/AdsDef.h',
-  'AdsLib/TwinCAT/AdsLib.h',
-  'AdsLib/bhf/ParameterList.h',
-  'AdsLib/bhf/StringToInteger.h',
-  'AdsLib/bhf/WindowsQuirks.h',
-  'AdsLib/standalone/AdsDef.h',
-  'AdsLib/standalone/AdsLib.h',
   'AdsLib/wrap_endian.h',
   'AdsLib/wrap_registry.h',
   'AdsLib/wrap_socket.h',
   subdir: 'AdsLib'
+)
+
+install_headers(
+  'AdsLib/bhf/ParameterList.h',
+  'AdsLib/bhf/StringToInteger.h',
+  'AdsLib/bhf/WindowsQuirks.h',
+  subdir: 'AdsLib/bhf'
+)
+
+install_headers(
+  'AdsLib/standalone/AdsDef.h',
+  'AdsLib/standalone/AdsLib.h',
+  subdir: 'AdsLib/standalone'
+)
+
+install_headers(
+  'AdsLib/TwinCAT/AdsDef.h',
+  'AdsLib/TwinCAT/AdsLib.h',
+  subdir: 'AdsLib/TwinCAT'
 )
 
 inc = include_directories([
