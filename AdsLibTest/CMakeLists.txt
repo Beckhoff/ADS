@@ -1,11 +1,6 @@
 set(SOURCES
-  main.cpp
+        main.cpp
 )
 
-add_executable(AdsLibTest.bin ${SOURCES})
-
-target_link_libraries(AdsLibTest.bin PUBLIC ads)
-
-target_include_directories(AdsLibTest.bin
-  PRIVATE ../tools/
-)
+add_executable(AdsLibTest ${SOURCES})
+target_link_libraries(AdsLibTest PRIVATE AdsLib Fructose)

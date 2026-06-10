@@ -2,6 +2,10 @@ set(SOURCES
   example.cpp
 )
 
-add_executable(example.bin ${SOURCES})
+add_executable(AdsExample ${SOURCES})
+target_link_libraries(AdsExample PRIVATE AdsLib)
 
-target_link_libraries(example.bin PUBLIC ads)
+if(TcAdsDll_FOUND AND NOT ONLY_STANDALONE)
+    add_executable(TcAdsExample ${SOURCES})
+    target_link_libraries(TcAdsExample PRIVATE TcAdsLib)
+endif ()
