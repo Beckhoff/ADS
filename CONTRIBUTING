@@ -9,3 +9,6 @@ Make sure your pull requests have the following properties:
 
 3. consistent coding style, simply run:
    `make uncrustify`
+
+4. sign off on each commit, just follow the Linux DCO:
+   https://www.kernel.org/doc/html/latest/process/submitting-patches.html#developer-s-certificate-of-origin-1-1
