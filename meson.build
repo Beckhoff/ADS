@@ -17,11 +17,11 @@ common_files = files([
   'AdsLib/AdsDevice.cpp',
   'AdsLib/AdsFile.cpp',
   'AdsLib/AdsLib.cpp',
-  'AdsLib/MasterDcStatAccess.cpp',
   'AdsLib/ECatAccess.cpp',
   'AdsLib/Frame.cpp',
   'AdsLib/LicenseAccess.cpp',
   'AdsLib/Log.cpp',
+  'AdsLib/MasterDcStatAccess.cpp',
   'AdsLib/RTimeAccess.cpp',
   'AdsLib/RegistryAccess.cpp',
   'AdsLib/RouterAccess.cpp',
@@ -128,8 +128,8 @@ adslibooitest = executable('AdsLibOOITest',
 )
 
 adstest_files = files([
-  'AdsTest/main.cpp',
   'AdsTest/RegistryAccessTest.cpp',
+  'AdsTest/main.cpp',
 ])
 
 adstest = executable('AdsTest',
