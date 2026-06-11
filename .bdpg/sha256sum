@@ -1,0 +1,6 @@
+0620ad10abbfa0587b669a51eda0d4cb4783d6decd2b6311e6419e70f036bae7  debian-release/adstool-dbgsym_113.0.33-1_amd64.deb
+42be85c9fbadfc7559c271ca7307d6d05070e8473b3f66e58308f5b551fcda15  debian-release/adstool-dbgsym_113.0.33-1_arm64.deb
+9d77cdeb80c77e29b00180caebc10d5e104d3f14c320600ace049cb93545e359  debian-release/adstool_113.0.33-1_amd64.deb
+5d25a419d5f94c19af4163df4983e81fe7b87921cdb52341252f7c77c10967ce  debian-release/adstool_113.0.33-1_arm64.deb
+b03e96028d59e960f8c17dfb4d41d419279836820b149ab046d4797cf61d5a00  debian-release/libads-dev_113.0.33-1_amd64.deb
+dc640cd5f62ca5cbb0159270e1702d37c2ca951d2e6aef6abdccbf372a987074  debian-release/libads-dev_113.0.33-1_arm64.deb

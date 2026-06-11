@@ -4,6 +4,11 @@ variables:
 
 image: ${REGISTRY_HOST}/beckhoff/bdpg:v13.3.8
 
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
 cache:
   paths:
   - apt-cache/
@@ -206,6 +211,17 @@ build-debian:
     when: always
     paths:
       - ./debian-release
+
+verify:
+  stage: test
+  needs:
+    - build-debian
+  script:
+    - bdpg verify
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      allow_failure: false
+    - allow_failure: true
 
 release-push:
   stage: deploy
