@@ -12,3 +12,6 @@ Make sure your pull requests have the following properties:
 
 4. sign off on each commit, just follow the Linux DCO:
    https://www.kernel.org/doc/html/latest/process/submitting-patches.html#developer-s-certificate-of-origin-1-1
+
+5. separate your changes, as with most things just follow the Linux process:
+   https://www.kernel.org/doc/html/latest/process/submitting-patches.html#separate-your-changes
