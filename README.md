@@ -2,14 +2,14 @@ This library is intended to provide easy use as ADS client applications running 
 
 To build this library a recent compiler with C++14 support is required.
 
-Currently (2026-02-05) tested with:
+Currently (2026-06-11) tested with:
 ===================================
 
 host os    | host  | target| compiler
 -----------|-------|-------|-------------
-Alpine 3.23| amd64 | amd64 | gcc 15.2.0
-Arch Linux | amd64 | amd64 | clang 21.1.6
-Arch Linux | amd64 | amd64 | gcc 15.2.1
+Alpine 3.24| amd64 | amd64 | gcc 15.2.0
+Arch Linux | amd64 | amd64 | clang 22.1.6
+Arch Linux | amd64 | amd64 | gcc 16.1.1
 Debian 13  | amd64 | amd64 | clang 19.1.7
 Debian 13  | amd64 | amd64 | gcc 14.2.0-19
 Debian 13  | amd64 | i686  | gcc 14.2.0-19
