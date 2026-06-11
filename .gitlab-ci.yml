@@ -1,6 +1,6 @@
 variables:
-  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v13.15
-  BHF_CI_TEST_STAGE_GIT_REF: v13.15
+  TEST_RUNNER_CONTAINER: ${REGISTRY_HOST}/beckhoff/test_stage/test_runner:v13.29
+  BHF_CI_TEST_STAGE_GIT_REF: v13.29
 
 image: ${REGISTRY_HOST}/beckhoff/bdpg:v13.3.0
 
