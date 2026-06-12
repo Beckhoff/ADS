@@ -1,3 +1,11 @@
+adstool (113.0.34-1) trixie; urgency=medium
+
+  * debian: build reproducible packages
+  * meson: change name of dynamic library to CamelCase
+  * meson: create subfolder for installed header files
+
+ -- Patrick Bruenn <p.bruenn@beckhoff.com>  Fri, 12 Jun 2026 11:42:09 +0000
+
 adstool (113.0.33-1) trixie; urgency=medium
 
   * AdsNotificationHeader: add BHF_ADS_USE_TWINCAT_ORDER
