@@ -18,7 +18,6 @@ Debian 12  | amd64 | win32 | gcc 10.2.1-6
 Debian 13  | amd64 |riscv64| gcc 14.2.0-19
 Debian 13  | arm64 | arm64 | gcc 14.2.0-19
 TC/BSD 14  | amd64 | amd64 | clang 19.1.7
-Windows 10 | amd64 | win64 | msvc 19.50.35721
 
 Compile & usage
 ===============
