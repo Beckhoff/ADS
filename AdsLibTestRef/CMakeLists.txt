@@ -2,6 +2,10 @@
 if (NOT TcAdsDll_FOUND)
     return()
 endif ()
+# Skip this test if we are not on Windows or FreeBSD system
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    return()
+endif ()
 
 set(SOURCES
         main.cpp

@@ -16,15 +16,10 @@ if (NOT TcAdsDll_FIND_QUIETLY)
     message(STATUS "Looking for TcAdsDll (TwinCAT ADS-DLL)...")
 endif ()
 
-if (NOT WIN32)
-    message(WARNING "FindTcAdsDll.cmake only tested on WINDOWS")
-endif ()
-
 if (WIN32)
     # Typical install locations on Windows
     set(_TcAdsDll_PATH "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll")
 else ()
-    # TODO: Linux not tested. Set additional known default locations to search.
     set(_TcAdsDll_PATH)
 endif ()
 # Find the include headers
@@ -34,7 +29,7 @@ find_path(TcAdsDll_INCLUDE_DIR
         PATH_SUFFIXES "Include" "include"
 )
 # Find all related files base on the include files location. This is done
-# assuming that the files are ordered as install by TwinCat. If they are
+# assuming that the files are ordered as install by TwinCAT. If they are
 # in some other configuration this will not work.
 if (WIN32)
     cmake_path(GET TcAdsDll_INCLUDE_DIR PARENT_PATH TcAdsDll_ROOT_DIR)
@@ -62,7 +57,6 @@ if (WIN32)
             NO_DEFAULT_PATH
     )
 else ()
-    # TODO: Linux not tested. We just try to look for the library by name.
     find_library(TcAdsDll_LIBRARY
             NAMES TcAdsDll
     )

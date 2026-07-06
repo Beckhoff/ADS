@@ -109,7 +109,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif ()
 
 if (BUILD_SHARED_LIBS)
-    target_compile_definitions(TcAdsLib
+    target_compile_definitions(AdsLib
             PUBLIC
             BHF_ADS_EXPORT_C
             BHF_ADS_USE_TWINCAT_ORDER

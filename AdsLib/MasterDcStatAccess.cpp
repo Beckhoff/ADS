@@ -69,7 +69,7 @@ long MasterDcStatAccess::Print(std::ostream &os) const
 			 sizeof(stat.posArr) / sizeof(stat.posArr[0])>
 		rowNames{ {
 			"1", "2", "5", "10", "20", "50", "100", "200", "500",
-			"\u221E" // infinity symbol
+			u8"\u221E" // infinity symbol
 		} };
 
 	os << "Deviation <" << " | " << "Count (neg)" << " | " << "Count (pos)"

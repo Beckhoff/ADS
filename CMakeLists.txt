@@ -36,14 +36,14 @@ include(GNUInstallDirs)
 
 option(WITH_EXAMPLES "Build the examples (for the variant)" ON)
 option(WITH_TESTS "Build the test (for the variant)" ON)
-option(STANDALONE_ONLY "Build only the AdsLib as stand alone (no TwinCat TcAdsDll targets)" OFF)
+option(STANDALONE_ONLY "Build only the AdsLib as stand alone (no TwinCAT TcAdsDll targets)" OFF)
 
 #Find the needed dependencies
 find_package(Threads REQUIRED)
 if (NOT STANDALONE_ONLY)
     find_package(TcAdsDll)
     if (NOT TcAdsDll_FOUND)
-        message(WARNING "Could NOT find TcAdsDll. TwinCat project targets will not be added.")
+        message(WARNING "Could NOT find TcAdsDll. TwinCAT router project targets will not be added.")
     endif ()
 endif ()
 # This list variable will contain all the targets that are created and need to be install.
