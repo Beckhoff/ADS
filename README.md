@@ -98,6 +98,14 @@ ninja -C example/build
 # and run the example
 ./example/build/example
 ```
+## On Windows with TwinCAT installed (PowerShell)
+```ps1
+mkdir build && cd build
+# Use TcAdsDll_ROOT if AdsApi is installed somewhere in a different location
+# Here it is taken from the TWINCAT_ADS_API_ROOT environment variable
+cmake -DTcAdsDll_ROOT="$TWINCAT_ADS_API_ROOT" ..
+cmake --build . --config Release --parallel ((Get-CimInstance –ClassName Win32_Processor).NumberOfLogicalProcessors | Measure-Object -Sum).Sum
+```
 
 Note: the name of the binaries which use the TwinCAT ADS Router have a different naming scheme
 
