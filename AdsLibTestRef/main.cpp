@@ -15,10 +15,12 @@ using USHORT = unsigned short;
 #define TCADSDLL_API
 #define TCADSDLL_EXPORT
 #define NULL nullptr
-#define AMSPORT_R0_PLC_TC3 851
 #else
 #include <Windows.h>
 #endif
+
+#define AMSPORT_R0_PLC_TC3 851
+
 #include <TcAdsDef.h>
 #ifndef GLOBALERR_TARGET_PORT
 #define GLOBALERR_TARGET_PORT 0x06

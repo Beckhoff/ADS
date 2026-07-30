@@ -20,7 +20,12 @@ if (NOT WIN32)
     message(WARNING "FindTcAdsDll.cmake only tested on WINDOWS")
 endif ()
 
-if (WIN32)
+if (DEFINED TcAdsDll_ROOT)
+    message(STATUS "FindTcAdsDll.cmake: DLL lookup directory ${TcAdsDll_ROOT}")
+    set(_TcAdsDll_PATH "${TcAdsDll_ROOT}")
+endif ()
+
+if (WIN32 AND NOT DEFINED TcAdsDll_ROOT)
     # Typical install locations on Windows
     set(_TcAdsDll_PATH "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll")
 else ()
@@ -28,6 +33,7 @@ else ()
     set(_TcAdsDll_PATH)
 endif ()
 # Find the include headers
+
 find_path(TcAdsDll_INCLUDE_DIR
         NAMES TcAdsApi.h TcAdsDef.h
         PATHS "${_TcAdsDll_PATH}"
@@ -42,23 +48,23 @@ if (WIN32)
         message(STATUS "Looking for TcAdsDll in ROOT ${TcAdsDll_ROOT_DIR}")
     endif ()
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/x64/lib")
+        set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib/x64")
         set(TcAdsDll_DLL_DIR "${TcAdsDll_ROOT_DIR}/x64")
+        set(TcAdsDll_COMMON_DIR "${TcAdsDll_ROOT_DIR}/../../Common64")
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib")
         set(TcAdsDll_DLL_DIR "${TcAdsDll_ROOT_DIR}")
+        set(TcAdsDll_COMMON_DIR "${TcAdsDll_ROOT_DIR}/../../Common32")
     endif ()
-    # Use NO_DEFAULT_PATH so that we only look in the provided location. If not set
-    # the find_library will find the 32 bit version first regardless of the config
-    # which leads to errors.
     find_library(TcAdsDll_IMPLIB
-            NAMES TcAdsDll
+            NAMES TcAdsDll.lib
             PATHS "${TcAdsDll_IMPLIB_DIR}"
             NO_DEFAULT_PATH
     )
+    message(STATUS ${TcAdsDll_IMPLIB})
     find_file(TcAdsDll_LIBRARY
             NAMES TcAdsDll.dll
-            PATHS "${TcAdsDll_DLL_DIR}"
+            PATHS "${TcAdsDll_DLL_DIR}" "${TcAdsDll_COMMON_DIR}"
             NO_DEFAULT_PATH
     )
 else ()
