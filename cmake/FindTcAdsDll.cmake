@@ -21,13 +21,17 @@ if (NOT WIN32)
 endif ()
 
 if (DEFINED TcAdsDll_ROOT)
-    message(STATUS "FindTcAdsDll.cmake: DLL lookup directory ${TcAdsDll_ROOT}")
     set(_TcAdsDll_PATH "${TcAdsDll_ROOT}")
 endif ()
 
 if (WIN32 AND NOT DEFINED TcAdsDll_ROOT)
     # Typical install locations on Windows
-    set(_TcAdsDll_PATH "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll")
+    set(_TcAdsDll_PATH_OLD
+        "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll" # Old location (TwinCAT < 3.5)
+    )
+    set(_TcAdsDll_PATH_NEW
+        "$ENV{ProgramFiles(x86)}/Beckhoff/TwinCAT/AdsApi/TcAdsDll" # New location (TwinCAT 3.5+)
+    )
 else ()
     # TODO: Linux not tested. Set additional known default locations to search.
     set(_TcAdsDll_PATH)
@@ -36,7 +40,7 @@ endif ()
 
 find_path(TcAdsDll_INCLUDE_DIR
         NAMES TcAdsApi.h TcAdsDef.h
-        PATHS "${_TcAdsDll_PATH}"
+        PATHS "${_TcAdsDll_PATH_OLD}" "${_TcAdsDll_PATH_NEW}"
         PATH_SUFFIXES "Include" "include"
 )
 # Find all related files base on the include files location. This is done
@@ -45,26 +49,25 @@ find_path(TcAdsDll_INCLUDE_DIR
 if (WIN32)
     cmake_path(GET TcAdsDll_INCLUDE_DIR PARENT_PATH TcAdsDll_ROOT_DIR)
     if (NOT TcAdsDll_FIND_QUIETLY)
-        message(STATUS "Looking for TcAdsDll in ROOT ${TcAdsDll_ROOT_DIR}")
+        message(STATUS "Searching TcAdsDll in ROOT ${TcAdsDll_ROOT_DIR}")
     endif ()
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib/x64")
-        set(TcAdsDll_DLL_DIR "${TcAdsDll_ROOT_DIR}/x64")
-        set(TcAdsDll_COMMON_DIR "${TcAdsDll_ROOT_DIR}/../../Common64")
+        set(TcAdsDll_DLL_DIR_OLD "${TcAdsDll_ROOT_DIR}/x64")
+        set(TcAdsDll_DLL_DIR_NEW "${TcAdsDll_ROOT_DIR}/../../Common64")
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib")
-        set(TcAdsDll_DLL_DIR "${TcAdsDll_ROOT_DIR}")
-        set(TcAdsDll_COMMON_DIR "${TcAdsDll_ROOT_DIR}/../../Common32")
+        set(TcAdsDll_DLL_DIR_OLD "${TcAdsDll_ROOT_DIR}")
+        set(TcAdsDll_DLL_DIR_NEW "${TcAdsDll_ROOT_DIR}/../../Common32")
     endif ()
     find_library(TcAdsDll_IMPLIB
             NAMES TcAdsDll.lib
             PATHS "${TcAdsDll_IMPLIB_DIR}"
             NO_DEFAULT_PATH
     )
-    message(STATUS ${TcAdsDll_IMPLIB})
     find_file(TcAdsDll_LIBRARY
             NAMES TcAdsDll.dll
-            PATHS "${TcAdsDll_DLL_DIR}" "${TcAdsDll_COMMON_DIR}"
+            PATHS "${TcAdsDll_DLL_DIR_OLD}" "${TcAdsDll_DLL_DIR_NEW}"
             NO_DEFAULT_PATH
     )
 else ()
