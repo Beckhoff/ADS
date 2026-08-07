@@ -26,10 +26,8 @@ endif ()
 
 if (WIN32 AND NOT DEFINED TcAdsDll_ROOT)
     # Typical install locations on Windows
-    set(_TcAdsDll_PATH_OLD
+    list(APPEND _TcAdsDll_PATH
         "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll" # Old location (TwinCAT < 3.5)
-    )
-    set(_TcAdsDll_PATH_NEW
         "$ENV{ProgramFiles(x86)}/Beckhoff/TwinCAT/AdsApi/TcAdsDll" # New location (TwinCAT 3.5+)
     )
 else ()
@@ -53,21 +51,25 @@ if (WIN32)
     endif ()
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib/x64")
-        set(TcAdsDll_DLL_DIR_OLD "${TcAdsDll_ROOT_DIR}/x64")
-        set(TcAdsDll_DLL_DIR_NEW "${TcAdsDll_ROOT_DIR}/../../Common64")
+        list(APPEND TcAdsDll_DLL_DIR 
+            "${TcAdsDll_ROOT_DIR}/x64"
+            "${TcAdsDll_ROOT_DIR}/../../Common64"
+        )
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib")
-        set(TcAdsDll_DLL_DIR_OLD "${TcAdsDll_ROOT_DIR}")
-        set(TcAdsDll_DLL_DIR_NEW "${TcAdsDll_ROOT_DIR}/../../Common32")
+        list(APPEND TcAdsDll_DLL_DIR 
+            "${TcAdsDll_ROOT_DIR}"
+            "${TcAdsDll_ROOT_DIR}/../../Common32"
+        )
     endif ()
     find_library(TcAdsDll_IMPLIB
             NAMES TcAdsDll.lib
-            PATHS "${TcAdsDll_IMPLIB_DIR}"
+            PATHS ${TcAdsDll_IMPLIB_DIR}
             NO_DEFAULT_PATH
     )
     find_file(TcAdsDll_LIBRARY
             NAMES TcAdsDll.dll
-            PATHS "${TcAdsDll_DLL_DIR_OLD}" "${TcAdsDll_DLL_DIR_NEW}"
+            PATHS ${TcAdsDll_DLL_DIR}
             NO_DEFAULT_PATH
     )
 else ()
