@@ -31,7 +31,6 @@ if (WIN32 AND NOT DEFINED TcAdsDll_ROOT)
         "$ENV{ProgramFiles(x86)}/Beckhoff/TwinCAT/AdsApi/TcAdsDll" # New location (TwinCAT 3.5+)
     )
 else ()
-    # TODO: Linux not tested. Set additional known default locations to search.
     set(_TcAdsDll_PATH)
 endif ()
 # Find the include headers
@@ -73,7 +72,6 @@ if (WIN32)
             NO_DEFAULT_PATH
     )
 else ()
-    # TODO: Linux not tested. We just try to look for the library by name.
     find_library(TcAdsDll_LIBRARY
             NAMES TcAdsDll
     )
