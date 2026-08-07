@@ -37,7 +37,7 @@ endif ()
 
 find_path(TcAdsDll_INCLUDE_DIR
         NAMES TcAdsApi.h TcAdsDef.h
-        PATHS "${_TcAdsDll_PATH}" "${_TcAdsDll_PATH}"
+        PATHS "${_TcAdsDll_PATH}"
         PATH_SUFFIXES "Include" "include"
 )
 # Find all related files base on the include files location. This is done
