@@ -28,7 +28,7 @@ if (WIN32 AND NOT DEFINED TcAdsDll_ROOT)
     # Typical install locations on Windows
     list(APPEND _TcAdsDll_PATH
         "$ENV{SystemDrive}/TwinCAT/AdsApi/TcAdsDll" # Old location (TwinCAT < 3.5)
-        "$ENV{ProgramFiles(x86)}/Beckhoff/TwinCAT/AdsApi/TcAdsDll" # New location (TwinCAT 3.5+)
+        "$ENV{ProgramFiles\(x86\)}/Beckhoff/TwinCAT/AdsApi/TcAdsDll" # New location (TwinCAT 3.5+)
     )
 else ()
     set(_TcAdsDll_PATH)
@@ -37,7 +37,7 @@ endif ()
 
 find_path(TcAdsDll_INCLUDE_DIR
         NAMES TcAdsApi.h TcAdsDef.h
-        PATHS "${_TcAdsDll_PATH}"
+        PATHS ${_TcAdsDll_PATH}
         PATH_SUFFIXES "Include" "include"
 )
 # Find all related files base on the include files location. This is done
@@ -83,6 +83,7 @@ else ()
     )
 endif ()
 
+include(FindPackageHandleStandardArgs)
 
 if (WIN32)
     find_package_handle_standard_args(TcAdsDll
