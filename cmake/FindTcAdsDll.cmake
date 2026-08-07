@@ -37,7 +37,7 @@ endif ()
 
 find_path(TcAdsDll_INCLUDE_DIR
         NAMES TcAdsApi.h TcAdsDef.h
-        PATHS "${_TcAdsDll_PATH_OLD}" "${_TcAdsDll_PATH_NEW}"
+        PATHS "${_TcAdsDll_PATH}" "${_TcAdsDll_PATH}"
         PATH_SUFFIXES "Include" "include"
 )
 # Find all related files base on the include files location. This is done
@@ -49,13 +49,19 @@ if (WIN32)
         message(STATUS "Searching TcAdsDll in ROOT ${TcAdsDll_ROOT_DIR}")
     endif ()
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib/x64")
+        list(APPEND TcAdsDll_IMPLIB_DIR 
+            "${TcAdsDll_ROOT_DIR}/x64/lib" # Old location (TwinCAT < 3.5)
+            "${TcAdsDll_ROOT_DIR}/Lib/x64" # New location (TwinCAT 3.5+)
+        )
         list(APPEND TcAdsDll_DLL_DIR 
             "${TcAdsDll_ROOT_DIR}/x64"
             "${TcAdsDll_ROOT_DIR}/../../Common64"
         )
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
-        set(TcAdsDll_IMPLIB_DIR "${TcAdsDll_ROOT_DIR}/Lib")
+        list(APPEND TcAdsDll_IMPLIB_DIR 
+            "${TcAdsDll_ROOT_DIR}/lib" # Old location (TwinCAT < 3.5)
+            "${TcAdsDll_ROOT_DIR}/Lib" # New location (TwinCAT 3.5+)
+        )
         list(APPEND TcAdsDll_DLL_DIR 
             "${TcAdsDll_ROOT_DIR}"
             "${TcAdsDll_ROOT_DIR}/../../Common32"
@@ -78,11 +84,17 @@ else ()
 endif ()
 
 
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(TcAdsDll
+if (WIN32)
+    find_package_handle_standard_args(TcAdsDll
+        REQUIRED_VARS TcAdsDll_INCLUDE_DIR TcAdsDll_LIBRARY TcAdsDll_IMPLIB
+        VERSION_VAR TcAdsDll_VERSION
+    )
+else ()
+    find_package_handle_standard_args(TcAdsDll
         REQUIRED_VARS TcAdsDll_INCLUDE_DIR TcAdsDll_LIBRARY
         VERSION_VAR TcAdsDll_VERSION
-)
+    )
+endif ()
 
 if (NOT TcAdsDll_FOUND)
     if (NOT TcAdsDll_FIND_QUIETLY)
