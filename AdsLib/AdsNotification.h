@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AdsDef.h"
+#include "Log.h"
 #include "RingBuffer.h"
 
 #include <vector>
@@ -21,6 +22,7 @@ struct Notification {
 		, callback(__func)
 		, buffer(sizeof(AdsNotificationHeader) + length)
 		, hUser(__hUser)
+		, bufferLength(length)
 	{
 		auto header = reinterpret_cast<AdsNotificationHeader *>(
 			buffer.data());
@@ -28,23 +30,28 @@ struct Notification {
 		header->cbSampleSize = length;
 	}
 
-	void Notify(uint64_t timestamp, RingBuffer &ring)
+	void Notify(uint64_t timestamp, RingBuffer &ring, uint32_t size)
 	{
+		if (size > bufferLength)
+		{
+			LOG_ERROR("Notification size exceeds buffer. "
+					<< size << " > " << bufferLength);
+			return;
+		}
 		auto header = reinterpret_cast<AdsNotificationHeader *>(
 			buffer.data());
 		uint8_t *data = reinterpret_cast<uint8_t *>(header + 1);
-		for (size_t i = 0; i < header->cbSampleSize; ++i) {
+		for (size_t i = 0; i < size; ++i) {
 			data[i] = ring.ReadFromLittleEndian<uint8_t>();
 		}
 		header->nTimeStamp = timestamp;
+		header->cbSampleSize = size;
 		callback(&connection.second, header, hUser);
 	}
 
-	uint32_t Size() const
+	uint32_t Capacity() const
 	{
-		auto header = reinterpret_cast<const AdsNotificationHeader *>(
-			buffer.data());
-		return header->cbSampleSize;
+		return bufferLength;
 	}
 
 	void hNotify(uint32_t value)
@@ -58,4 +65,5 @@ struct Notification {
 	const PAdsNotificationFuncEx callback;
 	std::vector<uint8_t> buffer;
 	const uint32_t hUser;
+	const uint32_t bufferLength;
 };

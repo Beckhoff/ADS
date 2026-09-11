@@ -80,15 +80,15 @@ void NotificationDispatcher::Run()
 				fullLength -= sizeof(hNotify) + sizeof(size);
 				const auto notification = Find(hNotify);
 				if (notification) {
-					if (size != notification->Size()) {
+					if (size > notification->Capacity()) {
 						LOG_WARN(
 							"Notification sample size: "
 							<< size
-							<< " doesn't match: "
-							<< notification->Size());
+							<< " exceeds buffer: "
+							<< notification->Capacity());
 						goto cleanup;
 					}
-					notification->Notify(timestamp, ring);
+					notification->Notify(timestamp, ring, size);
 				} else {
 					ring.Read(size);
 				}
