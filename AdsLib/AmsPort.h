@@ -19,9 +19,14 @@ struct AmsPort {
 			     SharedDispatcher dispatcher);
 	long DelNotification(AmsAddr ams, uint32_t hNotify);
 
+	void AddSyntheticNotification(AmsAddr ams, uint32_t hNotify,
+			     SharedDispatcher dispatcher);
+	long DelSyntheticNotification(AmsAddr ams, uint32_t hNotify);
+
     private:
 	using NotifyUUID = std::pair<const AmsAddr, const uint32_t>;
 	static const uint32_t DEFAULT_TIMEOUT = 5000;
 	std::map<NotifyUUID, SharedDispatcher> dispatcherList;
+	std::map<NotifyUUID, SharedDispatcher> syntheticDispatcherList;
 	std::mutex mutex;
 };

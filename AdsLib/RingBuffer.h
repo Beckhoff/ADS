@@ -10,6 +10,8 @@
 #include <memory>
 
 struct RingBuffer {
+	friend struct RingBufferTransaction;
+
 	RingBuffer(size_t N)
 		: dataSize(N + 1)
 		, data(new uint8_t[N + 1])
