@@ -19,8 +19,33 @@ namespace ads
 #define ECADS_IGRP_MASTER_FLBCMDS 0x0000002C
 
 #define SOCCOM_REG_SOCCOM_TYPE 0
+#define SOCCOM_REG_STATION_ADDRESS 0x0010
+#define SOCCOM_REG_AL_STATUS 0x0130
 #define EC_CMD_TYPE_APRD 1
 #define EC_HEAD_IDX_EXTERN_VALUE 0xff
+
+namespace {
+bool IsRelativeNetId(const AmsNetId &netId)
+{
+	return netId.b[0] == 0 && netId.b[1] == 0 && netId.b[2] == 0
+	    && netId.b[3] == 0;
+}
+
+AmsNetId ResolveNetId(const AmsNetId &rawNetId,
+			    const AmsNetId &remoteTarget)
+{
+	if (!IsRelativeNetId(rawNetId)) {
+		return rawNetId;
+	}
+
+	AmsNetId resolved = rawNetId;
+	resolved.b[0] = remoteTarget.b[0];
+	resolved.b[1] = remoteTarget.b[1];
+	resolved.b[2] = remoteTarget.b[2];
+	resolved.b[3] = remoteTarget.b[3];
+	return resolved;
+}
+}
 
 #pragma pack(push, 1)
 struct ETYPE_EC_HEADER {
@@ -37,11 +62,18 @@ struct ETYPE_EC_ULONG_CMD {
 	uint32_t data;
 	uint16_t cnt;
 };
+
+struct ETYPE_EC_USHORT_CMD {
+	ETYPE_EC_HEADER head;
+	uint16_t data;
+	uint16_t cnt;
+};
 #pragma pack(pop)
 
 ECatAccess::ECatAccess(const std::string &gw, const AmsNetId netid,
 		       const uint16_t port)
 	: device(gw, netid, port ? port : uint16_t(AMSPORT_R0_IO))
+	, gateway(gw)
 {
 }
 
@@ -91,7 +123,7 @@ long ECatAccess::ListECatMasters(std::ostream &os) const
 
 	if (status != ADSERR_NOERR) {
 		LOG_ERROR("Reading device ids failed with 0x" << std::hex
-							      << status);
+						      << status);
 		return status;
 	}
 
@@ -126,8 +158,8 @@ long ECatAccess::ListECatMasters(std::ostream &os) const
 		AmsNetId netId = { 0 };
 		status = device.ReadReqEx2(IOADS_IGR_IODEVICESTATE_BASE +
 						   deviceIds[i],
-					   IOADS_IOF_READDEVNETID,
-					   sizeof(netId), &netId, &bytesRead);
+				   IOADS_IOF_READDEVNETID,
+				   sizeof(netId), &netId, &bytesRead);
 
 		if (status != ADSERR_NOERR) {
 			LOG_ERROR("Reading AmsNetId for device["
@@ -136,16 +168,182 @@ long ECatAccess::ListECatMasters(std::ostream &os) const
 			return status;
 		}
 
-		const auto slaveCount = CountECatSlaves(netId);
+		const auto masterNetId =
+			ResolveNetId(netId, device.m_Addr.netId);
+		const auto slaveCount = CountECatSlaves(masterNetId);
 		os << deviceIds[i] << " | " << devType << " | " << deviceName
-		   << " | " << netId << " | " << slaveCount << '\n';
+		   << " | " << masterNetId << " | " << slaveCount << '\n';
 	}
 	return status;
+}
+
+std::vector<AmsNetId> ECatAccess::GetECatMasterNetIds() const
+{
+	uint32_t numberOfDevices;
+	uint32_t bytesRead;
+
+	auto status = device.ReadReqEx2(IOADS_IGR_IODEVICESTATE_BASE,
+					IOADS_IOF_READDEVCOUNT,
+					sizeof(numberOfDevices),
+					&numberOfDevices, &bytesRead);
+
+	if (status != ADSERR_NOERR) {
+		LOG_ERROR("Reading device count failed with 0x" << std::hex
+								<< status);
+		throw AdsException(status);
+	}
+
+	std::vector<AmsNetId> masters;
+	if (numberOfDevices == 0) {
+		return masters;
+	}
+
+	// the first element of the vector is set to devCount,
+	// so the actual device Ids start at index 1
+	std::vector<uint16_t> deviceIds(numberOfDevices + 1);
+
+	status = device.ReadReqEx2(IOADS_IGR_IODEVICESTATE_BASE,
+				   IOADS_IOF_READDEVIDS,
+				   deviceIds.capacity() * sizeof(uint16_t),
+				   deviceIds.data(), &bytesRead);
+
+	if (status != ADSERR_NOERR) {
+		LOG_ERROR("Reading device ids failed with 0x" << std::hex
+							      << status);
+		throw AdsException(status);
+	}
+
+	// Skip the device count, which is at the first index
+	for (uint32_t i = 1; i <= numberOfDevices; i++) {
+		AmsNetId netId = { 0 };
+		status = device.ReadReqEx2(IOADS_IGR_IODEVICESTATE_BASE +
+						   deviceIds[i],
+					   IOADS_IOF_READDEVNETID,
+					   sizeof(netId), &netId, &bytesRead);
+
+		if (status != ADSERR_NOERR) {
+			LOG_ERROR("Reading AmsNetId for device["
+				  << deviceIds[i] << "] failed with 0x"
+				  << std::hex << status);
+			throw AdsException(status);
+		}
+
+		masters.push_back(ResolveNetId(netId, device.m_Addr.netId));
+	}
+	return masters;
+}
+
+std::map<AmsNetId, std::vector<ECatSlaveStatus> >
+ECatAccess::GetECatSlaveStatus() const
+{
+	std::map<AmsNetId, std::vector<ECatSlaveStatus> > states;
+	for (const auto &master : GetECatMasterNetIds()) {
+		const auto slaveCount = CountECatSlaves(master);
+		if (slaveCount == 0) {
+			states[master] = {};
+			continue;
+		}
+		auto &slaveStates = states[master];
+		slaveStates.reserve(slaveCount);
+		for (uint16_t slave = 0; slave < slaveCount; ++slave) {
+			slaveStates.push_back({
+				ReadECatSlaveStationAddress(master, slave),
+				ReadECatSlaveAlStatus(master, slave)
+			});
+		}
+	}
+	return states;
+}
+
+uint16_t ECatAccess::ReadECatSlaveStationAddress(
+	const AmsNetId &ecatMaster, const uint16_t slaveIndex) const
+{
+	uint32_t bytesRead;
+
+	const auto routeStatus = AddLocalRoute(ecatMaster, gateway.c_str());
+	if (routeStatus != 0) {
+		LOG_ERROR("Adding route for ECat master ["
+			  << ecatMaster << "] via gateway [" << gateway
+			  << "] failed with 0x" << std::hex << routeStatus);
+		throw AdsException(routeStatus);
+	}
+
+	ETYPE_EC_USHORT_CMD cmd = {};
+	cmd.head.cmd = EC_CMD_TYPE_APRD;
+	cmd.head.idx = EC_HEAD_IDX_EXTERN_VALUE;
+	cmd.head.adp = static_cast<uint16_t>(0u - slaveIndex);
+	cmd.head.ado = SOCCOM_REG_STATION_ADDRESS;
+	cmd.head.length = sizeof(uint16_t);
+	cmd.head.irq = 0;
+
+	const AmsAddr addr{ ecatMaster, 0xffff };
+	const auto status = AdsSyncReadWriteReqEx2(
+		device.GetLocalPort(), &addr, ECADS_IGRP_MASTER_FLBCMDS, 0,
+		sizeof(cmd), &cmd, sizeof(cmd), &cmd, &bytesRead);
+
+	DelLocalRoute(ecatMaster);
+
+	if (status != ADSERR_NOERR) {
+		LOG_ERROR("Reading station address for slave["
+			  << slaveIndex << "] of master [" << ecatMaster
+			  << "] failed with 0x" << std::hex << status);
+		throw AdsException(status);
+	}
+
+	return cmd.data;
+}
+
+uint16_t ECatAccess::ReadECatSlaveAlStatus(const AmsNetId &ecatMaster,
+					   const uint16_t slaveIndex) const
+{
+	uint32_t bytesRead;
+
+	const auto routeStatus = AddLocalRoute(ecatMaster, gateway.c_str());
+	if (routeStatus != 0) {
+		LOG_ERROR("Adding route for ECat master ["
+			  << ecatMaster << "] via gateway [" << gateway
+			  << "] failed with 0x" << std::hex << routeStatus);
+		throw AdsException(routeStatus);
+	}
+
+	ETYPE_EC_USHORT_CMD cmd = {};
+	cmd.head.cmd = EC_CMD_TYPE_APRD;
+	cmd.head.idx = EC_HEAD_IDX_EXTERN_VALUE;
+	cmd.head.adp = static_cast<uint16_t>(0u - slaveIndex);
+	cmd.head.ado = SOCCOM_REG_AL_STATUS;
+	cmd.head.length = sizeof(uint16_t);
+	cmd.head.irq = 0;
+
+	const AmsAddr addr{ ecatMaster, 0xffff };
+	const auto status = AdsSyncReadWriteReqEx2(
+		device.GetLocalPort(), &addr, ECADS_IGRP_MASTER_FLBCMDS, 0,
+		sizeof(cmd), &cmd, sizeof(cmd), &cmd, &bytesRead);
+
+	DelLocalRoute(ecatMaster);
+
+	if (status != ADSERR_NOERR) {
+		LOG_ERROR("Reading ADS state for slave["
+			  << slaveIndex << "] of master [" << ecatMaster
+			  << "] failed with 0x" << std::hex << status);
+		throw AdsException(status);
+	}
+
+	return cmd.data;
 }
 
 uint32_t ECatAccess::CountECatSlaves(const AmsNetId &ecatMaster) const
 {
 	uint32_t bytesRead;
+
+	// ECat masters can use a different AMS NetId suffix than the runtime
+	// device. Add a temporary alias route for that NetId to the same gateway.
+	const auto routeStatus = AddLocalRoute(ecatMaster, gateway.c_str());
+	if (routeStatus != 0) {
+		LOG_ERROR("Adding route for ECat master ["
+			  << ecatMaster << "] via gateway [" << gateway
+			  << "] failed with 0x" << std::hex << routeStatus);
+		throw AdsException(routeStatus);
+	}
 
 	ETYPE_EC_ULONG_CMD cmd = {};
 	cmd.head.cmd = EC_CMD_TYPE_APRD;
@@ -162,6 +360,8 @@ uint32_t ECatAccess::CountECatSlaves(const AmsNetId &ecatMaster) const
 	const auto status = AdsSyncReadWriteReqEx2(
 		device.GetLocalPort(), &addr, ECADS_IGRP_MASTER_FLBCMDS, 0,
 		sizeof(cmd), &cmd, sizeof(cmd), &cmd, &bytesRead);
+
+	DelLocalRoute(ecatMaster);
 
 	// When no coupler is connected, the request returns a device timeout
 	if (status == ADSERR_DEVICE_TIMEOUT) {
