@@ -32,6 +32,35 @@ meson setup build
 ninja -C build
 ```
 
+Building and packaging without the TwinCAT router
+================================================
+The top-level Makefile builds both `adstool` and `tcadstool` by default and
+expects the TwinCAT ADS headers and library in `/usr/include` and `/usr/lib`.
+Use `TCADSDLL_INCLUDE` and `TCADSDLL_LIB` to override these paths.
+
+On systems without TwinCAT, disable the router variant for both building and
+installing. The standalone library and `adstool` do not need `libadscomm-dev`:
+
+```shell
+make WITH_TWINCAT_ROUTER=0 NINJAFLAGS=-j1
+make install WITH_TWINCAT_ROUTER=0 DESTDIR="$PWD/stage"
+```
+
+Run `make clean` before changing the router option or the TwinCAT paths in an
+existing build directory. `NINJAFLAGS=-j1` limits compilation to one job.
+
+For Debian packages, the `pkg.adstool.standalone` build profile disables the
+router variant and its `libadscomm-dev` build dependency. Install the remaining
+dependencies listed in `debian/control`, then build with:
+
+```shell
+NINJAFLAGS=-j1 dpkg-buildpackage -b -us -uc -j1 -Ppkg.adstool.standalone
+```
+
+The `adstool` package then contains only the standalone tool. Without this
+profile, Debian packages continue to include both tools and require
+`libadscomm-dev`.
+
 Prepare your target to run the example
 ======================================
 - Download your PLC project to your target e.g. "PLC-TestProject" of our GitHub repository.

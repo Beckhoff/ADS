@@ -1,5 +1,9 @@
 #!/usr/bin/make -f
 
+ifneq ($(filter pkg.adstool.standalone,$(DEB_BUILD_PROFILES)),)
+export WITH_TWINCAT_ROUTER = 0
+endif
+
 %:
 	dh $@
 

@@ -7,6 +7,8 @@ jobs:
       - name: install meson
         run: sudo apt update -y && sudo apt install -y meson
       - uses: actions/checkout@v2
+      - name: test standalone build selection
+        run: python3 tools/test_standalone_build.py
       - name: compile library
         run: meson build && ninja -C build && sudo ninja -C build install
       - name: compile example
