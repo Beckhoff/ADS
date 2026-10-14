@@ -9,6 +9,7 @@
 #include "NotificationDispatcher.h"
 #include "RingBuffer.h"
 #include "SymbolAccess.h"
+#include "SocketsTest.h"
 
 #include <chrono>
 #include <cstring>
@@ -517,7 +518,7 @@ struct TestNotificationDispatcher : test_base<TestNotificationDispatcher> {
 int main()
 {
 	std::ostream &errorstream = std::cout;
-	int failedTests = 0;
+	int failedTests = RunSocketTests();
 
 	TestAmsAddr amsAddrTest(errorstream);
 	amsAddrTest.add_test("testAmsAddrCompare",

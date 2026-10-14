@@ -28,16 +28,33 @@ long AmsRouter::AddRoute(AmsNetId ams, const IpV4 &ip)
 
 long AmsRouter::AddRoute(AmsNetId ams, const std::string &host)
 {
+	return AddRoute(ams, host, 0);
+}
+
+long AmsRouter::AddRoute(AmsNetId ams, const std::string &host,
+			 uint32_t timeout)
+{
 	/**
         DNS lookups are pretty time consuming, we shouldn't do them
         with a looked mutex! So instead we do the lookup first and
         use the results, later.
      */
 	auto hostAddresses = bhf::ads::GetListOfAddresses(host, "48898");
+	const auto deadline =
+		timeout ? std::chrono::steady_clock::now() +
+				  std::chrono::milliseconds(timeout) :
+			  std::chrono::steady_clock::time_point::max();
 
 	std::unique_lock<std::recursive_mutex> lock(mutex);
 
-	AwaitConnectionAttempts(ams, lock);
+	if (!timeout) {
+		AwaitConnectionAttempts(ams, lock);
+	} else if (!connection_attempt_events.wait_until(lock, deadline, [&]() {
+			   return connection_attempts.find(ams) ==
+				  connection_attempts.end();
+		   })) {
+		return GLOBALERR_TARGET_PORT;
+	}
 
 	const auto oldConnection = GetConnection(ams);
 	if (oldConnection &&
@@ -61,8 +78,9 @@ long AmsRouter::AddRoute(AmsNetId ams, const std::string &host)
 	lock.unlock();
 
 	try {
-		auto new_connection = std::unique_ptr<AmsConnection>(
-			new AmsConnection{ *this, hostAddresses.get() });
+		auto new_connection =
+			std::unique_ptr<AmsConnection>(new AmsConnection{
+				*this, hostAddresses.get(), deadline });
 		lock.lock();
 		connection_attempts.erase(ams);
 		connection_attempt_events.notify_all();

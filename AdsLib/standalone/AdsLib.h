@@ -10,6 +10,20 @@
 extern "C" {
 #endif
 /**
+ * Adds a standalone route with a timeout for the initial TCP connection.
+ * @param[in] ams NetId of the target system.
+ * @param[in] ip IP address or hostname, optionally including a TCP port.
+ * @param[in] timeout Timeout in ms; 0 preserves AdsAddRoute()'s OS timeout.
+ * The timeout starts after name resolution and covers waiting for another
+ * connection attempt to this NetId and all resolved TCP addresses. It does
+ * not change ADS request timeouts or cancel another thread's connection.
+ * Existing connections are reused as with AdsAddRoute().
+ * @return 0 on success, GLOBALERR_TARGET_PORT on connection failure or timeout,
+ *         or the same other error codes as AdsAddRoute().
+ */
+long AdsAddRouteEx(AmsNetId ams, const char *ip, uint32_t timeout);
+
+/**
  * The connection (communication port) to the message router is
  * closed. The port to be closed must previously have been opened via
  * an AdsPortOpenEx() call.

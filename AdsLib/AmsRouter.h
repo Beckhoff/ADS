@@ -25,6 +25,7 @@ struct AmsRouter : Router {
 	[[deprecated]]
 	long AddRoute(AmsNetId ams, const IpV4 &ip);
 	long AddRoute(AmsNetId ams, const std::string &host);
+	long AddRoute(AmsNetId ams, const std::string &host, uint32_t timeout);
 	void DelRoute(const AmsNetId &ams);
 	AmsConnection *GetConnection(const AmsNetId &pAddr);
 	long AdsRequest(AmsRequest &request);

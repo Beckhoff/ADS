@@ -7,6 +7,7 @@
 
 #include "Frame.h"
 #include "wrap_socket.h"
+#include <chrono>
 #include <stdexcept>
 #include <string>
 
@@ -54,12 +55,16 @@ struct Socket {
 	socklen_t m_DestAddrLen;
 
 	Socket(const struct addrinfo *host, int type);
+	Socket(const struct addrinfo *host, int type,
+	       std::chrono::steady_clock::time_point deadline);
 	~Socket();
 	bool Select(timeval *timeout) const;
 };
 
 struct TcpSocket : Socket {
 	TcpSocket(const struct addrinfo *host);
+	TcpSocket(const struct addrinfo *host,
+		  std::chrono::steady_clock::time_point deadline);
 	uint32_t Connect() const;
 
 	/**

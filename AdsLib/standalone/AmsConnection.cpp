@@ -68,8 +68,16 @@ AmsConnection::DispatcherListGet(const VirtualConnection &connection)
 
 AmsConnection::AmsConnection(Router &__router,
 			     const struct addrinfo *const destination)
+	: AmsConnection(__router, destination,
+			std::chrono::steady_clock::time_point::max())
+{
+}
+
+AmsConnection::AmsConnection(Router &__router,
+			     const struct addrinfo *const destination,
+			     std::chrono::steady_clock::time_point deadline)
 	: router(__router)
-	, socket(destination)
+	, socket(destination, deadline)
 	, refCount(0)
 	, invokeId(0)
 	, ownIp(socket.Connect())

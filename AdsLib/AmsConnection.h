@@ -69,6 +69,8 @@ struct AmsResponse {
 struct AmsConnection {
 	AmsConnection(Router &__router,
 		      const struct addrinfo *destination = nullptr);
+	AmsConnection(Router &__router, const struct addrinfo *destination,
+		      std::chrono::steady_clock::time_point deadline);
 	~AmsConnection();
 
 	SharedDispatcher

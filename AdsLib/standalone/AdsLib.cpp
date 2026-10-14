@@ -68,6 +68,17 @@ long AdsPortOpenEx()
 	return GetRouter().OpenPort();
 }
 
+long AdsAddRouteEx(const AmsNetId ams, const char *ip, uint32_t timeout)
+{
+	try {
+		return GetRouter().AddRoute(ams, ip, timeout);
+	} catch (const std::bad_alloc &) {
+		return GLOBALERR_NO_MEMORY;
+	} catch (const std::runtime_error &) {
+		return GLOBALERR_TARGET_PORT;
+	}
+}
+
 long AdsGetLocalAddressEx(long port, AmsAddr *pAddr)
 {
 	ASSERT_PORT_AND_AMSADDR(port, pAddr);

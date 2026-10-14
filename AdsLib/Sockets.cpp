@@ -13,6 +13,12 @@
 #include <sstream>
 #include <system_error>
 
+#if !(defined(_WIN32) && !defined(__CYGWIN__))
+#include <cerrno>
+#include <fcntl.h>
+#include <poll.h>
+#endif
+
 namespace bhf
 {
 namespace ads
@@ -114,21 +120,143 @@ bool IpV4::operator==(const IpV4 &ref) const
 	return value == ref.value;
 }
 
+static int ConnectWithDeadline(SOCKET fd, const struct addrinfo *host,
+			       std::chrono::steady_clock::time_point deadline)
+{
+	using namespace std::chrono;
+	if (deadline == steady_clock::time_point::max()) {
+		return ::connect(fd, host->ai_addr,
+				 static_cast<socklen_t>(host->ai_addrlen)) ?
+			       WSAGetLastError() :
+			       0;
+	}
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	static constexpr int timedOut = WSAETIMEDOUT;
+	u_long mode = 1;
+#else
+	static constexpr int timedOut = ETIMEDOUT;
+	const auto flags = fcntl(fd, F_GETFL, 0);
+	if (flags == -1) {
+		return errno;
+	}
+#endif
+	if (std::chrono::steady_clock::now() >= deadline) {
+		return timedOut;
+	}
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	if (ioctlsocket(fd, FIONBIO, &mode)) {
+		return WSAGetLastError();
+	}
+#else
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+		return errno;
+	}
+#endif
+	if (::connect(fd, host->ai_addr,
+		      static_cast<socklen_t>(host->ai_addrlen))) {
+		const auto error = WSAGetLastError();
+#if defined(_WIN32) && !defined(__CYGWIN__)
+		if (error != WSAEWOULDBLOCK && error != WSAEINPROGRESS &&
+		    error != WSAEINTR) {
+#else
+		if (error != EINPROGRESS && error != EWOULDBLOCK &&
+		    error != EINTR) {
+#endif
+			return error;
+		}
+		for (;;) {
+			const auto now = std::chrono::steady_clock::now();
+			if (now >= deadline) {
+				return timedOut;
+			}
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			const auto us =
+				duration_cast<microseconds>(deadline - now)
+					.count() +
+				1;
+			timeval timeout{ static_cast<long>(us / 1000000),
+					 static_cast<long>(us % 1000000) };
+			fd_set writable, errors;
+			FD_ZERO(&writable);
+			FD_ZERO(&errors);
+			FD_SET(fd, &writable);
+			FD_SET(fd, &errors);
+			const auto ready = NATIVE_SELECT(0, nullptr, &writable,
+							 &errors, &timeout);
+			if (ready == SOCKET_ERROR) {
+				const auto lastError = WSAGetLastError();
+				if (lastError == WSAEINTR) {
+					continue;
+				}
+				return lastError;
+			}
+#else
+			const auto ms =
+				duration_cast<milliseconds>(deadline - now)
+					.count() +
+				1;
+			pollfd pending{ fd, POLLOUT, 0 };
+			const auto ready = poll(
+				&pending, 1,
+				static_cast<int>(std::min<int64_t>(
+					ms, std::numeric_limits<int>::max())));
+			if (ready == -1) {
+				if (errno == EINTR) {
+					continue;
+				}
+				return errno;
+			}
+#endif
+			if (!ready) {
+				continue;
+			}
+			int socketError = 0;
+			socklen_t length = sizeof(socketError);
+			if (getsockopt(fd, SOL_SOCKET, SO_ERROR,
+				       reinterpret_cast<char *>(&socketError),
+				       &length)) {
+				return WSAGetLastError();
+			}
+			if (socketError) {
+				return socketError;
+			}
+			break;
+		}
+	}
+	// AmsConnection's receiver and send path expect a blocking socket.
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	mode = 0;
+	return ioctlsocket(fd, FIONBIO, &mode) ? WSAGetLastError() : 0;
+#else
+	return fcntl(fd, F_SETFL, flags) == -1 ? errno : 0;
+#endif
+}
+
 Socket::Socket(const struct addrinfo *const host, const int type)
+	: Socket(host, type, std::chrono::steady_clock::time_point::max())
+{
+}
+
+Socket::Socket(const struct addrinfo *const host, const int type,
+	       std::chrono::steady_clock::time_point deadline)
 	: m_WSAInitialized(!InitSocketLibrary())
+	, m_Socket(INVALID_SOCKET)
 	, m_DestAddr(SOCK_DGRAM == type ?
 			     reinterpret_cast<const struct sockaddr *>(
 				     &m_SockAddress) :
 			     nullptr)
 	, m_DestAddrLen(0)
 {
+	int lastError = 0;
 	for (auto rp = host; rp; rp = rp->ai_next) {
 		m_Socket = socket(rp->ai_family, type, 0);
 		if (INVALID_SOCKET == m_Socket) {
+			lastError = WSAGetLastError();
 			continue;
 		}
 		if (SOCK_STREAM == type) {
-			if (::connect(m_Socket, rp->ai_addr, rp->ai_addrlen)) {
+			lastError = ConnectWithDeadline(m_Socket, rp, deadline);
+			if (lastError) {
 				LOG_WARN("Socket(): connect failed");
 				closesocket(m_Socket);
 				m_Socket = INVALID_SOCKET;
@@ -148,7 +276,10 @@ Socket::Socket(const struct addrinfo *const host, const int type)
 		return;
 	}
 	LOG_ERROR("Unable to create socket");
-	throw std::system_error(WSAGetLastError(), std::system_category());
+	if (m_WSAInitialized) {
+		WSACleanup();
+	}
+	throw std::system_error(lastError, std::system_category());
 }
 
 Socket::~Socket()
@@ -254,7 +385,13 @@ size_t Socket::write(const Frame &frame) const
 }
 
 TcpSocket::TcpSocket(const struct addrinfo *const host)
-	: Socket(host, SOCK_STREAM)
+	: TcpSocket(host, std::chrono::steady_clock::time_point::max())
+{
+}
+
+TcpSocket::TcpSocket(const struct addrinfo *const host,
+		     std::chrono::steady_clock::time_point deadline)
+	: Socket(host, SOCK_STREAM, deadline)
 {
 	// AdsDll.lib seems to use TCP_NODELAY, we use it to be compatible
 	const int enable = 0;
