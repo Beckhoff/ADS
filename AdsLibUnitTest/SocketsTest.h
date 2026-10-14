@@ -7,7 +7,10 @@
 #include <cstdio>
 #include <thread>
 
-#if !(defined(_WIN32) && !defined(__CYGWIN__))
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#include <vector>
+#else
 #include <cerrno>
 #include <fcntl.h>
 #endif
@@ -96,6 +99,63 @@ struct TestConnectedSocket : TcpSocket {
 		return m_Socket;
 	}
 };
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+struct TestSaturatedListener : TestTcpListener {
+	std::vector<std::unique_ptr<TestSocketHandle> > fillers;
+
+	TestSaturatedListener()
+		: TestTcpListener(1)
+	{
+		// Probe the actual backlog instead of assuming Windows honors its
+		// requested size. Keep all peers alive, including the pending one.
+		for (int i = 0; i < 32; ++i) {
+			fillers.emplace_back(new TestSocketHandle);
+			const auto fd = fillers.back()->fd;
+			u_long mode = 1;
+			if (ioctlsocket(fd, FIONBIO, &mode)) {
+				throw std::system_error(WSAGetLastError(),
+							std::system_category());
+			}
+			if (!connect(fd, reinterpret_cast<sockaddr *>(&address),
+				     sizeof(address))) {
+				continue;
+			}
+			const auto error = WSAGetLastError();
+			if (error != WSAEWOULDBLOCK) {
+				throw std::system_error(error,
+							std::system_category());
+			}
+			fd_set writable, errors;
+			FD_ZERO(&writable);
+			FD_ZERO(&errors);
+			FD_SET(fd, &writable);
+			FD_SET(fd, &errors);
+			timeval timeout{ 0, 100000 };
+			const auto ready = select(0, nullptr, &writable,
+						  &errors, &timeout);
+			if (!ready) {
+				return;
+			}
+			int socketError = 0;
+			socklen_t length = sizeof(socketError);
+			if (ready == SOCKET_ERROR ||
+			    getsockopt(fd, SOL_SOCKET, SO_ERROR,
+				       reinterpret_cast<char *>(&socketError),
+				       &length)) {
+				throw std::system_error(WSAGetLastError(),
+							std::system_category());
+			}
+			if (socketError) {
+				throw std::system_error(socketError,
+							std::system_category());
+			}
+		}
+		throw std::runtime_error(
+			"could not saturate loopback accept queue");
+	}
+};
+#endif
 
 #ifdef __linux__
 struct TestSignalInterruptions {
@@ -233,6 +293,91 @@ struct TestSockets : fructose::test_base<TestSockets> {
 		server.ClosePeer();
 		AdsDelRoute(netId);
 	}
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	static DWORD CountHandles()
+	{
+		DWORD count = 0;
+		if (!GetProcessHandleCount(GetCurrentProcess(), &count)) {
+			throw std::runtime_error(
+				"cannot inspect socket cleanup");
+		}
+		return count;
+	}
+
+	void testWindowsConnectTimeout(const std::string &)
+	{
+		TestSaturatedListener server;
+		auto addresses = bhf::ads::GetListOfAddresses(server.endpoint);
+		DWORD handles = 0;
+		for (int i = 0; i < 5; ++i) {
+			const auto start = Clock::now();
+			try {
+				TcpSocket client(
+					addresses.get(),
+					start + std::chrono::milliseconds(50));
+				fructose_assert(false);
+			} catch (const std::system_error &error) {
+				fructose_assert_eq(WSAETIMEDOUT,
+						   error.code().value());
+			}
+			const auto elapsed = Clock::now() - start;
+			fructose_assert(elapsed >=
+					std::chrono::milliseconds(50));
+			fructose_assert(elapsed < std::chrono::seconds(1));
+			if (i == 0) {
+				// Exclude lazy Winsock/CRT initialization from the
+				// baseline, then check four more failed attempts.
+				handles = CountHandles();
+			}
+		}
+		fructose_assert_eq(handles, CountHandles());
+	}
+
+	void testWindowsSharedDeadline(const std::string &)
+	{
+		TestSaturatedListener server;
+		auto addresses = bhf::ads::GetListOfAddresses(server.endpoint);
+		struct addrinfo candidates[4];
+		for (int i = 0; i < 4; ++i) {
+			candidates[i] = *addresses;
+			candidates[i].ai_next = i == 3 ? nullptr :
+							 &candidates[i + 1];
+		}
+		const auto start = Clock::now();
+		try {
+			TcpSocket client(
+				candidates,
+				start + std::chrono::milliseconds(150));
+			fructose_assert(false);
+		} catch (const std::system_error &error) {
+			fructose_assert_eq(WSAETIMEDOUT, error.code().value());
+		}
+		const auto elapsed = Clock::now() - start;
+		fructose_assert(elapsed >= std::chrono::milliseconds(150));
+		fructose_assert(elapsed < std::chrono::milliseconds(400));
+	}
+
+	void testWindowsRouteRecovery(const std::string &)
+	{
+		TestSaturatedListener server;
+		const AmsNetId netId{ 127, 0, 0, 1, 1, 5 };
+		const auto start = Clock::now();
+		fructose_assert_eq(GLOBALERR_TARGET_PORT,
+				   AdsAddRouteEx(netId, server.endpoint.c_str(),
+						 100));
+		const auto elapsed = Clock::now() - start;
+		fructose_assert(elapsed >= std::chrono::milliseconds(100));
+		fructose_assert(elapsed < std::chrono::seconds(1));
+		// The timed-out attempt must not leave this NetId pending or mapped.
+		TestTcpListener reachable;
+		fructose_assert_eq(0, AdsAddRouteEx(netId,
+						    reachable.endpoint.c_str(),
+						    1000));
+		reachable.ClosePeer();
+		AdsDelRoute(netId);
+	}
+#endif
 
 #ifdef __linux__
 	static size_t CountDescriptors()
@@ -410,6 +555,14 @@ inline int RunSocketTests()
 	tests.add_test("testExpiredDeadline",
 		       &TestSockets::testExpiredDeadline);
 	tests.add_test("testAddRoute", &TestSockets::testAddRoute);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	tests.add_test("testWindowsConnectTimeout",
+		       &TestSockets::testWindowsConnectTimeout);
+	tests.add_test("testWindowsSharedDeadline",
+		       &TestSockets::testWindowsSharedDeadline);
+	tests.add_test("testWindowsRouteRecovery",
+		       &TestSockets::testWindowsRouteRecovery);
+#endif
 #ifdef __linux__
 	tests.add_test("testConnectTimeout", &TestSockets::testConnectTimeout);
 	tests.add_test("testAddRouteTimeoutAndRecovery",

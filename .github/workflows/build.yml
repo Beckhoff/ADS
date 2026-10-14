@@ -9,6 +9,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: compile library
         run: meson build && ninja -C build && sudo ninja -C build install
+      - name: run unit tests
+        run: timeout 60s meson test -C build --print-errorlogs
       - name: compile example
         run: meson example/build example && ninja -C example/build
       - uses: actions/upload-artifact@v4
@@ -33,6 +35,18 @@ jobs:
           path: |
             build/
             build-shared/
+  test-windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: configure standalone unit tests
+        run: cmake -S . -B build -A x64 -DSTANDALONE_ONLY=ON -DWITH_EXAMPLES=OFF
+      - name: compile unit tests
+        run: cmake --build build --config Release --target AdsLibUnitTest --parallel 2
+      - name: run unit tests
+        timeout-minutes: 1
+        run: ./build/AdsLibUnitTest/Release/AdsLibUnitTest.exe
   collect-and-release:
     needs: [build-ubuntu-meson, build-ubuntu-cmake]
     runs-on: ubuntu-latest
